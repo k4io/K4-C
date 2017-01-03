@@ -257,9 +257,9 @@ public:
 			Transform* Transform;
 
 			if (!target.is_heli) {
-				Transform = target.ent->FindBone(_(L"spine4"));
-				if (vars->combat.hitbox_override)
-					Transform = target.ent->FindBone(_(L"head"));
+				//Transform = target.ent->FindBone(_(L"spine4"));
+				//if (vars->combat.hitbox_override)
+				//	Transform = target.ent->FindBone(_(L"head"));
 			}
 			if (!Transform)
 				return false;

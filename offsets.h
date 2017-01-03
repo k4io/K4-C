@@ -22,14 +22,14 @@ namespace offsets {
 }
 */
 
-#define oButtons_TypeInfo 56933720
-#define oLineOfSightRadius 9521792
+#define oButtons_TypeInfo 56914544
+#define oLineOfSightRadius 9521824
 #define oChatOpen 0x642950 //public static void open() { } <- inside 'ConVar::Chat'
 #define oSetGestureMenuOpen 0x5EAAA0 //private void SetGestureMenuOpen(bool wantsOpen) { }
-#define oSphereCast 0x2536110
-#define oGetWorldVelocity 0xC9C290
+#define oSphereCast 0x2536130
+#define oGetWorldVelocity 0xC9C2B0
 #define oSetRayleigh 0x46A7D0 //public static void set_atmosphere_rayleigh(float value) { }
-#define oConsoleSystem_GetAll 39068192 //"ConsoleSystem.Index$$get_All"
+#define oConsoleSystem_GetAll 39068224 //"ConsoleSystem.Index$$get_All"
 #define oConvar 56922288
 #define oTerrainMeta_TypeInfo 56922664
 #define oPlayerEyes_TypeInfo 56804248

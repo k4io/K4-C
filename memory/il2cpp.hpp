@@ -10,6 +10,7 @@ template<typename T1, typename T2>
 bool map_contains_key(T1 map, T2 key) {
 	return map.count(key) > 0;
 }
+std::map<std::string, uintptr_t> addrmap{};
 
 namespace il2cpp {
 	namespace methods {
@@ -168,6 +169,11 @@ namespace il2cpp {
 	uintptr_t method(const char* kl, const char* name, int argument_number = -1, char* arg_name = _(""), const char* name_space = _(""), int selected_argument = -1) {
 		uintptr_t iter = 0;
 		uintptr_t f;
+		
+		auto s = std::string(kl) + name + name_space;
+		if (map_contains_key(addrmap, s))
+			return addrmap[s];
+
 		auto klass = init_class(kl, name_space);
 
 			while (f = methods::class_get_methods(klass, &iter)) {
@@ -192,6 +198,7 @@ namespace il2cpp {
 					if (!argname || !m_strcmp(argname, arg_name)) continue;
 				}
 
+				addrmap.insert(std::make_pair(s, f));
 				return f;
 			}
 		}
@@ -271,7 +278,6 @@ namespace il2cpp {
 	}
 }
 
-std::map<std::string, uintptr_t> addrmap{};
 
 uintptr_t mem::hook_virtual_function(const char* classname, const char* function_to_hook, void* our_func, const char* name_space = _("")) {
 	std::string mstr(name_space);

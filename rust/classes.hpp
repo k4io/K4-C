@@ -269,6 +269,9 @@ class Model;
 class ModelState;
 class BasePlayer;
 class HitTest;
+class Shader;
+class Material;
+class Renderer;
 class PlayerBelt;
 class Terrain;
 class Projectile;
@@ -276,6 +279,7 @@ class TerrainHeightMap;
 class TerrainCollision;
 class TerrainMeta;
 class InputState;
+class SkinnedMultiMesh;
 class Collider;
 class CapsuleCollider;
 class PlayerVoiceRecorder;
@@ -305,6 +309,26 @@ typedef struct Str
 //static auto ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
 
 //static auto setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
+static auto getrenderers = reinterpret_cast<System::list<Renderer*>*(*)(SkinnedMultiMesh*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
+
+static auto setmaterial = reinterpret_cast<void(*)(Renderer*, Material*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("set_material"), 0, _(""), _("UnityEngine"))));
+
+static auto getmaterial = reinterpret_cast<Material * (*)(Renderer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("get_material"), 0, _(""), _("UnityEngine"))));
+
+static auto setfloat = reinterpret_cast<void(*)(Material*, System::string, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetFloat"), 2, _("name"), _("UnityEngine"), 1)));
+
+static auto setcolor = reinterpret_cast<void(*)(Material*, System::string, col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetColor"), 2, _("name"), _("UnityEngine"), 1)));
+
+static auto setshader = reinterpret_cast<void(*)(Material*, Shader*)>(il2cpp::methods::resolve_icall(_("UnityEngine.Material::set_shader()")));
+
+static auto getshader = reinterpret_cast<Shader * (*)(Material*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("get_shader"), 0, _(""), _("UnityEngine"))));
+
+static auto canhit = reinterpret_cast<bool (*)(BaseMelee*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("CanHit"), 1, _(""), _(""))));
+
+static auto serverrpc = reinterpret_cast<void (*)(BaseEntity*, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
+
+static auto getparentvel = reinterpret_cast<Vector3(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetParentVelocity"), 0, _(""), _(""))));
+
 static auto sendprojupdate = reinterpret_cast<void(*)(BasePlayer*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("SendProjectileUpdate"), 0, _(""), _(""))));
 
 static auto gamephystrace = reinterpret_cast<bool(*)(Ray r, float f, RaycastHit * r2, float f2, int layer, int querytriggerinteraction)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("Trace"), 0, _(""), _(""))));
@@ -370,6 +394,8 @@ static auto sampleheight = reinterpret_cast<float(*)(Terrain*, Vector3)>(*reinte
 static auto thmgetheight = reinterpret_cast<float(*)(TerrainHeightMap*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetHeight"), 1, _(""), _(""))));
 
 static auto transgetpos = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
+
+static auto transgetrot = reinterpret_cast<Vector4(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
 
 static auto transsetpos = reinterpret_cast<void(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 0, _(""), _("UnityEngine"))));
 
@@ -576,6 +602,17 @@ float current_time;
 void init_bp() {
 	//setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
 	//ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
+	getrenderers = reinterpret_cast<System::list<Renderer*>*(*)(SkinnedMultiMesh*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
+	setmaterial = reinterpret_cast<void(*)(Renderer*, Material*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("set_material"), 0, _(""), _("UnityEngine"))));
+	getmaterial = reinterpret_cast<Material * (*)(Renderer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("get_material"), 0, _(""), _("UnityEngine"))));
+	setfloat = reinterpret_cast<void(*)(Material*, System::string, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetFloat"), 2, _("name"), _("UnityEngine"), 1)));
+	setcolor = reinterpret_cast<void(*)(Material*, System::string, col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetColor"), 2, _("name"), _("UnityEngine"), 1)));
+	setshader = reinterpret_cast<void(*)(Material*, Shader*)>(il2cpp::methods::resolve_icall(_("UnityEngine.Material::set_shader()")));
+	getshader = reinterpret_cast<Shader * (*)(Material*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("get_shader"), 0, _(""), _("UnityEngine"))));
+	canhit = reinterpret_cast<bool (*)(BaseMelee*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("CanHit"), 1, _(""), _(""))));
+	serverrpc = reinterpret_cast<void (*)(BaseEntity*, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
+	getparentvel = reinterpret_cast<Vector3(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetParentVelocity"), 0, _(""), _(""))));
+	transgetrot = reinterpret_cast<Vector4(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
 	gettrans = reinterpret_cast<uintptr_t(*)(Component*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 	get_game_object_transform = reinterpret_cast<Transform * (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 	sendprojupdate = reinterpret_cast<void(*)(BasePlayer*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("SendProjectileUpdate"), 0, _(""), _(""))));
@@ -974,7 +1011,6 @@ public:
 			__try {
 			if (!(uintptr_t)this)
 				return {};
-			//auto off = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
 			return transgetpos(this);
 		}
 		__except (true) { pent return Vector3::Zero(); }
@@ -984,7 +1020,6 @@ public:
 		pent
 			if (!(uintptr_t)this)
 				return;
-		//auto off = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
 		return transsetpos(this, pos);
 	}
 
@@ -992,8 +1027,7 @@ public:
 		pent
 			if (!(uintptr_t)this)
 				return {};
-		auto off = reinterpret_cast<Vector4(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
-		return off(this);
+		return transgetrot(this);
 	}
 
 	Vector3 InverseTransformPoint(Vector3 point) {
@@ -1162,10 +1196,7 @@ public:
 		pent
 			__try {
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return Vector3(0, 0, 0);
-			//public Vector3 GetWorldVelocity() { pent }
 			typedef Vector3(*GWV)(BaseEntity*);
-			//auto off = reinterpret_cast<Vector3(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetWorldVelocity"), 0, _(""), _(""))));
-			//if (!off) return Vector3(0, 0, 0);
 			return ((GWV)(mem::game_assembly_base + oGetWorldVelocity))(this);
 		}
 		__except (true) { pent return Vector3::Zero(); }
@@ -1173,27 +1204,18 @@ public:
 	Vector3 GetParentVelocity() {
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return Vector3(0, 0, 0);
-		auto off = reinterpret_cast<Vector3(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetParentVelocity"), 0, _(""), _(""))));
-		return off(this);
+		return getparentvel(this);
 	}
 	void ServerRPC(wchar_t* func) {
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
-		auto off = reinterpret_cast<void (*)(BaseEntity*, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
-		return off(this, func);
+		return serverrpc(this, func);
 	}
 	void ServerRPCs(const char* func) {
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
 		auto s = std::string(func);
-		auto off = reinterpret_cast<void (*)(BaseEntity*, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
-		return off(this, std::wstring(s.begin(), s.end()).c_str());
-	}
-	Transform* FindBone(wchar_t* bone) {
-		pent
-			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return nullptr;
-		auto off = reinterpret_cast<Transform * (*)(BaseEntity*, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("FindBone"), 1, _(""), _(""))));
-		return off(this, bone);
+		return serverrpc(this, std::wstring(s.begin(), s.end()).c_str());
 	}
 	bool is_visible(Vector3 source, Vector3 destination, float p1 = 0.03f) {
 		//	pent
@@ -1386,8 +1408,7 @@ public:
 	bool CanHit(HitTest* ht) {
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return false;
-		auto off = reinterpret_cast<bool (*)(BaseMelee*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("CanHit"), 1, _(""), _(""))));
-		return off(this, ht);
+		return canhit(this, ht);
 	}
 
 	void DoThrow() {
@@ -2228,26 +2249,22 @@ public:
 	Shader* GetShader() {
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return nullptr;
-		auto off = reinterpret_cast<Shader * (*)(Material*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("get_shader"), 0, _(""), _("UnityEngine"))));
-		return off(this);
+		return getshader(this);
 	}
 	void SetShader(Shader* s) {
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
-		auto off = reinterpret_cast<void(*)(Material*, Shader*)>(il2cpp::methods::resolve_icall(_("UnityEngine.Material::set_shader()")));
-		return off(this, s);
+		return setshader(this, s);
 	}
 	void SetColor(System::string s, col c) {
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
-		auto off = reinterpret_cast<void(*)(Material*, System::string, col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetColor"), 2, _("name"), _("UnityEngine"), 1)));
-		return off(this, s, c);
+		return setcolor(this, s, c);
 	}
 	void SetFloat(System::string s, float n) {
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
-		auto off = reinterpret_cast<void(*)(Material*, System::string, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetFloat"), 2, _("name"), _("UnityEngine"), 1)));
-		return off(this, s, n);
+		return setfloat(this, s, n);
 	}
 };
 
@@ -2256,21 +2273,13 @@ public:
 	Material* GetMaterial() {
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return nullptr;
-		auto off = reinterpret_cast<Material * (*)(Renderer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("get_material"), 0, _(""), _("UnityEngine"))));
-		return off(this);
+		return getmaterial(this);
 	}
 
 	void SetMaterial(Material* m) {
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
-		auto off = reinterpret_cast<void(*)(Renderer*, Material*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("set_material"), 0, _(""), _("UnityEngine"))));
-		return off(this, m);
-	}
-	void SetMaterials(System::Array<Material*>* m) {
-		pent
-			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
-		auto off = reinterpret_cast<void(*)(Renderer*, System::Array<Material*>*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("SetMaterialArray"), 0, _(""), _("UnityEngine"))));
-		return off(this, m);
+		return setmaterial(this, m);
 	}
 };
 
@@ -2280,8 +2289,7 @@ public:
 	System::list<Renderer*>* get_Renderers() {
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return nullptr;
-		auto off = reinterpret_cast<System::list<Renderer*>*(*)(SkinnedMultiMesh*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
-		return off(this);
+		return getrenderers(this);
 	}
 };
 
@@ -2300,8 +2308,7 @@ public:
 	bool isnpc() {
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return false;
-		auto off = reinterpret_cast<bool(*)(PlayerModel*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerModel"), _("get_IsNpc"), -1, _(""), _(""))));
-		return off(this);
+		return get_IsNpc((uintptr_t)this);
 	}
 	bool isLocalPlayer() {
 		pent
