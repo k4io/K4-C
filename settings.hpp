@@ -42,7 +42,9 @@ void load_config() {
 		else if (name == _("fast_bullet")) vars->combat.fast_bullet = std::stoi(value);
 
 		else if (name == _("playeresp")) vars->visual.playeresp = std::stoi(value);
-		else if (name == _("crosshair")) vars->visual.crosshair = std::stoi(value);
+		else if (name == _("crosshair1")) vars->visual.crosshair1 = std::stoi(value);
+		else if (name == _("crosshair2")) vars->visual.crosshair2 = std::stoi(value);
+		else if (name == _("crosshair3")) vars->visual.crosshair3 = std::stoi(value);
 		else if (name == _("playerfov")) vars->visual.playerfov = std::stof(value);
 		else if (name == _("zoomtoggle")) vars->visual.zoomtoggle = std::stoi(value);
 		else if (name == _("staramount")) vars->visual.staramount = std::stof(value);
@@ -217,8 +219,14 @@ void save_config() {
 	itoa(vars->visual.playeresp, buffer, 4);
 	str = (std::string(_("playeresp=")) + std::string(buffer) + _("\n"));
 	f.write(str.c_str(), str.size());
-	itoa(vars->visual.crosshair, buffer, 4);
-	str = (std::string(_("crosshair=")) + std::string(buffer) + _("\n"));
+	itoa(vars->visual.crosshair1, buffer, 4);
+	str = (std::string(_("crosshair1=")) + std::string(buffer) + _("\n"));
+	f.write(str.c_str(), str.size());
+	itoa(vars->visual.crosshair2, buffer, 4);
+	str = (std::string(_("crosshair2=")) + std::string(buffer) + _("\n"));
+	f.write(str.c_str(), str.size());
+	itoa(vars->visual.crosshair3, buffer, 4);
+	str = (std::string(_("crosshair3=")) + std::string(buffer) + _("\n"));
 	f.write(str.c_str(), str.size());
 	sprintf(buffer, _("%.2f"), vars->visual.playerfov);
 	str = (std::string(_("playerfov=")) + std::string(buffer) + _("\n"));

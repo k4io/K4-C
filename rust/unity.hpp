@@ -36,7 +36,7 @@ namespace unity {
 
 	static auto LineOfSightInternal = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightInternal"), -1, _(""), _(""))));
 
-	static auto GetKey = reinterpret_cast<bool(*)(rust::classes::KeyCode)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("GetKeyInt"), 1, _(""), _("UnityEngine"))));
+	//static auto GetKey = reinterpret_cast<bool(*)(rust::classes::KeyCode)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("GetKeyInt"), 1, _(""), _("UnityEngine"))));
 
 	static auto set_visible = reinterpret_cast<void(*)(bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Cursor"), _("set_visible"), 1, _("value"), _("UnityEngine"))));
 
@@ -95,7 +95,7 @@ namespace unity {
 
 		LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), -1, _(""), _(""))));
 
-		GetKey = reinterpret_cast<bool(*)(rust::classes::KeyCode)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("GetKeyInt"), 1, _(""), _("UnityEngine"))));
+		//GetKey = reinterpret_cast<bool(*)(rust::classes::KeyCode)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("GetKeyInt"), 1, _(""), _("UnityEngine"))));
 
 		get_realtimesincestartup = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_realtimeSinceStartup"), 0, _(""), _("UnityEngine"))));
 
@@ -143,6 +143,10 @@ namespace unity {
 		return LineOfSightRadius(source, destination, rust::classes::Layers(10551296), radius, 0, entity) && LineOfSightRadius(destination, source, rust::classes::Layers(10551296), radius, 0, entity);
 	}
 */
+	bool GetKey(int key) {
+		return !(!GetAsyncKeyState(key));
+	}
+
 	uintptr_t GetType(const char* space, const char* name) {
 		return il2cpp::type_object(space, name);
 	}
@@ -154,8 +158,8 @@ namespace unity {
 		//real rust 0x52D200
 		//alkad rust 0x52C6A0
 
-		return ((AAA)(mem::game_assembly_base + 0x52D200))(source, destination, rust::classes::Layers(layer), p1, ent)
-			&& ((AAA)(mem::game_assembly_base + 0x52D200))(destination, source, rust::classes::Layers(layer), p1, ent);
+		return ((AAA)(mem::game_assembly_base + oLineOfSightRadius))(source, destination, rust::classes::Layers(layer), p1, ent)
+			&& ((AAA)(mem::game_assembly_base + oLineOfSightRadius))(destination, source, rust::classes::Layers(layer), p1, ent);
 	}
 
 	auto camera = unity::get_main_camera();

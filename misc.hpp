@@ -1,7 +1,6 @@
 #pragma once
 #include "memory/il2cpp.hpp"
 #include "settings.hpp"
-#include "offsets.h"
 #include <math.h>
 #include "Keybind.h"
 
@@ -11,9 +10,9 @@
 #include <chrono>
 #include "settings.hpp"
 #include "rust/rust.hpp"
-#include "rust/unity.hpp"
 #include "rust/classes.hpp"
 #include "projectile.hpp"
+
 //#include "projectile.hpp"
 //#include <vector>
 
@@ -260,6 +259,9 @@ namespace misc
 	projectileshoot emulated_shot;
 	NodeTarget node;
 
+	float speedhackCooldownEnd = 0.f;
+	float lastSpeedhackReset = 0.f;
+
 	float speedhackDistance = 0.f;
 	float speedhackPauseTime = 0.f;
 	float flyhackDistanceVertical = 0.f;
@@ -354,9 +356,9 @@ namespace misc
 		if (!flag)
 		{
 			typedef bool (*AAA)(Ray, float, float, int);
-			//real rust 0x2273840
+			//real rust 0x2298A50
 			//alkad rust 0x2271FB0
-			flag = ((AAA)(mem::game_assembly_base + 0x2273840))(z, radius, magnitude, 429990145);
+			flag = ((AAA)(mem::game_assembly_base + oSphereCast))(z, radius, magnitude, 429990145);
 		}
 		return flag;
 	}
@@ -607,8 +609,9 @@ namespace misc
 			if (num > num2)
 			{
 				auto getheightmap = [&]() {
-					//real rust 52698608
-					uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + 52698608); //52690304 alkad
+					//real rust 0x1146750
+					//"TerrainMeta_TypeInfo",
+					uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTerrainMeta_TypeInfo); //52690304 alkad
 					uintptr_t fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
 					uintptr_t heightmap = *reinterpret_cast<uintptr_t*>(fieldz + 0xB0);
 					return heightmap;
@@ -625,7 +628,7 @@ namespace misc
 			speedhackDistance = std::clamp(speedhackDistance, -num5, num5);
 			speedhackDistance = std::clamp(speedhackDistance - num2, -num5, num5);
 
-			//esp::local_player->console_echo(string::wformat(_(L"[trap]: IsSpeeding - speedhackDistance: %d, num4: %d"),(int)(speedhackDistance * 100), (int)(num4 * 100)));
+			//esp::local_player->console_echo(string::wformat(_(L"[trap]: IsSpeeding - speedhackDistance: %d, num4: %d, speedhackPauseTime: %d"),(int)((speedhackDistance + 4) * 100), (int)(num4 * 100), (int)(speedhackPauseTime * 100)));
 
 			if (speedhackDistance > num4) {
 				result = true;
@@ -729,7 +732,8 @@ namespace misc
 			return;
 		auto lp = esp::local_player;
 		tickDeltaTime += deltatime;
-		bool flag = ticks.startPoint != ticks.endPoint;
+		//bool flag = ticks.startPoint != ticks.endPoint;
+		bool flag = true;
 		if (flag) {
 			if (ValidateMove(lp, ticks, deltatime))
 			{
@@ -749,7 +753,7 @@ namespace misc
 			settings::vert_flyhack = flyhackDistanceVertical;
 			settings::hor_flyhack = flyhackDistanceHorizontal;
 			//settings::speedhack = speedhackDistance + 4.0f;
-			settings::speedhack = speedhackDistance + 3.9f;
+			vars->speedhack = speedhackDistance + 3.9f;
 		}
 		ticks.Reset(esp::local_player->get_transform()->get_position());
 		ValidateEyeHistory(lp);
@@ -875,6 +879,7 @@ namespace misc
 		int psteps = 0;
 		Vector3 last_pos = Vector3(0, 0, 0);
 		float last_pos_time = 0.f;
+		float time_at_node = 0.f;
 
 		void PathSmooth(std::vector<Vector3>& ref) {
 			std::vector<int> indexes = { };
@@ -908,7 +913,7 @@ namespace misc
 			Vector3 old_point = point;
 			float control = 0.f;
 			int iterations = 0;
-			while (point.distance(node.pos) > 1.5f)
+			while (point.distance(node.pos) > 1.0f)
 			{
 				if (iterations++ > 500)
 					break;
@@ -917,7 +922,7 @@ namespace misc
 				//Vector3 new_point = lowest_pos(Vector3::move_towards(point, node.pos, 1.0f));
 				Vector3 new_point = Vector3::move_towards(point, node.pos, 1.0f);
 
-				if (esp::local_player->is_visible(point, new_point, 1.5f))
+				if (esp::local_player->is_visible(point, new_point, 1.0f))
 				{
 					esp::local_player->console_echo(string::wformat(_(L"[trap]: CreatePath - visibility straight ahead (%d)"), path.size()));
 					old_point = point;
@@ -976,13 +981,13 @@ namespace misc
 
 			Vector3 vel = pwm->get_TargetMovement();
 			vel = Vector3(vel.x / vel.length() * 5.5f, vel.y, vel.z / vel.length() * 5.5f);
-			auto eyepos = lp->eyes()->get_position();
+			auto eyepos = lp->get_transform()->get_position();//lp->eyes()->get_position();
 
 			auto Transform = node.ent->get_transform();
 			auto hp = *reinterpret_cast<float*>(node.ent + 0x178); //detect if broken with this fuck knows why
-			if (Transform && hp > 60) {
+			if (Transform && hp > 60 && time_at_node < 7.f) {
 				auto marker_pos = Transform->get_position();
-				Sphere(marker_pos, 1.f, col(1, 1, 1, 1), 0.02f, 100.f);
+				//Sphere(marker_pos, 1.f, col(1, 1, 1, 1), 0.02f, 100.f);
 				if (node.steps > 0
 					&& eyepos.distance(node.pos) < 1.f)
 				{
@@ -990,6 +995,7 @@ namespace misc
 					node.pos = Vector3(0, 0, 0);
 					node.steps = 0;
 					vel = Vector3(0, 0, 0);
+					time_at_node += get_deltaTime();
 				}
 
 				if (eyepos.distance(node.pos) >= 1.f)
@@ -1016,9 +1022,9 @@ namespace misc
 						for (size_t i = 1; i < node.path.size(); i++)
 						{
 							if (node.path[i] == current_step)
-								Line(node.path[i - 1], node.path[i], col(12, 150, 100, 50), 0.02f, false, true);
+								Line(node.path[i - 1], node.path[i], col(190, 20, 20, 50), 0.02f, false, true);
 							else
-								Line(node.path[i - 1], node.path[i], col(12, 150, 100, 50), 0.02f, false, true);
+								Line(node.path[i - 1], node.path[i], col(190, 190, 190, 50), 0.02f, false, true);
 						}
 					}
 
@@ -1059,7 +1065,7 @@ namespace misc
 			else
 			{
 				misc::node.ent = (BaseEntity*)lp->find_closest(_("OreResourceEntity"), (Networkable*)lp, 200.f);
-
+				time_at_node = 0.f;
 				misc::node.path.clear();
 				misc::node.pos = Vector3(0, 0, 0);
 				misc::node.steps = 0;
@@ -1075,7 +1081,8 @@ namespace misc
 		Vector3& _aimdir,
 		float& travel_t,
 		Projectile* p,
-		bool skip_draw = false) {
+		bool skip_draw = false) 
+	{
 		Vector3 player_velocity = Vector3(0, 0, 0);
 		std::vector<Vector3> path = {};
 		int simulations = 0;
@@ -1141,9 +1148,9 @@ namespace misc
 		if (travel_t > 0.f) {
 			//movement prediction
 
-			if (settings::desyncTime > 0.f
+			if (vars->desyncTime > 0.f
 				&& vars->combat.bullet_tp)
-				travel_t -= settings::desyncTime;
+				travel_t -= vars->desyncTime;
 
 			aimbot_velocity = Vector3(0, 0, 0);
 			if (target.ent) {

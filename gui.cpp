@@ -11,6 +11,7 @@
 #if CUSTOM_ICONS
 #include "icons.h"
 #endif
+#include "utils/vector.hpp"
 
 namespace Gui
 {
@@ -44,7 +45,7 @@ namespace Gui
 			else if (name == _("hitbox_override")) vars->combat.hitbox_override = std::stoi(value);
 			else if (name == _("hitbox")) vars->combat.hitbox = std::stoi(value);
 			else if (name == _("silent_melee")) vars->combat.silent_melee = std::stoi(value);
-			else if (name == _("manipulator")) vars->combat.manipulator = std::stoi(value);
+			else if (name == _("manipulator")) vars->combat.manipulator2 = std::stoi(value);
 			else if (name == _("doubletap")) vars->combat.doubletap = std::stoi(value);
 			else if (name == _("always_reload")) vars->combat.always_reload = std::stoi(value);
 			else if (name == _("autoshoot")) vars->combat.autoshoot = std::stoi(value);
@@ -60,7 +61,9 @@ namespace Gui
 			else if (name == _("fast_bullet")) vars->combat.fast_bullet = std::stoi(value);
 
 			else if (name == _("playeresp")) vars->visual.playeresp = std::stoi(value);
-			else if (name == _("crosshair")) vars->visual.crosshair = std::stoi(value);
+			else if (name == _("crosshair1")) vars->visual.crosshair1 = std::stoi(value);
+			else if (name == _("crosshair2")) vars->visual.crosshair2 = std::stoi(value);
+			else if (name == _("crosshair3")) vars->visual.crosshair3 = std::stoi(value);
 			else if (name == _("playerfov")) vars->visual.playerfov = std::stof(value);
 			else if (name == _("zoomtoggle")) vars->visual.zoomtoggle = std::stoi(value);
 			else if (name == _("staramount")) vars->visual.staramount = std::stof(value);
@@ -143,7 +146,8 @@ namespace Gui
 			else if (name == _("speedhack")) vars->misc.speedhack = std::stoi(value);
 			else if (name == _("hitsound")) vars->misc.hitsound = std::stoi(value);
 			else if (name == _("speedhackspeed")) vars->misc.speedhackspeed = std::stof(value);
-			else if (name == _("tpcamdist")) vars->misc.tpcamdist = std::stof(value);
+			else if (name == _("antispeed")) vars->misc.antispeed = std::stoi(value);
+			if (name == _("tpcamdist")) vars->misc.tpcamdist = std::stof(value);
 			else if (name == _("tpcamfov")) vars->misc.tpcamfov = std::stof(value);
 			else if (name == _("TakeFallDamage")) vars->misc.TakeFallDamage = std::stoi(value);
 			else if (name == _("silent_farm")) vars->misc.silent_farm = std::stoi(value);
@@ -188,7 +192,7 @@ namespace Gui
 		itoa(vars->combat.silent_melee, buffer, 4);
 		str = (std::string(_("silent_melee=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
-		itoa(vars->combat.manipulator, buffer, 4);
+		itoa(vars->combat.manipulator2, buffer, 4);
 		str = (std::string(_("manipulator=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
 		itoa(vars->combat.doubletap, buffer, 4);
@@ -234,8 +238,14 @@ namespace Gui
 		itoa(vars->visual.playeresp, buffer, 4);
 		str = (std::string(_("playeresp=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
-		itoa(vars->visual.crosshair, buffer, 4);
-		str = (std::string(_("crosshair=")) + std::string(buffer) + _("\n"));
+		itoa(vars->visual.crosshair1, buffer, 4);
+		str = (std::string(_("crosshair1=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->visual.crosshair2, buffer, 4);
+		str = (std::string(_("crosshair2=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->visual.crosshair3, buffer, 4);
+		str = (std::string(_("crosshair3=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
 		sprintf(buffer, _("%.2f"), vars->visual.playerfov);
 		str = (std::string(_("playerfov=")) + std::string(buffer) + _("\n"));
@@ -279,7 +289,7 @@ namespace Gui
 		itoa(vars->visual.hand_chams, buffer, 4);
 		str = (std::string(_("hand_chams=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
-		sprintf(buffer, _(".2f"), vars->visual.shader);
+		itoa(vars->visual.shader, buffer, 4);
 		str = (std::string(_("chams=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
 		itoa(vars->visual.boxesp, buffer, 4);
@@ -469,6 +479,9 @@ namespace Gui
 		itoa(vars->misc.speedhack, buffer, 4);
 		str = (std::string(_("speedhack=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
+		itoa(vars->misc.antispeed, buffer, 4);
+		str = (std::string(_("antispeed=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
 		itoa(vars->misc.hitsound, buffer, 4);
 		str = (std::string(_("hitsound=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
@@ -537,14 +550,21 @@ namespace Gui
 		{
 			im::Text(_("Aimbot"));
 			im::Separator();
+
 			im::Checkbox(_("PSilent"), &vars->combat.psilent);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			im::Hotkey(_(""), &vars->keybinds.psilent, ImVec2(44, 19));
+
+
 			im::SliderFloat(_("Target fov"), &vars->combat.aimbotfov, 1.f, 900.f, _("%.0f"));
-			im::Checkbox(_("No recoil"), &vars->combat.norecoil);
+			im::SliderFloat(_("Recoil X"), &vars->combat.recoilx, 0.f, 5.f, _("%.0f"));
+			im::SliderFloat(_("Recoil Y"), &vars->combat.recoily, 0.f, 5.f, _("%.0f"));
+
+			im::Checkbox(_("No spread (quick ban)"), &vars->combat.nospread);
 			im::Checkbox(_("Remove shoot restrictions"), &vars->combat.always_shoot);
 			im::EndChild();
 		}
-		im::SameLine();
-		im::SetCursorPosX(im::GetCursorPosX() + 132);
+		im::SameLine();;
 		if (im::BeginChild(_("Weapon"), ImVec2(300, 420), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Weapon"));
@@ -552,24 +572,30 @@ namespace Gui
 			im::Checkbox(_("Hitbox override"), &vars->combat.hitbox_override);
 			im::Combo(_("Hitboxes"), &vars->combat.hitbox,
 				_("Head\0Body\0Upperbody\0Penis\0Hands\0Legs\0Feet"));
-			im::Checkbox(_("Manipulator"), &vars->combat.manipulator);
+			im::Checkbox(_("Manipulator"), &vars->combat.manipulator2);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(44, 19));
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
 			im::Checkbox(_("Bullet tp"), &vars->combat.bullet_tp);
 			im::Checkbox(_("Fast bullets"), &vars->combat.fast_bullet);
 			im::Checkbox(_("Thick bullets"), &vars->combat.thick_bullet);
-			im::SliderFloat(_("Thickness"), &vars->combat.thickness, 0.01f, 1.00f, _("%.3f"), 0.1f);
+			im::SliderFloat(_("Thickness"), &vars->combat.thickness, 0.1f, 1.f, _("%.3f"), 1.f);
 			im::Checkbox(_("Autoshoot"), &vars->combat.autoshoot);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			im::Hotkey(_("A"), &vars->keybinds.autoshoot, ImVec2(44, 19));
 			im::Checkbox(_("Rapid-fire"), &vars->combat.rapidfire);
 			im::Checkbox(_("Automatic"), &vars->combat.automatic);
 			im::Checkbox(_("Auto-reload"), &vars->combat.always_reload);
 			im::EndChild();
 		}
-		im::SetCursorPosY(im::GetCursorPosY() - 110);
+		im::SetCursorPosY(im::GetCursorPosY() - 166);
 		if (im::BeginChild(_("Melee"), ImVec2(300, 105), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Melee"));
 			im::Separator();
 			im::Checkbox(_("Silent melee"), &vars->combat.silent_melee);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			im::Hotkey(_("S"), &vars->keybinds.silentmelee, ImVec2(44, 19));
 			im::SliderFloat(_("Range"), &vars->combat.melee_range, 0.1f, 4.00f, _("%.1f"), 0.1f);
 			im::EndChild();
 		}
@@ -582,7 +608,8 @@ namespace Gui
 			im::Separator();
 			im::Checkbox(_("Desync indicator"), &vars->visual.desync_indicator);
 			im::Checkbox(_("Flyhack indicator"), &vars->visual.flyhack_indicator);
-			im::Checkbox(_("Offscreen indicator"), &vars->visual.offscreen_indicator);
+			im::Checkbox(_("Speedhack indicator"), &vars->visual.speedhack_indicator);
+			//im::Checkbox(_("Offscreen indicator"), &vars->visual.offscreen_indicator);
 			im::Combo(_("Snapline"), &vars->visual.snapline,
 				_("None\0Top\0Center\0Bottom"));
 			im::Checkbox(_("Show target fov"), &vars->visual.show_fov);
@@ -590,7 +617,7 @@ namespace Gui
 			im::EndChild();
 		}
 		im::SameLine();
-		im::SetCursorPosX(im::GetCursorPosX() + 132);
+		//im::SetCursorPosX(im::GetCursorPosX() + 132);
 		if (im::BeginChild(_("Player ESP"), ImVec2(300, 300), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Player ESP"));
@@ -604,6 +631,7 @@ namespace Gui
 			im::Checkbox(_("Skeleton"), &vars->visual.skeleton);
 			im::Checkbox(_("Full box"), &vars->visual.full_box);
 			im::Checkbox(_("Corner box"), &vars->visual.corner_box);
+			im::Checkbox(_("3D Cube"), &vars->visual.cube);
 			im::Checkbox(_("Crosshair name"), &vars->visual.midhealth);
 			im::Checkbox(_("Crosshair hp"), &vars->visual.midname);
 			im::Checkbox(_("Sleeper"), &vars->visual.sleeper_esp);
@@ -617,15 +645,19 @@ namespace Gui
 			im::Text(_("Gameplay"));
 			im::Separator();
 			im::SliderFloat(_("Player fov"), &vars->visual.playerfov, 50.f, 180.f, _("%.1f"));
-			im::Checkbox(_("Crosshair"), &vars->visual.crosshair);
+			im::Checkbox(_("Crosshair 1"), &vars->visual.crosshair1);
+			im::Checkbox(_("Crosshair 2"), &vars->visual.crosshair2);
+			im::Checkbox(_("Crosshair 3"), &vars->visual.crosshair3);
 			im::Checkbox(_("Zoom"), &vars->visual.zoomtoggle);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			im::Hotkey(_("Z"), &vars->keybinds.zoom, ImVec2(44, 19));
 			im::SliderFloat(_("Zoom fov"), &vars->visual.zoomfov, 1.f, 100.f, _("%.1f"));
 			im::SliderFloat(_("Stars"), &vars->visual.staramount, 1.f, 1000.f, _("%.0f"));
 			im::Checkbox(_("Manipulator angles"), &vars->visual.angles);
 			im::EndChild();
 		}
 		im::SetCursorPosY(im::GetCursorPosY() - 40);
-		im::SetCursorPosX(im::GetCursorPosX() + 440);
+		im::SetCursorPosX(im::GetCursorPosX() + 308);
 		if (im::BeginChild(_("Chams"), ImVec2(300, 120), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Chams"));
@@ -652,13 +684,14 @@ namespace Gui
 			im::EndChild();
 		}
 		im::SameLine();
-		im::SetCursorPosX(im::GetCursorPosX() + 132);
+		//im::SetCursorPosX(im::GetCursorPosX() + 132);
 		if (im::BeginChild(_("World"), ImVec2(300, 200), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("World"));
 			im::Separator();
 			im::Checkbox(_("Corpses"), &vars->visual.corpses);
 			im::Checkbox(_("Vehicles"), &vars->visual.vehicles);
+			im::Checkbox(_("Ladders"), &vars->visual.ladder);
 			im::Checkbox(_("Stashes"), &vars->visual.stash);
 			im::Checkbox(_("Airdrops"), &vars->visual.airdrops);
 			im::Checkbox(_("Hackable crates"), &vars->visual.hackable_crate_esp);
@@ -670,44 +703,57 @@ namespace Gui
 		}
 	}
 	void misc() {
-		if (im::BeginChild(_("Movement"), ImVec2(300, 240), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
+		if (im::BeginChild(_("Movement"), ImVec2(300, 320), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Movement"));
 			im::Separator();
+			im::Checkbox(_("Anti-flyhack"), &vars->misc.flyhack_stop);
+			im::Checkbox(_("Anti-speedhack"), &vars->misc.antispeed);
 			im::Checkbox(_("Omnisprint"), &vars->misc.always_sprint);
 			im::Checkbox(_("Spiderman"), &vars->misc.spiderman);
 			im::Checkbox(_("Big jump"), &vars->misc.gravity);
 			im::Checkbox(_("Infinite jump"), &vars->misc.infinite_jump);
-			im::Checkbox(_("Big velocity (for wall noclip)"), &vars->misc.flywall);
+			im::Checkbox(_("Fly-wall"), &vars->misc.flywall);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			im::Hotkey(_("F"), &vars->keybinds.flywall, ImVec2(44, 19));
 			im::Checkbox(_("No collisions"), &vars->misc.no_playercollision);
 			im::Checkbox(_("Spinbot"), &vars->misc.spinbot);
 			im::Checkbox(_("Autofarm"), &vars->misc.autofarm);
 			im::EndChild();
 		}
 		im::SameLine();
-		im::SetCursorPosX(im::GetCursorPosX() + 132);
-		if (im::BeginChild(_("Gameplay"), ImVec2(300, 300), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
+		//im::SetCursorPosX(im::GetCursorPosX() + 132);
+		if (im::BeginChild(_("Gameplay"), ImVec2(300, 390), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Gameplay"));
 			im::Separator();
-			im::Checkbox(_("Anti-flyhack"), &vars->misc.flyhack_stop);
 			im::Checkbox(_("Anti-recycler"), &vars->misc.norecycler);
 			im::Checkbox(_("Interactive debug"), &vars->misc.interactive_debug);
 			im::Checkbox(_("Instant med"), &vars->misc.instant_med);
 			im::Checkbox(_("Instant revive"), &vars->misc.instant_revive);
-			im::Checkbox(_("Suicide"), &vars->misc.instant_revive);
+			im::Checkbox(_("Suicide"), &vars->misc.TakeFallDamage);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			im::Hotkey(_("S"), &vars->keybinds.suicide, ImVec2(44, 19));
 			im::Checkbox(_("Longneck"), &vars->misc.eyeoffset);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			im::Hotkey(_("L"), &vars->keybinds.neck, ImVec2(44, 19));
 			im::SliderFloat(_("Size"), &vars->misc.PlayerEyes, 1.f, 1.5f, _("%.1f"), 0.1f);
 			im::Checkbox(_("Auto upgrade"), &vars->misc.auto_upgrade);
 			im::Checkbox(_("Fakelag"), &vars->misc.fake_lag);
+			im::Checkbox(_("Desync on key"), &vars->misc.desync);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			im::Hotkey(_("D"), &vars->keybinds.desync_ok, ImVec2(44, 19));
 			im::Checkbox(_("Fake admin"), &vars->misc.admin_mode);
+			im::Checkbox(_("Timescale"), &vars->misc.speedhack);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			im::Hotkey(_("T"), &vars->keybinds.timescale, ImVec2(44, 19));
 			im::Checkbox(_("Silent farm"), &vars->misc.silent_farm);
 			im::EndChild();
 		}
 	}
 	void configs() {
 		//do buttons on left side
-		if (im::BeginChild(_("Listbox"), ImVec2(740, 420), true))
+		if (im::BeginChild(_("Listbox"), ImVec2(605, 420), true))
 		{
 			if (im::ListBoxHeader(_("Configs"), ImVec2(500, 300)))
 			{
@@ -737,15 +783,57 @@ namespace Gui
 		//im::ListBox(_("Configs"), &selected_config, configs_name_list.data(), configs_name_list.size());
 	}
 	void colors() {
-		if (im::BeginChild(_("Players"), ImVec2(300, 400))) {
+		if (im::BeginChild(_("Players"), ImVec2(300, 445), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
 			im::Text(_("Players"));
 			im::Separator();
-			if (im::BeginChild(_("Boxes"), ImVec2(290, 350))) {
+			if (im::BeginChild(_("Boxes"), ImVec2(282, 90), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
 				im::Text(_("Boxes"));
 				im::Separator();
-				im::ColorPicker3(_("Visible"), vars->colors.players.boxes.visible);
+				im::ColorEdit4(_("Visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
 				im::EndChild();
 			}
+			if (im::BeginChild(_("Details"), ImVec2(282, 305), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
+				im::Text(_("Details"));
+				im::Separator();
+				im::ColorEdit4(_("Name visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Name invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Distance visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Distance invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Flags visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Flags invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Skeleton visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Skeleton invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Chams visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Chams invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+				im::EndChild();
+			}
+			im::EndChild();
+		}
+		im::SameLine();
+		if (im::BeginChild(_("UI"), ImVec2(300, 142), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
+			im::Text(_("UI"));
+			im::Separator();
+			im::ColorEdit4(_("Snapline visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Snapline invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Fov visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Fov invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+			im::EndChild();
+		}
+		im::SetCursorPos(ImVec2(im::GetCursorPosX() + 308, im::GetCursorPosY() - 300));
+		if (im::BeginChild(_("ESP Items"), ImVec2(300, 296), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
+			im::Text(_("ESP Items"));
+			im::Separator();
+			im::ColorEdit4(_("Hemp visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Hemp invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Stone visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Stone invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Sulfur visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Sulfur invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Metal visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Metal invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Stash (closed)"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Stash (open)"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
 			im::EndChild();
 		}
 	}
@@ -753,15 +841,16 @@ namespace Gui
 	void Render()
 	{
 		im::Begin(GUI_NAME, nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+		im::SetWindowSize(ImVec2(625, 516));
 		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 
 		im::Separator();
-		if (im::Button(_("Combat"),		ImVec2(100, 20))) { selected_tab = 0; }  im::SameLine();	  im::SetCursorPosX(im::GetCursorPosX() + 20);
-		if (im::Button(_("Visuals"),		ImVec2(100, 20))) { selected_tab = 1; }  im::SameLine();	  im::SetCursorPosX(im::GetCursorPosX() + 20);
-		if (im::Button(_("ESP Items"),	ImVec2(100, 20))) { selected_tab = 2; }  im::SameLine();	  im::SetCursorPosX(im::GetCursorPosX() + 20);
-		if (im::Button(_("Misc"),		ImVec2(100, 20))) { selected_tab = 3; }  im::SameLine();	  im::SetCursorPosX(im::GetCursorPosX() + 20);
-		if (im::Button(_("Configs"),		ImVec2(100, 20))) { selected_tab = 4; }  im::SameLine();	  im::SetCursorPosX(im::GetCursorPosX() + 20);
-		if (im::Button(_("Colors"),		ImVec2(100, 20))) { selected_tab = 5; }
+		if (im::Button(_("Combat"),			ImVec2(95, 20))) { selected_tab = 0; }  im::SameLine();	  
+		if (im::Button(_("Visuals"),		ImVec2(95, 20))) { selected_tab = 1; }  im::SameLine();	
+		if (im::Button(_("ESP Items"),		ImVec2(95, 20))) { selected_tab = 2; }  im::SameLine();	  
+		if (im::Button(_("Misc"),			ImVec2(95, 20))) { selected_tab = 3; }  im::SameLine();	  
+		if (im::Button(_("Configs"),		ImVec2(95, 20))) { selected_tab = 4; }  im::SameLine();	
+		if (im::Button(_("Colors"),			ImVec2(95, 20))) { selected_tab = 5; }	
 		im::Separator();
 		switch (selected_tab)
 		{

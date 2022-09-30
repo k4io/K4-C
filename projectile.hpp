@@ -268,10 +268,10 @@ public:
 		safe_write(ht + 0x70, go, DWORD64); //gameObject
 		if (info.bone != 0) {
 
-			Vector3 hitpoint = InverseTransformPoint(safe_read(ht + 0xB0, Transform*)/*HitTransform*/, info.point);
+			Vector3 hitpoint = safe_read(ht + 0xB0, Transform*)->InverseTransformPoint(info.point);
 			safe_write(ht + 0x90, hitpoint, Vector3); //hitPoint
 
-			Vector3 normalpoint = InverseTransformDirection(safe_read(ht + 0xB0, Transform*)/*HitTransform*/, info.normal);
+			Vector3 normalpoint = safe_read(ht + 0xB0, Transform*)->InverseTransformDirection(info.normal);
 			safe_write(ht + 0x9C, normalpoint, Vector3); //HitNormal
 		}
 
@@ -325,7 +325,7 @@ public:
 
 			safe_write(ht + 0xB0, (uintptr_t)Transform, DWORD64);
 
-			Vector3 hitpoint = InverseTransformPoint(Transform, point);
+			Vector3 hitpoint = Transform->InverseTransformPoint(point);
 			safe_write(ht + 0x90, hitpoint, Vector3); //hitPoint
 			safe_write(ht + 0x14, point, Vector3);
 
@@ -535,7 +535,7 @@ void OnProjectileUpdate(Projectile* unk) {
 		if (!unk)
 			return;
 
-		if (vars->combat.doubletap && settings::desyncTime > 0.f)
+		if (vars->combat.doubletap && vars->desyncTime > 0.f)
 			return _update(unk);
 		//if(!vars->combat.magic_bullet)
 		//	return Update(unk);

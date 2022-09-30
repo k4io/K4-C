@@ -2,6 +2,9 @@
 #include "vars.hpp"
 #include "gui.h"
 
+#include "RenderClass.h"
+#include "esp.hpp"
+
 #if CUSTOM_ICONS
 #include "iconscpp.h"
 #include "icons.h"
@@ -85,6 +88,15 @@ HRESULT WINAPI hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Fla
 
 	if (GetAsyncKeyState(VK_INSERT) & 1)
 		vars->open = !vars->open;
+
+	if (!vars->misc.panic)
+	{
+		if (render.NewFrame(pSwapChain))
+		{
+			new_frame();
+		}
+		render.EndFrame();
+	}
 
 	if (vars->open)
 	{

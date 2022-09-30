@@ -1,9 +1,12 @@
 #pragma once
 #include <stdio.h>
-#include "unity.hpp"
-#include "../utils/xor_float.hpp"
 #include <vector>
+
+
+#include "../utils/xor_float.hpp"
 #include "../utils/string_format.h"
+
+#include "unity.hpp"
 
 class default_t
 {
@@ -206,9 +209,9 @@ static auto get_time = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*
 
 static auto ClosestPoint = reinterpret_cast<Vector3(*)(BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ClosestPoint"), 1, _("position"), _(""), 1)));
 
-static auto InverseTransformPoint = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
+static auto _InverseTransformPoint = reinterpret_cast<Vector3(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
 
-static auto InverseTransformDirection = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformDirection"), 1, _(""), _("UnityEngine"))));
+static auto _InverseTransformDirection = reinterpret_cast<Vector3(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformDirection"), 1, _(""), _("UnityEngine"))));
 
 static auto get_localToWorldMatrix = reinterpret_cast<VMatrix(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_localToWorldMatrix"), 0, _(""), _("UnityEngine"))));
 
@@ -348,7 +351,7 @@ void init_bp() {
 	get_texture = reinterpret_cast<uintptr_t(*)(uintptr_t sprite)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Sprite"), _("get_texture"), 0, _(""), _("UnityEngine"))));
 	set_name = reinterpret_cast<void(*)(uintptr_t, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("set_name"), 1, _(""), _("UnityEngine"))));;
 	get_gameObject = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_gameObject"), 0, _(""), _("UnityEngine"))));
-	InverseTransformDirection = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformDirection"), 1, _(""), _("UnityEngine"))));
+	_InverseTransformDirection = reinterpret_cast<Vector3(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformDirection"), 1, _(""), _("UnityEngine"))));
 	LookRotation = reinterpret_cast<Vector4(*)(Vector3, Vector3 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Quaternion"), _("LookRotation"), 2, _(""), _("UnityEngine"))));
 	set_rotation = reinterpret_cast<void(*)(Transform*, Vector4 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_rotation"), 1, _(""), _("UnityEngine"))));
 	set_position = reinterpret_cast<void(*)(Transform*, Vector3 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 1, _(""), _("UnityEngine"))));
@@ -496,7 +499,7 @@ void init_bp() {
 
 	StartAttackCooldown = reinterpret_cast<void(*)(BaseProjectile*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AttackEntity"), _("StartAttackCooldown"), 1, _(""), _(""))));
 
-	InverseTransformPoint = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
+	_InverseTransformPoint = reinterpret_cast<Vector3(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
 
 	ProcessAttack = reinterpret_cast<void(*)(BaseProjectile*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("ProcessAttack"), 1, _(""), _(""))));
 
@@ -586,6 +589,16 @@ public:
 			return {};
 		auto off = reinterpret_cast<Vector4(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
 		return off(this);
+	}
+
+	Vector3 InverseTransformPoint(Vector3 point) {
+		if (!this) return Vector3(0, 0, 0);
+		return _InverseTransformPoint(*reinterpret_cast<uintptr_t*>(this), point);
+	}
+
+	Vector3 InverseTransformDirection(Vector3 point) {
+		if (!this) return Vector3(0, 0, 0);
+		return _InverseTransformDirection(*reinterpret_cast<uintptr_t*>(this), point);
 	}
 };
 
@@ -738,6 +751,8 @@ public:
 
 class ItemDefinition : public MonoBehaviour {
 public:
+	member(int, itemid, 0x18);
+	//FIELD(_("ItemDefinition"), _("itemid"), itemid, int);
 };
 
 class GatherProperties {
@@ -766,7 +781,10 @@ public:
 };
 
 class Magazine {
-	
+public:
+	FIELD(_("Magazine"), _("capacity"), capacity, int);
+	FIELD(_("Magazine"), _("contents"), contents, int);
+	FIELD(_("Magazine"), _("ammoType"), ammoType, ItemDefinition*);
 };
 
 class BaseProjectile : public AttackEntity {
@@ -812,8 +830,27 @@ public:
 		return *reinterpret_cast<ItemModProjectile**>((uintptr_t)this + mod);
 	}
 
+	void remove_ammo() {
+		const auto primary_magazine = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x2C0);
+		if (!primary_magazine) return;
+		auto ammo = *reinterpret_cast<int*>(primary_magazine + 0x1C);
+		*reinterpret_cast<int*>(primary_magazine + 0x1C) = (ammo - 1);
+
+		updateammodisplay((uintptr_t)this);
+		shot_fired((uintptr_t)this);
+		did_attack_client_side((uintptr_t)this);
+		return;
+	}
+
+	int ammo_left() {
+		const auto primary_magazine = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x2C0);
+		if (!primary_magazine) return 0;
+		const auto ammo = *reinterpret_cast<int*>(primary_magazine + 0x1C);
+		return ammo;
+	}
+
 	weapon_stats_t get_stats(int32_t weapon_id) {
-		const auto primary_magazine = (uintptr_t)this->primaryMagazine();//*reinterpret_cast<uintptr_t*>((uintptr_t)this + primaryMagazine);
+		const auto primary_magazine = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x2C0);
 		if (!primary_magazine)
 			return weapon_stats_t{ xf(1000) };
 
@@ -825,93 +862,97 @@ public:
 		auto velocity_scale = xf(1);
 		bool scale_velocity = false;
 
-		const auto ammo_definition = *reinterpret_cast<uintptr_t*>(primary_magazine + 0x20);
+		const auto ammo_definition = *reinterpret_cast<uintptr_t*>((uintptr_t)primary_magazine + 0x20);
+		//auto ammo_definition = primary_magazine->ammoType();//*reinterpret_cast<uintptr_t*>((uintptr_t)primary_magazine + 0x20);
 		if (ammo_definition) {
 			// itemid
-			const auto ammo_id = *reinterpret_cast<int32_t*>(ammo_definition + 0x18);
-
-			switch (ammo_id) {
-			case shotgun:
-				velocity = xf(225);
-				drag = xf(1);
-				distance = xf(3);
-				break;
-			case shotgun_slug:
-				velocity = xf(225);
-				drag = xf(1);
-				distance = xf(10);
-				break;
-			case shotgun_fire:
-				velocity = 100;
-				drag = 1;
-				distance = 3;
-				break;
-			case shotgun_handmade:
-				velocity = 100;
-				drag = 1;
-				distance = 0;
-				break;
-			case rifle_556:
-				velocity = 375;
-				drag = .6;
-				distance = 15;
-				break;
-			case rifle_556_hv:
-				velocity = 450;
-				drag = .6;
-				distance = 15;
-				break;
-			case rifle_556_fire:
-				velocity = 225;
-				drag = .6;
-				distance = 15;
-				break;
-			case rifle_556_explosive:
-				velocity = 225;
-				gravity_modifier = 1.25;
-				drag = .6;
-				distance = 15;
-				break;
-			case pistol:
-				velocity = 300;
-				drag = .7;
-				distance = 15;
-				break;
-			case pistol_hv:
-				velocity = 400;
-				drag = .7;
-				distance = 15;
-				break;
-			case pistol_fire:
-				velocity = 225;
-				drag = .7;
-				distance = 15;
-				break;
-			case arrow_wooden:
-				velocity = 50;
-				gravity_modifier = .75;
-				drag = .005;
-				break;
-			case arrow_hv:
-				velocity = 80;
-				gravity_modifier = .5;
-				drag = .005;
-				break;
-			case arrow_fire:
-				velocity = 40;
-				gravity_modifier = 1;
-				drag = .01;
-				break;
-			case arrow_bone:
-				velocity = 45;
-				gravity_modifier = .75;
-				drag = .01;
-				break;
-			case nailgun_nails:
-				velocity = 50;
-				gravity_modifier = .75;
-				drag = .005;
-				break;
+			//const auto ammo_id = ammo_definition->itemid;//*reinterpret_cast<int32_t*>((uintptr_t)ammo_definition + 0x18);
+			const auto ammo_id = *reinterpret_cast<int32_t*>((uintptr_t)ammo_definition + 0x18);
+			if (ammo_id)
+			{
+				switch (ammo_id) {
+				case shotgun:
+					velocity = xf(225);
+					drag = xf(1);
+					distance = xf(3);
+					break;
+				case shotgun_slug:
+					velocity = xf(225);
+					drag = xf(1);
+					distance = xf(10);
+					break;
+				case shotgun_fire:
+					velocity = 100;
+					drag = 1;
+					distance = 3;
+					break;
+				case shotgun_handmade:
+					velocity = 100;
+					drag = 1;
+					distance = 0;
+					break;
+				case rifle_556:
+					velocity = 375;
+					drag = .6;
+					distance = 15;
+					break;
+				case rifle_556_hv:
+					velocity = 450;
+					drag = .6;
+					distance = 15;
+					break;
+				case rifle_556_fire:
+					velocity = 225;
+					drag = .6;
+					distance = 15;
+					break;
+				case rifle_556_explosive:
+					velocity = 225;
+					gravity_modifier = 1.25;
+					drag = .6;
+					distance = 15;
+					break;
+				case pistol:
+					velocity = 300;
+					drag = .7;
+					distance = 15;
+					break;
+				case pistol_hv:
+					velocity = 400;
+					drag = .7;
+					distance = 15;
+					break;
+				case pistol_fire:
+					velocity = 225;
+					drag = .7;
+					distance = 15;
+					break;
+				case arrow_wooden:
+					velocity = 50;
+					gravity_modifier = .75;
+					drag = .005;
+					break;
+				case arrow_hv:
+					velocity = 80;
+					gravity_modifier = .5;
+					drag = .005;
+					break;
+				case arrow_fire:
+					velocity = 40;
+					gravity_modifier = 1;
+					drag = .01;
+					break;
+				case arrow_bone:
+					velocity = 45;
+					gravity_modifier = .75;
+					drag = .01;
+					break;
+				case nailgun_nails:
+					velocity = 50;
+					gravity_modifier = .75;
+					drag = .005;
+					break;
+				}
 			}
 
 			scale_velocity = true;
@@ -967,7 +1008,7 @@ public:
 	float opy = 0.f;
 
 	void set_recoil() {
-		auto recoil_properties = (uintptr_t)this->recoil();//*reinterpret_cast<uintptr_t*>((uintptr_t)this + recoil);
+		auto recoil_properties = *reinterpret_cast<uintptr_t*>((uintptr_t)this + il2cpp::value(_("BaseProjectile"), _("recoil")));//this->recoil();//
 		
 		float recoilx = vars->combat.recoilx;
 		float recoily = vars->combat.recoily;
@@ -1093,7 +1134,7 @@ public:
 		return *reinterpret_cast<int32_t*>(item_definition + itemid);
 	}
 
-	template<typename T>
+	template<typename T = BaseEntity>
 	T* GetHeldEntity() {
 		if (!this) return nullptr;
 		return ((T*)this->heldEntity());
@@ -1478,7 +1519,7 @@ public:
 		bool zooming = false;
 
 
-		if (vars->visual.zoomtoggle && unity::GetKey((rust::classes::KeyCode)vars->keybinds.zoom)) {
+		if (vars->visual.zoomtoggle && unity::GetKey(vars->keybinds.zoom)) {
 			zooming = true;
 		}
 		else {
@@ -1487,13 +1528,13 @@ public:
 
 		if (zooming) {//0x32182E0
 			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52689952); //"ConVar_Graphics_c*" alkad rust
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52698272); //"	" real rust
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + oConvar); //"	" real rust
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = vars->visual.zoomfov;
 		}
 
 		if (!zooming) {
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52698272); //"ConVar_Graphics_c*" real rust
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + oConvar); //"ConVar_Graphics_c*" real rust
 			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*" alkad rust
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = vars->visual.playerfov;
@@ -1760,7 +1801,7 @@ public:
 	Item* GetActiveItem()
 	{
 		//unsigned int ActUID = this->clActiveItem();
-		unsigned int ActUID = mem::read<unsigned int>((uintptr_t)this + 0x5D0); //private uint clActiveItem; //
+		unsigned int ActUID = mem::read<unsigned int>((uintptr_t)this + 0x5D8); //private uint clActiveItem; //0x5D8
 		if (!ActUID)
 			return 0;
 		Item* ActWeapon;
@@ -1971,6 +2012,10 @@ public:
 	float Distance(Vector3 position) { return position.distance(this->ClosestPoint(position)); }
 };
 
+float clamp01(float f, float min, float max) {
+	return f < min ? min : f > max ? max : f;
+}
+
 class _Line {
 public:
 	Vector3 start;
@@ -1986,7 +2031,8 @@ public:
 		if (magnitude == 0.f) return start;
 		Vector3 vector = a / magnitude;
 		Vector3 lhs = pos - start;
-		return start + vector * std::clamp(lhs.dot(vector), 0.f, magnitude);
+		
+		return start + vector * clamp01(lhs.dot(vector), 0.f, magnitude);
 	}
 };
 
@@ -2125,17 +2171,17 @@ void attack_melee(aim_target target, BaseProjectile* baseprojectile, bool is_pla
 
 	Ray ray = Ray(local_position, (target.pos - local_position).Normalized());
 
-	Transform* trans = is_player ? target.ent->model()->boneTransforms()->get(48) : target.ent->get_transform();
+	uintptr_t trans = is_player ? (uintptr_t)target.ent->model()->boneTransforms()->get(48) : (uintptr_t)target.ent->get_transform();
 
 	if (!trans)
 		return;
 
 	hit_test->MaxDistance() = 1000;
-	hit_test->HitTransform() = trans;
+	hit_test->HitTransform() = (Transform*)trans;
 	hit_test->AttackRay() = ray;
 	hit_test->DidHit() = true;
 	hit_test->HitEntity() = target.ent;
-	hit_test->HitPoint() = InverseTransformPoint(trans, target.pos);
+	hit_test->HitPoint() = _InverseTransformPoint(trans, target.pos);//trans->InverseTransformPoint(target.pos);//InverseTransformPoint(trans, target.pos);
 	hit_test->HitNormal() = Vector3(0, 0, 0);
 	hit_test->damageProperties() = (DamageProperties*)*reinterpret_cast<uintptr_t*>(baseprojectile + 0x50);
 

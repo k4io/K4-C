@@ -50,6 +50,10 @@ public:
 	inline float Distance(const Vector2& Dst) {
 		return sqrt(powf(this->x - Dst.x, 2) + powf(this->y - Dst.y, 2));
 	}
+
+	inline bool empty() {
+		return (this->x == 0 && this->y == 0);
+	}
 };
 struct weapon_stats_t {
 	float initial_velocity;
@@ -87,30 +91,7 @@ enum weapon_types : int32_t {
 };
 
 
-float my_pow(float base, float exp)
-{
-	auto nth_root = [](float A, int n) {
-		constexpr int K = 8;
-		float         x[K] = { 1 };
-		for (int k = 0; k < K - 1; k++)
-			x[k + 1] = (1.0 / n) * ((n - 1) * x[k] + A / my_pow(x[k], n - 1));
-		return x[K - 1];
-	};
-	if (base == 0)
-		return 0;
-	if (exp == 0)
-		return 1;
-	else if (exp < 0)
-		return 1 / my_pow(base, -exp);
-	else if (exp > 0 && exp < 1)
-		return nth_root(base, 1 / exp);
-	else if ((int)exp % 2 == 0) {
-		float half_pow = my_pow(base, exp / 2);
-		return half_pow * half_pow;
-	}
-	else
-		return base * my_pow(base, exp - 1);
-}
+
 
 class Vector3
 {
@@ -155,6 +136,10 @@ public:
 	inline float Length()
 	{
 		return my_sqrt((x * x) + (y * y) + (z * z));
+	}
+
+	Vector3 midPoint(Vector3 v2) {
+		return Vector3((x + v2.x) / 2, (y + v2.y) / 2, (z + v2.z) / 2);
 	}
 
 	Vector3 MoveTowards(Vector3 current, Vector3 target, float maxDistanceDelta)

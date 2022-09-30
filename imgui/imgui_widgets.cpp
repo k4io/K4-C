@@ -1011,7 +1011,7 @@ bool im::Checkbox(const char* label, bool* v)
     else if (*v)
     {
         const float pad = ImMax(1.0f, IM_FLOOR(square_sz / 6.0f));
-        RenderCheckMark(check_bb.Min + ImVec2(pad, pad), check_col, square_sz - pad*2.0f);
+        RenderCheckMark(check_bb.Min + ImVec2(pad, pad), check_col, square_sz - pad * 2.0f);
     }
 
     if (g.LogEnabled)
@@ -4347,7 +4347,7 @@ bool im::ColorEdit4(const char* label, float col[4], ImGuiColorEditFlags flags)
 
     if (label != label_display_end && !(flags & ImGuiColorEditFlags_NoLabel))
     {
-        window->DC.CursorPos = ImVec2(pos.x + w_full + style.ItemInnerSpacing.x, pos.y + style.FramePadding.y);
+        window->DC.CursorPos = ImVec2(pos.x + 25 + style.ItemInnerSpacing.x, pos.y + style.FramePadding.y);
         TextEx(label, label_display_end);
     }
 

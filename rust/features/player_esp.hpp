@@ -21,6 +21,8 @@ namespace esp {
 	aim_target best_target = aim_target();
 	uintptr_t closest_building_block = 0;
 
+	std::vector<aim_target> visibleplayerswithin300m = {};
+
 	struct bounds_t {
 		float left, right, top, bottom;
 	};
@@ -59,11 +61,6 @@ namespace esp {
 		return true;
 	}
 
-	//struct str
-	//{
-	//	char buffer[128];
-	//};
-
 	void draw_heli(float x, float y, float w, float h);
 
 	void draw_tool_cupboard(Vector2 w2s_position, uintptr_t label, Vector4 color, System::list<PlayerNameID*>* authorizedPlayers_list);
@@ -93,8 +90,9 @@ namespace esp {
 	uintptr_t shader;
 
 	float last_recycler = 0.f;
-
+	
 	void iterate_players(bool draw = true) {
+		visibleplayerswithin300m.clear();
 		//best_target = ;
 		auto get_client_entities = [&]() {
 			client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
@@ -307,6 +305,11 @@ namespace esp {
 						auto visible = ent->is_visible(esp::local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
 						target.visible = visible;
 
+						if (distance < 300.0f)
+						{
+							visibleplayerswithin300m.push_back(target);
+						}
+
 						if (target < best_target
 							|| !best_target.ent->is_alive()
 							|| (target.ent && ((BasePlayer*)target.ent)->userID() == ((BasePlayer*)best_target.ent)->userID()))
@@ -324,7 +327,7 @@ namespace esp {
 							{
 								//new frame, record velocity, record frame
 								best_target.last_frame = get_fixedTime();
-								if (best_target.velocity_list.size() < 30) //0.03125 * 30 = 0.9 seconds
+								if (best_target.velocity_list.size() < 90) //0.03125 * 30 = 0.9 seconds
 									best_target.velocity_list.push_back(vel);
 								else
 								{
@@ -366,7 +369,7 @@ namespace esp {
 							offscreen_indicator(((BasePlayer*)ent)->eyes()->get_position());
 						}
 
-						if (vars->combat.silent_melee || unity::GetKey(rust::classes::KeyCode(vars->keybinds.silentmelee)))
+						if (vars->combat.silent_melee || unity::GetKey(vars->keybinds.silentmelee))
 							hit_player();
 					}
 				}
@@ -439,11 +442,16 @@ namespace esp {
 				vars->visual.sulfur_ore ||
 				vars->visual.metal_ore ||
 				vars->visual.traps ||
+				vars->visual.animal ||
+				vars->visual.barrels ||
+				vars->visual.food ||
 				vars->visual.vehicles ||
 				vars->visual.airdrops ||
+				vars->visual.ladder ||
 				vars->visual.cloth ||
 				vars->visual.corpses) 
 			{
+				//dropped items
 				if (*(int*)(entity_class_name) == 'porD') {
 					if (!vars->visual.dropped_items)
 						continue;
@@ -481,7 +489,7 @@ namespace esp {
 					continue;
 				}
 
-				//if (*(int*)(entity_class_name) == 'ddaL') {
+				//ladder
 				if (vars->visual.ladder && !strcmp(entity_class_name, _("BaseLadder"))) {
 					esp_name = il2cpp::methods::new_string(_("Ladder"));
 					esp_color = Vector4(0, 219, 58, 255);
@@ -499,6 +507,7 @@ namespace esp {
 					//		esp::draw_item(w2s_position, il2cpp::methods::new_string(string::format(_("[parent: %d]"), selected_entity_parent_mapping[ent_id])), esp_color);
 				}
 
+				//tc
 				if (vars->visual.tc_esp && *(int*)(entity_class_name) == 'liuB' && *(int*)(entity_class_name + 8) == 'virP') {
 
 					//rpc stuf
@@ -515,7 +524,7 @@ namespace esp {
 						esp::draw_tool_cupboard(w2s_position, il2cpp::methods::new_string(_("Tool Cupboard")), Vector4(255, 0, 0, 255), authorizedPlayers_list);
 				}
 
-
+				//heli
 				if (*(int*)(entity_class_name + 4) == 'ileH' && vars->visual.heli_esp) {
 					auto base_heli = reinterpret_cast<BaseHelicopter*>(ent);
 
@@ -567,6 +576,10 @@ namespace esp {
 								best_target.pos = target.pos;
 							else best_target.is_heli = false;
 						}
+						else
+						{
+							best_target = aim_target();
+						}
 					}
 					else best_target.is_heli = false;
 
@@ -574,9 +587,12 @@ namespace esp {
 					continue;
 				}
 
+				//stash
 				if (vars->visual.stash && *(int*)(object_name.zpad + 46) == '_hsa') {
 					esp_name = il2cpp::methods::new_string(_("Stash"));
 				}
+
+				//recycler
 				else if (vars->misc.norecycler && *(int*)(entity_class_name) == 'yceR' && get_fixedTime() > last_recycler + 0.35f) {
 					esp_name = il2cpp::methods::new_string(_("Recycler"));
 					esp_color = Vector4(232, 232, 232, 255);
@@ -586,18 +602,26 @@ namespace esp {
 						last_recycler = get_fixedTime();
 					}
 				}
+
+				//stone
 				else if (vars->visual.stone_ore && (*(int*)(object_name.zpad + 52) == 'nots' || *(int*)(object_name.zpad + 47) == 'nots')) {
 					esp_name = il2cpp::methods::new_string(_("Stone Ore"));
 					esp_color = Vector4(232, 232, 232, 255);
 				}
+
+				//sulfur
 				else if (vars->visual.sulfur_ore && (*(int*)(object_name.zpad + 52) == 'flus' || *(int*)(object_name.zpad + 47) == 'flus')) {
 					esp_name = il2cpp::methods::new_string((_("Sulfur Ore")));
 					esp_color = Vector4(203, 207, 0, 255);
 				}
+
+				//metal
 				else if (vars->visual.metal_ore && (*(int*)(object_name.zpad + 52) == 'atem' || *(int*)(object_name.zpad + 47) == 'atem')) {
 					esp_name = il2cpp::methods::new_string(_("Metal Ore"));
 					esp_color = Vector4(145, 145, 145, 255);
 				}
+
+				//traps
 				else if (vars->visual.traps && (*(int*)(object_name.zpad + 36) == 'terr' || *(int*)(object_name.zpad + 43) == 'tnug' || *(int*)(object_name.zpad + 38) == 'rtra')) {
 					if (*(int*)(object_name.zpad + 36) == 'terr')
 						esp_name = il2cpp::methods::new_string(_("Auto Turret*"));
@@ -608,18 +632,26 @@ namespace esp {
 
 					esp_color = Vector4(255, 166, 0, 255);
 				}
+				
+				//vehicles
 				else if (vars->visual.vehicles && *(int*)(entity_class_name + 4) == 'iheV') {
 					esp_name = il2cpp::methods::new_string(_("Vehicle"));
 					esp_color = Vector4(0, 161, 219, 255);
 				}
+
+				//airdrop
 				else if (vars->visual.airdrops && *(int*)(object_name.zpad + 39) == 'pord') {
 					esp_name = il2cpp::methods::new_string(_("Airdrop"));
 					esp_color = Vector4(0, 161, 219, 255);
 				}
+
+				//cloth
 				else if (vars->visual.cloth && *(int*)(object_name.zpad + 52) == 'c-pm') {
 					esp_name = il2cpp::methods::new_string(_("Cloth"));
 					esp_color = Vector4(0, 219, 58, 255);
 				}
+
+				//corpse
 				else if (vars->visual.corpses && *(int*)(object_name.zpad + 29) == 'proc') {
 					esp_name = il2cpp::methods::new_string(_("Player Corpse"));
 					esp_color = Vector4(230, 230, 230, 255);
@@ -627,7 +659,7 @@ namespace esp {
 				else if (tag != 6)
 					continue;
 
-
+				//stash open?
 				if (tag != 6) {
 					if (*(int*)(entity_class_name) == 'satS') {
 						auto flag = *reinterpret_cast<int*>(ent + 0x128);
@@ -643,7 +675,9 @@ namespace esp {
 						if (vars->visual.distance)
 						{
 							auto nstr = string::wformat(_(L"[%dm]"), (int)dist);
-							w2s_position.y += 12;
+							w2s_position.y += 11;
+							draw_text(w2s_position, const_cast<wchar_t*>(nstr), Vector4(0, 0, 0, 1));
+							w2s_position.y += 1;
 							draw_text(w2s_position, const_cast<wchar_t*>(nstr), Vector4(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1));
 						}
 						//if (vars->visual.distance
@@ -715,7 +749,7 @@ namespace esp {
 		esp::draw_target_hotbar(best_target);
 		esp::draw_middle(best_target);
 	}
-
+	
 
 	void draw_teammates() {
 		if (!esp::local_player)

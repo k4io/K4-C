@@ -46,7 +46,7 @@
     <ClCompile Include="utils\pattern\pattern.cpp">
       <Filter>utils\pattern</Filter>
     </ClCompile>
-    <ClCompile Include="d3d.cpp" />
+    <ClCompile Include="d3d.hpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="kiero\kiero.cpp">
       <Filter>kiero</Filter>
@@ -200,5 +200,8 @@
     <ClInclude Include="misc.hpp" />
     <ClInclude Include="projectile1.hpp" />
     <ClInclude Include="nine_meter_poggers.hpp" />
+    <ClInclude Include="noimp.h" />
+    <ClInclude Include="esp.hpp" />
+    <ClInclude Include="RenderClass.h" />
   </ItemGroup>
 </Project>

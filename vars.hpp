@@ -1,7 +1,7 @@
 #pragma once
 #include "utils/xorstr.hpp"
 #include <string>
-#define GUI_NAME "traphouse"
+#define GUI_NAME "Rust"
 #define CUSTOM_ICONS FALSE
 
 struct Vars
@@ -29,7 +29,7 @@ struct Vars
 		bool always_shoot = false;
 		float melee_range = 1.f;
 		float thickness = 1.f;
-		bool HitScan = true;
+		bool HitScan = false;
 		bool norecoil = false;
 		bool nospread = false;
 		bool fast_bullet = false;
@@ -52,7 +52,9 @@ struct Vars
 
 	struct visual {
 		bool playeresp = false;
-		bool crosshair = false;
+		bool crosshair1 = false;
+		bool crosshair2 = false;
+		bool crosshair3 = false;
 		float playerfov = 90.f;
 		bool zoomtoggle = false;
 		float staramount = 350;
@@ -106,6 +108,8 @@ struct Vars
 		bool hackable_crate_esp = false;
 		bool full_box = false;
 		bool corner_box = false;
+		bool cube = false;
+		bool box3d = false;
 		bool bottomhealth = false;
 		int snapline = 0;
 		bool sidehealth = false;
@@ -129,6 +133,7 @@ struct Vars
 		bool force_privlidge = false;
 		int upgrade_tier = 1;
 		bool flyhack_stop = false;
+		bool antispeed = false;
 		float    m_idebugcam_speed = 1.f;
 		float code_lock_code = 1000;
 		bool playerfovtoggle = false;
@@ -137,6 +142,7 @@ struct Vars
 		bool Movement = false;
 		bool eyeoffset = false;
 		float PlayerEyes = 1.4;
+		bool panic = false;
 		bool spinbot = false;
 		bool always_shoot = false;
 		bool attack_on_mountables = false;
@@ -189,12 +195,29 @@ struct Vars
 		struct players {
 			struct boxes {
 				float visible[3] = { 1, 1, 1 };
+				float invisible[3] = { 1, 1, 1 };
 			}; boxes boxes;
 		}; players players;
+		struct ui {
+			float snapline_v[3] = { 1, 1, 1 };
+			float snapline_i[3] = { 1, 1, 1 };
+			float fov[3] = { 1, 1, 1 };
+			float crosshair[3] = { 1, 1, 1 };
+		}; ui ui;
 	}; colors colors;
 
 	int tab = 0;
 
 	std::wstring config_name = L"default";
+
+
+	float ScreenX = 1920;
+	float ScreenY = 1080;
+	float tick_time_when_called;
+
+	float desyncTime;
+	float speedhack;
+	float reload;
+	float time_since_last_shot;
 };
 extern Vars* vars;

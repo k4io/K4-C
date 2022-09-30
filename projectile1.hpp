@@ -123,7 +123,7 @@ public:
 
 		auto getheightmap = [&]() {
 			//real rust 52698608
-			uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + 52698608);
+			uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTerrainMeta_TypeInfo);
 			uintptr_t fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
 			uintptr_t heightmap = *reinterpret_cast<uintptr_t*>(fieldz + 0xB0);
 			return heightmap;
@@ -319,7 +319,7 @@ public:
 				//ht->HitTransform() = Transform;
 				ht->HitTransform() = Transform;
 				//ht->HitPoint() = Transform->InverseTransformPoint(point);
-				ht->HitPoint() = InverseTransformPoint(Transform, point);
+				ht->HitPoint() = Transform->InverseTransformPoint(point);
 				//ht->HitMaterial() = Il2CppString::create(_("flesh"));
 				ht->HitMaterial() = _(L"flesh");
 			}
@@ -414,7 +414,7 @@ public:
 	uint64_t CreatePlayerProjectileUpdate()
 	{
 		typedef uint64_t(__stdcall* PoolGet)(uint64_t);
-		uint64_t update = *reinterpret_cast<uint64_t*>(GameAssemblyBase + 7047552); //"Facepunch.Pool$$Get<PlayerProjectileUpdate>",
+		uint64_t update = *reinterpret_cast<uint64_t*>(GameAssemblyBase + 5990640); //"Facepunch.Pool$$Get<PlayerProjectileUpdate>",
 
 		if (!update)
 			return 0;
@@ -432,8 +432,8 @@ public:
 		if (!update)
 			return;
 
-		typedef uintptr_t(*AAA)();
-		auto cl = ((AAA)(GameAssemblyBase + 0x1095B00))();
+		typedef uintptr_t(*AAA)(); // Client get_cl() { }
+		auto cl = ((AAA)(GameAssemblyBase + 0x13106B0))();
 		if (!cl)
 			return;
 

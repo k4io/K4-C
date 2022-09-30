@@ -1,12 +1,14 @@
 #pragma once
 #include "../utils/vector.hpp"
 #include "../memory/il2cpp.hpp"
+#include "../offsets.h"
 
 #define STR_MERGE_IMPL(a, b) a##b
 #define STR_MERGE(a, b) STR_MERGE_IMPL(a, b)
 #define MAKE_PAD(size) STR_MERGE(_pad, __COUNTER__)[size]
 #define member(type, name, offset) struct {unsigned char MAKE_PAD(offset); type name;}
 #define min(a,b)            (((a) < (b)) ? (a) : (b))
+
 
 struct Ray {
 	Vector3 origin;

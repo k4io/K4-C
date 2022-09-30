@@ -8,7 +8,8 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 	if (!LocalPlayer)
 		return false;
 
-	if (vars->combat.manipulator2) { //key will already be checked for in clientinput
+	if (vars->combat.manipulator2
+		&& TargetPlayer->is_alive()) { //key will already be checked for in clientinput
 		//CheatCore::m_cheat->isDesyncing = true; //not used as far as i know
 
 		float time = get_deltaTime();//UnityEngine::Time::get_deltaTime();
@@ -46,6 +47,9 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 	if (!TargetPlayer)
 		return false;
 
+	if (!TargetPlayer->is_alive())
+		return false;
+
 	bool ManipStatus = false;
 	bool BehindWallStatus = false;
 	Vector3 ManipulationPosition = Vector3(0,0,0), BehindWallPoistion = Vector3(0,0,0);
@@ -81,9 +85,9 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 
 		//0x52D200 losradius real rust alkad
 		typedef bool(*lr)(Vector3, Vector3, int, float, uintptr_t);
-		bool CenterLOS = ((lr)(mem::game_assembly_base + 0x52D200))(center, LastLocalEye, layermask, 0.2f, 0);
-		bool UpLOS = CenterLOS && ((lr)(mem::game_assembly_base + 0x52D200))(LastLocalEye, Up, layermask, 0.2f, 0) && LastLocalEye.distance(Up) > 0.01f && misc::ValidateEyePos(LastLocalEye, Up);// && LocalPlayer->checkNoclipMagicBullet(LastLocalEye, Up);
-		bool DownLOS = CenterLOS && ((lr)(mem::game_assembly_base + 0x52D200))(LastLocalEye, Down, layermask, 0.2f, 0) && LastLocalEye.distance(Down) > 0.01f && misc::ValidateEyePos(LastLocalEye, Down);// && LocalPlayer->checkNoclipMagicBullet(LastLocalEye, Down);
+		bool CenterLOS = ((lr)(mem::game_assembly_base + oLineOfSightRadius))(center, LastLocalEye, layermask, 0.2f, 0);
+		bool UpLOS = CenterLOS && ((lr)(mem::game_assembly_base + oLineOfSightRadius))(LastLocalEye, Up, layermask, 0.2f, 0) && LastLocalEye.distance(Up) > 0.01f && misc::ValidateEyePos(LastLocalEye, Up);// && LocalPlayer->checkNoclipMagicBullet(LastLocalEye, Up);
+		bool DownLOS = CenterLOS && ((lr)(mem::game_assembly_base + oLineOfSightRadius))(LastLocalEye, Down, layermask, 0.2f, 0) && LastLocalEye.distance(Down) > 0.01f && misc::ValidateEyePos(LastLocalEye, Down);// && LocalPlayer->checkNoclipMagicBullet(LastLocalEye, Down);
 
 		static const bool debug_test = false;
 
@@ -138,9 +142,9 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 
 		if (vars->visual.angles)
 		{
-			Sphere(HitResultUp.second, 0.1f, col(r * 100, g * 100, b * 100, 255), 0.05f, false);
-			Sphere(HitResultDown.second, 0.1f, col(r * 100, g * 100, b * 100, 255), 0.05f, false);
-			Sphere(HitResultForward.second, 0.1f, col(r * 100, g * 100, b * 100, 255), 0.05f, false);
+			Sphere(HitResultUp.second, 0.1f,		col(100, 100, 100, 255), 0.05f, false);
+			Sphere(HitResultDown.second, 0.1f,		col(100, 100, 100, 255), 0.05f, false);
+			Sphere(HitResultForward.second, 0.1f,	col(100, 100, 100, 255), 0.05f, false);
 		}
 
 		if (HitResultForward.first)
@@ -177,9 +181,9 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 
 			if (vars->visual.angles)
 			{
-				Sphere(DiagonalUp, 0.1f, col(r * 100, g * 100, b * 100, 255), 0.05f, 0);
-				Sphere(DiagonalDown, 0.1f, col(r * 100, g * 100, b * 100, 255), 0.05f, 0);
-				Sphere(Horizontal, 0.1f, col(r * 100, g * 100, b * 100, 255), 0.05f, 0);
+				Sphere(DiagonalUp, 0.1f,	col(100, 100, 100, 255), 0.05f, 0);
+				Sphere(DiagonalDown, 0.1f,	col(100, 100, 100, 255), 0.05f, 0);
+				Sphere(Horizontal, 0.1f,	col(100, 100, 100, 255), 0.05f, 0);
 			}
 
 			auto HitResultDiagonalUp = HitScan(DiagonalUp, true, val); //settings.ManipulationUp
