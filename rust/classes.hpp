@@ -8,6 +8,9 @@
 
 #include "unity.hpp"
 
+#define safe_read(Addr, Type) mem::read<Type>((DWORD64)Addr)
+#define safe_write(Addr, Data, Type) mem::write<Type>((DWORD64)Addr, Data);
+
 class default_t
 {
 public:
@@ -593,12 +596,12 @@ public:
 
 	Vector3 InverseTransformPoint(Vector3 point) {
 		if (!this) return Vector3(0, 0, 0);
-		return _InverseTransformPoint(*reinterpret_cast<uintptr_t*>(this), point);
+		return _InverseTransformPoint((uintptr_t)(this), point);
 	}
 
 	Vector3 InverseTransformDirection(Vector3 point) {
 		if (!this) return Vector3(0, 0, 0);
-		return _InverseTransformDirection(*reinterpret_cast<uintptr_t*>(this), point);
+		return _InverseTransformDirection((uintptr_t)(this), point);
 	}
 };
 
@@ -2171,20 +2174,35 @@ void attack_melee(aim_target target, BaseProjectile* baseprojectile, bool is_pla
 
 	Ray ray = Ray(local_position, (target.pos - local_position).Normalized());
 
-	uintptr_t trans = is_player ? (uintptr_t)target.ent->model()->boneTransforms()->get(48) : (uintptr_t)target.ent->get_transform();
+	auto trans = is_player ? target.ent->model()->boneTransforms()->get(48) : target.ent->get_transform();
+
+	auto get_transform = reinterpret_cast<uintptr_t (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 
 	if (!trans)
 		return;
 
-	hit_test->MaxDistance() = 1000;
-	hit_test->HitTransform() = (Transform*)trans;
-	hit_test->AttackRay() = ray;
-	hit_test->DidHit() = true;
-	hit_test->HitEntity() = target.ent;
-	hit_test->HitPoint() = _InverseTransformPoint(trans, target.pos);//trans->InverseTransformPoint(target.pos);//InverseTransformPoint(trans, target.pos);
-	hit_test->HitNormal() = Vector3(0, 0, 0);
-	hit_test->damageProperties() = (DamageProperties*)*reinterpret_cast<uintptr_t*>(baseprojectile + 0x50);
-
+	if (!is_player)
+	{
+		safe_write(hit_test + 0x34, 1000.f, float);
+		safe_write(hit_test + 0x14, ray, Ray);
+		safe_write(hit_test + 0x66, true, bool);
+		safe_write(hit_test + 0xB0, get_transform((uintptr_t)target.ent), uintptr_t);
+		safe_write(hit_test + 0x88, target.ent, BaseEntity*);
+		safe_write(hit_test + 0x90, _InverseTransformPoint(get_transform((uintptr_t)target.ent), target.pos), Vector3);
+		safe_write(hit_test + 0x9C, Vector3(0, 0, 0), Vector3);
+		safe_write(hit_test + 0x68, safe_read(baseprojectile + 0x288, uintptr_t), uintptr_t);
+	}
+	else
+	{
+		hit_test->MaxDistance() = 1000.f;
+		hit_test->AttackRay() = ray;
+		hit_test->DidHit() = true;
+		hit_test->HitTransform() = is_player ? trans : (Transform*)get_transform((uintptr_t)target.ent);
+		hit_test->HitEntity() = target.ent;
+		hit_test->HitPoint() = is_player ? trans->InverseTransformPoint(target.pos) : _InverseTransformPoint(get_transform((uintptr_t)target.ent), target.pos);
+		hit_test->HitNormal() = Vector3(0, 0, 0);
+		hit_test->damageProperties() = (DamageProperties*)*reinterpret_cast<uintptr_t*>(baseprojectile + 0x50); //basemelee + damageproperties
+	}
 	StartAttackCooldown(baseprojectile, baseprojectile->repeatDelay());
 
 	return ProcessAttack(baseprojectile, hit_test);
