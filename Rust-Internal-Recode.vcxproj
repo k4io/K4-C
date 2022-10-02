@@ -218,6 +218,7 @@
   <ItemGroup>
     <ClInclude Include="assets\assets.hpp" />
     <ClInclude Include="esp.hpp" />
+    <ClInclude Include="fuzzy.h" />
     <ClInclude Include="gui.h" />
     <ClInclude Include="gui\OnGUI.hpp" />
     <ClInclude Include="hooks.hpp" />

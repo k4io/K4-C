@@ -546,26 +546,26 @@ namespace Gui
 	}
 
 	void combat() {
-		if (im::BeginChild(_("Aimbot"), ImVec2(300, 250), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
+		if (im::BeginChild(_("Aimbot"), ImVec2(235, 200), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Aimbot"));
 			im::Separator();
 
 			im::Checkbox(_("PSilent"), &vars->combat.psilent);
-			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
-			im::Hotkey(_(""), &vars->keybinds.psilent, ImVec2(44, 19));
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
+			im::Hotkey(_(""), &vars->keybinds.psilent, ImVec2(50, 15));
 
 
 			im::SliderFloat(_("Target fov"), &vars->combat.aimbotfov, 1.f, 900.f, _("%.0f"));
-			im::SliderFloat(_("Recoil X"), &vars->combat.recoilx, 0.f, 5.f, _("%.0f"));
-			im::SliderFloat(_("Recoil Y"), &vars->combat.recoily, 0.f, 5.f, _("%.0f"));
+			im::SliderFloat(_("Recoil X"), &vars->combat.recoilx, 0.f, 5.f, _("%.2f"));
+			im::SliderFloat(_("Recoil Y"), &vars->combat.recoily, 0.f, 5.f, _("%.2f"));
 
 			im::Checkbox(_("No spread (quick ban)"), &vars->combat.nospread);
 			im::Checkbox(_("Remove shoot restrictions"), &vars->combat.always_shoot);
 			im::EndChild();
 		}
 		im::SameLine();;
-		if (im::BeginChild(_("Weapon"), ImVec2(300, 420), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
+		if (im::BeginChild(_("Weapon"), ImVec2(235, 330), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Weapon"));
 			im::Separator();
@@ -574,35 +574,35 @@ namespace Gui
 				_("Head\0Body\0Upperbody\0Penis\0Hands\0Legs\0Feet"));
 			im::Checkbox(_("Manipulator"), &vars->combat.manipulator2);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
-			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(44, 19));
+			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(50, 15));
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
 			im::Checkbox(_("Bullet tp"), &vars->combat.bullet_tp);
 			im::Checkbox(_("Fast bullets"), &vars->combat.fast_bullet);
 			im::Checkbox(_("Thick bullets"), &vars->combat.thick_bullet);
-			im::SliderFloat(_("Thickness"), &vars->combat.thickness, 0.1f, 1.f, _("%.3f"), 1.f);
+			im::SliderFloat(_("Thickness"), &vars->combat.thickness, 0.1f, 1.f, _("%.2f"), 1.f);
 			im::Checkbox(_("Autoshoot"), &vars->combat.autoshoot);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
-			im::Hotkey(_("A"), &vars->keybinds.autoshoot, ImVec2(44, 19));
+			im::Hotkey(_("A"), &vars->keybinds.autoshoot, ImVec2(50, 14));
 			im::Checkbox(_("Rapid-fire"), &vars->combat.rapidfire);
 			im::Checkbox(_("Automatic"), &vars->combat.automatic);
 			im::Checkbox(_("Auto-reload"), &vars->combat.always_reload);
 			im::EndChild();
 		}
-		im::SetCursorPosY(im::GetCursorPosY() - 166);
-		if (im::BeginChild(_("Melee"), ImVec2(300, 105), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
+		im::SetCursorPosY(im::GetCursorPosY() - 126);
+		if (im::BeginChild(_("Melee"), ImVec2(235, 122), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Melee"));
 			im::Separator();
 			im::Checkbox(_("Silent melee"), &vars->combat.silent_melee);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
-			im::Hotkey(_("S"), &vars->keybinds.silentmelee, ImVec2(44, 19));
-			im::SliderFloat(_("Range"), &vars->combat.melee_range, 0.1f, 4.00f, _("%.1f"), 0.1f);
+			im::Hotkey(_("S"), &vars->keybinds.silentmelee, ImVec2(50, 14));
+			im::SliderFloat(_("Range"), &vars->combat.melee_range, 1.f, 4.f, _("%.2f"), 0.1f);
 			im::EndChild();
 		}
 
 	}
 	void visual() {
-		if (im::BeginChild(_("Indicators"), ImVec2(300, 170), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
+		if (im::BeginChild(_("Indicators"), ImVec2(235, 170), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Indicators"));
 			im::Separator();
@@ -618,7 +618,7 @@ namespace Gui
 		}
 		im::SameLine();
 		//im::SetCursorPosX(im::GetCursorPosX() + 132);
-		if (im::BeginChild(_("Player ESP"), ImVec2(300, 300), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
+		if (im::BeginChild(_("Player ESP"), ImVec2(235, 170), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Player ESP"));
 			im::Separator();
@@ -639,8 +639,9 @@ namespace Gui
 			im::Checkbox(_("Held item icon"), &vars->visual.spriteitem);
 			im::EndChild();
 		}
-		im::SetCursorPosY(im::GetCursorPosY() - 125);
-		if (im::BeginChild(_("Gameplay"), ImVec2(300, 165), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
+
+		im::SetCursorPosY(im::GetCursorPosY() + 5);
+		if (im::BeginChild(_("Gameplay"), ImVec2(235, 151), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Gameplay"));
 			im::Separator();
@@ -650,15 +651,15 @@ namespace Gui
 			im::Checkbox(_("Crosshair 3"), &vars->visual.crosshair3);
 			im::Checkbox(_("Zoom"), &vars->visual.zoomtoggle);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
-			im::Hotkey(_("Z"), &vars->keybinds.zoom, ImVec2(44, 19));
+			im::Hotkey(_("Z"), &vars->keybinds.zoom, ImVec2(50, 14));
 			im::SliderFloat(_("Zoom fov"), &vars->visual.zoomfov, 1.f, 100.f, _("%.1f"));
 			im::SliderFloat(_("Stars"), &vars->visual.staramount, 1.f, 1000.f, _("%.0f"));
 			im::Checkbox(_("Manipulator angles"), &vars->visual.angles);
 			im::EndChild();
 		}
-		im::SetCursorPosY(im::GetCursorPosY() - 40);
-		im::SetCursorPosX(im::GetCursorPosX() + 308);
-		if (im::BeginChild(_("Chams"), ImVec2(300, 120), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
+		im::SetCursorPosY(im::GetCursorPosY() - 154);
+		im::SetCursorPosX(im::GetCursorPosX() + 243);
+		if (im::BeginChild(_("Chams"), ImVec2(235, 150), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Chams"));
 			im::Separator();
@@ -671,7 +672,7 @@ namespace Gui
 		}
 	}
 	void esp_items() {
-		if (im::BeginChild(_("Resources"), ImVec2(300, 200), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
+		if (im::BeginChild(_("Resources"), ImVec2(235, 330), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Resources"));
 			im::Separator();
@@ -685,7 +686,7 @@ namespace Gui
 		}
 		im::SameLine();
 		//im::SetCursorPosX(im::GetCursorPosX() + 132);
-		if (im::BeginChild(_("World"), ImVec2(300, 200), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
+		if (im::BeginChild(_("World"), ImVec2(235, 330), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("World"));
 			im::Separator();
@@ -703,7 +704,7 @@ namespace Gui
 		}
 	}
 	void misc() {
-		if (im::BeginChild(_("Movement"), ImVec2(300, 320), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
+		if (im::BeginChild(_("Movement"), ImVec2(235, 330), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Movement"));
 			im::Separator();
@@ -715,7 +716,7 @@ namespace Gui
 			im::Checkbox(_("Infinite jump"), &vars->misc.infinite_jump);
 			im::Checkbox(_("Fly-wall"), &vars->misc.flywall);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
-			im::Hotkey(_("F"), &vars->keybinds.flywall, ImVec2(44, 19));
+			im::Hotkey(_("F"), &vars->keybinds.flywall, ImVec2(50, 14));
 			im::Checkbox(_("No collisions"), &vars->misc.no_playercollision);
 			im::Checkbox(_("Spinbot"), &vars->misc.spinbot);
 			im::Checkbox(_("Autofarm"), &vars->misc.autofarm);
@@ -723,7 +724,7 @@ namespace Gui
 		}
 		im::SameLine();
 		//im::SetCursorPosX(im::GetCursorPosX() + 132);
-		if (im::BeginChild(_("Gameplay"), ImVec2(300, 390), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
+		if (im::BeginChild(_("Gameplay"), ImVec2(235, 330), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Gameplay"));
 			im::Separator();
@@ -733,29 +734,29 @@ namespace Gui
 			im::Checkbox(_("Instant revive"), &vars->misc.instant_revive);
 			im::Checkbox(_("Suicide"), &vars->misc.TakeFallDamage);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
-			im::Hotkey(_("S"), &vars->keybinds.suicide, ImVec2(44, 19));
+			im::Hotkey(_("S"), &vars->keybinds.suicide, ImVec2(50, 14));
 			im::Checkbox(_("Longneck"), &vars->misc.eyeoffset);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
-			im::Hotkey(_("L"), &vars->keybinds.neck, ImVec2(44, 19));
-			im::SliderFloat(_("Size"), &vars->misc.PlayerEyes, 1.f, 1.5f, _("%.1f"), 0.1f);
+			im::Hotkey(_("L"), &vars->keybinds.neck, ImVec2(50, 14));
+			im::SliderFloat(_("Size"), &vars->misc.PlayerEyes, 1.f, 1.5f, _("%.2f"), 0.1f);
 			im::Checkbox(_("Auto upgrade"), &vars->misc.auto_upgrade);
 			im::Checkbox(_("Fakelag"), &vars->misc.fake_lag);
 			im::Checkbox(_("Desync on key"), &vars->misc.desync);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
-			im::Hotkey(_("D"), &vars->keybinds.desync_ok, ImVec2(44, 19));
+			im::Hotkey(_("D"), &vars->keybinds.desync_ok, ImVec2(50, 14));
 			im::Checkbox(_("Fake admin"), &vars->misc.admin_mode);
 			im::Checkbox(_("Timescale"), &vars->misc.speedhack);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
-			im::Hotkey(_("T"), &vars->keybinds.timescale, ImVec2(44, 19));
+			im::Hotkey(_("T"), &vars->keybinds.timescale, ImVec2(50, 14));
 			im::Checkbox(_("Silent farm"), &vars->misc.silent_farm);
 			im::EndChild();
 		}
 	}
 	void configs() {
 		//do buttons on left side
-		if (im::BeginChild(_("Listbox"), ImVec2(605, 420), true))
+		if (im::BeginChild(_("Listbox"), ImVec2(480, 330), true))
 		{
-			if (im::ListBoxHeader(_("Configs"), ImVec2(500, 300)))
+			if (im::ListBoxHeader(_("Configs"), ImVec2(475, 130)))
 			{
 				int i = 0;
 				auto s = LI_FIND(getenv)(_("APPDATA"));
@@ -783,17 +784,19 @@ namespace Gui
 		//im::ListBox(_("Configs"), &selected_config, configs_name_list.data(), configs_name_list.size());
 	}
 	void colors() {
-		if (im::BeginChild(_("Players"), ImVec2(300, 445), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
+		if (im::BeginChild(_("Players"), ImVec2(235, 330), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
 			im::Text(_("Players"));
 			im::Separator();
-			if (im::BeginChild(_("Boxes"), ImVec2(282, 90), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
-				im::Text(_("Boxes"));
+			if (im::BeginChild(_("Player"), ImVec2(217, 90), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
+				im::Text(_("Player"));
 				im::Separator();
 				im::ColorEdit4(_("Visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
 				im::ColorEdit4(_("Invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Chams visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Chams invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
 				im::EndChild();
 			}
-			if (im::BeginChild(_("Details"), ImVec2(282, 305), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
+			if (im::BeginChild(_("Details"), ImVec2(217, 200), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
 				im::Text(_("Details"));
 				im::Separator();
 				im::ColorEdit4(_("Name visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
@@ -804,14 +807,12 @@ namespace Gui
 				im::ColorEdit4(_("Flags invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
 				im::ColorEdit4(_("Skeleton visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
 				im::ColorEdit4(_("Skeleton invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Chams visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Chams invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
 				im::EndChild();
 			}
 			im::EndChild();
 		}
 		im::SameLine();
-		if (im::BeginChild(_("UI"), ImVec2(300, 142), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
+		if (im::BeginChild(_("UI"), ImVec2(235, 142), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
 			im::Text(_("UI"));
 			im::Separator();
 			im::ColorEdit4(_("Snapline visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
@@ -820,8 +821,8 @@ namespace Gui
 			im::ColorEdit4(_("Fov invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
 			im::EndChild();
 		}
-		im::SetCursorPos(ImVec2(im::GetCursorPosX() + 308, im::GetCursorPosY() - 300));
-		if (im::BeginChild(_("ESP Items"), ImVec2(300, 296), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
+		im::SetCursorPos(ImVec2(im::GetCursorPosX() + 243, im::GetCursorPosY() - 184));
+		if (im::BeginChild(_("ESP Items"), ImVec2(235, 180), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
 			im::Text(_("ESP Items"));
 			im::Separator();
 			im::ColorEdit4(_("Hemp visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
@@ -841,16 +842,15 @@ namespace Gui
 	void Render()
 	{
 		im::Begin(GUI_NAME, nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-		im::SetWindowSize(ImVec2(625, 516));
 		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
 
 		im::Separator();
-		if (im::Button(_("Combat"),			ImVec2(95, 20))) { selected_tab = 0; }  im::SameLine();	  
-		if (im::Button(_("Visuals"),		ImVec2(95, 20))) { selected_tab = 1; }  im::SameLine();	
-		if (im::Button(_("ESP Items"),		ImVec2(95, 20))) { selected_tab = 2; }  im::SameLine();	  
-		if (im::Button(_("Misc"),			ImVec2(95, 20))) { selected_tab = 3; }  im::SameLine();	  
-		if (im::Button(_("Configs"),		ImVec2(95, 20))) { selected_tab = 4; }  im::SameLine();	
-		if (im::Button(_("Colors"),			ImVec2(95, 20))) { selected_tab = 5; }	
+		if (im::Button(_("Combat"),			ImVec2(73, 20))) { selected_tab = 0; }  im::SameLine();	  
+		if (im::Button(_("Visuals"),		ImVec2(73, 20))) { selected_tab = 1; }  im::SameLine();	
+		if (im::Button(_("ESP Items"),		ImVec2(73, 20))) { selected_tab = 2; }  im::SameLine();	  
+		if (im::Button(_("Misc"),			ImVec2(73, 20))) { selected_tab = 3; }  im::SameLine();	  
+		if (im::Button(_("Configs"),		ImVec2(73, 20))) { selected_tab = 4; }  im::SameLine();	
+		if (im::Button(_("Colors"),			ImVec2(73, 20))) { selected_tab = 5; }	
 		im::Separator();
 		switch (selected_tab)
 		{

@@ -5,10 +5,9 @@
 #include "RenderClass.h"
 #include "esp.hpp"
 
-#if CUSTOM_ICONS
+
 #include "iconscpp.h"
 #include "icons.h"
-#endif
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -28,6 +27,14 @@ void InitImGui()
 	io.LogFilename = nullptr;
 
 	io.MouseDrawCursor = vars->open;
+
+	try {
+		ImFontConfig cfg;
+		io.Fonts->AddFontFromMemoryCompressedTTF(minecraft, mcfontsize, 12.f, &cfg);
+		//io.Fonts->AddFontFromFileTTF(_("RustClient_Data\\font.asset"), 18.f, &cfg);
+		io.Fonts->AddFontDefault(&cfg);
+	}
+	catch (...) {}
 
 #if CUSTOM_ICONS
 	try

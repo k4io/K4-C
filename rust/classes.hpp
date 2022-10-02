@@ -72,7 +72,7 @@ uintptr_t building_grade = il2cpp::value(_("BuildingBlock"), _("grade"));
 
 uintptr_t numprojectiles = il2cpp::value(_("ItemModProjectile"), _("numProjectiles"));
 
-
+uintptr_t damageProperties = il2cpp::value(_("BaseMelee"), _("damageProperties"));
 uintptr_t newVelocity = il2cpp::value(_("PlayerModel"), _("newVelocity"));
 uintptr_t isLocalPlayer = il2cpp::value(_("PlayerModel"), _("isLocalPlayer"));
 
@@ -133,11 +133,14 @@ uintptr_t flying = il2cpp::value(_("PlayerWalkMovement"), _("flying"));
 uintptr_t model = il2cpp::value(_("BaseEntity"), _("model"));
 
 
+class AttackEntity;
+class BaseMelee;
 class BaseProjectile;
 class Transform;
 class BasePlayer;
 class HitTest;
 class ModelState;
+class GameObject;
 class Transform;
 class Item;
 class col;
@@ -214,7 +217,7 @@ static auto ClosestPoint = reinterpret_cast<Vector3(*)(BasePlayer*, Vector3)>(*r
 
 static auto _InverseTransformPoint = reinterpret_cast<Vector3(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
 
-static auto _InverseTransformDirection = reinterpret_cast<Vector3(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformDirection"), 1, _(""), _("UnityEngine"))));
+static auto _InverseTransformDirection = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformDirection"), 1, _(""), _("UnityEngine"))));
 
 static auto get_localToWorldMatrix = reinterpret_cast<VMatrix(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_localToWorldMatrix"), 0, _(""), _("UnityEngine"))));
 
@@ -232,9 +235,9 @@ static auto LookRotation = reinterpret_cast<Vector4(*)(Vector3, Vector3 value)>(
 
 static auto set_rotation = reinterpret_cast<void(*)(Transform*, Vector4 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_rotation"), 1, _(""), _("UnityEngine"))));
 
-static auto StartAttackCooldown = reinterpret_cast<void(*)(BaseProjectile*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AttackEntity"), _("StartAttackCooldown"), 1, _(""), _(""))));
+static auto StartAttackCooldown = reinterpret_cast<void(*)(AttackEntity*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AttackEntity"), _("StartAttackCooldown"), 1, _(""), _(""))));
 
-static auto ProcessAttack = reinterpret_cast<void(*)(BaseProjectile*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("ProcessAttack"), 1, _(""), _(""))));
+static auto ProcessAttack = reinterpret_cast<void(*)(BaseMelee*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("ProcessAttack"), 1, _(""), _(""))));
 
 static auto GetProjectileVelocityScale = reinterpret_cast<float(*)(BaseProjectile*, bool max)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("GetProjectileVelocityScale"), 1, _("getMax"), _(""), 1)));
 
@@ -336,6 +339,7 @@ public:
 float current_time;
 
 void init_bp() {
+	damageProperties = il2cpp::value(_("BaseMelee"), _("damageProperties"));
 	get_center = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_center"), 0, _(""), _(""))));
 	get_max_fwd_speed = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModularCar"), _("GetMaxForwardSpeed"), 0, _(""), _(""))));
 	get_short_prefab_name = reinterpret_cast<System::string(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseNetworkable"), _("get_ShortPrefabName"), 0, _(""), _(""))));
@@ -354,7 +358,7 @@ void init_bp() {
 	get_texture = reinterpret_cast<uintptr_t(*)(uintptr_t sprite)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Sprite"), _("get_texture"), 0, _(""), _("UnityEngine"))));
 	set_name = reinterpret_cast<void(*)(uintptr_t, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("set_name"), 1, _(""), _("UnityEngine"))));;
 	get_gameObject = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_gameObject"), 0, _(""), _("UnityEngine"))));
-	_InverseTransformDirection = reinterpret_cast<Vector3(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformDirection"), 1, _(""), _("UnityEngine"))));
+	_InverseTransformDirection = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformDirection"), 1, _(""), _("UnityEngine"))));
 	LookRotation = reinterpret_cast<Vector4(*)(Vector3, Vector3 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Quaternion"), _("LookRotation"), 2, _(""), _("UnityEngine"))));
 	set_rotation = reinterpret_cast<void(*)(Transform*, Vector4 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_rotation"), 1, _(""), _("UnityEngine"))));
 	set_position = reinterpret_cast<void(*)(Transform*, Vector3 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 1, _(""), _("UnityEngine"))));
@@ -500,11 +504,11 @@ void init_bp() {
 
 	ClosestPoint = reinterpret_cast<Vector3(*)(BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ClosestPoint"), 1, _("position"), _(""), 1)));
 
-	StartAttackCooldown = reinterpret_cast<void(*)(BaseProjectile*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AttackEntity"), _("StartAttackCooldown"), 1, _(""), _(""))));
+	StartAttackCooldown = reinterpret_cast<void(*)(AttackEntity*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AttackEntity"), _("StartAttackCooldown"), 1, _(""), _(""))));
 
 	_InverseTransformPoint = reinterpret_cast<Vector3(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
 
-	ProcessAttack = reinterpret_cast<void(*)(BaseProjectile*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("ProcessAttack"), 1, _(""), _(""))));
+	ProcessAttack = reinterpret_cast<void(*)(BaseMelee*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("ProcessAttack"), 1, _(""), _(""))));
 
 #pragma endregion
 }
@@ -517,8 +521,8 @@ class Component : public Object {
 public:
 	Transform* get_transform() {
 		if (!this) return nullptr;
-		auto off = reinterpret_cast<Transform* (*)(Component*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
-		return off(this);
+		auto off = *reinterpret_cast<uintptr_t* (*)(Component*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
+		return (Transform*)off(this);
 	}
 };
 
@@ -601,7 +605,7 @@ public:
 
 	Vector3 InverseTransformDirection(Vector3 point) {
 		if (!this) return Vector3(0, 0, 0);
-		return _InverseTransformDirection((uintptr_t)(this), point);
+		return _InverseTransformDirection((this), point);
 	}
 };
 
@@ -735,6 +739,45 @@ public:
 	FIELD(_("HitTest"), _("HitPart"), HitPart, UINT);
 	FIELD(_("HitTest"), _("HitMaterial"), HitMaterial, System::string);
 	FIELD(_("HitTest"), _("gameObject"), gameObject, GameObject*);
+
+	void set_hit_transform(Transform* hit_transform) {
+		*reinterpret_cast<Transform**>((uintptr_t)this + 0xB0) = hit_transform;
+	}
+
+	void set_did_hit(bool did_hit) {
+		*reinterpret_cast<bool*>((uintptr_t)this + 0x66) = did_hit;
+	}
+
+	void set_attack_ray(Ray ray) {
+		*reinterpret_cast<Ray*>((uintptr_t)this + 0x14) = ray;
+	}
+
+	void set_best_hit(bool best_hit) {
+		*reinterpret_cast<bool*>((uintptr_t)this + 0x65) = best_hit;
+	}
+
+	void set_max_distance(float max_dist) {
+		*reinterpret_cast<float*>((uintptr_t)this + 0x34) = max_dist;
+	}
+
+	void set_hit_entity(BasePlayer* entity) {
+		*reinterpret_cast<BasePlayer**>((uintptr_t)this + 0x88) = entity;
+	}
+
+	BasePlayer*& get_hit_entity() {
+		return *reinterpret_cast<BasePlayer**>((uintptr_t)this + 0x88);
+	}
+
+	void set_hit_point(Vector3 hit_point) {
+		*reinterpret_cast<Vector3*>((uintptr_t)this + 0x90) = hit_point;
+	}
+
+	void set_hit_normal(Vector3 hit_nromal) {
+		*reinterpret_cast<Vector3*>((uintptr_t)this + 0x9C) = hit_nromal;
+	}
+	void set_damage_properties(uintptr_t damage_properties) {
+		*reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x68) = damage_properties;
+	}
 };
 
 class GatherPropertyEntry {
@@ -781,6 +824,13 @@ class BaseMelee : public AttackEntity {
 public:
 	FIELD(_("BaseMelee"), _("gathering"), gathering, GatherProperties*);
 	FIELD(_("BaseMelee"), _("damageProperties"), damageProperties, DamageProperties*);
+
+
+	bool CanHit(HitTest* ht) {
+		if (!this) return false;
+		auto off = reinterpret_cast<bool (*)(BaseMelee*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("CanHit"), 1, _(""), _(""))));
+		return off(this, ht);
+	}
 };
 
 class Magazine {
@@ -1774,7 +1824,7 @@ public:
 				if (!baseentity)
 					continue;
 
-				auto ent = reinterpret_cast<BasePlayer*>(baseentity);
+				auto ent = reinterpret_cast<BaseEntity*>(baseentity);
 
 				aim_target new_target;
 
@@ -2150,7 +2200,7 @@ public:
 	}
 };
 
-void attack_melee(aim_target target, BaseProjectile* baseprojectile, bool is_player = false) {
+void attack_melee(aim_target target, BaseMelee* melee, bool is_player = false) {
 	if (!target.visible)
 		return;
 
@@ -2159,10 +2209,10 @@ void attack_melee(aim_target target, BaseProjectile* baseprojectile, bool is_pla
 
 	Vector3 local_position = unity::get_camera_pos();
 
-	if (baseprojectile->nextAttackTime() >= get_time())
+	if (melee->nextAttackTime() >= get_time())
 		return;
 
-	if (baseprojectile->timeSinceDeploy() < baseprojectile->deployDelay())
+	if (melee->timeSinceDeploy() < melee->deployDelay())
 		return;
 
 	auto hit_test_class = il2cpp::init_class(_("HitTest"));
@@ -2171,41 +2221,39 @@ void attack_melee(aim_target target, BaseProjectile* baseprojectile, bool is_pla
 
 	HitTest* hit_test = (HitTest*)il2cpp::methods::object_new(hit_test_class);
 	
-
 	Ray ray = Ray(local_position, (target.pos - local_position).Normalized());
 
-	auto trans = is_player ? target.ent->model()->boneTransforms()->get(48) : target.ent->get_transform();
-
-	auto get_transform = reinterpret_cast<uintptr_t (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
+	auto get_transform = reinterpret_cast<Transform * (*)(BaseCombatEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
+	auto trans = is_player ? target.ent->model()->boneTransforms()->get(48) : get_transform(target.ent);
 
 	if (!trans)
 		return;
 
-	if (!is_player)
-	{
-		safe_write(hit_test + 0x34, 1000.f, float);
-		safe_write(hit_test + 0x14, ray, Ray);
-		safe_write(hit_test + 0x66, true, bool);
-		safe_write(hit_test + 0xB0, get_transform((uintptr_t)target.ent), uintptr_t);
-		safe_write(hit_test + 0x88, target.ent, BaseEntity*);
-		safe_write(hit_test + 0x90, _InverseTransformPoint(get_transform((uintptr_t)target.ent), target.pos), Vector3);
-		safe_write(hit_test + 0x9C, Vector3(0, 0, 0), Vector3);
-		safe_write(hit_test + 0x68, safe_read(baseprojectile + 0x288, uintptr_t), uintptr_t);
-	}
-	else
-	{
-		hit_test->MaxDistance() = 1000.f;
-		hit_test->AttackRay() = ray;
-		hit_test->DidHit() = true;
-		hit_test->HitTransform() = is_player ? trans : (Transform*)get_transform((uintptr_t)target.ent);
-		hit_test->HitEntity() = target.ent;
-		hit_test->HitPoint() = is_player ? trans->InverseTransformPoint(target.pos) : _InverseTransformPoint(get_transform((uintptr_t)target.ent), target.pos);
-		hit_test->HitNormal() = Vector3(0, 0, 0);
-		hit_test->damageProperties() = (DamageProperties*)*reinterpret_cast<uintptr_t*>(baseprojectile + 0x50); //basemelee + damageproperties
-	}
-	StartAttackCooldown(baseprojectile, baseprojectile->repeatDelay());
+	hit_test->set_max_distance(1000);
+	hit_test->set_hit_transform(trans);
+	hit_test->set_attack_ray(ray);
+	hit_test->set_did_hit(true);
+	hit_test->set_hit_entity((BasePlayer*)target.ent);
+	hit_test->set_hit_point(trans->InverseTransformPoint(target.pos));
+	hit_test->set_hit_normal(Vector3(0, 0, 0));
+	hit_test->set_damage_properties((uintptr_t)melee->damageProperties());
+	
+	//esp::local_player->console_echo(string::wformat(_(L"[trap]: attack_melee - point: (%d, %d, %d)"), (int)v.x, (int)v.y, (int)v.z));
 
-	return ProcessAttack(baseprojectile, hit_test);
+	//hit_test->MaxDistance() = 1000.f;
+	//hit_test->HitTransform() = trans;
+	//hit_test->AttackRay() = ray;
+	//hit_test->DidHit() = true;
+	//hit_test->HitEntity() = target.ent;
+	//hit_test->HitPoint() = _InverseTransformPoint(trans, target.pos);
+	//hit_test->HitNormal() = Vector3(0, 0, 0);
+	//hit_test->damageProperties() = (DamageProperties*)*reinterpret_cast<uintptr_t*>((uintptr_t)melee + damageProperties); //basemelee + damageproperties
+	
+	StartAttackCooldown(melee, melee->repeatDelay());
+
+	if(melee->CanHit(hit_test))
+		ProcessAttack(melee, hit_test);
+	return;
 }
 
 Vector3 WorldToScreen(Vector3 position)

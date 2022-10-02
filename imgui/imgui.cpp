@@ -955,12 +955,12 @@ ImGuiStyle::ImGuiStyle()
 {
     Alpha                   = 0.8f;             // Global alpha applies to everything in ImGui
     WindowPadding           = ImVec2(8,8);      // Padding within a window
-    WindowRounding          = 5.0f;             // Radius of window corners rounding. Set to 0.0f to have rectangular windows
+    WindowRounding          = 1.0f;             // Radius of window corners rounding. Set to 0.0f to have rectangular windows
     WindowBorderSize        = 1.0f;             // Thickness of border around windows. Generally set to 0.0f or 1.0f. Other values not well tested.
     WindowMinSize           = ImVec2(32,32);    // Minimum window size
     WindowTitleAlign        = ImVec2(0.0f,0.5f);// Alignment for title bar text
     WindowMenuButtonPosition= ImGuiDir_Left;    // Position of the collapsing/docking button in the title bar (left/right). Defaults to ImGuiDir_Left.
-    ChildRounding           = 3.0f;             // Radius of child window corners rounding. Set to 0.0f to have rectangular child windows
+    ChildRounding           = 1.0f;             // Radius of child window corners rounding. Set to 0.0f to have rectangular child windows
     ChildBorderSize         = 1.0f;             // Thickness of border around child windows. Generally set to 0.0f or 1.0f. Other values not well tested.
     PopupRounding           = 0.0f;             // Radius of popup window corners rounding. Set to 0.0f to have rectangular child windows
     PopupBorderSize         = 1.0f;             // Thickness of border around popup or tooltip windows. Generally set to 0.0f or 1.0f. Other values not well tested.
@@ -973,8 +973,8 @@ ImGuiStyle::ImGuiStyle()
     IndentSpacing           = 21.0f;            // Horizontal spacing when e.g. entering a tree node. Generally == (FontSize + FramePadding.x*2).
     ColumnsMinSpacing       = 6.0f;             // Minimum horizontal spacing between two columns. Preferably > (FramePadding.x + 1).
     ScrollbarSize           = 4.0f;            // Width of the vertical scrollbar, Height of the horizontal scrollbar
-    ScrollbarRounding       = 2.0f;             // Radius of grab corners rounding for scrollbar
-    GrabMinSize             = 3.0f;            // Minimum width/height of a grab box for slider/scrollbar
+    ScrollbarRounding       = 0.0f;             // Radius of grab corners rounding for scrollbar
+    GrabMinSize             = 2.0f;            // Minimum width/height of a grab box for slider/scrollbar
     GrabRounding            = 0.0f;             // Radius of grabs corners rounding. Set to 0.0f to have rectangular slider grabs.
     TabRounding             = 1.0f;             // Radius of upper corners of a tab. Set to 0.0f to have rectangular tabs.
     TabBorderSize           = 0.0f;             // Thickness of border around tabs.
@@ -3346,6 +3346,8 @@ const char* const KeyNames[] = {
 
 bool im::Hotkey(const char* label, int* k, const ImVec2& size_arg)
 {
+    ImVec2 nsize = size_arg;
+    nsize.x -= 2; nsize.y -= 2;
     ImGuiWindow* window = im::GetCurrentWindow();
     if (window->SkipItems)
         return false;
@@ -3357,7 +3359,7 @@ bool im::Hotkey(const char* label, int* k, const ImVec2& size_arg)
     const ImGuiID id = window->GetID(label);
     const ImVec2 label_size = im::CalcTextSize(label, NULL, true);
     ImVec2 size = im::CalcItemSize(size_arg, im::CalcItemWidth(), label_size.y + style.FramePadding.y * 2.0f);
-    const ImRect frame_bb(window->DC.CursorPos + ImVec2(label_size.x + style.ItemInnerSpacing.x, 0.0f), window->DC.CursorPos + size);
+    ImRect frame_bb(window->DC.CursorPos + ImVec2(label_size.x + style.ItemInnerSpacing.x, 0.0f), window->DC.CursorPos + size);
     const ImRect total_bb(window->DC.CursorPos, frame_bb.Max);
 
     im::ItemSize(total_bb, style.FramePadding.y);
@@ -3430,7 +3432,8 @@ bool im::Hotkey(const char* label, int* k, const ImVec2& size_arg)
             }
         }
         
-        if (im::IsKeyPressedMap(ImGuiKey_Escape)) {
+        if (im::IsKeyPressedMap(ImGuiKey_Escape)
+            || key == VK_ESCAPE) {
             *k = 0;
             im::ClearActiveID();
         }
@@ -3444,6 +3447,7 @@ bool im::Hotkey(const char* label, int* k, const ImVec2& size_arg)
 
     char buf_display[64] = "none";
 
+    im::RenderFrame(ImVec2(frame_bb.Min.x - 2, frame_bb.Min.y - 2), ImVec2(frame_bb.Max.x + 2, frame_bb.Max.y + 2), im::GetColorU32(ImVec4(0.21f, 0.21f, 0.21f, 1.0f)), true, style.FrameRounding);
     im::RenderFrame(frame_bb.Min, frame_bb.Max, im::GetColorU32(ImVec4(0.41f, 0.41f, 0.41f, 1.0f)), true, style.FrameRounding);
 
     if (*k != 0 && g.ActiveId != id) {
@@ -3453,7 +3457,11 @@ bool im::Hotkey(const char* label, int* k, const ImVec2& size_arg)
         strcpy_s(buf_display, "...");
     }
 
-    const ImRect clip_rect(frame_bb.Min.x, frame_bb.Min.y, frame_bb.Min.x + size.x, frame_bb.Min.y + size.y); // Not using frame_bb.Max because we have adjusted size
+    frame_bb.Min.y -= 4;
+    frame_bb.Min.x += 1;
+    frame_bb.Max.y -= 4;
+    frame_bb.Max.x += 1;
+    const ImRect clip_rect(frame_bb.Min.x, frame_bb.Min.y, frame_bb.Min.x + size.x + 2, frame_bb.Min.y + size.y + 2); // Not using frame_bb.Max because we have adjusted size
     ImVec2 render_pos = frame_bb.Min + style.FramePadding;
     im::RenderTextClipped(frame_bb.Min + style.FramePadding, frame_bb.Max - style.FramePadding, buf_display, NULL, NULL, style.ButtonTextAlign, &clip_rect);
     //RenderTextClipped(frame_bb.Min + style.FramePadding, frame_bb.Max - style.FramePadding, buf_display, NULL, NULL, GetColorU32(ImGuiCol_Text), style.ButtonTextAlign, &clip_rect);
@@ -5567,7 +5575,7 @@ bool im::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
     const bool window_just_created = (window == NULL);
     if (window_just_created)
     {
-        ImVec2 size_on_first_use = (g.NextWindowData.Flags & ImGuiNextWindowDataFlags_HasSize) ? g.NextWindowData.SizeVal : ImVec2(625, 500); // Any condition flag will do since we are creating a new window here.
+        ImVec2 size_on_first_use = (g.NextWindowData.Flags & ImGuiNextWindowDataFlags_HasSize) ? g.NextWindowData.SizeVal : ImVec2(495, 400); // Any condition flag will do since we are creating a new window here.
         window = CreateNewWindow(name, size_on_first_use, flags);
     }
 

@@ -203,5 +203,8 @@
     <ClInclude Include="noimp.h" />
     <ClInclude Include="esp.hpp" />
     <ClInclude Include="RenderClass.h" />
+    <ClInclude Include="fuzzy.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

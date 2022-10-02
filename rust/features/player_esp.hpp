@@ -177,7 +177,7 @@ namespace esp {
 					target.pos = world_position;
 					target.ent = (BasePlayer*)ent;
 					target.visible = true;
-					attack_melee(target, baseprojectile);
+					attack_melee(target, (BaseMelee*)baseprojectile);
 				};
 
 				auto name = *(int*)(entity_class_name);
@@ -258,7 +258,7 @@ namespace esp {
 
 								aim_target target = esp::best_target;
 
-								attack_melee(target, baseprojectile, true);
+								attack_melee(target, (BaseMelee*)baseprojectile, true);
 							}
 						}
 					}

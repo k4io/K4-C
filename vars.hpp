@@ -58,7 +58,7 @@ struct Vars
 		float playerfov = 90.f;
 		bool zoomtoggle = false;
 		float staramount = 350;
-		bool always_day = false;
+		bool always_day = true;
 		float zoomfov = 10.f;
 		bool berry = false;
 		bool offscreen_indicator = false;
