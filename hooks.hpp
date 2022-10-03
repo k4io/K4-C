@@ -1,6 +1,8 @@
 #pragma once
 #include "nine_meter_poggers.hpp"
 
+#include "gui/OnGUI.hpp"
+
 static auto dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
 
 static auto create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
@@ -1044,17 +1046,17 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			return _update((Projectile*)pr);
 	}
 
-	//void hk_performance_update(void* instance) {
-	//	if (wake) {
-	//		__go = il2cpp::methods::object_new(il2cpp::init_class(_("GameObject"), _("UnityEngine")));
-	//		
-	//		create(__go, _(L""));
-	//		add_component(__go, il2cpp::type_object(_(""), _("DevControls")));
-	//		dont_destroy_on_load(__go);
-	//		wake = false;
-	//	}
-	//	PerformanceUI_Update(instance);
-	//}
+	void hk_performance_update(void* instance) {
+		if (wake) {
+			__go = il2cpp::methods::object_new(il2cpp::init_class(_("GameObject"), _("UnityEngine")));
+			
+			create(__go, _(L""));
+			add_component(__go, il2cpp::type_object(_(""), _("DevControls")));
+			dont_destroy_on_load(__go);
+			wake = false;
+		}
+		PerformanceUI_Update(instance);
+	}
 
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
 	{
@@ -1806,5 +1808,76 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		if (vars->misc.spinbot) {
 			state->set_aim_angles(Vector3(100, my_rand() % 999 + -999, 100));
 		}
+	}
+
+	void hk_ddraw_ongui(uintptr_t rcx) {
+		auto current = gui::methods::get_current();
+		auto event_type = gui::methods::get_type(current);
+		if (event_type == rust::classes::EventType::Repaint) {
+			{
+				static int cases = 0;
+				switch (cases) {
+				case 0: { r -= 0.0015f; if (r <= 0) cases += 1; break; }
+				case 1: { g += 0.0015f; b -= 0.0015f; if (g >= 1) cases += 1; break; }
+				case 2: { r += 0.0015f; if (r >= 1) cases += 1; break; }
+				case 3: { b += 0.0015f; g -= 0.0015f; if (b >= 1) cases = 0; break; }
+				default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
+				}
+				const float ScreenWidth = 1920;
+				const float ScreenHeight = 1080;
+				const Vector2 screen_center = Vector2(1920 / 2, 1080 / 2);
+
+				if (esp::local_player)
+				{
+					if ((esp::best_target.ent && esp::best_target.ent->is_alive())
+						&& vars->visual.snapline > 1)
+					{
+						Vector2 start = vars->visual.snapline == 1 ? Vector2(ScreenWidth / 2, 0) :
+							vars->visual.snapline == 2 ? Vector2(ScreenWidth / 2, 540) :
+							vars->visual.snapline == 3 ? Vector2(ScreenWidth / 2, 1080) :
+							Vector2(ScreenWidth / 2, 1080);
+						Vector3 o = WorldToScreen(esp::best_target.pos);
+						if (o.x != 0 && o.y != 0)
+						{
+							if (esp::best_target.visible)
+								gui::line(start, Vector2(o.x, o.y), gui::Color(0, 0.9, 0.2, 1), 0.1f, true);
+							else
+								gui::line(start, Vector2(o.x, o.y), gui::Color(0.9, 0, 0.2, 1), 0.1f, true);
+						}
+					}
+					if (vars->visual.flyhack_indicator) {
+						if (settings::vert_flyhack >= 3.f) {
+							gui::Progbar({ screen_center.x - 300, screen_center.y - 500 },
+								{ 600, 5 },
+								settings::vert_flyhack,
+								settings::vert_flyhack);
+						}
+						else {
+							gui::Progbar({ screen_center.x - 300, screen_center.y - 500 },
+								{ 600, 5 },
+								settings::vert_flyhack,
+								3.f);
+						}
+
+						if (settings::hor_flyhack >= 6.5f) {
+							gui::Progbar({ screen_center.x - 300, screen_center.y - 470 },
+								{ 600, 5 },
+								settings::hor_flyhack,
+								settings::hor_flyhack);
+						}
+						else {
+							gui::Progbar({ screen_center.x - 300, screen_center.y - 470 },
+								{ 600, 5 },
+								settings::hor_flyhack,
+								6.5f);
+						}
+					}
+				}
+
+
+				esp::start();
+			}
+		}
+		return;
 	}
 }

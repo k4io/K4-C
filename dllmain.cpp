@@ -25,7 +25,7 @@ extern DWORD D3DThread();
 bool DllMain(HMODULE hmodule)
 {
 	if (!has_initialized) {
-		CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)D3DThread, 0, 0, 0));
+		//CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)D3DThread, 0, 0, 0));
 		//init cheat?
 		auto s = LI_FIND(getenv)(_("APPDATA"));
 		auto p = s + std::string(_("\\trap"));
@@ -72,13 +72,15 @@ bool DllMain(HMODULE hmodule)
 		has_initialized = true;
 	}
 
-	il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DDraw"), _("UnityEngine"), 0);
-	//il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
-	//il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
+	il2cpp::hook(&hooks::hk_ddraw_ongui, _("OnGUI"), _("DDraw"), _("UnityEngine"), 0);
+	il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
+	il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
 	il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);
 	mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
 	mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);
 	//il2cpp::hook(&hooks::hk_DoHit, _("DoHit"), _("Projectile"), _(""), 3);
+
+
 
 	return true;
 }
