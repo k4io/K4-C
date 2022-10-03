@@ -31,7 +31,7 @@ namespace unity {
 
 	//static auto LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), -1, _(""), _(""))));
 
-	static auto LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), -1, _(""), _(""))));
+	static auto LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), 5, _(""), _(""))));
 	//static auto LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), -1, _(""), _(""))));
 
 	static auto LineOfSightInternal = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightInternal"), -1, _(""), _(""))));
@@ -93,7 +93,7 @@ namespace unity {
 
 		LineOfSight = reinterpret_cast<bool(*)(Vector3, Vector3, int, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSight"), -1, _(""), _(""))));
 
-		LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), -1, _(""), _(""))));
+		LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), 5, _(""), _(""))));
 
 		//GetKey = reinterpret_cast<bool(*)(rust::classes::KeyCode)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("GetKeyInt"), 1, _(""), _("UnityEngine"))));
 
@@ -122,6 +122,7 @@ namespace unity {
 		get_AtmosphereMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("get_AtmosphereMaterial"), 0, _(""), _(""))));
 		get_ClearMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("get_ClearMaterial"), 0, _(""), _(""))));
 		get_CloudMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("get_CloudMaterial"), 0, _(""), _(""))));
+
 		//Spherecast = reinterpret_cast<bool (*)(Vector3, float, Vector3, RaycastHit*, float, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Physics"), _("SphereCast"), 6, _("origin"), _("UnityEngine"), 1)));
 		//Spherecast = reinterpret_cast<bool (*)(Ray, float, float, int)>(/*instead of il2cpp because seems to hate me use static offset*/ mem::game_assembly_base + 35705904);
 	}
@@ -152,14 +153,22 @@ namespace unity {
 	}
 
 	bool is_visible(Vector3 source, Vector3 destination, uintptr_t ent, float p1 = 0.18f) {
-		auto layer = (int)rust::classes::Layers::ProjectileLineOfSightCheck | (int)rust::classes::Layers::Terrain | (int)rust::classes::Layers::z;
-		typedef bool (*AAA)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t);//real rust 0x50F790         //cracked 0x50ED80
+		__try {
+			auto layer = (int)rust::classes::Layers::ProjectileLineOfSightCheck | (int)rust::classes::Layers::Terrain | (int)rust::classes::Layers::z;
+			typedef bool (*AAA)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t);//real rust 0x50F790         //cracked 0x50ED80
 
-		//real rust 0x52D200
-		//alkad rust 0x52C6A0
+			//real rust 0x52D200
+			//alkad rust 0x52C6A0
 
-		return ((AAA)(mem::game_assembly_base + oLineOfSightRadius))(source, destination, rust::classes::Layers(layer), p1, ent)
-			&& ((AAA)(mem::game_assembly_base + oLineOfSightRadius))(destination, source, rust::classes::Layers(layer), p1, ent);
+			return ((AAA)(mem::game_assembly_base + oLineOfSightRadius))(source, destination, rust::classes::Layers(layer), p1, ent)
+				&& ((AAA)(mem::game_assembly_base + oLineOfSightRadius))(destination, source, rust::classes::Layers(layer), p1, ent);
+			//return LineOfSightRadius(source, destination, rust::classes::Layers(layer), p1, ent)
+			//	&& LineOfSightRadius(destination, source, rust::classes::Layers(layer), p1, ent);
+		}
+		__except (false)
+		{
+			return false;
+		}
 	}
 
 	auto camera = unity::get_main_camera();

@@ -17,6 +17,8 @@
 #include "hooks.hpp"
 #include "gui/OnGUI.hpp"
 
+#include "esp.hpp"
+
 #include "gui.h"
 
 bool has_initialized = false, init = false, menuopen = false;
@@ -81,6 +83,11 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	//memu
 	im::NewFrame();
 	try {
+		if (render.NewFrame(pSwapChain))
+		{
+			new_frame();
+		}
+		render.EndFrame();
 		if(vars->open)
 			Gui::Render();
 	} catch(...) {}

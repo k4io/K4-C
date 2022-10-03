@@ -1249,11 +1249,11 @@ namespace gui {
 				}
 
 
-				esp::start();
+				//esp::start();
 			}
 		}
 
-		if (open) {
+		if (false) {
 			{
 				int margin = 3;
 				static int cases = 0;

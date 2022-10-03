@@ -28,6 +28,8 @@ private:
 	IDWriteFactory1* TextEngine;
 	IDWriteTextFormat* TextFormat;
 	ID2D1SolidColorBrush* SolidColor;
+	ID2D1LinearGradientBrush* LinearGradientBrush;
+	ID2D1RadialGradientBrush* RadialGradientBrush;
 
 	//fast get wstring length
 	__forceinline UINT wcslen(const wchar_t* Str)
@@ -136,6 +138,118 @@ public:
 	__forceinline void FillRoundedRectangle(const Vector2& Start, const Vector2& Sz, const D2D1::ColorF& Clr, float Rad)
 	{
 		SolidColor->SetColor(Clr); Canvas->FillRoundedRectangle({ {Start.x, Start.y, Start.x + Sz.x, Start.y + Sz.y}, Rad, Rad }, SolidColor);
+	}
+
+	__forceinline void FillRectangle_GradientLinear(const Vector2& Start, const Vector2& Sz, const D2D1::ColorF& ClrTop, const D2D1::ColorF& ClrBottom)
+	{
+		ID2D1GradientStopCollection* pStops;
+		D2D1_GRADIENT_STOP stops[2];
+		stops[0].color = ClrTop;
+		stops[0].position = 0.f;
+		stops[1].color = ClrBottom;
+		stops[1].position = 1.f;
+		auto hr = Canvas->CreateGradientStopCollection(
+			stops,
+			2,
+			D2D1_GAMMA_2_2,
+			D2D1_EXTEND_MODE_CLAMP,
+			&pStops
+		);
+		if (SUCCEEDED(hr))
+		{
+			hr = Canvas->CreateLinearGradientBrush(
+				D2D1::LinearGradientBrushProperties(
+					D2D1::Point2F(Start.x, Start.y),
+					D2D1::Point2F(Start.x + Sz.x, Start.y + Sz.y)),
+				pStops,
+				&LinearGradientBrush
+			);
+		}
+		Canvas->FillRectangle({ Start.x, Start.y, Start.x + Sz.x, Start.y + Sz.y }, LinearGradientBrush);
+	}
+	__forceinline void FillRoundedRectangle_GradientLinear(const Vector2& Start, const Vector2& Sz, const D2D1::ColorF& ClrTop, const D2D1::ColorF& ClrBottom, float Rad)
+	{
+		ID2D1GradientStopCollection* pStops;
+		D2D1_GRADIENT_STOP stops[2];
+		stops[0].color = ClrTop;
+		stops[0].position = 0.f;
+		stops[1].color = ClrBottom;
+		stops[1].position = 1.f;
+		auto hr = Canvas->CreateGradientStopCollection(
+			stops,
+			2,
+			D2D1_GAMMA_2_2,
+			D2D1_EXTEND_MODE_CLAMP,
+			&pStops
+		);
+		if (SUCCEEDED(hr))
+		{
+			hr = Canvas->CreateLinearGradientBrush(
+				D2D1::LinearGradientBrushProperties(
+					D2D1::Point2F(Start.x, Start.y),
+					D2D1::Point2F(Start.x + Sz.x, Start.y + Sz.y)),
+				pStops,
+				&LinearGradientBrush
+			);
+		}
+		Canvas->FillRoundedRectangle({ { Start.x, Start.y, Start.x + Sz.x, Start.y + Sz.y }, Rad, Rad }, LinearGradientBrush);
+	}
+
+	__forceinline void FillRectangle_GradientRadial(const Vector2& Start, const Vector2& Sz, const D2D1::ColorF& ClrMid, const D2D1::ColorF& ClrOut, float Rad)
+	{
+		ID2D1GradientStopCollection* pStops;
+		D2D1_GRADIENT_STOP stops[2];
+		stops[0].color = ClrMid;
+		stops[0].position = 0.f;
+		stops[1].color = ClrOut;
+		stops[1].position = 1.f;
+		auto hr = Canvas->CreateGradientStopCollection(
+			stops,
+			2,
+			D2D1_GAMMA_2_2,
+			D2D1_EXTEND_MODE_CLAMP,
+			&pStops
+		);
+		if (SUCCEEDED(hr))
+		{
+			hr = Canvas->CreateRadialGradientBrush(
+				D2D1::RadialGradientBrushProperties(
+					D2D1::Point2F((Start.x + (Sz.x / 2), (Start.y + (Sz.y / 2)))),
+					D2D1::Point2F(0, 0),
+					Rad, Rad),
+				pStops,
+				&RadialGradientBrush
+			);
+		}
+		Canvas->FillRectangle({ Start.x, Start.y, Start.x + Sz.x, Start.y + Sz.y }, RadialGradientBrush);
+	}
+	__forceinline void FillRoundedRectangle_GradientRadial(const Vector2& Start, const Vector2& Sz, const D2D1::ColorF& ClrMid, const D2D1::ColorF& ClrOut, float Rad)
+	{
+		ID2D1GradientStopCollection* pStops;
+		D2D1_GRADIENT_STOP stops[2];
+		stops[0].color = ClrMid;
+		stops[0].position = 0.f;
+		stops[1].color = ClrOut;
+		stops[1].position = 1.f;
+		auto hr = Canvas->CreateGradientStopCollection(
+			stops,
+			2,
+			D2D1_GAMMA_2_2,
+			D2D1_EXTEND_MODE_CLAMP,
+			&pStops
+		);
+		if (SUCCEEDED(hr))
+		{
+			hr = Canvas->CreateRadialGradientBrush(
+				D2D1::RadialGradientBrushProperties(
+					D2D1::Point2F((Start.x + (Sz.x / 2), (Start.y + (Sz.y / 2)))),
+					D2D1::Point2F(0, 0),
+					Rad, Rad),
+				pStops,
+				&RadialGradientBrush
+			);
+		}
+		Canvas->FillRoundedRectangle({ { Start.x, Start.y, Start.x + Sz.x, Start.y + Sz.y }, Rad, Rad }, RadialGradientBrush);
 	}
 
 	//text

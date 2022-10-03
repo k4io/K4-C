@@ -69,6 +69,7 @@ struct Vars
 		bool rainbow_chams = false;
 		bool hotbar_esp = false;
 		int hand_chams = 0;
+		int boxtype = 0;
 		bool boxesp = false;
 		bool spriteitem = false;
 		bool snaplines = true;
@@ -199,13 +200,73 @@ struct Vars
 				float visible[3] = { 1, 1, 1 };
 				float invisible[3] = { 1, 1, 1 };
 			}; boxes boxes;
+			struct chams {
+				float visible[3] = { 1, 1, 1 };
+				float invisible[3] = { 1, 1, 1 };
+			}; chams chams;
+
+			struct details {
+				struct name {
+					float visible[3] = { 1, 1, 1 };
+					float invisible[3] = { 1, 1, 1 };
+				}; name name;
+				struct distance {
+					float visible[3] = { 1, 1, 1 };
+					float invisible[3] = { 1, 1, 1 };
+				}; distance distance;
+				struct flags {
+					float visible[3] = { 1, 1, 1 };
+					float invisible[3] = { 1, 1, 1 };
+				}; flags flags;
+				struct skeleton {
+					float visible[3] = { 1, 1, 1 };
+					float invisible[3] = { 1, 1, 1 };
+				}; skeleton skeleton;
+			}; details details;
 		}; players players;
+
 		struct ui {
-			float snapline_v[3] = { 1, 1, 1 };
-			float snapline_i[3] = { 1, 1, 1 };
-			float fov[3] = { 1, 1, 1 };
+			struct snapline {
+				float visible[3] = { 1, 1, 1 };
+				float invisible[3] = { 1, 1, 1 };
+			}; snapline snapline;
+			struct fov {
+				float visible[3] = { 1, 1, 1 };
+				float invisible[3] = { 1, 1, 1 };
+			}; fov fov;
 			float crosshair[3] = { 1, 1, 1 };
 		}; ui ui;
+
+		struct items {
+			struct hemp {
+				float visible[3] = { 1, 1, 1 };
+				float invisible[3] = { 1, 1, 1 };
+			}; hemp hemp;
+			struct stone {
+				float visible[3] = { 1, 1, 1 };
+				float invisible[3] = { 1, 1, 1 };
+			}; stone stone;
+			struct sulfur {
+				float visible[3] = { 1, 1, 1 };
+				float invisible[3] = { 1, 1, 1 };
+			}; sulfur sulfur;
+			struct metal {
+				float visible[3] = { 1, 1, 1 };
+				float invisible[3] = { 1, 1, 1 };
+			}; metal metal;
+			struct stash {
+				float open[3] = { 1, 1, 1 };
+				float closed[3] = { 1, 1, 1 };
+			}; stash stash;
+			struct barrel {
+				float visible[3] = { 1, 1, 1 };
+				float invisible[3] = { 1, 1, 1 };
+			}; barrel barrel;
+			struct animal {
+				float visible[3] = { 1, 1, 1 };
+				float invisible[3] = { 1, 1, 1 };
+			}; animal animal;
+		}; items items;
 	}; colors colors;
 
 	int tab = 0;

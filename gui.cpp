@@ -63,6 +63,8 @@ namespace Gui
 			else if (name == _("fast_bullet")) vars->combat.fast_bullet = std::stoi(value);
 
 			else if (name == _("playeresp")) vars->visual.playeresp = std::stoi(value);
+			else if (name == _("boxtype")) vars->visual.boxtype = std::stoi(value);
+			else if (name == _("hpbar")) vars->visual.hpbar = std::stoi(value);
 			else if (name == _("crosshair1")) vars->visual.crosshair1 = std::stoi(value);
 			else if (name == _("crosshair2")) vars->visual.crosshair2 = std::stoi(value);
 			else if (name == _("crosshair3")) vars->visual.crosshair3 = std::stoi(value);
@@ -239,6 +241,12 @@ namespace Gui
 
 		itoa(vars->visual.playeresp, buffer, 4);
 		str = (std::string(_("playeresp=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->visual.boxtype, buffer, 4);
+		str = (std::string(_("boxtype=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->visual.hpbar, buffer, 4);
+		str = (std::string(_("hpbar=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
 		itoa(vars->visual.crosshair1, buffer, 4);
 		str = (std::string(_("crosshair1=")) + std::string(buffer) + _("\n"));
@@ -633,9 +641,11 @@ namespace Gui
 			im::Checkbox(_("Weapon"), &vars->visual.weaponesp);
 			im::Checkbox(_("Hotbar"), &vars->visual.hotbar_esp);
 			im::Checkbox(_("Skeleton"), &vars->visual.skeleton);
-			im::Checkbox(_("Full box"), &vars->visual.full_box);
-			im::Checkbox(_("Corner box"), &vars->visual.corner_box);
-			im::Checkbox(_("3D Cube"), &vars->visual.cube);
+			im::Combo(_("Box type"), &vars->visual.boxtype,
+				_("None\0Full\0Corner\03D Cube"));
+			//im::Checkbox(_("Full box"), &vars->visual.full_box);
+			//im::Checkbox(_("Corner box"), &vars->visual.corner_box);
+			//im::Checkbox(_("3D Cube"), &vars->visual.cube);
 			im::Checkbox(_("Crosshair name"), &vars->visual.midhealth);
 			im::Checkbox(_("Crosshair hp"), &vars->visual.midname);
 			im::Checkbox(_("Sleeper"), &vars->visual.sleeper_esp);
@@ -796,21 +806,21 @@ namespace Gui
 				im::Separator();
 				im::ColorEdit4(_("Visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
 				im::ColorEdit4(_("Invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Chams visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Chams invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Chams visible"), vars->colors.players.chams.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Chams invisible"), vars->colors.players.chams.visible, ImGuiColorEditFlags_NoInputs);
 				im::EndChild();
 			}
 			if (im::BeginChild(_("Details"), ImVec2(217, 200), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
 				im::Text(_("Details"));
 				im::Separator();
-				im::ColorEdit4(_("Name visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Name invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Distance visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Distance invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Flags visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Flags invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Skeleton visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Skeleton invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Name visible"), vars->colors.players.details.name.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Name invisible"), vars->colors.players.details.name.invisible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Distance visible"),	vars->colors.players.details.distance.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Distance invisible"), vars->colors.players.details.distance.invisible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Flags visible"), vars->colors.players.details.flags.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Flags invisible"), vars->colors.players.details.flags.invisible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Skeleton visible"),	vars->colors.players.details.skeleton.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Skeleton invisible"), vars->colors.players.details.skeleton.invisible, ImGuiColorEditFlags_NoInputs);
 				im::EndChild();
 			}
 			im::EndChild();
@@ -819,26 +829,26 @@ namespace Gui
 		if (im::BeginChild(_("UI"), ImVec2(235, 142), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
 			im::Text(_("UI"));
 			im::Separator();
-			im::ColorEdit4(_("Snapline visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Snapline invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Fov visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Fov invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Snapline visible"),	vars->colors.ui.snapline.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Snapline invisible"), vars->colors.ui.snapline.invisible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Fov visible"),		vars->colors.ui.fov.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Fov invisible"),		vars->colors.ui.fov.invisible, ImGuiColorEditFlags_NoInputs);
 			im::EndChild();
 		}
 		im::SetCursorPos(ImVec2(im::GetCursorPosX() + 243, im::GetCursorPosY() - 184));
 		if (im::BeginChild(_("ESP Items"), ImVec2(235, 180), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
 			im::Text(_("ESP Items"));
 			im::Separator();
-			im::ColorEdit4(_("Hemp visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Hemp invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Stone visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Stone invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Sulfur visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Sulfur invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Metal visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Metal invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Stash (closed)"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Stash (open)"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Hemp visible"),		vars->colors.items.hemp.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Hemp invisible"),		vars->colors.items.hemp.invisible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Stone visible"),		vars->colors.items.stone.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Stone invisible"),	vars->colors.items.stone.invisible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Sulfur visible"),		vars->colors.items.sulfur.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Sulfur invisible"),	vars->colors.items.sulfur.invisible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Metal visible"),		vars->colors.items.metal.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Metal invisible"),	vars->colors.items.metal.invisible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Stash (closed)"),		vars->colors.items.stash.closed, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Stash (open)"),		vars->colors.items.stash.open, ImGuiColorEditFlags_NoInputs);
 			im::EndChild();
 		}
 	}

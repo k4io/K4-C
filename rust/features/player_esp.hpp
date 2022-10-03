@@ -24,7 +24,7 @@ namespace esp {
 	std::vector<aim_target> visibleplayerswithin300m = {};
 
 	struct bounds_t {
-		float left, right, top, bottom;
+		float left, right, top, bottom, center;
 	};
 
 	struct rust_str
@@ -193,6 +193,8 @@ namespace esp {
 			if (tag == 6)
 			{
 				BasePlayer* entity = (BasePlayer*)ent;
+
+				
 				auto hit_player = [&]() {
 					auto Item = esp::local_player->GetActiveItem();
 					if (Item) {

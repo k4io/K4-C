@@ -170,7 +170,7 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 		}
 		//else if (settings.AimKey.get()) {
 
-		for (int val = 0; val < 720; val += 20)
+		for (int val = 0; val < 720; val += 10)
 		{
 			float DegreeX = cos(val) * maxDist;
 			float DegreeZ = sin(val) * maxDist;
