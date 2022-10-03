@@ -1186,6 +1186,73 @@ namespace gui {
 		fill_box(rust::classes::Rect{ 10, 20, 81, 3 }, rgba(249.f, 130.f, 109.f, 255));
 		gui::Label(rust::classes::Rect{ 12, 4, 80, 20 }, _(L"trap.sh"), gui::Color(1, 1, 1, 1), true, 12);
 
+		//esp
+		if (event_type == rust::classes::EventType::Repaint) {
+			{
+				static int cases = 0;
+				switch (cases) {
+				case 0: { r -= 0.0015f; if (r <= 0) cases += 1; break; }
+				case 1: { g += 0.0015f; b -= 0.0015f; if (g >= 1) cases += 1; break; }
+				case 2: { r += 0.0015f; if (r >= 1) cases += 1; break; }
+				case 3: { b += 0.0015f; g -= 0.0015f; if (b >= 1) cases = 0; break; }
+				default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
+				}
+				const float ScreenWidth = 1920;
+				const float ScreenHeight = 1080;
+				const Vector2 screen_center = Vector2(1920 / 2, 1080 / 2);
+
+				if (esp::local_player)
+				{
+					if ((esp::best_target.ent && esp::best_target.ent->is_alive())
+						&& vars->visual.snapline > 1)
+					{
+						Vector2 start = vars->visual.snapline == 1 ? Vector2(ScreenWidth / 2, 0) :
+							vars->visual.snapline == 2 ? Vector2(ScreenWidth / 2, 540) :
+							vars->visual.snapline == 3 ? Vector2(ScreenWidth / 2, 1080) :
+							Vector2(ScreenWidth / 2, 1080);
+						Vector3 o = WorldToScreen(esp::best_target.pos);
+						if (o.x != 0 && o.y != 0)
+						{
+							if (esp::best_target.visible)
+								gui::line(start, Vector2(o.x, o.y), gui::Color(0, 0.9, 0.2, 1), 0.1f, true);
+							else
+								gui::line(start, Vector2(o.x, o.y), gui::Color(0.9, 0, 0.2, 1), 0.1f, true);
+						}
+					}
+					if (vars->visual.flyhack_indicator) {
+						if (settings::vert_flyhack >= 3.f) {
+							gui::Progbar({ screen_center.x - 300, screen_center.y - 500 },
+								{ 600, 5 },
+								settings::vert_flyhack,
+								settings::vert_flyhack);
+						}
+						else {
+							gui::Progbar({ screen_center.x - 300, screen_center.y - 500 },
+								{ 600, 5 },
+								settings::vert_flyhack,
+								3.f);
+						}
+
+						if (settings::hor_flyhack >= 6.5f) {
+							gui::Progbar({ screen_center.x - 300, screen_center.y - 470 },
+								{ 600, 5 },
+								settings::hor_flyhack,
+								settings::hor_flyhack);
+						}
+						else {
+							gui::Progbar({ screen_center.x - 300, screen_center.y - 470 },
+								{ 600, 5 },
+								settings::hor_flyhack,
+								6.5f);
+						}
+					}
+				}
+
+
+				esp::start();
+			}
+		}
+
 		if (open) {
 			{
 				int margin = 3;
