@@ -1186,7 +1186,7 @@ namespace gui {
 		fill_box(rust::classes::Rect{ 10, 20, 81, 3 }, rgba(249.f, 130.f, 109.f, 255));
 		gui::Label(rust::classes::Rect{ 12, 4, 80, 20 }, _(L"trap.sh"), gui::Color(1, 1, 1, 1), true, 12);
 
-		if (false) {
+		if (open) {
 			{
 				int margin = 3;
 				static int cases = 0;
