@@ -1121,16 +1121,20 @@ namespace gui {
 
 	Vector2 window_position = { 650, 200 };
 	Vector2 lmp = { 650, 200 };
+
+	void InGameOnGui(uintptr_t rcx)
+	{
+		return;
+	}
+
+	bool b_init = false;
 	void OnGUI(uintptr_t rcx)
 	{
 		tab_size = Vector2(102, 35);
-		init();
-
-		float t = 0.0f;
-
-		if (esp::local_player)
-			t = esp::local_player->lastSentTickTime();
-
+		if (!b_init) {
+			init();
+			b_init = true;
+		}
 		if (opacity < 255.0f)
 			opacity += 2.f;
 
@@ -1190,30 +1194,8 @@ namespace gui {
 				const float ScreenHeight = 1080;
 				const Vector2 screen_center = Vector2(1920 / 2, 1080 / 2);
 
-
 				if (esp::local_player)
 				{
-					float bars = 0;
-					//if (vars->visual.desync_indicator)
-					//{
-					//	Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, vars->desyncTime, 1.0f);
-					//}
-					//if (vars->visual.speedhack_indicator)
-					//{
-					//	Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, settings::speedhack, 1.0f);
-					//}
-					////put extra gui things here
-					//auto held = esp::local_player->GetActiveItem();
-					//if (vars->combat.always_reload)
-					//{
-					//	if (held->heldEntity())
-					//	{
-					//		auto b = held->heldEntity();
-					//		auto r = esp::rl_time;
-					//		if (settings::time_since_last_shot < r)
-					//			Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, settings::time_since_last_shot, (r - 0.2f));
-					//	}
-					//}
 					if ((esp::best_target.ent && esp::best_target.ent->is_alive())
 						&& vars->visual.snapline > 1)
 					{
@@ -1230,11 +1212,6 @@ namespace gui {
 								gui::line(start, Vector2(o.x, o.y), gui::Color(0.9, 0, 0.2, 1), 0.1f, true);
 						}
 					}
-
-					//if (vars->visual.draw_fov) {
-					//	esp::draw_target_fov(col(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1), Vector2(ScreenWidth / 2, ScreenHeight / 2), vars->combat.aimbotfov);
-					//}
-
 					if (vars->visual.flyhack_indicator) {
 						if (settings::vert_flyhack >= 3.f) {
 							Progbar({ screen_center.x - 300, screen_center.y - 500 },
@@ -1263,6 +1240,7 @@ namespace gui {
 						}
 					}
 				}
+
 
 				esp::start();
 			}
@@ -2062,8 +2040,6 @@ namespace esp
 			Shader* shader = 0;
 			switch (vars->visual.shader)
 			{
-			case 0:
-				break;
 			case 1:
 				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
 				break;
@@ -2078,14 +2054,14 @@ namespace esp
 				break;
 			}
 
-			//if (vars->visual.shader == 6
-			//	|| vars->visual.hand_chams == 4)
+			//if (vars->visual.shader == 5
+			//	|| vars->visual.hand_chams == 3)
 			//{
 			//	if(!unity::galaxy_material)
-			//		unity::galaxy_material = unity::LoadAsset(unity::galaxy_bundle, _(L"GalaxyMaterial_10"), unity::GetType(_("UnityEngine"), _("Material")));
+			//		unity::galaxy_material = unity::LoadAsset(unity::galaxy_bundle, _(L"GalaxyMaterial_15"), unity::GetType(_("UnityEngine"), _("Material")));
 			//}
 
-			if ((!shader /* && !unity::galaxy_material*/) && vars->visual.hand_chams < 1) return;
+			if ((!shader && !unity::galaxy_material) && vars->visual.hand_chams < 1) return;
 
 			static int cases = 0;
 			switch (cases) {
@@ -2096,7 +2072,7 @@ namespace esp
 			default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
 			}
 
-			if (vars->visual.hand_chams > 1
+			if (vars->visual.hand_chams >= 1
 				&& ent->is_local_player()) {
 				auto model = gui::methods::get_activemodel();
 				auto renderers = ((Networkable*)model)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
@@ -2128,24 +2104,25 @@ namespace esp
 							material->SetColor(_(L"_Color"), col(r, g, b, 0.5));
 							break;
 						}
-						//case 4:
-						//{
-						//	if (unity::galaxy_material && material != unity::galaxy_material)
-						//	{
-						//		//unity::set_shader(material, unity::space_material);
-						//		//auto s = FindShader(System::string(_(L"Standard")));
-						//		//unity::set_shader(unity::galaxy_material, s);
-						//		set_material(renderer, unity::galaxy_material);
-						//		SetInt(unity::galaxy_material, _(L"_ZTest"), 8);
-						//	}
-						//	break;
-						//}
+						case 3:
+						{
+							if (unity::galaxy_material)
+							{
+								//unity::set_shader(material, unity::space_material);
+								//auto s = FindShader(System::string(_(L"Standard")));
+								//unity::set_shader(unity::galaxy_material, s);
+								//set_material((uintptr_t)renderer, unity::galaxy_material);
+								renderer->SetMaterial((Material*)unity::galaxy_material);
+								SetInt(unity::galaxy_material, _(L"_ZTest"), 8);
+							}
+							break;
+						}
 						}
 					}
 				}
 			}
 
-			if (vars->visual.shader > 1 && shader) {
+			if (vars->visual.shader >= 1 && (shader || unity::galaxy_material)) {
 				uintptr_t chams_shader = 0;
 
 				static int cases = 0;
@@ -2168,10 +2145,12 @@ namespace esp
 					if (!renderer) continue;
 					auto material = renderer->GetMaterial();
 					if (!material) continue;
-					if (shader)
+					if (shader || (vars->visual.shader >= 5 && unity::galaxy_material))
 					{
 						if (shader != material->GetShader()) {
-							material->SetShader(shader);
+							if (vars->visual.shader >= 5 && unity::galaxy_material)
+								renderer->SetMaterial((Material*)unity::galaxy_material);
+							else material->SetShader(shader);
 						}
 						else
 						{
@@ -2208,6 +2187,8 @@ namespace esp
 
 	void draw_player(BasePlayer* ent, bool is_npc)
 	{
+		if (!ent)
+			return;
 		if (!local_player)
 			return;
 
@@ -2381,6 +2362,8 @@ namespace esp
 
 				gui::vertical_line(Vector2{ bounds.left, bounds.top }, wid, clr);
 				gui::vertical_line(Vector2{ bounds.right, bounds.top }, wid, clr);
+				gui::vertical_line(Vector2{ bounds.left + 1, bounds.top }, wid, clr);
+				gui::vertical_line(Vector2{ bounds.right + 1, bounds.top }, wid, clr);
 
 				gui::vertical_line(Vector2{ bounds.left, bounds.bottom }, -(wid), clr);
 				gui::vertical_line(Vector2{ bounds.right, bounds.bottom }, -(wid), clr);
@@ -2552,6 +2535,8 @@ namespace esp
 					gui::line(frontBottomLeft_2d, backBottomLeft_2d, clr, wid);
 				}
 			}
+
+#pragma region healthbars
 			//     health bar   
 			const auto cur_health = ent->health();
 			const auto max_health = (is_npc ? ent->maxHealth() : 100);
@@ -2560,16 +2545,18 @@ namespace esp
 				HSV((health_pc * .25f), 1, .875f * 1);
 
 			const auto     height = (bounds.bottom - bounds.top) * health_pc;
-			if (vars->visual.bottomhealth) {
+			switch (vars->visual.hpbar)
+			{
+			case 1:
 				gui::fill_box(rust::classes::Rect(bounds.left, bounds.bottom + 6, box_width + 1, 4), gui::Color(0, 0, 0, 120));
 				gui::fill_box(rust::classes::Rect(bounds.left + 1, bounds.bottom + 7, ((box_width / max_health) * cur_health) - 1, 2), health_color);
-				//gui::Label(rust::classes::Rect{ bounds.left, bounds.bottom + 10, box_width, box_width / 2 }, il2cpp::methods::new_string(string::format(("%.f"), cur_health)), gui::Color(255, 255, 255, 220), false, box_width / 3);
-				//HEALTH NUMBER UNDER BAR ^^^^^^^^^^^^^ LAGGY
-			}
-			if (vars->visual.sidehealth) {
+				break;
+			case 2:
 				gui::fill_box(rust::classes::Rect(bounds.left - 7, bounds.top - 1, 4, box_height + 3), gui::Color(0, 0, 0, 120));
 				gui::fill_box(rust::classes::Rect(bounds.left - 6, bounds.top + box_height - height + 1, 2, height), health_color);
+				break;
 			}
+#pragma endregion
 
 			if (player_weapon)
 			{
@@ -2600,7 +2587,6 @@ namespace esp
 					}
 				}
 			}
-
 
 			if (vars->visual.skeleton)
 			{
@@ -2781,6 +2767,7 @@ namespace esp
 			if (name)
 			{
 				auto Transform = ent->model()->boneTransforms()->get(48);
+				if (!Transform) return;
 
 				auto position = Transform->get_position();
 
@@ -2810,16 +2797,16 @@ namespace esp
 					if (vars->visual.distance)
 					{
 						auto nstr = string::wformat(_(L"[%dm]"), (int)distance);
-						gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 4.f, 79.f + half * 2 + 80.f , 30 }, nstr, gui::Color(0, 0, 0, 120), true, 10.5);
-						gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 5.f, 80.f + half * 2 + 80.f , 30 }, nstr, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
+						gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.bottom + 1.f, 79.f + half * 2 + 80.f , 30 }, nstr, gui::Color(0, 0, 0, 120), true, 10.5);
+						gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.bottom, 80.f + half * 2 + 80.f , 30 }, nstr, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
 					}
 					//if (vars->visual.distance)
 					//	nw = string::wformat(_(L"%s\n%d"), _(L""), name, (int)distance);
 					//else
 					//	nw = string::wformat(_(L"%s"), _(L""), name);
 
-					gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.top - 23.f, 79.f + half * 2 + 80.f , 30 }, name, gui::Color(0, 0, 0, 120), true, 10.5);
-					gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.top - 24.f, 80.f + half * 2 + 80.f , 30 }, name, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
+					gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.top - 23.f, 79.f + half * 2 + 80.f , 30 }, name, gui::Color(0, 0, 0, 120), true, 10.5);
+					gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.top - 24.f, 80.f + half * 2 + 80.f , 30 }, name, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
 				}
 				// PLAYER NAME
 			}

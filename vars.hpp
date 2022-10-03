@@ -111,6 +111,7 @@ struct Vars
 		bool cube = false;
 		bool box3d = false;
 		bool bottomhealth = false;
+		int hpbar = 0;
 		int snapline = 0;
 		bool sidehealth = false;
 		bool skeleton = false;

@@ -1473,6 +1473,12 @@ public:
 		auto off = reinterpret_cast<Material*(*)(Renderer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("get_material"), 0, _(""), _("UnityEngine"))));
 		return off(this);
 	}
+	
+	void SetMaterial(Material* m) {
+		if (!this) return;
+		auto off = reinterpret_cast<void(*)(Renderer*, Material*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("set_material"), 0, _(""), _("UnityEngine"))));
+		return off(this, m);
+	}
 };
 
 class SkinnedMultiMesh : public MonoBehaviour {

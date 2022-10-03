@@ -1104,7 +1104,7 @@ namespace misc
 			//player_velocity = Vector3(wv.x, 0, wv.z);
 
 
-			while (simulations < 300) {
+			while (simulations < 50) {
 				travel_t = 0.f;
 				auto pos = rpc_position;
 				auto origin = pos;
@@ -1181,7 +1181,7 @@ namespace misc
 
 				travel_t = 0.f;
 
-				while (simulations < 1200) {
+				while (simulations < 100) {
 					path.clear();
 					auto pos = rpc_position;
 					auto origin = pos;

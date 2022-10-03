@@ -187,9 +187,9 @@ namespace hooks {
 						const auto TOD_Stars = *reinterpret_cast<uintptr_t*>(tod_sky + 0x70);
 						if (vars->visual.always_day) {
 							*(float*)(TOD_Night + 0x50) = 4.f;
-							*(float*)(TOD_Night + 0x54) = 1.f;
-							*(float*)(TOD_Day + 0x50) = 1.f;
-							*(float*)(TOD_Day + 0x54) = 1.f;
+							*(float*)(TOD_Night + 0x54) = 2.f;
+							*(float*)(TOD_Day + 0x50) = 2.f;
+							*(float*)(TOD_Day + 0x54) = 2.f;
 							*(float*)(TOD_Stars + 0x14) = vars->visual.staramount;
 						}
 
@@ -813,7 +813,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 	void hk_playerwalkmovement_ClientInput(PlayerWalkMovement* player_walk_movement, uintptr_t inputstate, ModelState* model_state) {
 
-		if (player_walk_movement) {
+		if (player_walk_movement && inputstate && model_state) {
 			orig::playerwalkmovement_client_input(player_walk_movement, inputstate, model_state);
 			Vector3 vel = player_walk_movement->get_TargetMovement();
 			auto loco = esp::local_player;
@@ -843,76 +843,78 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					}
 				}
 
-				misc::cLastTickEyePos = esp::local_player->eyes()->get_position();//get_transform(esp::local_player)->get_bone_position();//baseplayer->eyes()->get_position();
-				misc::cLastTickPos = esp::local_player->get_transform()->get_position();//_get_transform(esp::local_player)->get_position();//get_transform(esp::local_player)->get_bone_position();//baseplayer->eyes()->get_position();
-				misc::ticks.AddPoint(misc::cLastTickPos);
-				//misc::ServerUpdate(misc::tickDeltaTime, esp::local_player);
-				misc::ServerUpdate(get_deltaTime(), esp::local_player);
+				if (loco->get_transform())
+				{
+					misc::cLastTickEyePos = loco->eyes()->get_position();//get_transform(esp::local_player)->get_bone_position();//baseplayer->eyes()->get_position();
+					misc::cLastTickPos = loco->get_transform()->get_position();//_get_transform(esp::local_player)->get_position();//get_transform(esp::local_player)->get_bone_position();//baseplayer->eyes()->get_position();
+					misc::ticks.AddPoint(misc::cLastTickPos);
+					misc::ServerUpdate(get_deltaTime(), loco);
+				}
 			}
 			else if (!loco || loco->is_sleeping())
 			{
 				settings::vert_flyhack = 0.f; settings::hor_flyhack = 0.f;
 			}
 
-			set_sprinting(model_state, true);
-			flying = player_walk_movement->get_flying();
-
-			if (vars->misc.silentwalk && vars->keybinds.silentwalk) {
-				set_onLadder(model_state, true);
-			}
-			else set_onLadder(model_state, false);
-
-			if (vars->misc.interactive_debug)
-				model_state->set_flag(rust::classes::ModelState_Flag::Mounted);
-
-			model_state->remove_flag(rust::classes::ModelState_Flag::Flying);
-
-			float max_speed = (player_walk_movement->get_swimming() || player_walk_movement->get_ducking() > 0.5) ? 1.7f : 5.5f;
-			if (vars->misc.always_sprint) {
-				if (vel.length() > 0.f) {
-					Vector3 target_vel = Vector3(vel.x / vel.length() * max_speed, vel.y, vel.z / vel.length() * max_speed);
-					player_walk_movement->set_TargetMovement(target_vel);
-				}
-			}
-
-			if (unity::GetKeyDown(rust::classes::KeyCode::Space)
-				&& vars->misc.infinite_jump)
+			if (loco && !loco->is_sleeping() && vars->desyncTime < 0.f)
 			{
-				misc::autobot::do_jump(player_walk_movement, model_state);
-			}
+				set_sprinting(model_state, true);
+				flying = player_walk_movement->get_flying();
 
-			auto wpn = esp::local_player->GetActiveItem();
-			auto held = wpn ? wpn->GetHeldEntity<BaseProjectile>() : nullptr;
-			if (vars->combat.always_reload
-				&& held)
-			{
-				misc::time_since_last_shot = (get_fixedTime() - misc::fixed_time_last_shot);
-				vars->time_since_last_shot = misc::time_since_last_shot;
-				if (misc::just_shot && (misc::time_since_last_shot > 0.2f))
-				{
-					held->ServerRPC(_(L"StartReload"));
-					esp::local_player->console_echo(_(L"[trap]: ClientInput - starting reload"));
-					//esp::local_player->SendSignalBroadcast(rust::classes::Signal::Reload); //does this cause animation? YES
-					misc::just_shot = false;
+				if (vars->misc.silentwalk && vars->keybinds.silentwalk) {
+					set_onLadder(model_state, true);
 				}
-				float reloadtime = *reinterpret_cast<float*>((uintptr_t)held + 0x2B8);//held->reloadTime();
-				vars->reload = reloadtime;
+				else set_onLadder(model_state, false);
 
-				if (misc::time_since_last_shot > reloadtime //-10% for faster reloads than normal >:)
-					&& !misc::did_reload)
+				if (vars->misc.interactive_debug)
+					model_state->set_flag(rust::classes::ModelState_Flag::Mounted);
+
+				model_state->remove_flag(rust::classes::ModelState_Flag::Flying);
+
+				float max_speed = (player_walk_movement->get_swimming() || player_walk_movement->get_ducking() > 0.5) ? 1.7f : 5.5f;
+				if (vars->misc.always_sprint) {
+					if (vel.length() > 0.f) {
+						Vector3 target_vel = Vector3(vel.x / vel.length() * max_speed, vel.y, vel.z / vel.length() * max_speed);
+						player_walk_movement->set_TargetMovement(target_vel);
+					}
+				}
+
+				if (unity::GetKeyDown(rust::classes::KeyCode::Space)
+					&& vars->misc.infinite_jump)
 				{
-					esp::local_player->console_echo(_(L"[trap]: ClientInput - finishing reload"));
-					held->ServerRPC(_(L"Reload"));
-					misc::did_reload = true;
+					misc::autobot::do_jump(player_walk_movement, model_state);
+				}
+
+				auto wpn = esp::local_player->GetActiveItem();
+				auto held = wpn ? wpn->GetHeldEntity<BaseProjectile>() : nullptr;
+				if (vars->combat.always_reload
+					&& held)
+				{
+					misc::time_since_last_shot = (get_fixedTime() - misc::fixed_time_last_shot);
+					vars->time_since_last_shot = misc::time_since_last_shot;
+					if (misc::just_shot && (misc::time_since_last_shot > 0.2f))
+					{
+						held->ServerRPC(_(L"StartReload"));
+						esp::local_player->console_echo(_(L"[trap]: ClientInput - starting reload"));
+						//esp::local_player->SendSignalBroadcast(rust::classes::Signal::Reload); //does this cause animation? YES
+						misc::just_shot = false;
+					}
+					float reloadtime = *reinterpret_cast<float*>((uintptr_t)held + 0x2B8);//held->reloadTime();
+					vars->reload = reloadtime;
+
+					if (misc::time_since_last_shot > reloadtime //-10% for faster reloads than normal >:)
+						&& !misc::did_reload)
+					{
+						esp::local_player->console_echo(_(L"[trap]: ClientInput - finishing reload"));
+						held->ServerRPC(_(L"Reload"));
+						misc::did_reload = true;
+						misc::time_since_last_shot = 0;
+					}
+				}
+				else
+				{
 					misc::time_since_last_shot = 0;
 				}
-			}
-			else
-			{
-				misc::time_since_last_shot = 0;
-			}
-			if (loco)
-			{
 				if (!loco->is_sleeping()) {
 					if (vars->misc.autofarm)
 					{
@@ -928,62 +930,63 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						misc::node.steps = 0;
 					}
 				}
-			}
 
-			//maybe find max amount of velocity we can have before speedhack violations kick in?
-			if (vars->misc.antispeed)
-			{
-				Vector3 current_velocity = player_walk_movement->get_TargetMovement();
-
-				float mul = misc::speedhackDistance + 4;
-
-				if (mul > .3f && misc::speedhackCooldownEnd < get_fixedTime())//start cooldown
+				//maybe find max amount of velocity we can have before speedhack violations kick in?
+				if (vars->misc.antispeed)
 				{
-					misc::lastSpeedhackReset = get_fixedTime();
-					misc::speedhackCooldownEnd = get_fixedTime() + 10.f;
-				}
-				else //still on cooldown
-				{
-					auto timeleft = misc::speedhackCooldownEnd - get_fixedTime(); //will be 10
-					//auto remainder = (timeleft - 10.f) < 0 ? 0 : (timeleft - 10.f);
-					auto remainder = timeleft > 10 ? 10 : (timeleft < 0 ? 0 : timeleft);
-					Vector3 new_vel = current_velocity;
-					float fslowdown = (mul / 1.f);
-					if (mul > .3f)
+					Vector3 current_velocity = player_walk_movement->get_TargetMovement();
+
+					float mul = misc::speedhackDistance + 4;
+
+					if (mul > .3f && misc::speedhackCooldownEnd < get_fixedTime())//start cooldown
 					{
-						//auto fslowdown = (mul / 3.f);//percent to slow down
-						fslowdown = (mul / 0.5f);//percent to slow down
-						std::clamp(fslowdown, 0.f, 1.f);
-						Vector3 new_vel = Vector3(current_velocity.x * (2.f - fslowdown), current_velocity.y, current_velocity.z * (2.f - fslowdown));
+						misc::lastSpeedhackReset = get_fixedTime();
+						misc::speedhackCooldownEnd = get_fixedTime() + 10.f;
 					}
-					else new_vel = Vector3(current_velocity.x * (2.f - (remainder / 10.f)), current_velocity.y, current_velocity.z * (2.f - (remainder / 10.f)));
-
-					player_walk_movement->set_TargetMovement(new_vel);
-				}
-			}
-
-			if (dont_move)
-				player_walk_movement->set_TargetMovement(Vector3(0, 0, 0));
-
-			if (vars->misc.flywall)
-			{
-				if (unity::GetKey(vars->keybinds.flywall))
-				{
-					set_onLadder(model_state, true);
-					if (settings::vert_flyhack > 1.5f
-						|| settings::hor_flyhack > 4.f)
+					else //still on cooldown
 					{
-						return;
+						auto timeleft = misc::speedhackCooldownEnd - get_fixedTime(); //will be 10
+						//auto remainder = (timeleft - 10.f) < 0 ? 0 : (timeleft - 10.f);
+						auto remainder = timeleft > 10 ? 10 : (timeleft < 0 ? 0 : timeleft);
+						Vector3 new_vel = current_velocity;
+						float fslowdown = (mul / 1.f);
+						if (mul > .3f)
+						{
+							//auto fslowdown = (mul / 3.f);//percent to slow down
+							fslowdown = (mul / 0.5f);//percent to slow down
+							std::clamp(fslowdown, 0.f, 1.f);
+							Vector3 new_vel = Vector3(current_velocity.x * (2.f - fslowdown), current_velocity.y, current_velocity.z * (2.f - fslowdown));
+						}
+						else new_vel = Vector3(current_velocity.x * (2.f - (remainder / 10.f)), current_velocity.y, current_velocity.z * (2.f - (remainder / 10.f)));
+
+						player_walk_movement->set_TargetMovement(new_vel);
+					}
+				}
+
+				if (dont_move)
+					player_walk_movement->set_TargetMovement(Vector3(0, 0, 0));
+
+				if (vars->misc.flywall)
+				{
+					if (unity::GetKey(vars->keybinds.flywall))
+					{
+						set_onLadder(model_state, true);
+						if (settings::vert_flyhack > 1.5f
+							|| settings::hor_flyhack > 4.f)
+						{
+							return;
+						}
+						else
+							player_walk_movement->set_TargetMovement(Vector3(0, 25, 0));
 					}
 					else
-						player_walk_movement->set_TargetMovement(Vector3(0, 25, 0));
-				}
-				else
-				{
-					set_onLadder(model_state, false);
+					{
+						set_onLadder(model_state, false);
+					}
 				}
 			}
 		}
+		else return orig::playerwalkmovement_client_input(player_walk_movement, inputstate, model_state);
 	}
 
 	void hk_projectile_launchprojectile(BaseProjectile* p)
@@ -1162,6 +1165,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 #pragma endregion
 
 		if (baseplayer) {
+			auto loco = esp::local_player;
+			if(!loco)
+				return orig::baseplayer_client_input(baseplayer, state);
 			get_skydome();
 
 			auto fixed_time = get_fixedTime();
@@ -1185,15 +1191,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				OnLand(baseplayer, -8.0001f - 100);
 			}
 
-			bool t1 = orig::isdown(state, rust::classes::BUTTON::FIRE_PRIMARY);
-			auto t2 = orig::get_bodyleanoffset(baseplayer->eyes());
-
 			if (vars->misc.admin_mode)
 				baseplayer->set_admin_flag(rust::classes::PlayerFlags::IsAdmin);
-
-			if (vars->misc.spiderman) {
-				baseplayer->GroundAngleNew();
-			}
 
 			baseplayer->fov();
 
@@ -1780,16 +1779,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				vars->tick_time_when_called = tick_time;
 			}
 
-			orig::baseplayer_client_input(baseplayer, state);
-
-			auto model_state = baseplayer->modelState();
-
-			//model_state->set_water_level(99999);
-
-			if (vars->misc.spinbot) {
-				state->set_aim_angles(Vector3(100, my_rand() % 999 + -999, 100));
-			}
-
 			if (vars->misc.autofarm) {
 				if (misc::node.pos != Vector3(0, 0, 0))
 				{
@@ -1797,6 +1786,15 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					state->set_aim_angles(dir);
 				}
 			}
+		}
+
+
+		orig::baseplayer_client_input(baseplayer, state);
+
+		auto model_state = baseplayer->modelState();
+
+		if (vars->misc.spinbot) {
+			state->set_aim_angles(Vector3(100, my_rand() % 999 + -999, 100));
 		}
 	}
 }

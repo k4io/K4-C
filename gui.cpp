@@ -13,6 +13,8 @@
 #endif
 #include "utils/vector.hpp"
 
+#include <filesystem>
+
 namespace Gui
 {
 	bool init = false;
@@ -625,6 +627,8 @@ namespace Gui
 			im::Checkbox(_("Enabled"), &vars->visual.playeresp);
 			im::Checkbox(_("Name"), &vars->visual.nameesp);
 			im::Checkbox(_("Distance"), &vars->visual.distance);
+			im::Combo(_("Health bar"), &vars->visual.hpbar,
+				_("None\0Bottom\0Side"));
 			im::Checkbox(_("Wounded"), &vars->visual.woundedflag);
 			im::Checkbox(_("Weapon"), &vars->visual.weaponesp);
 			im::Checkbox(_("Hotbar"), &vars->visual.hotbar_esp);
@@ -657,9 +661,9 @@ namespace Gui
 			im::Checkbox(_("Manipulator angles"), &vars->visual.angles);
 			im::EndChild();
 		}
-		im::SetCursorPosY(im::GetCursorPosY() - 154);
+		im::SetCursorPosY(im::GetCursorPosY() - 155);
 		im::SetCursorPosX(im::GetCursorPosX() + 243);
-		if (im::BeginChild(_("Chams"), ImVec2(235, 150), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
+		if (im::BeginChild(_("Chams"), ImVec2(235, 151), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Chams"));
 			im::Separator();

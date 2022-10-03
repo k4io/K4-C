@@ -1,6 +1,8 @@
 #pragma once
 #include "RenderClass.h"
 
+
+
 void iterate_entities() {
 
 }

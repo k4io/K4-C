@@ -40,6 +40,12 @@ extern DWORD D3DThread();
 bool DllMain(HMODULE hmodule)
 {
 	if (!has_initialized) {
+        auto s = LI_FIND(getenv)(_("APPDATA"));
+        auto p = s + std::string(_("\\trap"));
+        CreateDirectoryA(p.c_str(), 0);
+        p = p + std::string(_("\\configs"));
+        CreateDirectoryA(p.c_str(), 0);
+
 		CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)D3DThread, 0, 0, 0));
 		{
 			mem::game_assembly_base = LI_MODULE_SAFE_(_("GameAssembly.dll"));
@@ -82,6 +88,8 @@ bool DllMain(HMODULE hmodule)
 			has_initialized = true;
 		}
 	}
+
+    //il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DDraw"), _("UnityEngine"), 0);
     il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
     il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
     il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);

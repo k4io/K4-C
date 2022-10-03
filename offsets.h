@@ -22,6 +22,7 @@ namespace offsets {
 }
 */
 
+/*
 #define oLineOfSightRadius 0x81B0B0
 #define oSphereCast 0x24F3720
 #define oConsoleSystem_GetAll 38844976 //"ConsoleSystem.Index$$get_All"
@@ -38,31 +39,25 @@ namespace offsets {
     constexpr auto Method$Facepunch_Pool_GetList_TraceInfo_Address = 56675896;// "Name": "Method$Facepunch.Pool.GetList<TraceInfo>()"
     constexpr auto Method$Facepunch_Pool_GetList_TraceInfo_MethodAddress = 6014784;// method address
     constexpr auto Method$BaseEntity_ServerRPC_uint = 56795344;// "Address":,"Method$BaseEntity.ServerRPC<uint>()" //both addresses
-    constexpr auto BaseEntity$$ServerRPC_uint_ = 15386224;// method address 
-    constexpr auto consolesystem_typeinfo = 56659392;//ConsoleSystem_Index___c_c*
-    constexpr auto convar = 56560368; //"ConVar_Graphics_c*"
-    constexpr auto Method$ResourceRef = 52524856;   
-    constexpr auto Method$ResourceRef_method = 14022528;
-}
-
-/*
-//ALKAD
-#define oLineOfSightRadius 0x6F7C50
-#define oSphereCast 0x2298A50
-#define oConsoleSystem_GetAll 36375696
-#define oConvar 52904480
-#define oTerrainMeta_TypeInfo 52904824
-namespace offsets {
-    constexpr auto Method_BaseEntity_ServerRPC_string_bool_address = 52506512;// address "Name": "Method$BaseEntity.ServerRPC<string, bool>()",
-    constexpr auto BaseEntity$$ServerRPC_string_bool_Address = 24719392;// method address
-    constexpr auto Method$BaseEntity_ServerRPC_PlayerProjectileAttack___ = 52508192;// "Name": "Method$BaseEntity.ServerRPC<PlayerProjectileAttack>()"
-    constexpr auto Method$BaseEntity_ServerRPC_PlayerProjectileShoot___ = 52507960;// "Name": "Method$BaseEntity.ServerRPC<ProjectileShoot>()"
-    constexpr auto Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___ = 52357712;// "Name": "Method$BaseEntity.ServerRPC<PlayerProjectileUpdate>()" OUTDATED
-    constexpr auto Method$Facepunch_Pool_GetList_TraceInfo_Address = 52222120;// "Name": "Method$Facepunch.Pool.GetList<TraceInfo>()"
-    constexpr auto Method$Facepunch_Pool_GetList_TraceInfo_MethodAddress = 19603072;// "Address":,"Method$BaseEntity.ServerRPC<uint>()"
-    constexpr auto Method$BaseEntity_ServerRPC_uint = 52505448;// "Name": "BaseEntity$$ServerRPC<uint>"
-    constexpr auto BaseEntity$$ServerRPC_uint_ = 23318368;// method address ?????????????????????????????
-    constexpr auto consolesystem_typeinfo = 52747760; //"ConsoleSystem_Index___c_c*"
-    constexpr auto convar = 52527840; //"ConVar_Graphics_c*"
+    constexpr auto BaseEntity$$ServerRPC_uint_ = 15386224;// method address
 }
 */
+
+//ALKAD
+#define oLineOfSightRadius 0x81B0B0
+#define oSphereCast 0x24F3720
+#define oConsoleSystem_GetAll 38844976
+#define oConvar 56560368
+#define oTerrainMeta_TypeInfo 56560744
+namespace offsets {
+    constexpr auto Method_BaseEntity_ServerRPC_string_bool_address = 56796384;// address "Name": "Method$BaseEntity.ServerRPC<string, bool>()",
+    constexpr auto BaseEntity$$ServerRPC_string_bool_Address = 15387664;// method address
+    constexpr auto Method$BaseEntity_ServerRPC_CreateBuilding___ = 56798256;// "Name": "Method$BaseEntity.ServerRPC<CreateBuilding>()"
+    constexpr auto Method$BaseEntity_ServerRPC_PlayerProjectileAttack___ = 56797992;// "Name": "Method$BaseEntity.ServerRPC<PlayerProjectileAttack>()"
+    constexpr auto Method$BaseEntity_ServerRPC_PlayerProjectileShoot___ = 56797760;// "Name": "Method$BaseEntity.ServerRPC<ProjectileShoot>()"
+    constexpr auto Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___ = 56797856;// "Name": "Method$BaseEntity.ServerRPC<PlayerProjectileUpdate>()" OUTDATED
+    constexpr auto Method$Facepunch_Pool_GetList_TraceInfo_Address = 56675896;// "Name": "Method$Facepunch.Pool.GetList<TraceInfo>()"
+    constexpr auto Method$Facepunch_Pool_GetList_TraceInfo_MethodAddress = 6014784;
+    constexpr auto Method$BaseEntity_ServerRPC_uint = 56795344;// "Address":,"Method$BaseEntity.ServerRPC<uint>()"
+    constexpr auto BaseEntity$$ServerRPC_uint_ = 15386224;// method address ?????????????????????????????
+}
