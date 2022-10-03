@@ -2,16 +2,20 @@
 #include "memory/il2cpp.hpp"
 #include "settings.hpp"
 #include <math.h>
-#include "Keybind.h"
-
+//#include "esp.hpp"
 #include "spherearray.h"
 
 #include <Windows.h>
 #include <chrono>
+
+//#include "d3d.hpp"
+
 #include "settings.hpp"
 #include "rust/rust.hpp"
 #include "rust/classes.hpp"
 #include "projectile.hpp"
+
+#include <algorithm>
 
 //#include "projectile.hpp"
 //#include <vector>

@@ -1,12 +1,12 @@
 #pragma once
 #include "RenderClass.h"
 
-
+//#include "rust/features/player_esp.hpp"
+//#include "rust/classes.hpp"
 
 void iterate_entities() {
 
 }
-
 
 void Crosshair1() {
 	float x = vars->ScreenX / 2, y = vars->ScreenY / 2;
@@ -46,11 +46,10 @@ void IndicatorSpeedhack() {
 }
 
 void DrawSnapline() {
-	Vector2 start = vars->visual.snapline == 2 ? Vector2(vars->ScreenX / 2, 0) :
-		vars->visual.snapline == 3 ? Vector2(vars->ScreenX / 2, vars->ScreenY / 2) :
-		vars->visual.snapline == 4 ? Vector2(vars->ScreenX / 2, vars->ScreenY) :
-		Vector2(vars->ScreenX / 2, 1080);
-	
+	Vector2 start = vars->visual.snapline == 1 ? Vector2(vars->ScreenX / 2, 0) :
+		vars->visual.snapline == 2 ? Vector2(vars->ScreenX / 2, vars->ScreenY / 2) :
+		vars->visual.snapline == 3 ? Vector2(vars->ScreenX / 2, vars->ScreenY) :
+		Vector2(vars->ScreenX / 2, vars->ScreenY);
 }
 
 void DrawFov() {
@@ -66,6 +65,7 @@ void Watermark() {
 }
 
 void new_frame() {
+
 	float Y = GetSystemMetrics(SM_CYSCREEN);
 	float X = GetSystemMetrics(SM_CXSCREEN);
 	Vector2 vScreen = render.CanvasSize();

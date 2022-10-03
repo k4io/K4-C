@@ -1,7 +1,7 @@
 #pragma once
 
 #include <fstream>
-
+#include "utils/vector.hpp"
 #include "vars.hpp"
 Vars* vars = new Vars();
 

@@ -190,6 +190,7 @@ struct Vars
 		int neck = 0;
 		int zoom = 0;
 		int bullettp = 0;
+		int fakelag = 0;
 	}; keybinds keybinds;
 
 	struct colors {

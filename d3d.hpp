@@ -2,12 +2,11 @@
 #include "vars.hpp"
 #include "gui.h"
 
-#include "RenderClass.h"
 #include "esp.hpp"
-
 
 #include "iconscpp.h"
 #include "icons.h"
+//#include "imgui/imgui_impl_win32.cpp"
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -126,8 +125,11 @@ HRESULT WINAPI hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Fla
 	return oPresent(pSwapChain, SyncInterval, Flags);
 }
 
+bool cheatinit = false;
+
 DWORD D3DThread()
 {
+
 	//return TRUE;
 	bool init_hook = false;
 	while(!init_hook)

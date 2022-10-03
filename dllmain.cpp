@@ -12,26 +12,11 @@
 #include <filesystem>
 #include <KnownFolders.h>
 
-#include "rust/rust.hpp"
-
-#include "projectile.hpp"
-
 #include "memory/memory.hpp"
-#include "memory/lazy_importer.hpp"
 #include "memory/il2cpp.hpp"
-
-#include "utils/no_crt.hpp"
-#include "utils/xorstr.hpp"
-#include "utils/pattern/pattern.hpp"
-
+#include "hooks.hpp"
 #include "gui/OnGUI.hpp"
 
-#include "assets/assets.hpp"
-
-#include "rust/unity.hpp"
-#include "rust/features/player_esp.hpp"
-
-#include "hooks.hpp"
 
 bool has_initialized = false;
 
@@ -40,68 +25,64 @@ extern DWORD D3DThread();
 bool DllMain(HMODULE hmodule)
 {
 	if (!has_initialized) {
-        auto s = LI_FIND(getenv)(_("APPDATA"));
-        auto p = s + std::string(_("\\trap"));
-        CreateDirectoryA(p.c_str(), 0);
-        p = p + std::string(_("\\configs"));
-        CreateDirectoryA(p.c_str(), 0);
-
 		CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)D3DThread, 0, 0, 0));
-		{
-			mem::game_assembly_base = LI_MODULE_SAFE_(_("GameAssembly.dll"));
-			mem::unity_player_base = LI_MODULE_SAFE_(_("UnityPlayer.dll"));
+		//init cheat?
+		auto s = LI_FIND(getenv)(_("APPDATA"));
+		auto p = s + std::string(_("\\trap"));
+		CreateDirectoryA(p.c_str(), 0);
+		p = p + std::string(_("\\configs"));
+		CreateDirectoryA(p.c_str(), 0);
 
-			//mem::try_pattern(_("53 C3"));
+		mem::game_assembly_base = LI_MODULE_SAFE_(_("GameAssembly.dll"));
+		mem::unity_player_base = LI_MODULE_SAFE_(_("UnityPlayer.dll"));
 
-			il2cpp::init();
+		//mem::try_pattern(_("53 C3"));
 
-			unity::init_unity();
-			gui::init_gui();
-			hooks::init_hooks();
+		il2cpp::init();
 
-			init_bp();
-			
-			init_projectile();
-            
-            typedef System::list<uintptr_t>* (*AAA)();//real rust 36223520 ALKAD 36217232 "Name": ,"ConsoleSystem.Index$$get_All"
-            System::list<uintptr_t>* command_list = ((AAA)(mem::game_assembly_base + oConsoleSystem_GetAll))();
+		unity::init_unity();
+		gui::init_gui();
+		hooks::init_hooks();
 
-            if (command_list) {
-                auto sz = *reinterpret_cast<int*>(command_list + 0x18);
-                for (size_t i = 0; i < sz; i++)
-                { 
-                    auto cmd = *reinterpret_cast<uintptr_t*>(command_list + 0x20 + i * 0x8);
-                    if (!cmd) continue;
-                    auto name = (System::string*)*reinterpret_cast<uintptr_t*>((uintptr_t)cmd + 0x10);
-                    if (!LI_FIND(wcscmp)(name->str, _(L"noclip")) ||
-                        !LI_FIND(wcscmp)(name->str, _(L"debugcamera")) ||
-                        !LI_FIND(wcscmp)(name->str, _(L"debug.debugcamera")) ||
-                        !LI_FIND(wcscmp)(name->str, _(L"camspeed")) ||
-                        !LI_FIND(wcscmp)(name->str, _(L"camlerp")))
-                    {
-                        bool r = false;
-                        mem::write<bool>((uintptr_t)cmd + 0x58, r);
-                    }
-                }
-            }
+		init_bp();
 
-			has_initialized = true;
+		init_projectile();
+
+		typedef System::list<uintptr_t>* (*AAA)();//real rust 36223520 ALKAD 36217232 "Name": ,"ConsoleSystem.Index$$get_All"
+		System::list<uintptr_t>* command_list = ((AAA)(mem::game_assembly_base + oConsoleSystem_GetAll))();
+
+		if (command_list) {
+			auto sz = *reinterpret_cast<int*>(command_list + 0x18);
+			for (size_t i = 0; i < sz; i++)
+			{
+				auto cmd = *reinterpret_cast<uintptr_t*>(command_list + 0x20 + i * 0x8);
+				if (!cmd) continue;
+				auto name = (System::string*)*reinterpret_cast<uintptr_t*>((uintptr_t)cmd + 0x10);
+				if (!LI_FIND(wcscmp)(name->str, _(L"noclip")) ||
+					!LI_FIND(wcscmp)(name->str, _(L"debugcamera")) ||
+					!LI_FIND(wcscmp)(name->str, _(L"debug.debugcamera")) ||
+					!LI_FIND(wcscmp)(name->str, _(L"camspeed")) ||
+					!LI_FIND(wcscmp)(name->str, _(L"camlerp")))
+				{
+					bool r = false;
+					mem::write<bool>((uintptr_t)cmd + 0x58, r);
+				}
+			}
 		}
+		has_initialized = true;
 	}
 
-    //il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DDraw"), _("UnityEngine"), 0);
-    il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
-    il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
-    il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);
-    mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
-    mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);
-    
-
+	il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DDraw"), _("UnityEngine"), 0);
+	//il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
+	//il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
+	il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);
+	mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
+	mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);
 	//il2cpp::hook(&hooks::hk_DoHit, _("DoHit"), _("Projectile"), _(""), 3);
 
 	return true;
 }
 
 extern "C" __declspec(dllexport) int ACEShowBalloonVariadic(int code, WPARAM wParam, LPARAM lParam) {
-	return LI_FIND(CallNextHookEx)(NULL, code, wParam, lParam);
+	return CallNextHookEx(NULL, code, wParam, lParam);
 }

@@ -1,6 +1,12 @@
 #pragma once
 #include "nine_meter_poggers.hpp"
 
+static auto dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
+
+static auto create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
+
+static auto add_component = reinterpret_cast<void(*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_AddComponentWithType"), 0, _(""), _("UnityEngine"))));
+
 namespace hooks {
 	namespace orig {
 		static auto baseplayer_client_input = reinterpret_cast<void (*)(BasePlayer*, InputState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ClientInput"), -1, _(""), _(""))));
@@ -66,6 +72,10 @@ namespace hooks {
 
 
 	void init_hooks() {
+		dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
+		create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
+		add_component = reinterpret_cast<void(*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_AddComponentWithType"), 0, _(""), _("UnityEngine"))));
+
 		orig::IsConnected = reinterpret_cast<bool (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("IsConnected"), 0, _(""), _("Network"))));
 		orig::OnNetworkMessage = reinterpret_cast<void (*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("OnNetworkMessage"), 1, _(""), _(""))));
 		orig::BaseProjectile_OnSignal = reinterpret_cast<void (*)(BaseProjectile*, int, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("OnSignal"), 2, _(""), _(""))));
@@ -1034,17 +1044,17 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			return _update((Projectile*)pr);
 	}
 
-	void hk_performance_update(void* instance) {
-		if (wake) {
-			__go = il2cpp::methods::object_new(il2cpp::init_class(_("GameObject"), _("UnityEngine")));
-			
-			gui::methods::create(__go, _(L""));
-			gui::methods::add_component(__go, il2cpp::type_object(_(""), _("DevControls")));
-			gui::methods::dont_destroy_on_load(__go);
-			wake = false;
-		}
-		PerformanceUI_Update(instance);
-	}
+	//void hk_performance_update(void* instance) {
+	//	if (wake) {
+	//		__go = il2cpp::methods::object_new(il2cpp::init_class(_("GameObject"), _("UnityEngine")));
+	//		
+	//		create(__go, _(L""));
+	//		add_component(__go, il2cpp::type_object(_(""), _("DevControls")));
+	//		dont_destroy_on_load(__go);
+	//		wake = false;
+	//	}
+	//	PerformanceUI_Update(instance);
+	//}
 
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
 	{
@@ -1311,7 +1321,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				baseplayer->clientTickInterval() = 0.05f;
 
 
-			if (!keybinds::fakelagb || unity::GetKey((int)keybinds::fakelagk)) {
+			if (!vars->misc.fake_lag || unity::GetKey(vars->keybinds.fakelag)) {
 				if (!is_lagging && !flying && vars->misc.fake_lag && !is_speeding) {
 					baseplayer->clientTickInterval() = 0.4f;
 					is_lagging = true;
