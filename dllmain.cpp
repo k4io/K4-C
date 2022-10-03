@@ -17,15 +17,101 @@
 #include "hooks.hpp"
 #include "gui/OnGUI.hpp"
 
+#include "gui.h"
 
-bool has_initialized = false;
+bool has_initialized = false, init = false, menuopen = false;
 
-extern DWORD D3DThread();
+//extern DWORD D3DThread();
+
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+Present oPresent;
+HWND window = NULL;
+WNDPROC oWndProc;
+ID3D11Device* pDevice = NULL;
+ID3D11DeviceContext* pContext = NULL;
+ID3D11RenderTargetView* mainRenderTargetView;
+
+void InitImGui()
+{
+	im::CreateContext();
+	ImGuiIO& io = im::GetIO();
+	io.ConfigFlags = ImGuiConfigFlags_NoMouseCursorChange;
+	ImGui_ImplWin32_Init(window);
+	ImGui_ImplDX11_Init(pDevice, pContext);
+}
+
+LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+
+	if (true && ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
+		return true;
+
+	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
+}
+
+HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
+{
+	if (!init)
+	{
+		if (SUCCEEDED(pSwapChain->GetDevice(__uuidof(ID3D11Device), (void**)&pDevice)))
+		{
+			pDevice->GetImmediateContext(&pContext);
+			DXGI_SWAP_CHAIN_DESC sd;
+			pSwapChain->GetDesc(&sd);
+			window = sd.OutputWindow;
+			ID3D11Texture2D* pBackBuffer;
+			pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
+			pDevice->CreateRenderTargetView(pBackBuffer, NULL, &mainRenderTargetView);
+			pBackBuffer->Release();
+			oWndProc = (WNDPROC)SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)WndProc);
+			InitImGui();
+			init = true;
+		}
+
+		else
+			return oPresent(pSwapChain, SyncInterval, Flags);
+	}
+
+	ImGui_ImplDX11_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+
+	if (GetAsyncKeyState(VK_INSERT) & 1)
+		vars->open = !vars->open;
+
+	//memu
+	im::NewFrame();
+	try {
+		if(vars->open)
+			Gui::Render();
+	} catch(...) {}
+	im::End();
+	
+	im::Render();
+
+	pContext->OMSetRenderTargets(1, &mainRenderTargetView, NULL);
+	ImGui_ImplDX11_RenderDrawData(im::GetDrawData());
+	return oPresent(pSwapChain, SyncInterval, Flags);
+}
+
+DWORD WINAPI MainThread(LPVOID lpReserved)
+{
+	bool init_hook = false;
+	do
+	{
+		if (kiero::init(kiero::RenderType::D3D11) == kiero::Status::Success)
+		{
+			kiero::bind(8, (void**)&oPresent, hkPresent);
+			init_hook = true;
+		}
+	} while (!init_hook);
+	return TRUE;
+}
 
 bool DllMain(HMODULE hmodule)
 {
 	if (!has_initialized) {
-		//CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)D3DThread, 0, 0, 0));
+		DisableThreadLibraryCalls(hmodule);
+		CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)MainThread, hmodule, 0, 0));
 		//init cheat?
 		auto s = LI_FIND(getenv)(_("APPDATA"));
 		auto p = s + std::string(_("\\trap"));
@@ -37,6 +123,7 @@ bool DllMain(HMODULE hmodule)
 		mem::unity_player_base = LI_MODULE_SAFE_(_("UnityPlayer.dll"));
 
 		//mem::try_pattern(_("53 C3"));
+
 
 		il2cpp::init();
 
@@ -73,8 +160,8 @@ bool DllMain(HMODULE hmodule)
 	}
 
 	//il2cpp::hook(&hooks::hk_ddraw_ongui, _("OnGUI"), _("DDraw"), _("UnityEngine"), 0);
-	il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
-	il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
+	//il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
+	//il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
 	il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);
 	mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
 	mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);

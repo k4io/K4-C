@@ -46,7 +46,6 @@
     <ClCompile Include="utils\pattern\pattern.cpp">
       <Filter>utils\pattern</Filter>
     </ClCompile>
-    <ClCompile Include="d3d.hpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="kiero\kiero.cpp">
       <Filter>kiero</Filter>

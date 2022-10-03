@@ -1,8 +1,9 @@
 #pragma once
 #include "RenderClass.h"
+#include "vars.hpp"
 
 //#include "rust/features/player_esp.hpp"
-//#include "rust/classes.hpp"
+#include "rust/classes.hpp"
 
 void iterate_entities() {
 
