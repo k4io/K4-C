@@ -439,7 +439,7 @@ void DrawPlayerHotbar(aim_target target) {
 			//filled gradient
 			render.FillRoundedRectangle_GradientLinear(start, sz,
 				{ 0.14f, 0.14f, 0.14f, 0.65f },
-				{ 209.f / 255.f, 90.f / 255.f, 79.f / 255.f, 0.65f }, 
+				{ 159.f / 255.f, 40.f / 255.f, 29.f / 255.f, 0.65f }, 
 				2);
 			
 			std::wstring name_str(player_name); name_str = name_str + _(L"'s items");
