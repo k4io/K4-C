@@ -116,6 +116,10 @@ public:
 
 	bool is_empty() { return x == 0 && y == 0 && z == 0; }
 
+	static Vector3 Zero() {
+		return Vector3(0, 0, 0);
+	}
+
 	static float my_sqrt(float number)
 	{
 		long        i;

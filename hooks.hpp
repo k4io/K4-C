@@ -1,6 +1,8 @@
 #pragma once
 #include "nine_meter_poggers.hpp"
 
+#include "esp.hpp"
+
 #include "gui/OnGUI.hpp"
 
 static auto dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
@@ -12,6 +14,7 @@ static auto add_component = reinterpret_cast<void(*)(uintptr_t self, uintptr_t c
 namespace hooks {
 	namespace orig {
 		static auto baseplayer_client_input = reinterpret_cast<void (*)(BasePlayer*, InputState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ClientInput"), -1, _(""), _(""))));
+		static auto playermodel_updatelocalvelocity = reinterpret_cast<void (*)(PlayerModel*, Vector3, Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerModel"), _("UpdateLocalVelocity"), 2, _(""), _(""))));
 		static auto BaseProjectile_OnSignal = reinterpret_cast<void (*)(BaseProjectile*, int, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("OnSignal"), 2, _(""), _(""))));
 		static auto playerwalkmovement_client_input = reinterpret_cast<void (*)(PlayerWalkMovement*, uintptr_t, ModelState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("ClientInput"), -1, _(""), _(""))));
 		static auto DoFixedUpdate = reinterpret_cast<void (*)(PlayerWalkMovement*, ModelState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("DoFixedUpdate"), -1, _(""), _(""))));
@@ -86,7 +89,7 @@ namespace hooks {
 		orig::DoFixedUpdate = reinterpret_cast<void (*)(PlayerWalkMovement*, ModelState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("DoFixedUpdate"), -1, _(""), _(""))));
 		orig::blocksprint = reinterpret_cast<void (*)(BasePlayer*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("BlockSprint"), 1, _(""), _(""))));
 		orig::Run = reinterpret_cast<System::string(*)(uintptr_t, System::string, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ConsoleSystem"), _("Run"), 0, _(""), _(""))));
-
+		orig::playermodel_updatelocalvelocity = reinterpret_cast<void (*)(PlayerModel*, Vector3, Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerModel"), _("UpdateLocalVelocity"), 2, _(""), _(""))));
 		orig::get_bodyleanoffset = reinterpret_cast<Vector3(*)(PlayerEyes*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_BodyLeanOffset"), 0, _(""), _(""))));
 
 		orig::isdown = reinterpret_cast<bool(*)(InputState*, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("InputState"), _("IsDown"), 1, _(""), _(""))));
@@ -1058,6 +1061,47 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		PerformanceUI_Update(instance);
 	}
 
+	void bonecache_func() {
+
+		/*//read baseplayer typeinfo
+		//read static fields
+		//read 0x10 or 0x8 (sk4ddu) for visplayerslist
+
+		uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayer_TypeInfo); //52690304 alkad
+		uintptr_t fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+		auto list = (rust::classes::list*)*reinterpret_cast<uintptr_t*>(fieldz + 0x10 + 0x0);
+
+		auto val = list->get_value<uintptr_t>();
+		if (!val) return;
+		
+		auto sz = list->get_size();
+		if (!sz) return;
+
+		auto buf = list->get_buffer<uintptr_t>();
+		if (!buf) return;
+
+		for (size_t i = 0; i < sz; i++)
+		{
+			auto current_object = *reinterpret_cast<uintptr_t*>(buf + 0x20 + (i * 0x8));
+			if (!current_object || current_object <= 100000)
+				continue;
+
+			auto base_object = *reinterpret_cast<uintptr_t*>(current_object + 0x10);
+			if (!base_object || base_object <= 100000)
+				continue;
+
+			auto object = *reinterpret_cast<uintptr_t*>(base_object + 0x30);
+			if (!object || object <= 100000)
+				continue;
+
+			auto ent = *reinterpret_cast<BasePlayer**>(base_object + 0x28);
+			if (!ent)	
+				continue;
+
+		}
+		*/
+	}
+
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
 	{
 		//if(!do_fixed_update_ptr)
@@ -1180,6 +1224,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			auto loco = esp::local_player;
 			if(!loco)
 				return orig::baseplayer_client_input(baseplayer, state);
+
 			get_skydome();
 
 			auto fixed_time = get_fixedTime();
@@ -1382,116 +1427,116 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			if (item) {
 				auto baseprojectile = *reinterpret_cast<BaseProjectile**>((uintptr_t)item + heldEntity);//item->GetHeldEntity<BaseProjectile>();
 				if (baseprojectile) {
-					//for (int i = 0; i < 32; i++) {
-					//	auto current = misc::fired_projectiles[i];
-					//	if (current.fired_at <= 2.f)
-					//		continue;
-					//	//kill original so no updates wasted by game
-						//auto original = current.original;
-					//
-					//	auto projectile = current.original;
-					//	if (!projectile->authoritative())
-					//		continue;
-					//
-					//	//we will be the ones who update the projectile, not the game
-						//auto delta = get_deltaTime();
-						//auto updates = current.updates++;
-						//auto next_update_time = current.fired_at + (updates * delta);
-						//bool ret = false;
-						//if (get_fixedTime() > next_update_time)
-						//	if (projectile->IsAlive())
-						//	{
-						//		projectile->UpdateVelocity(delta, projectile);
-						//	}
-					//
-					//	float offset = 0.f;
-					//	auto target = current.ent;
-					//	if (vars->combat.thick_bullet
-					//		&& projectile->authoritative()
-					//		&& projectile->IsAlive()
-					//		&& false)
-							//&& vars->combat.thickness > 1.1f)//)
+					for (int i = 0; i < 32; i++) {
+						auto current = misc::fired_projectiles[i];
+						if (current.fired_at <= 2.f)
+							continue;
+						//kill original so no updates wasted by game
+					//auto original = current.original;
+					
+						auto projectile = current.original;
+						if (!projectile->authoritative())
+							continue;
+					
+						//we will be the ones who update the projectile, not the game
+					//auto delta = get_deltaTime();
+					//auto updates = current.updates++;
+					//auto next_update_time = current.fired_at + (updates * delta);
+					//bool ret = false;
+					//if (get_fixedTime() > next_update_time)
+					//	if (projectile->IsAlive())
 					//	{
-					//		if (target.ent)
-					//		{
-					//			auto current_position = projectile->get_transform()->get_position();
-					//
-					//			//transform* bonetrans = target.player->find_closest_bone(current_position, true
-					//			Transform* bonetrans = target.ent->model()->boneTransforms()->get(48);
-					//
-					//			if (bonetrans)
-					//			{
-					//				if (vars->combat.bodyaim)
-					//					bonetrans = target.ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis);
-					//
-					//
-					//				Vector3 target_bone = bonetrans->get_position(); //target_bone.y -= 0.8f;
-									//Sphere(target_bone, 2.2f, col(12, 150, 100, 50), 10.f, 100.f);
-					//
-					//				if (misc::LineCircleIntersection(target_bone, vars->combat.thickness, current_position, projectile->previousPosition(), offset))
-					//				{
-					//					current_position = Vector3::move_towards(target_bone, current_position, vars->combat.thickness);
-					//				}
-					//
-					//				auto dist = target_bone.distance(current_position);
-					//
-					//
-					//				//fuck with shit pussy wagon
-					//				float num2 = 1.0f + 0.5f;
-					//				float num8 = 2.0f / 60.0f;
-					//				float num9 = 2.0f * max(max(get_deltaTime(), get_smoothdeltaTime()), get_fixeddeltaTime());
-					//				float num11 = (vars->desyncTime + num8 + num9) * num2;
-					//				//typedef Vector3(*gpv)(uintptr_t);
-									//auto pv = ((gpv)(mem::game_assembly_base + 8331264))((uintptr_t)target.player);
-					//				auto pv = target.ent->GetParentVelocity();
-					//				float mag = pv.length();
-					//				float num15 = 0.1f + num11 * mag + 0.1f;
-					//				//dist -= num15;
-					//
-					//				/*if (target.player->get_mountable())
-					//				{
-					//					Sphere(target_bone, 3.0f, col(12, 150, 100, 50), 10.f, 100.f);
-					//					if (dist < 3.0f)
-					//					{
-					//						auto newpos = Vector3::move_towards(target_bone, current_position, 1.0f);
-					//						set_position(get_transform((base_player*)projectile), newpos);
-					//
-					//						HitTest* ht = (HitTest*)projectile->hitTest();
-					//						ht->set_did_hit(true);
-					//						ht->set_hit_entity(target.player);
-					//						ht->set_hit_transform(bonetrans);
-					//						ht->set_hit_point(InverseTransformPoint(bonetrans, newpos));
-					//						ht->set_hit_normal(InverseTransformDirection(bonetrans, newpos));
-					//						Ray r(get_position((uintptr_t)get_transform((base_player*)projectile)), newpos);
-					//						safe_write(ht + 0x14, r, Ray);
-					//
-					//						esp::local_player->console_echo(string::wformat(_(L"[trap]: Fat bullet - Called with distance: %dm"), (int)dist));
-					//						DoHit(projectile, ht, newpos, HitNormalWorld((uintptr_t)ht));
-					//					}
-					//				}*/
-					//				if (dist < 2.0f)
-					//				{
-					//					auto newpos = Vector3::move_towards(current_position, target_bone, 1.0f);
-					//					set_position(projectile->get_transform(), newpos);
-					//
-					//
-					//					HitTest* ht = (HitTest*)projectile->hitTest();
-					//					ht->DidHit() = true;
-					//					ht->HitEntity() = target.ent;
-					//					ht->HitTransform() = bonetrans;
-					//					ht->HitPoint() = InverseTransformPoint(bonetrans, newpos);
-					//					ht->HitNormal() = InverseTransformDirection(bonetrans, newpos);
-					//					Ray r(projectile->get_transform()->get_position(), newpos);
-					//					safe_write(ht + 0x14, r, Ray);
-					//					DoHit(projectile, ht, newpos, HitNormalWorld((uintptr_t)ht));
-					//				}
-					//			}
-					//		}
+					//		projectile->UpdateVelocity(delta, projectile);
 					//	}
-					//	else if (time - current.fired_at > 8.f) {
-					//		misc::fired_projectiles[i] = { nullptr, nullptr, 1, 0 };
-					//	}
-					//}
+					
+						float offset = 0.f;
+						auto target = current.ent;
+						if (vars->combat.thick_bullet
+							&& projectile->authoritative()
+							&& projectile->IsAlive()
+							&& false)
+						//&& vars->combat.thickness > 1.1f)//)
+						{
+							if (target.ent)
+							{
+								auto current_position = projectile->get_transform()->get_position();
+					
+								//transform* bonetrans = target.player->find_closest_bone(current_position, true
+								Transform* bonetrans = target.ent->model()->boneTransforms()->get(48);
+					
+								if (bonetrans)
+								{
+									if (vars->combat.bodyaim)
+										bonetrans = target.ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis);
+					
+					
+									Vector3 target_bone = bonetrans->get_position(); //target_bone.y -= 0.8f;
+								//Sphere(target_bone, 2.2f, col(12, 150, 100, 50), 10.f, 100.f);
+					
+									if (misc::LineCircleIntersection(target_bone, vars->combat.thickness, current_position, projectile->previousPosition(), offset))
+									{
+										current_position = Vector3::move_towards(target_bone, current_position, vars->combat.thickness);
+									}
+					
+									auto dist = target_bone.distance(current_position);
+					
+					
+									//fuck with shit pussy wagon
+									float num2 = 1.0f + 0.5f;
+									float num8 = 2.0f / 60.0f;
+									float num9 = 2.0f * max(max(get_deltaTime(), get_smoothdeltaTime()), get_fixeddeltaTime());
+									float num11 = (vars->desyncTime + num8 + num9) * num2;
+									//typedef Vector3(*gpv)(uintptr_t);
+								//auto pv = ((gpv)(mem::game_assembly_base + 8331264))((uintptr_t)target.player);
+									auto pv = target.ent->GetParentVelocity();
+									float mag = pv.length();
+									float num15 = 0.1f + num11 * mag + 0.1f;
+									//dist -= num15;
+					
+									/*if (target.player->get_mountable())
+									{
+										Sphere(target_bone, 3.0f, col(12, 150, 100, 50), 10.f, 100.f);
+										if (dist < 3.0f)
+										{
+											auto newpos = Vector3::move_towards(target_bone, current_position, 1.0f);
+											set_position(get_transform((base_player*)projectile), newpos);
+					
+											HitTest* ht = (HitTest*)projectile->hitTest();
+											ht->set_did_hit(true);
+											ht->set_hit_entity(target.player);
+											ht->set_hit_transform(bonetrans);
+											ht->set_hit_point(InverseTransformPoint(bonetrans, newpos));
+											ht->set_hit_normal(InverseTransformDirection(bonetrans, newpos));
+											Ray r(get_position((uintptr_t)get_transform((base_player*)projectile)), newpos);
+											safe_write(ht + 0x14, r, Ray);
+					
+											esp::local_player->console_echo(string::wformat(_(L"[trap]: Fat bullet - Called with distance: %dm"), (int)dist));
+											DoHit(projectile, ht, newpos, HitNormalWorld((uintptr_t)ht));
+										}
+									}*/
+									if (dist < 2.0f)
+									{
+										auto newpos = Vector3::move_towards(current_position, target_bone, 1.0f);
+										set_position(projectile->get_transform(), newpos);
+					
+					
+										HitTest* ht = (HitTest*)projectile->hitTest();
+										ht->DidHit() = true;
+										ht->HitEntity() = target.ent;
+										ht->HitTransform() = bonetrans;
+										ht->HitPoint() = bonetrans->InverseTransformPoint(newpos);
+										ht->HitNormal() = bonetrans->InverseTransformDirection(newpos);
+										Ray r(projectile->get_transform()->get_position(), newpos);
+										safe_write(ht + 0x14, r, Ray);
+										DoHit(projectile, ht, newpos, HitNormalWorld((uintptr_t)ht));
+									}
+								}
+							}
+						}
+						else if (time - current.fired_at > 8.f) {
+							misc::fired_projectiles[i] = { nullptr, nullptr, 1, 0 };
+						}
+					}
 
 					//for (int i = 0; i < 32; i++)
 					//{

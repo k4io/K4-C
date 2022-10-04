@@ -15,6 +15,21 @@
 
 #include <filesystem>
 
+std::vector<std::string> split(std::string s, std::string delimiter) {
+	size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+	std::string token;
+	std::vector<std::string> res;
+
+	while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos) {
+		token = s.substr(pos_start, pos_end - pos_start);
+		pos_start = pos_end + delim_len;
+		res.push_back(token);
+	}
+
+	res.push_back(s.substr(pos_start));
+	return res;
+}
+
 namespace Gui
 {
 	bool init = false;
@@ -22,8 +37,22 @@ namespace Gui
 	static char str0[32] = "";
 	int selected_cfg = 0;
 
-	void delete_config() {
+	void delete_config(char* cfgname) {
+		auto s = LI_FIND(getenv)(_("APPDATA"));
+		auto p = s + std::string(_("\\trap\\configs\\")) + std::string(cfgname) + _(".t");
+		remove(p.c_str());
+	}
 
+	void loadcolor(float* col, std::string line)
+	{
+		auto vals = split(line, _(","));
+		col[0] = stof(vals[0]);
+		col[1] = stof(vals[1]);
+		col[2] = stof(vals[2]);
+	}
+
+	std::string savefloat(std::string beginning, float* col) {
+		return beginning + "=" + std::to_string(col[0]) + _(",") + std::to_string(col[1]) + _(",") + std::to_string(col[2]);
 	}
 
 	void load_config() {
@@ -41,6 +70,38 @@ namespace Gui
 			auto delimiterPos = line.find("=");
 			auto name = line.substr(0, delimiterPos);
 			auto value = line.substr(delimiterPos + 1);
+
+			if (name == _("boxvis")) loadcolor(vars->colors.players.boxes.visible, value);
+			else if (name == _("boxinvis")) loadcolor(vars->colors.players.boxes.invisible, value);
+			else if (name == _("chamsvis")) loadcolor(vars->colors.players.chams.visible, value);
+			else if (name == _("chamsinvis")) loadcolor(vars->colors.players.chams.invisible, value);
+			else if (name == _("namevis")) loadcolor(vars->colors.players.details.name.visible, value);
+			else if (name == _("nameinvis")) loadcolor(vars->colors.players.details.name.invisible, value);
+			else if (name == _("distvis")) loadcolor(vars->colors.players.details.distance.visible, value);
+			else if (name == _("distinvis")) loadcolor(vars->colors.players.details.distance.invisible, value);
+			else if (name == _("flagvis")) loadcolor(vars->colors.players.details.flags.visible, value);
+			else if (name == _("flaginvis")) loadcolor(vars->colors.players.details.flags.invisible, value);
+			else if (name == _("skelvis")) loadcolor(vars->colors.players.details.skeleton.visible, value);
+			else if (name == _("skelinvis")) loadcolor(vars->colors.players.details.skeleton.invisible, value);
+			else if (name == _("snapvis")) loadcolor(vars->colors.ui.snapline.visible, value);
+			else if (name == _("snapinvis")) loadcolor(vars->colors.ui.snapline.invisible, value);
+			else if (name == _("fovvis")) loadcolor(vars->colors.ui.fov.visible, value);
+			else if (name == _("fovinvis")) loadcolor(vars->colors.ui.fov.invisible, value);
+			else if (name == _("crosshair")) loadcolor(vars->colors.ui.crosshair, value);
+			else if (name == _("hempvis")) loadcolor(vars->colors.items.hemp.visible, value);
+			else if (name == _("hempinvis")) loadcolor(vars->colors.items.hemp.invisible, value);
+			else if (name == _("stonevis")) loadcolor(vars->colors.items.stone.visible, value);
+			else if (name == _("stoneinvis")) loadcolor(vars->colors.items.stone.invisible, value);
+			else if (name == _("sulfurvis")) loadcolor(vars->colors.items.sulfur.visible, value);
+			else if (name == _("sulfurinvis")) loadcolor(vars->colors.items.sulfur.invisible, value);
+			else if (name == _("metalvis")) loadcolor(vars->colors.items.metal.visible, value);
+			else if (name == _("metalinvis")) loadcolor(vars->colors.items.metal.invisible, value);
+			else if (name == _("barrelvis")) loadcolor(vars->colors.items.barrel.visible, value);
+			else if (name == _("barrelinvis")) loadcolor(vars->colors.items.barrel.invisible, value);
+			else if (name == _("animalvis")) loadcolor(vars->colors.items.animal.visible, value);
+			else if (name == _("animalinvis")) loadcolor(vars->colors.items.animal.invisible, value);
+			else if (name == _("stashopen")) loadcolor(vars->colors.items.stash.open, value);
+			else if (name == _("stashclosed")) loadcolor(vars->colors.items.stash.closed, value);
 
 			if (name == _("psilent")) vars->combat.psilent = std::stoi(value);
 			else if (name == _("aimbotfov")) vars->combat.aimbotfov = std::stoi(value);
@@ -181,8 +242,72 @@ namespace Gui
 		remove(p.c_str());
 		std::ofstream f(p);
 		char buffer[4]; 
+
+		auto str = savefloat(_("boxvis"), vars->colors.players.boxes.visible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("boxinvis"), vars->colors.players.boxes.invisible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("chamsvis"), vars->colors.players.chams.visible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("chamsinvis"), vars->colors.players.chams.invisible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("namevis"), vars->colors.players.details.name.visible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("nameinvis"), vars->colors.players.details.name.invisible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("distvis"), vars->colors.players.details.distance.visible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("distinvis"), vars->colors.players.details.distance.invisible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("flagvis"), vars->colors.players.details.flags.visible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("flaginvis"), vars->colors.players.details.flags.invisible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("skelvis"), vars->colors.players.details.skeleton.visible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("skelinvis"), vars->colors.players.details.skeleton.invisible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("snapvis"), vars->colors.ui.snapline.visible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("snapinvis"), vars->colors.ui.snapline.invisible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("fovvis"), vars->colors.ui.fov.visible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("fovinvis"), vars->colors.ui.fov.invisible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("crosshair"), vars->colors.ui.crosshair);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("hempvis"), vars->colors.items.hemp.visible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("hempinvis"), vars->colors.items.hemp.invisible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("stonevis"), vars->colors.items.stone.visible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("stoneinvis"), vars->colors.items.stone.invisible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("sulfurvis"), vars->colors.items.sulfur.visible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("sulfurinvis"), vars->colors.items.sulfur.invisible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("metalvis"), vars->colors.items.metal.visible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("metalinvis"), vars->colors.items.metal.invisible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("barrelvis"), vars->colors.items.barrel.visible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("barrelinvis"), vars->colors.items.barrel.invisible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("animalvis"), vars->colors.items.animal.visible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("animalinvis"), vars->colors.items.animal.invisible);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("stashopen"), vars->colors.items.stash.open);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("stashclosed"), vars->colors.items.stash.closed);
+		f.write(str.c_str(), str.size());
+
 		itoa(vars->combat.psilent, buffer, 4);
-		auto str = (std::string("psilent=") + std::string(buffer) + _("\n"));
+		str = (std::string("psilent=") + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
 		sprintf(buffer, _("%.2f"), vars->combat.aimbotfov);
 		str = (std::string(_("aimbotfov=")) + std::string(buffer) + _("\n"));
@@ -589,7 +714,7 @@ namespace Gui
 			im::Checkbox(_("Bullet tp"), &vars->combat.bullet_tp);
 			im::Checkbox(_("Fast bullets"), &vars->combat.fast_bullet);
 			im::Checkbox(_("Thick bullets"), &vars->combat.thick_bullet);
-			im::SliderFloat(_("Thickness"), &vars->combat.thickness, 0.1f, 1.f, _("%.2f"), 1.f);
+			im::SliderFloat(_("Thickness"), &vars->combat.thickness, 0.1f, 2.2f, _("%.2f"), 1.f);
 			im::Checkbox(_("Autoshoot"), &vars->combat.autoshoot);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("A"), &vars->keybinds.autoshoot, ImVec2(50, 14));
@@ -642,7 +767,7 @@ namespace Gui
 			im::Checkbox(_("Hotbar"), &vars->visual.hotbar_esp);
 			im::Checkbox(_("Skeleton"), &vars->visual.skeleton);
 			im::Combo(_("Box type"), &vars->visual.boxtype,
-				_("None\0Full\0Corner\03D Cube"));
+				_("None\0Full\0Corner\0Cube"));
 			//im::Checkbox(_("Full box"), &vars->visual.full_box);
 			//im::Checkbox(_("Corner box"), &vars->visual.corner_box);
 			//im::Checkbox(_("3D Cube"), &vars->visual.cube);
@@ -805,9 +930,9 @@ namespace Gui
 				im::Text(_("Player"));
 				im::Separator();
 				im::ColorEdit4(_("Visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Invisible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Invisible"), vars->colors.players.boxes.invisible, ImGuiColorEditFlags_NoInputs);
 				im::ColorEdit4(_("Chams visible"), vars->colors.players.chams.visible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Chams invisible"), vars->colors.players.chams.visible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Chams invisible"), vars->colors.players.chams.invisible, ImGuiColorEditFlags_NoInputs);
 				im::EndChild();
 			}
 			if (im::BeginChild(_("Details"), ImVec2(217, 200), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {

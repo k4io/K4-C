@@ -23,10 +23,6 @@ namespace esp {
 
 	std::vector<aim_target> visibleplayerswithin300m = {};
 
-	struct bounds_t {
-		float left, right, top, bottom, center;
-	};
-
 	struct rust_str
 	{
 		char zpad[128];

@@ -4,6 +4,8 @@
 #include "../settings.hpp"
 #include "../utils/string_format.h"
 
+#include "../esp.hpp"	
+
 inline float NormalizeAngle(float angle) {
 	while (angle > 360.0f) {
 		angle -= 360.0f;
@@ -1181,10 +1183,10 @@ namespace gui {
 		Vector2 pos, menu_pos = window_position, menu_size = { 500, 380 }, button_size = { 200, 0 }, mouse_pos = { mouse.x, height - mouse.y };
 
 		//watermark
-		fill_box(rust::classes::Rect{ 10, 6, 80, 16 }, rgba(14.f, 18.f, 24.f, 255));
-		outline_box({ 10, 6 }, { 80, 16 }, rgba(249.f, 130.f, 109.f, 255.f));
-		fill_box(rust::classes::Rect{ 10, 20, 81, 3 }, rgba(249.f, 130.f, 109.f, 255));
-		gui::Label(rust::classes::Rect{ 12, 4, 80, 20 }, _(L"trap.sh"), gui::Color(1, 1, 1, 1), true, 12);
+		//fill_box(rust::classes::Rect{ 10, 6, 80, 16 }, rgba(14.f, 18.f, 24.f, 255));
+		//outline_box({ 10, 6 }, { 80, 16 }, rgba(249.f, 130.f, 109.f, 255.f));
+		//fill_box(rust::classes::Rect{ 10, 20, 81, 3 }, rgba(249.f, 130.f, 109.f, 255));
+		//gui::Label(rust::classes::Rect{ 12, 4, 80, 20 }, _(L"trap.sh"), gui::Color(1, 1, 1, 1), true, 12);
 
 		//esp
 		if (event_type == rust::classes::EventType::Repaint) {
@@ -1249,6 +1251,13 @@ namespace gui {
 				}
 
 
+				if (!player_list.empty())
+					for (auto p : player_list)
+						if (vars->visual.playeresp)
+						{
+							esp::do_chams(p);
+							cache::CacheBones(p, esp::local_player);
+						}
 				//esp::start();
 			}
 		}
@@ -2035,7 +2044,7 @@ namespace esp
 
 	void do_chams(BasePlayer* ent)
 	{
-		if (!ent->is_alive() || ent->is_sleeping()) return;
+		if (!ent->is_alive() || (ent->is_sleeping() && !vars->visual.sleeper_esp)) return;
 		if (unity::bundle)
 		{
 			Shader* shader = 0;

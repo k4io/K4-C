@@ -5,9 +5,38 @@
 #include "rust/features/player_esp.hpp"
 //#include "rust/classes.hpp"
 
+std::vector<BasePlayer*> player_list = {};
+
+void ColorConvertHSVtoRGB2(float h, float s, float v, float& out_r, float& out_g, float& out_b)
+{
+	if (s == 0.0f)
+	{
+		// gray
+		out_r = out_g = out_b = v;
+		return;
+	}
+
+	h = my_fmod(h, 1.0f) / (60.0f / 360.0f);
+	int   i = (int)h;
+	float f = h - (float)i;
+	float p = v * (1.0f - s);
+	float q = v * (1.0f - s * f);
+	float t = v * (1.0f - s * (1.0f - f));
+
+	switch (i)
+	{
+	case 0: out_r = v; out_g = t; out_b = p; break;
+	case 1: out_r = q; out_g = v; out_b = p; break;
+	case 2: out_r = p; out_g = v; out_b = t; break;
+	case 3: out_r = p; out_g = q; out_b = v; break;
+	case 4: out_r = t; out_g = p; out_b = v; break;
+	case 5: default: out_r = v; out_g = p; out_b = q; break;
+	}
+}
+
 D2D1::ColorF HSVD(float h, float s, float v, float a = 1.0f) 
 { 
-	float r, g, b; ColorConvertHSVtoRGB(h, s, v, r, g, b); return D2D1::ColorF(r, g, b, a);
+	float r, g, b; ColorConvertHSVtoRGB2(h, s, v, r, g, b); return D2D1::ColorF(r, g, b, a);
 }
 
 void DrawPlayer(BasePlayer* ply, bool npc)
@@ -15,9 +44,11 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 	if (!ply) return;
 	if (!esp::local_player) return;
 
+	auto player_id = ply->userID();
+
 	esp::do_chams(ply);
 
-	esp::bounds_t bounds;
+	bounds_t bounds;
 
 	struct bone_t {
 		Vector3 screen;
@@ -55,7 +86,8 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 	bool is_visible = false, is_teammate = ply->is_teammate(esp::local_player);
 	auto camera_position = unity::get_camera_pos();
 
-	const auto get_bounds = [&](esp::bounds_t& out, float expand = 0) -> bool {
+	/*
+	const auto get_bounds = [&](bounds_t& out, float expand = 0) -> bool {
 		bounds = { FLT_MAX, FLT_MIN, FLT_MAX, FLT_MIN };
 
 		for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
@@ -99,13 +131,16 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 
 		return true;
 	};
-
-	if (get_bounds(bounds, 4)) {
-		is_visible = unity::is_visible(camera_position, bones[8].world_position, (uintptr_t)esp::local_player);
+	*/
+	//if (get_bounds(bounds, 4)) {
+	bounds = ply->bones()->bounds;
+	if (!bounds.empty()) {
+		//is_visible = unity::is_visible(camera_position, bones[8].world_position, (uintptr_t)esp::local_player);
 		//for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
 		//	if (is_visible) break;
 		//	is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
 		//}
+		is_visible = ply->visible();
 
 		//safezone flag???
 
@@ -567,6 +602,17 @@ void iterate_entities() {
 		{
 			auto entity = (BasePlayer*)ent;
 
+			for (BasePlayer* p : player_list)
+			{
+				if (!p->is_alive()
+					|| (entity->is_sleeping() && !vars->visual.sleeper_esp)
+					|| p->userID() == entity->userID()
+					&& player_list.size() > 1)
+				{
+					player_list.erase(std::remove(player_list.begin(), player_list.end(), p), player_list.end());
+				}
+			}
+			player_list.push_back(entity);
 			//hit player for silent melee, but not here as may crash due to not being run from a game thread
 
 			//check valid
@@ -602,7 +648,9 @@ void iterate_entities() {
 
 					target.network_id = ent_id;
 
-					auto visible = ent->is_visible(esp::local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
+					//auto visible = ent->is_visible(esp::local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
+					auto visible = entity->visible();
+
 					target.visible = visible;
 
 					//if (distance < 300.0f)

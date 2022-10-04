@@ -1,7 +1,7 @@
 #pragma once
 #include <stdio.h>
 #include <vector>
-
+#include <map>
 
 #include "../utils/xor_float.hpp"
 #include "../utils/string_format.h"
@@ -32,6 +32,18 @@ void pop_front(std::vector<T>& vec)
 	vec.pop_back();
 }
 
+struct bounds_t {
+	float left, right, top, bottom, center;
+	bool empty() {
+		if (left == FLT_MAX
+			|| right == FLT_MIN
+			|| top == FLT_MAX
+			|| bottom == FLT_MIN)
+			return true;
+		return false;
+	}
+};
+
 class Bounds {
 public:
 	Vector3 m_center;
@@ -48,6 +60,8 @@ enum BaseCombatEntity_LifeState {
 	Dead = 1
 };
 
+
+#pragma region il2
 uintptr_t planner_rotationoffset = il2cpp::value(_("Planner"), _("rotationOffset"));
 uintptr_t planner_currentconstruction = il2cpp::value(_("Planner"), _("currentConstruction"));
 uintptr_t planner_guide = il2cpp::value(_("Planner"), _("guide"));
@@ -131,19 +145,35 @@ uintptr_t gravityMultiplier = il2cpp::value(_("PlayerWalkMovement"), _("gravityM
 uintptr_t flying = il2cpp::value(_("PlayerWalkMovement"), _("flying"));
 
 uintptr_t model = il2cpp::value(_("BaseEntity"), _("model"));
+#pragma endregion
 
-
+class Object;
+class Component;
+class Behaviour;
+class FacepunchBehaviour;
+class BaseMonoBehaviour;
+class MonoBehaviour;
+class GameObject;
+class Transform;
+class Item;
 class AttackEntity;
 class BaseMelee;
 class BaseProjectile;
 class Transform;
+class Bone;
+class BoneCache;
+class Model;
+class ModelState;
 class BasePlayer;
 class HitTest;
-class ModelState;
-class GameObject;
-class Transform;
-class Item;
 class col;
+
+std::map<uint64_t, BoneCache*> cachedBones = std::map<uint64_t, BoneCache*>();
+
+template<typename T1, typename T2>
+bool map_contains_key(T1 map, T2 key) {
+	return map.count(key) > 0;
+}
 
 typedef struct Str
 {
@@ -152,8 +182,10 @@ typedef struct Str
 	wchar_t str[1];
 } *str;
 
-
+#pragma region il2func
 static auto GetNormal = reinterpret_cast<Vector3 (*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetNormal"), 1, _(""), _(""))));
+
+static auto get_visplayerlist = reinterpret_cast<System::Array<BasePlayer*>*(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("get_VisiblePlayerList"), -1, _(""), _(""))));
 
 static auto GetSpeed = reinterpret_cast<float (*)(BasePlayer * baseplayer, float running, float ducking, float crawling)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetSpeed"), 3, _(""), _(""))));
 
@@ -321,6 +353,7 @@ static auto set_AtmosphereMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*
 static auto set_ClearMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_ClearMaterial"), 0, _(""), _(""))));
 static auto set_CloudMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_CloudMaterial"), 0, _(""), _(""))));
 
+#pragma endregion
 
 class col {
 public:
@@ -339,6 +372,7 @@ public:
 float current_time;
 
 void init_bp() {
+	get_visplayerlist = reinterpret_cast<System::Array<BasePlayer*>*(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("get_VisiblePlayerList"), -1, _(""), _(""))));
 	damageProperties = il2cpp::value(_("BaseMelee"), _("damageProperties"));
 	get_center = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_center"), 0, _(""), _(""))));
 	get_max_fwd_speed = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModularCar"), _("GetMaxForwardSpeed"), 0, _(""), _(""))));
@@ -631,9 +665,89 @@ public:
 	}
 };
 
-class Model : public MonoBehaviour {
+class Bone {
 public:
-	FIELD(_("Model"), _("boneTransforms"), boneTransforms, System::Array<Transform*>*);
+	Vector3 position;
+	bool visible;
+	Transform* transform;
+
+	Bone() {
+		this->position = Vector3::Zero();
+		this->visible = false;
+	}
+	Bone(Vector3 position, bool visible) {
+		this->position = position;
+		this->visible = visible;
+		this->transform = nullptr;
+	}
+	Bone(Vector3 position, bool visible, Transform* traa) {
+		this->position = position;
+		this->visible = visible;
+		this->transform = traa;
+	}
+	bool visible_(Vector3 from) {
+		if (this->position.is_empty())
+			return false;
+
+		if (!this->transform)
+			return false;
+
+		return unity::is_visible(this->position, from, 0);
+	}
+};
+
+class BoneCache {
+public:
+	Bone* head;
+	Bone* neck;
+	Bone* spine4;
+	Bone* spine1;
+	Bone* l_upperarm;
+	Bone* l_forearm;
+	Bone* l_hand;
+	Bone* r_upperarm;
+	Bone* r_forearm;
+	Bone* r_hand;
+	Bone* pelvis;
+	Bone* l_hip;
+	Bone* l_knee;
+	Bone* l_foot;
+	Bone* r_hip;
+	Bone* r_knee;
+	Bone* r_foot;
+	Bone* r_toe;
+	Bone* l_toe;
+	Bone* penis;
+
+	bounds_t bounds;
+	Vector2 dfc;
+	Vector2 forward;
+	Vector4 eye_rot;
+
+	BoneCache() {
+		head = new Bone();
+		neck = new Bone();
+		spine4 = new Bone();
+		spine1 = new Bone();
+		l_upperarm = new Bone();
+		l_forearm = new Bone();
+		l_hand = new Bone();
+		r_upperarm = new Bone();
+		r_forearm = new Bone();
+		r_hand = new Bone();
+		pelvis = new Bone();
+		l_hip = new Bone();
+		l_knee = new Bone();
+		l_foot = new Bone();
+		r_hip = new Bone();
+		r_knee = new Bone();
+		r_foot = new Bone();
+
+		bounds = { 0, 0, 0, 0, 0 };
+		dfc = Vector2();
+		forward = { };
+		eye_rot = { };
+	}
 };
 
 class BaseNetworkable : public BaseMonoBehaviour {
@@ -1527,6 +1641,30 @@ public:
 	FIELD(_("BasePlayer"), _("clientTickInterval"), clientTickInterval, float);
 	FIELD(_("BasePlayer"), _("mounted"), mounted, BaseMountable*);
 	
+	bool isCached() {
+		if (!this) return false;
+		return (map_contains_key(cachedBones, this->userID()));
+	}
+
+	bool visible() {
+		if (!this->isCached()) return false;
+		if (cachedBones[this->userID()]->head->visible ||
+			cachedBones[this->userID()]->neck->visible ||
+			cachedBones[this->userID()]->spine4->visible ||
+			cachedBones[this->userID()]->pelvis->visible ||
+			cachedBones[this->userID()]->r_foot->visible ||
+			cachedBones[this->userID()]->l_foot->visible ||
+			cachedBones[this->userID()]->r_knee->visible ||
+			cachedBones[this->userID()]->l_knee->visible) {
+			return true;
+		}
+		return false;
+	}
+
+	BoneCache* bones() {
+		return (this->isCached() ? cachedBones[this->userID()] : new BoneCache());
+	}
+
 	void GroundAngleNew() {
 		*reinterpret_cast<float*>(this + 0xb0) = -1.0f;
 	}
@@ -1814,7 +1952,8 @@ public:
 
 			auto world_position = *reinterpret_cast<Vector3*>(visual_state + 0x90);
 
-			auto bone_pos = this->model()->boneTransforms()->get(48)->get_position();
+			//auto bone_pos = this->model()->boneTransforms()->get(48)->get_position();
+			auto bone_pos = this->get_transform()->get_position();
 
 			auto distance = bone_pos.get_3d_dist(world_position);
 			if (distance < closest_entity_distance && distance < max_distance) {
@@ -1919,6 +2058,36 @@ public:
 		//string::format(("%s %d"), _("B:"), (int)vars->visual.VisBcolor))
 		//auto s = string::wformat(_(L"trap [%d]: %s"), (int)get_fixedTime(), str);
 		console_msg((uintptr_t)this, str);
+	}
+};
+
+class Model : public MonoBehaviour {
+public:
+	FIELD(_("Model"), _("boneTransforms"), boneTransforms, System::Array<Transform*>*);
+	FIELD(_("Model"), _("boneNames"), boneNames, System::Array<System::string*>*);
+
+	Bone* resolve(const wchar_t* bone_name, BasePlayer* lp) {
+		//auto lp = LocalPlayer::ent();
+		if (!this || !lp) return nullptr;
+		if (!this->boneNames() || !this->boneTransforms()) return nullptr;
+		auto names = this->boneNames();
+		auto trans = this->boneTransforms();
+
+		for (size_t i = 0; i < names->size(); i++)
+		{
+			//array may mishandle so could crash here
+			auto name = names->get(i);
+			auto tr = trans->get(i);
+			if (!name || !tr) continue;
+			auto name_w = name->str;
+			if (!(wcscmp(name_w, bone_name))) {
+				//Vector3 re_p = ply->model()->boneTransforms()->get(47)->get_position() + ply->model()->boneTransforms()->get(47)->up() * (ply->eyes()->get_view_offset().y + v.y);
+				auto kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyes_TypeInfo);
+				auto eyeoffset = *reinterpret_cast<Vector3*>(kl + 0xB8); //eye offset is at + 0x0 from class
+				Vector3 ref = lp->get_transform()->get_position() + lp->get_transform()->up() * (eyeoffset.y + lp->eyes()->get_view_offset().y); ref.y += 1.6f;
+				return new Bone(tr->get_position(), unity::is_visible(tr->get_position(), ref, 0), tr);
+			}
+		}
 	}
 };
 
@@ -2290,4 +2459,105 @@ Vector3 WorldToScreen(Vector3 position)
 	out.z = w;
 
 	return out;
+}
+
+namespace cache {
+	std::array<int, 20> boneids = {
+		1, 2, 3, 5, 6, 14, 15, 17, 18, 21, 23, 24, 25, 26, 27, 48, 55, 56, 57, 76
+	};
+
+	bounds_t get_bounds(BasePlayer* player, float expand = 0) {
+		bounds_t ret = { FLT_MAX, FLT_MIN, FLT_MAX, FLT_MIN, FLT_MAX };
+		for (auto id : boneids) {
+			auto arr = player->model()->boneTransforms();
+			if (arr)
+			{
+				auto transform = player->model()->boneTransforms()->get(id);
+				if (transform) {
+					auto pos = transform->get_position();
+					if (id == 48)
+						pos.y += .2f;
+					auto v3 = WorldToScreen(pos);
+					Vector2 screen = { v3.x, v3.y };
+					if (!screen.empty()) {
+						if (screen.x < ret.left)
+							ret.left = screen.x;
+						if (screen.x > ret.right)
+							ret.right = screen.x;
+						if (screen.y < ret.top)
+							ret.top = screen.y;
+						if (screen.y > ret.bottom)
+							ret.bottom = screen.y;
+					}
+				}
+			}
+		}
+
+		if (ret.left == FLT_MAX
+			|| ret.right == FLT_MIN
+			|| ret.top == FLT_MAX
+			|| ret.bottom == FLT_MIN)
+			return { 0, 0, 0, 0, 0 };
+		ret.left -= expand;
+		ret.right += expand;
+		ret.top -= expand;
+		ret.bottom += expand;
+
+		ret.center = ret.left + ((ret.right - ret.left) / 2);
+
+		return ret;
+	}
+	void CacheBones(BasePlayer* player, BasePlayer* lp) {
+		auto model = player->model();
+		auto pid = player->userID();
+		if (model) {
+			auto bones = new BoneCache();
+
+			bones->head = model->resolve(_(L"head"), lp);
+			bones->neck = model->resolve(_(L"neck"), lp);
+			bones->spine4 = model->resolve(_(L"spine4"), lp);
+			bones->spine1 = model->resolve(_(L"spine1"), lp);
+			bones->l_upperarm = model->resolve(_(L"l_upperarm"), lp);
+			bones->l_forearm = model->resolve(_(L"l_forearm"), lp);
+			bones->l_hand = model->resolve(_(L"l_hand"), lp);
+			bones->r_upperarm = model->resolve(_(L"r_upperarm"), lp);
+			bones->r_forearm = model->resolve(_(L"r_forearm"), lp);
+			bones->r_hand = model->resolve(_(L"r_hand"), lp);
+			bones->pelvis = model->resolve(_(L"pelvis"), lp);
+			bones->l_hip = model->resolve(_(L"l_hip"), lp);
+			bones->l_knee = model->resolve(_(L"l_knee"), lp);
+			bones->l_foot = model->resolve(_(L"l_foot"), lp);
+			bones->r_hip = model->resolve(_(L"r_hip"), lp);
+			bones->r_knee = model->resolve(_(L"r_knee"), lp);
+			bones->r_foot = model->resolve(_(L"r_foot"), lp);
+			bones->r_toe = model->resolve(_(L"r_toe"), lp);
+			bones->l_toe = model->resolve(_(L"l_toe"), lp);
+			bones->penis = model->resolve(_(L"penis"), lp);
+
+			if (pid != lp->userID()) {
+				bounds_t bo = get_bounds(player, 4.f);
+				if (bo.bottom != FLT_MIN)
+					bones->bounds = bo;
+
+				auto v3 = WorldToScreen(bones->head->position);
+				Vector2 footpos = { v3.x, v3.y };
+				if (!footpos.empty())
+					bones->dfc = footpos;
+
+				v3 = WorldToScreen(bones->head->position + (player->eyes()->body_forward() * 2));
+				Vector2 fwd = { v3.x, v3.y };
+				if (!fwd.empty())
+					bones->forward = fwd;
+
+				//dont need nanohacks 'target' as it doesn't make sense and is only local? lol
+
+				bones->eye_rot = player->eyes()->get_rotation();
+			}
+
+			if (!map_contains_key(cachedBones, pid))
+				cachedBones.insert(std::make_pair(pid, bones));
+			else
+				cachedBones[pid] = bones;
+		}
+	}
 }
