@@ -1537,6 +1537,11 @@ public:
 		if (!this) return Vector3(0, 0, 0);
 		return get_center((uintptr_t)this);
 	}
+
+	Vector3 EyeOffset() {
+		auto kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyes_TypeInfo);
+		return *reinterpret_cast<Vector3*>(kl + 0xB8); //eye offset is at + 0x0 from class
+	}
 };
 
 class InputState {
@@ -1640,7 +1645,7 @@ public:
 	FIELD(_("BasePlayer"), _("userID"), userID, ULONG);
 	FIELD(_("BasePlayer"), _("clientTickInterval"), clientTickInterval, float);
 	FIELD(_("BasePlayer"), _("mounted"), mounted, BaseMountable*);
-	
+
 	bool isCached() {
 		if (!this) return false;
 		return (map_contains_key(cachedBones, this->userID()));
@@ -2081,10 +2086,7 @@ public:
 			if (!name || !tr) continue;
 			auto name_w = name->str;
 			if (!(wcscmp(name_w, bone_name))) {
-				//Vector3 re_p = ply->model()->boneTransforms()->get(47)->get_position() + ply->model()->boneTransforms()->get(47)->up() * (ply->eyes()->get_view_offset().y + v.y);
-				auto kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyes_TypeInfo);
-				auto eyeoffset = *reinterpret_cast<Vector3*>(kl + 0xB8); //eye offset is at + 0x0 from class
-				Vector3 ref = lp->get_transform()->get_position() + lp->get_transform()->up() * (eyeoffset.y + lp->eyes()->get_view_offset().y); ref.y += 1.6f;
+				Vector3 ref = lp->get_transform()->get_position() + lp->get_transform()->up() * (lp->eyes()->EyeOffset().y + lp->eyes()->get_view_offset().y); ref.y += 1.6f;
 				return new Bone(tr->get_position(), unity::is_visible(tr->get_position(), ref, 0), tr);
 			}
 		}

@@ -28,9 +28,7 @@ namespace offsets {
 #define oConsoleSystem_GetAll 38844976 //"ConsoleSystem.Index$$get_All"
 #define oConvar 56560368
 #define oTerrainMeta_TypeInfo 56560744
-#define oBasePlayer_TypeInfo 56560504
 #define oPlayerEyes_TypeInfo 56446352
-#define oLocalPlayer_TypeInfo 56564432
 //REAL RUST
 namespace offsets {
     constexpr auto Method_BaseEntity_ServerRPC_string_bool_address = 56796384;// address "Name": "Method$BaseEntity.ServerRPC<string, bool>()",

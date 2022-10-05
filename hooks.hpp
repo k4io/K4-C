@@ -1061,47 +1061,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		PerformanceUI_Update(instance);
 	}
 
-	void bonecache_func() {
-
-		/*//read baseplayer typeinfo
-		//read static fields
-		//read 0x10 or 0x8 (sk4ddu) for visplayerslist
-
-		uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayer_TypeInfo); //52690304 alkad
-		uintptr_t fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-		auto list = (rust::classes::list*)*reinterpret_cast<uintptr_t*>(fieldz + 0x10 + 0x0);
-
-		auto val = list->get_value<uintptr_t>();
-		if (!val) return;
-		
-		auto sz = list->get_size();
-		if (!sz) return;
-
-		auto buf = list->get_buffer<uintptr_t>();
-		if (!buf) return;
-
-		for (size_t i = 0; i < sz; i++)
-		{
-			auto current_object = *reinterpret_cast<uintptr_t*>(buf + 0x20 + (i * 0x8));
-			if (!current_object || current_object <= 100000)
-				continue;
-
-			auto base_object = *reinterpret_cast<uintptr_t*>(current_object + 0x10);
-			if (!base_object || base_object <= 100000)
-				continue;
-
-			auto object = *reinterpret_cast<uintptr_t*>(base_object + 0x30);
-			if (!object || object <= 100000)
-				continue;
-
-			auto ent = *reinterpret_cast<BasePlayer**>(base_object + 0x28);
-			if (!ent)	
-				continue;
-
-		}
-		*/
-	}
-
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
 	{
 		//if(!do_fixed_update_ptr)

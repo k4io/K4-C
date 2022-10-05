@@ -1199,9 +1199,9 @@ namespace gui {
 				case 3: { b += 0.0015f; g -= 0.0015f; if (b >= 1) cases = 0; break; }
 				default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
 				}
-				const float ScreenWidth = 1920;
-				const float ScreenHeight = 1080;
-				const Vector2 screen_center = Vector2(1920 / 2, 1080 / 2);
+				const float ScreenWidth = vars->ScreenX;
+				const float ScreenHeight = vars->ScreenY;
+				const Vector2 screen_center = Vector2(ScreenWidth / 2, ScreenHeight / 2);
 
 				if (esp::local_player)
 				{
@@ -1209,9 +1209,9 @@ namespace gui {
 						&& vars->visual.snapline > 1)
 					{
 						Vector2 start = vars->visual.snapline == 1 ? Vector2(ScreenWidth / 2, 0) :
-							vars->visual.snapline == 2 ? Vector2(ScreenWidth / 2, 540) :
-							vars->visual.snapline == 3 ? Vector2(ScreenWidth / 2, 1080) :
-							Vector2(ScreenWidth / 2, 1080);
+							vars->visual.snapline == 2 ? Vector2(ScreenWidth / 2, ScreenHeight/2) :
+							vars->visual.snapline == 3 ? Vector2(ScreenWidth / 2, ScreenHeight) :
+							Vector2(ScreenWidth / 2, 1080); // does not matter
 						Vector3 o = WorldToScreen(esp::best_target.pos);
 						if (o.x != 0 && o.y != 0)
 						{
@@ -1250,6 +1250,7 @@ namespace gui {
 					}
 				}
 
+				esp::matrix = unity::get_view_matrix();
 
 				if (!player_list.empty())
 					for (auto p : player_list)

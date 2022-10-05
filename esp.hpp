@@ -596,7 +596,6 @@ void iterate_entities() {
 		auto ent_net = *reinterpret_cast<Networkable**>(ent + 0x58);
 		auto ent_id = ent_net->get_id();
 
-		esp::matrix = unity::get_view_matrix();
 
 		if (tag == 6)
 		{
@@ -1052,7 +1051,7 @@ void DrawSnapline() {
 
 void DrawFov() {
 	float x = vars->ScreenX / 2, y = vars->ScreenY / 2;
-	render.Circle(Vector2(x, y), FLOAT4TOD3DCOLOR(vars->colors.ui.fov.visible), vars->combat.aimbotfov, 0.7f);
+	render.Circle(Vector2(x, y), FLOAT4TOD3DCOLOR(esp::best_target.visible ? vars->colors.ui.fov.visible : vars->colors.ui.fov.invisible), vars->combat.aimbotfov, 0.7f);
 }
 
 void Watermark() {
