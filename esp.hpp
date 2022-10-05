@@ -39,10 +39,11 @@ D2D1::ColorF HSVD(float h, float s, float v, float a = 1.0f)
 	float r, g, b; ColorConvertHSVtoRGB2(h, s, v, r, g, b); return D2D1::ColorF(r, g, b, a);
 }
 
-void DrawPlayer(BasePlayer* ply, bool npc)
+void DrawPlayer(BasePlayer* ply, bool npc)	
 {
 	if (!ply) return;
 	if (!esp::local_player) return;
+	if (npc && !vars->visual.npc_esp) return;
 
 	auto player_id = ply->userID();
 
@@ -156,31 +157,31 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 		switch (vars->visual.boxtype)
 		{
 		case 1: //full box
-			render.Rectangle({ bounds.left, bounds.top }, { box_width, box_height }, { 0,0,0,1 }, 2.f);
-			render.Rectangle({ bounds.left, bounds.top }, { box_width, box_height }, FLOAT4TOD3DCOLOR(box_color), 1.f);
+			render.Rectangle({ bounds.left, bounds.top }, { box_width, box_height }, { 0,0,0,1 }, 4.f);
+			render.Rectangle({ bounds.left, bounds.top }, { box_width, box_height }, FLOAT4TOD3DCOLOR(box_color), 2.f);
 			break;
 		case 2: //corner box
 
 			//top left
-			render.Line({ bounds.left, bounds.top }, { bounds.left + (box_width / 4), bounds.top }, { 0,0,0,1 }, 2.f);
-			render.Line({ bounds.left, bounds.top }, { bounds.left + (box_width / 4), bounds.top }, FLOAT4TOD3DCOLOR(box_color), 1.f);
-			render.Line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_height / 4) }, { 0,0,0,1 }, 2.f);
-			render.Line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 1.f);
+			render.Line({ bounds.left, bounds.top }, { bounds.left + (box_width / 4), bounds.top }, { 0,0,0,1 }, 4.f);
+			render.Line({ bounds.left, bounds.top }, { bounds.left + (box_width / 4), bounds.top }, FLOAT4TOD3DCOLOR(box_color), 2.f);
+			render.Line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_height / 4) }, { 0,0,0,1 }, 4.f);
+			render.Line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 2.f);
 			//top right
-			render.Line({ bounds.right, bounds.top }, { bounds.right - (box_width / 4), bounds.top }, { 0,0,0,1 }, 2.f);
-			render.Line({ bounds.right, bounds.top }, { bounds.right - (box_width / 4), bounds.top }, FLOAT4TOD3DCOLOR(box_color), 1.f);
-			render.Line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_height / 4) }, { 0,0,0,1 }, 2.f);
-			render.Line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 1.f);
+			render.Line({ bounds.right, bounds.top }, { bounds.right - (box_width / 4), bounds.top }, { 0,0,0,1 }, 4.f);
+			render.Line({ bounds.right, bounds.top }, { bounds.right - (box_width / 4), bounds.top }, FLOAT4TOD3DCOLOR(box_color), 2.f);
+			render.Line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_height / 4) }, { 0,0,0,1 }, 4.f);
+			render.Line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 2.f);
 			//bottom left
-			render.Line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 4), bounds.bottom }, { 0,0,0,1 }, 2.f);
-			render.Line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 4), bounds.bottom }, FLOAT4TOD3DCOLOR(box_color), 1.f);
-			render.Line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_height / 4) }, { 0,0,0,1 }, 2.f);
-			render.Line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 1.f);
+			render.Line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 4), bounds.bottom }, { 0,0,0,1 }, 4.f);
+			render.Line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 4), bounds.bottom }, FLOAT4TOD3DCOLOR(box_color), 2.f);
+			render.Line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_height / 4) }, { 0,0,0,1 }, 4.f);
+			render.Line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 2.f);
 			//bottom right
-			render.Line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 4), bounds.bottom }, { 0,0,0,1 }, 2.f);
-			render.Line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 4), bounds.bottom }, FLOAT4TOD3DCOLOR(box_color), 1.f);
-			render.Line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_height / 4) }, { 0,0,0,1 }, 1.f);
-			render.Line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 1.f);
+			render.Line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 4), bounds.bottom }, { 0,0,0,1 }, 4.f);
+			render.Line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 4), bounds.bottom }, FLOAT4TOD3DCOLOR(box_color), 2.f);
+			render.Line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_height / 4) }, { 0,0,0,1 }, 4.f);
+			render.Line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 2.f);
 			break;
 		case 3: //3d cube
 			//LMAO I WILL DO THIS LATER
@@ -199,7 +200,7 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 		{
 		case 1:
 			render.FillRectangle({ bounds.left - 7, bounds.top - 1 }, { 4, box_height + 3 }, { 0,0,0,1 });
-			render.FillRectangle({ bounds.left - 6, bounds.top }, { 2, box_height - h + 1 }, health_color);
+			render.FillRectangle({ bounds.left - 6, bounds.bottom }, { 2, -h - 1 }, health_color);
 			break;
 		case 2:
 			render.FillRectangle({ bounds.left, bounds.bottom + 6 }, { box_width + 1, 4 }, { 0,0,0,1 });
@@ -426,8 +427,64 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 	}
 }
 
-void DrawPlayerHotbar(aim_target target) {
+void DrawToolcupboard(Vector2 w2s, System::list<PlayerNameID*>* authed) {
 	Vector2 screen = { 0, 0 }; 
+
+	//create window length based off amount of items in belt
+	std::vector<std::wstring> names = {};
+
+	if (!w2s.empty())
+	{
+		if (!authed) return;
+		Item* result = nullptr;
+		authed->for_each([&](PlayerNameID* nameid, int32_t idx) {
+			{
+				if (nameid)
+					names.push_back(nameid->get_username());
+			}
+		});
+
+		Vector2 start = { w2s.x, w2s.y };
+		Vector2 sz = { 130, 35.f + (names.size() * 20.f) };
+
+		//filled gradient
+		render.FillRoundedRectangle_GradientLinear(start, sz,
+			{ 0.14f, 0.14f, 0.14f, 0.65f },
+			{ 159.f / 255.f, 40.f / 255.f, 29.f / 255.f, 0.65f },
+			2);
+
+		render.String({ start.x + 10, start.y + 5 }, _(L"Tool cupboard"), { 0.71, 0.71, 0.71, 1 });
+
+		//seperator
+		render.Line({ start.x, start.y + 25 }, { start.x + sz.x, start.y + 25 }, { 0.11, 0.11, 0.11, 1 }, 1);
+
+		//outline
+		render.RoundedRectangle(start, sz, { 0.11, 0.11, 0.11, 1 }, 2, 1);
+
+		if (names.size() > 0)
+		{
+			// 
+			// box has player name
+			// *separator*
+			// *item* x*amount*
+			// *item* x*amount*
+			// *item* x*amount*
+			//
+
+			start.x += 10; //left-side margin
+			start.y += 30; //margin from seperator
+
+			int k = 0;
+			for (auto i : names)
+			{
+				render.String({ start.x, start.y + (k++ * 20) }, i.c_str(), { 0.71, 0.71, 0.71, 1 });
+			}
+		}
+	}
+}
+
+void DrawPlayerHotbar(aim_target target) {
+	Vector2 screen = { 0, 0 };
 	esp::out_w2s(target.pos, screen);
 
 	//create window length based off amount of items in belt
@@ -452,7 +509,7 @@ void DrawPlayerHotbar(aim_target target) {
 					items.push_back({ name, amt });
 				}
 			}
-		});
+			});
 
 		//check for draw wearable?
 
@@ -469,22 +526,22 @@ void DrawPlayerHotbar(aim_target target) {
 			//
 
 			Vector2 start = { 150, 150 };
-			Vector2 sz = { 200, 50.f + (items.size() * 20.f) };
+			Vector2 sz = { 200, 35.f + (items.size() * 20.f) };
 
 			//filled gradient
 			render.FillRoundedRectangle_GradientLinear(start, sz,
 				{ 0.14f, 0.14f, 0.14f, 0.65f },
-				{ 159.f / 255.f, 40.f / 255.f, 29.f / 255.f, 0.65f }, 
+				{ 159.f / 255.f, 40.f / 255.f, 29.f / 255.f, 0.65f },
 				2);
-			
+
 			std::wstring name_str(player_name); name_str = name_str + _(L"'s items");
 			render.String({ start.x + 10, start.y + 5 }, name_str.c_str(), { 0.71, 0.71, 0.71, 1 });
 
 			//seperator
-			render.Line({ start.x, start.y + 25 }, { start.x + sz.x, start.y + 25 }, { 0.21, 0.21, 0.21, 1 }, 1);
+			render.Line({ start.x, start.y + 25 }, { start.x + sz.x, start.y + 25 }, { 0.11, 0.11, 0.11, 1 }, 1);
 
 			//outline
-			render.RoundedRectangle(start, sz, { 0.21, 0.21, 0.21, 1 }, 2, 1);
+			render.RoundedRectangle(start, sz, { 0.11, 0.11, 0.11, 1 }, 2, 1);
 
 			start.x += 10; //left-side margin
 			start.y += 30; //margin from seperator
@@ -589,10 +646,6 @@ void iterate_entities() {
 		if (!object_name_ptr)
 			continue;
 
-		auto object_name = *reinterpret_cast<esp::rust_str*>(object_name_ptr);
-		if (!object_name.zpad)
-			continue;
-
 		auto ent_net = *reinterpret_cast<Networkable**>(ent + 0x58);
 		auto ent_id = ent_net->get_id();
 
@@ -605,8 +658,7 @@ void iterate_entities() {
 			{
 				if (!p->is_alive()
 					|| (entity->is_sleeping() && !vars->visual.sleeper_esp)
-					|| p->userID() == entity->userID()
-					&& player_list.size() > 1)
+					|| p->userID() == entity->userID())
 				{
 					player_list.erase(std::remove(player_list.begin(), player_list.end(), p), player_list.end());
 				}
@@ -637,7 +689,7 @@ void iterate_entities() {
 					else
 						target.pos = ent->model()->boneTransforms()->get(48)->get_position();
 
-					auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().get_3d_dist(target.pos);
+					auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().get_3d_dist(target.pos); //crashes bc non game thread
 					target.distance = distance;
 
 					auto fov = unity::get_fov(target.pos);
@@ -752,6 +804,10 @@ void iterate_entities() {
 				vars->visual.cloth ||
 				vars->visual.corpses)
 			{
+				auto object_name = *reinterpret_cast<esp::rust_str*>(object_name_ptr);
+				if (!object_name.zpad)
+					continue;
+
 				float dist = 10.f;
 				if (esp::local_player && vars->visual.distance)
 					dist = esp::local_player->model()->boneTransforms()->get(48)->get_position().distance(world_position);
@@ -824,7 +880,10 @@ void iterate_entities() {
 					Vector2 w2s_position = {};
 					if (esp::out_w2s(world_position, w2s_position))
 					{
-
+						world_position.y += 1.5f;
+						//if(esp::local_player->bones()->head->position.distance(world_position) < 50.f)
+						if(esp::local_player->model()->boneTransforms()->get(48)->get_position().distance(world_position) < 50.f)
+							DrawToolcupboard(w2s_position, authorizedPlayers_list);
 						//esp::draw_tool_cupboard(w2s_position, il2cpp::methods::new_string(_("Tool Cupboard")), Vector4(255, 0, 0, 255), authorizedPlayers_list);
 					}
 					continue;
@@ -892,7 +951,13 @@ void iterate_entities() {
 					}
 					else esp::best_target.is_heli = false;
 
-					esp::draw_heli(x, y, w, h);
+					if (vars->visual.heli_esp
+						&& base_heli->is_alive())
+					{
+						render.StringCenter({ x, y - 5 }, _(L"Patrol-heli"), { 1, 1, 1, 1 });
+						render.Rectangle({ x - w, y - h }, { w * 2, h }, { 0, 0, 0, 0 }, 2);
+						render.Rectangle({ x - w, y - h }, { w * 2, h }, FLOAT4TOD3DCOLOR(vars->colors.players.boxes.visible), 1);
+					}
 					continue;
 				}
 

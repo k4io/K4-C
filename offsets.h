@@ -50,6 +50,7 @@ namespace offsets {
 #define oConsoleSystem_GetAll 38844976
 #define oConvar 56560368
 #define oTerrainMeta_TypeInfo 56560744
+#define oPlayerEyes_TypeInfo 56446352
 namespace offsets {
     constexpr auto Method_BaseEntity_ServerRPC_string_bool_address = 56796384;// address "Name": "Method$BaseEntity.ServerRPC<string, bool>()",
     constexpr auto BaseEntity$$ServerRPC_string_bool_Address = 15387664;// method address

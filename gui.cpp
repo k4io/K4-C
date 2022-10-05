@@ -761,7 +761,7 @@ namespace Gui
 			im::Checkbox(_("Name"), &vars->visual.nameesp);
 			im::Checkbox(_("Distance"), &vars->visual.distance);
 			im::Combo(_("Health bar"), &vars->visual.hpbar,
-				_("None\0Bottom\0Side"));
+				_("None\0Side\0Bottom"));
 			im::Checkbox(_("Wounded"), &vars->visual.woundedflag);
 			im::Checkbox(_("Weapon"), &vars->visual.weaponesp);
 			im::Checkbox(_("Hotbar"), &vars->visual.hotbar_esp);
@@ -830,6 +830,7 @@ namespace Gui
 			im::Text(_("World"));
 			im::Separator();
 			im::Checkbox(_("Corpses"), &vars->visual.corpses);
+			im::Checkbox(_("Patrol-heli"), &vars->visual.heli_esp);
 			im::Checkbox(_("Vehicles"), &vars->visual.vehicles);
 			im::Checkbox(_("Ladders"), &vars->visual.ladder);
 			im::Checkbox(_("Stashes"), &vars->visual.stash);
