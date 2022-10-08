@@ -857,12 +857,12 @@ void iterate_entities() {
 				//ladder
 				if (vars->visual.ladder && !strcmp(entity_class_name, _("BaseLadder"))) {
 					esp_name = _(L"Ladder");
-					esp_color = Vector4(0, 219, 58, 255);
+					float col[3] = { 0, 219/255.f, 58/255.f };
 
 					Vector2 w2s_position = {};
 					if (esp::out_w2s(world_position, w2s_position))
 					{
-
+						render.StringCenter(w2s_position, esp_name, FLOAT4TOD3DCOLOR(col));
 						//esp::draw_item(w2s_position, esp_name, esp_color);
 					}
 					continue;
@@ -1002,6 +1002,25 @@ void iterate_entities() {
 					esp_color = Vector4(145, 145, 145, 255);
 					if (vars->visual.rock_chams >= 1)
 						esp::rock_chams(ent);
+				}
+
+				//hackable crate
+				if (*(int*)(entity_class_name) == 'kcaH' && *(int*)(entity_class_name + 14) == 'tarC') {
+					auto flag = *reinterpret_cast<int*>(ent + 0x128);
+					if (flag != 128 && flag != 256)
+						continue;
+
+					Vector2 w2s_position = {};
+					if (esp::out_w2s(world_position, w2s_position))
+					{
+						auto timer = *reinterpret_cast<uintptr_t*>((uintptr_t)ent + 0x440);
+						if (!timer) continue;
+						auto text = (str)(*reinterpret_cast<uintptr_t*>(timer + 0xD0));
+						if (!text) continue;
+						auto str = text->str;
+						if (!str) continue;
+						render.StringCenter(w2s_position, string::wformat(_(L"Hackable crate: %ss"), str), { 130/255.f, 200/255.f, 230/255.f });
+					}
 				}
 
 				//traps
