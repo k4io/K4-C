@@ -593,7 +593,7 @@ void iterate_entities() {
 	bool found_lp = false;
 	Vector4 esp_color(1, 0, 1, 1);
 
-	wchar_t* esp_name;
+	wchar_t* esp_name = _(L"");
 
 	for (int i = 0; i <= size; i++) {
 		auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
@@ -671,11 +671,9 @@ void iterate_entities() {
 				|| (entity->is_sleeping() && !vars->visual.sleeper_esp))
 				continue;
 
+			bool npc = entity->playerModel()->isnpc();
 			//check npc
-			bool npc = false;
-			if (vars->visual.npc_esp
-				&& entity->playerModel()->isnpc())
-				npc = true;
+			if (npc && !vars->visual.npc_esp) continue;
 
 			//local player chams, player average velocity
 			if (entity->is_local_player())
@@ -895,7 +893,7 @@ void iterate_entities() {
 				}
 
 				//heli
-				if (*(int*)(entity_class_name + 4) == 'ileH' && vars->visual.heli_esp) {
+				if (std::string(object_name.zpad).find(_("patrol")) != std::string::npos && vars->visual.heli_esp) {
 					auto base_heli = reinterpret_cast<BaseHelicopter*>(ent);
 					if (!base_heli) continue;
 					Vector2 rearrotor, beam, mainrotor;
@@ -1081,11 +1079,10 @@ void iterate_entities() {
 					esp_name = _(L"Player Corpse");
 					esp_color = Vector4(230, 230, 230, 255);
 				}
-				else if (tag != 6)
-					continue;
 
 				//stash open?
-				if (tag != 6) {
+				if (tag != 6
+					&& wcscmp(esp_name, L"")) {
 					if (*(int*)(entity_class_name) == 'satS') {
 						auto flag = *reinterpret_cast<int*>(ent + 0x138);
 						if (flag != 2048)

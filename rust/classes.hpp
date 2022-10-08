@@ -976,7 +976,10 @@ public:
 	FIELD(_("BaseProjectile"), _("stancePenaltyScale"), stancePenaltyScale, float);
 	FIELD(_("BaseProjectile"), _("projectileVelocityScale"), projectileVelocityScale, float);
 	
-
+	void set_projectile_thickness(float thickness)
+	{
+		*reinterpret_cast<float*>((uintptr_t)this + thickness_addr) = thickness;
+	}
 
 	void set_last_hit_time(float time) {
 		*reinterpret_cast<float*>((uintptr_t)this + lastHitTime) = time;

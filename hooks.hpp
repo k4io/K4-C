@@ -441,9 +441,9 @@ namespace hooks {
 				}
 
 				if (vars->combat.thick_bullet)
-					*reinterpret_cast<float*>(projectile + 0x2C) = vars->combat.thickness > 1.f ? 1.f : vars->combat.thickness;
+					projectile->set_projectile_thickness(vars->combat.thickness > 1.f ? 1.f : vars->combat.thickness);//*reinterpret_cast<float*>(projectile + thickness_addr) = vars->combat.thickness > 1.f ? 1.f : vars->combat.thickness;
 				else
-					*reinterpret_cast<float*>(projectile + 0x2C) = 0.01f;
+					projectile->set_projectile_thickness(0.01f);
 				
 				p->integrity(1.f);
 				float t = p->traveledTime();
