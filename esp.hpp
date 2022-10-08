@@ -859,6 +859,7 @@ void iterate_entities() {
 					esp_name = _(L"Ladder");
 					float col[3] = { 0, 219/255.f, 58/255.f };
 
+					world_position.y += 1.f;
 					Vector2 w2s_position = {};
 					if (esp::out_w2s(world_position, w2s_position))
 					{
@@ -881,6 +882,7 @@ void iterate_entities() {
 						continue;
 
 					Vector2 w2s_position = {};
+					world_position.y += 1.f;
 					if (esp::out_w2s(world_position, w2s_position))
 					{
 						world_position.y += 1.5f;
@@ -978,6 +980,7 @@ void iterate_entities() {
 						ent->ServerRPC(_(L"SVSwitch"));
 						esp::last_recycler = get_fixedTime();
 					}
+					world_position.y += 1.f;
 				}
 
 				//stone
@@ -986,6 +989,7 @@ void iterate_entities() {
 					esp_color = Vector4(232, 232, 232, 255);
 					if (vars->visual.rock_chams >= 1)
 						esp::rock_chams(ent);
+					world_position.y += 1.f;
 				}
 
 				//sulfur
@@ -994,6 +998,7 @@ void iterate_entities() {
 					esp_color = Vector4(203, 207, 0, 255);
 					if (vars->visual.rock_chams >= 1)
 						esp::rock_chams(ent);
+					world_position.y += 1.f;
 				}
 
 				//metal
@@ -1002,6 +1007,7 @@ void iterate_entities() {
 					esp_color = Vector4(145, 145, 145, 255);
 					if (vars->visual.rock_chams >= 1)
 						esp::rock_chams(ent);
+					world_position.y += 1.f;
 				}
 
 				//hackable crate
@@ -1010,6 +1016,7 @@ void iterate_entities() {
 					if (flag != 128 && flag != 256)
 						continue;
 
+					world_position.y += 1.f;
 					Vector2 w2s_position = {};
 					if (esp::out_w2s(world_position, w2s_position))
 					{
@@ -1037,18 +1044,34 @@ void iterate_entities() {
 
 				//vehicles
 				else if (vars->visual.vehicles && *(int*)(entity_class_name + 4) == 'iheV') {
-					esp_name = _(L"Vehicle");
+					if (std::string(object_name.zpad).find(_("standing")) != std::string::npos)
+						esp_name = _(L"Rhib");
+					else if(std::string(object_name.zpad).find(_("small")) != std::string::npos)
+						esp_name = _(L"Small boat");
+					else if(std::string(object_name.zpad).find(_("mini")) != std::string::npos)
+						esp_name = _(L"Minicopter");
+					else if(std::string(object_name.zpad).find(_("scrap")) != std::string::npos)
+						esp_name = _(L"Scrap helicopter");
+					else if(std::string(object_name.zpad).find(_("snow")) != std::string::npos)
+						esp_name = _(L"Snowmobile");
+					else if(std::string(object_name.zpad).find(_("saddle")) != std::string::npos)
+						esp_name = _(L"Horse");
+					else esp_name = _(L"Vehicle");
+
 					esp_color = Vector4(0, 161, 219, 255);
+					world_position.y += 1.f;
 				}
 
 				//airdrop
 				else if (vars->visual.airdrops && *(int*)(object_name.zpad + 39) == 'pord') {
+					world_position.y += 1.f;
 					esp_name = _(L"Airdrop");
 					esp_color = Vector4(0, 161, 219, 255);
 				}
 
 				//cloth
 				else if (vars->visual.cloth && *(int*)(object_name.zpad + 52) == 'c-pm') {
+					world_position.y += 1.f;
 					esp_name = _(L"Cloth");
 					esp_color = Vector4(0, 219, 58, 255);
 				}
@@ -1062,8 +1085,7 @@ void iterate_entities() {
 					continue;
 
 				//stash open?
-				if (tag != 6
-					&& !std::wstring(esp_name).empty()) {
+				if (tag != 6) {
 					if (*(int*)(entity_class_name) == 'satS') {
 						auto flag = *reinterpret_cast<int*>(ent + 0x138);
 						if (flag != 2048)
