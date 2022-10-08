@@ -558,6 +558,11 @@ public:
 		auto off = *reinterpret_cast<uintptr_t* (*)(Component*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 		return (Transform*)off(this);
 	}
+
+	char* get_class_name() {
+		auto bp = *reinterpret_cast<uintptr_t*>(this);
+		return (char*)*reinterpret_cast<uintptr_t*>(bp + 0x10);
+	}
 };
 
 class GameObject : public Object {
@@ -911,6 +916,7 @@ public:
 
 class ItemDefinition : public MonoBehaviour {
 public:
+	FIELD(_("ItemDefinition"), _("displayName"), _displayName, System::string*);
 	member(int, itemid, 0x18);
 	//FIELD(_("ItemDefinition"), _("itemid"), itemid, int);
 };
@@ -978,11 +984,6 @@ public:
 
 	void set_last_hit_material(System::string material) {
 		*reinterpret_cast<System::string*>((uintptr_t)this + lastHitMaterial) = material;
-	}
-
-	char* get_class_name() {
-		auto bp = *reinterpret_cast<uintptr_t*>(this);
-		return (char*)*reinterpret_cast<uintptr_t*>(bp + 0x10);
 	}
 
 	HitTest* get_hit_test() {
@@ -1204,8 +1205,14 @@ public:
 	}
 
 	void set_no_spread(float scale = 0.f) {
-		auto recoil_properties = this->recoil();//*reinterpret_cast<uintptr_t*>((uintptr_t)this + recoil);
+		auto recoil_properties = *reinterpret_cast<uintptr_t*>((uintptr_t)this + il2cpp::value(_("BaseProjectile"), _("recoil")));//this->recoil();//
+
+		float recoilx = vars->combat.recoilx;
+		float recoily = vars->combat.recoily;
+
+		//after update June 5th 2022
 		auto new_recoil_properties = *reinterpret_cast<uintptr_t*>((uintptr_t)recoil_properties + 0x78);
+
 		this->aimCone() = scale;
 		this->hipAimCone() = scale;
 		this->aimConePenaltyMax() = scale;
@@ -1244,9 +1251,11 @@ public:
 class Item {
 public:
 	FIELD(_("Item"), _("heldEntity"), heldEntity, HeldEntity*);
+	FIELD(_("Item"), _("info"), info, ItemDefinition*);
+	//FIELD(_("Item"), _("name"), name, str);
 
 	uintptr_t get_icon_sprite() {
-		const auto     item_definition = mem::read<uintptr_t>((uintptr_t)this + info);
+		const auto item_definition = this->info();
 		if (!item_definition)
 			return 0;
 
@@ -1254,11 +1263,11 @@ public:
 	}
 
 	uintptr_t get_steam_icon_sprite() {
-		const auto     item_definition = mem::read<uintptr_t>((uintptr_t)this + info);
+		const auto item_definition = this->info();
 		if (!item_definition)
 			return 0;
 
-		auto SteamInventoryItem = *reinterpret_cast<uintptr_t*>(item_definition + steamItem);
+		auto SteamInventoryItem = *reinterpret_cast<uintptr_t*>((uintptr_t)item_definition + steamItem);
 		if (!SteamInventoryItem)
 			return 0;
 
@@ -1271,11 +1280,11 @@ public:
 	}
 
 	wchar_t* get_weapon_name() {
-		auto item_def = *reinterpret_cast<uintptr_t*>((uintptr_t)this + info);
-		if (!item_def)
+		const auto item_definition = this->info();
+		if (!item_definition)
 			return {};
 
-		auto display_name = *reinterpret_cast<uintptr_t*>(item_def + displayName);
+		auto display_name = *reinterpret_cast<uintptr_t*>((uintptr_t)item_definition + displayName);
 		if (!display_name)
 			return {};
 
@@ -1285,20 +1294,20 @@ public:
 	}
 
 	bool is_weapon() {
-		const auto     item_definition = mem::read<uintptr_t>((uintptr_t)this + info);
+		const auto item_definition = this->info();
 		if (!item_definition)
 			return false;
 
-		return mem::read<uint32_t>(item_definition + category) == 0;
+		return mem::read<uint32_t>((uintptr_t)item_definition + category) == 0;
 	}
 
 	int32_t get_item_definition_id()
 	{
-		const auto     item_definition = *reinterpret_cast<uintptr_t*>((uintptr_t)this + info);
+		const auto item_definition = this->info();
 		if (!item_definition)
 			return 0;
 
-		return *reinterpret_cast<int32_t*>(item_definition + itemid);
+		return *reinterpret_cast<int32_t*>((uintptr_t)item_definition + itemid);
 	}
 
 	template<typename T = BaseEntity>
@@ -1630,6 +1639,34 @@ public:
 	}
 };
 
+class ItemSlot {
+
+};
+
+class ItemCrafter {
+
+};
+
+class ItemContainer {
+public:
+	FIELD(_("ItemContainer"), _("capacity"), capacity, int);
+	FIELD(_("ItemContainer"), _("itemList"), itemList, System::list<Item*>*);
+	FIELD(_("ItemContainer"), _("availableSlots"), availableSlots, System::list<ItemSlot*>*);
+};
+
+class PlayerLoot {
+
+};
+
+class PlayerInventory {
+public:
+	FIELD(_("PlayerInventory"), _("containerMain"), containerMain, ItemContainer*);
+	FIELD(_("PlayerInventory"), _("containerBelt"), containerBelt, ItemContainer*);
+	FIELD(_("PlayerInventory"), _("containerWear"), containerWear, ItemContainer*);
+	FIELD(_("PlayerInventory"), _("crafting"), crafting, ItemCrafter*);
+	FIELD(_("PlayerInventory"), _("loot"), loot, PlayerLoot*);
+};
+
 class BasePlayer : public BaseCombatEntity {
 public:
 	FIELD(_("BasePlayer"), _("playerModel"), playerModel, PlayerModel*);
@@ -1645,6 +1682,7 @@ public:
 	FIELD(_("BasePlayer"), _("userID"), userID, ULONG);
 	FIELD(_("BasePlayer"), _("clientTickInterval"), clientTickInterval, float);
 	FIELD(_("BasePlayer"), _("mounted"), mounted, BaseMountable*);
+	FIELD(_("BasePlayer"), _("inventory"), inventory, PlayerInventory*);
 
 	bool isCached() {
 		if (!this) return false;
@@ -1774,6 +1812,60 @@ public:
 	//auto lastSentTickTime() {
 	//	return *reinterpret_cast<float*>((uintptr_t)this + _lastSentTickTime);
 	//}
+	Bone* closest_bone(BasePlayer* lp, Vector3 point, bool vischeck = true) {
+		if (!this->isCached()) return nullptr;
+		float bdist = 1000.f;
+		Bone* bestbone = nullptr;
+		if (cachedBones[this->userID()]->head->position.distance(point) < bdist
+			&& (vischeck ? cachedBones[this->userID()]->head->visible : true))
+		{
+			bestbone = cachedBones[this->userID()]->head;
+			bdist = cachedBones[this->userID()]->head->position.distance(point);
+		}
+		if (cachedBones[this->userID()]->neck->position.distance(point) < bdist
+			&& (vischeck ? cachedBones[this->userID()]->neck->visible : true))
+		{
+			bestbone = cachedBones[this->userID()]->neck;
+			bdist = cachedBones[this->userID()]->neck->position.distance(point);
+		}
+		if (cachedBones[this->userID()]->spine4->position.distance(point) < bdist
+			&& (vischeck ? cachedBones[this->userID()]->spine4->visible : true))
+		{
+			bestbone = cachedBones[this->userID()]->spine4;
+			bdist = cachedBones[this->userID()]->spine4->position.distance(point);
+		}
+		if (cachedBones[this->userID()]->pelvis->position.distance(point) < bdist
+			&& (vischeck ? cachedBones[this->userID()]->pelvis->visible : true))
+		{
+			bestbone = cachedBones[this->userID()]->pelvis;
+			bdist = cachedBones[this->userID()]->pelvis->position.distance(point);
+		}
+		if (cachedBones[this->userID()]->r_foot->position.distance(point) < bdist
+			&& (vischeck ? cachedBones[this->userID()]->r_foot->visible : true))
+		{
+			bestbone = cachedBones[this->userID()]->r_foot;
+			bdist = cachedBones[this->userID()]->r_foot->position.distance(point);
+		}
+		if (cachedBones[this->userID()]->l_foot->position.distance(point) < bdist
+			&& (vischeck ? cachedBones[this->userID()]->l_foot->visible : true))
+		{
+			bestbone = cachedBones[this->userID()]->l_foot;
+			bdist = cachedBones[this->userID()]->l_foot->position.distance(point);
+		}
+		if (cachedBones[this->userID()]->r_knee->position.distance(point) < bdist
+			&& (vischeck ? cachedBones[this->userID()]->r_knee->visible : true))
+		{
+			bestbone = cachedBones[this->userID()]->r_knee;
+			bdist = cachedBones[this->userID()]->r_knee->position.distance(point);
+		}
+		if (cachedBones[this->userID()]->l_knee->position.distance(point) < bdist
+			&& (vischeck ? cachedBones[this->userID()]->l_knee->visible : true))
+		{
+			bestbone = cachedBones[this->userID()]->l_knee;
+			bdist = cachedBones[this->userID()]->l_knee->position.distance(point);
+		}
+		return bestbone;
+	}
 
 	System::list<Item*>* get_belt_items()
 	{
@@ -2510,12 +2602,15 @@ namespace cache {
 		return ret;
 	}
 	void CacheBones(BasePlayer* player, BasePlayer* lp) {
+		if (!player || !lp || !player->is_alive()) return;
 		auto model = player->model();
 		auto pid = player->userID();
 		if (model) {
 			auto bones = new BoneCache();
 
 			bones->head = model->resolve(_(L"head"), lp);
+			if (!bones->head)
+				return;
 			bones->neck = model->resolve(_(L"neck"), lp);
 			bones->spine4 = model->resolve(_(L"spine4"), lp);
 			bones->spine1 = model->resolve(_(L"spine1"), lp);

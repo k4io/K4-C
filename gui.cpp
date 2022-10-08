@@ -52,7 +52,7 @@ namespace Gui
 	}
 
 	std::string savefloat(std::string beginning, float* col) {
-		return beginning + "=" + std::to_string(col[0]) + _(",") + std::to_string(col[1]) + _(",") + std::to_string(col[2]);
+		return beginning + "=" + std::to_string(col[0]) + _(",") + std::to_string(col[1]) + _(",") + std::to_string(col[2]) + _("\n");
 	}
 
 	void load_config() {
@@ -804,9 +804,11 @@ namespace Gui
 			im::Separator();
 			im::Checkbox(_("Rainbow chams"), &vars->visual.rainbow_chams);
 			im::Combo(_("Players"), &vars->visual.shader,
-				_("None\0Normal\0Seethrough\0Wireframe\0Lit"));
+				_("None\0Normal\0Seethrough\0Wireframe\0Lit\0Galaxy"));
 			im::Combo(_("Hands"), &vars->visual.hand_chams,
-				_("None\0Seethrough\0Normal"));
+				_("None\0Seethrough\0Normal\0Galaxy"));
+			im::Combo(_("Rocks"), &vars->visual.rock_chams,
+				_("None\0Seethrough\0Normal\0Galaxy"));
 			im::EndChild();
 		}
 	}
@@ -880,6 +882,7 @@ namespace Gui
 			im::Hotkey(_("L"), &vars->keybinds.neck, ImVec2(50, 14));
 			im::SliderFloat(_("Size"), &vars->misc.PlayerEyes, 1.f, 1.5f, _("%.2f"), 0.1f);
 			im::Checkbox(_("Auto upgrade"), &vars->misc.auto_upgrade);
+			im::Checkbox(_("Auto refill"), &vars->misc.autorefill);
 			im::Checkbox(_("Fakelag"), &vars->misc.fake_lag);
 			im::Checkbox(_("Desync on key"), &vars->misc.desync);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);

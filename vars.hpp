@@ -69,6 +69,7 @@ struct Vars
 		bool rainbow_chams = false;
 		bool hotbar_esp = false;
 		int hand_chams = 0;
+		int rock_chams = 0;
 		int boxtype = 0;
 		bool boxesp = false;
 		bool spriteitem = false;
@@ -172,6 +173,7 @@ struct Vars
 		bool spiderman = false;
 		bool silentwalk = false;
 		bool autofarm = false;
+		bool autorefill = false;
 		bool interactive_debug = false;
 
 		int gesture_spam = 0;

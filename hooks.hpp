@@ -3,7 +3,7 @@
 
 #include "esp.hpp"
 
-#include "gui/OnGUI.hpp"
+//#include "gui/OnGUI.hpp"
 
 static auto dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
 
@@ -386,6 +386,11 @@ namespace hooks {
 				p = *(Projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
 				Vector3 a;
 				misc::get_prediction(target, rpc_position, target_pos, original_vel, aimbot_velocity, a, travel_t, p);
+
+				if (vars->combat.thick_bullet)
+					*reinterpret_cast<float*>(projectile + 0x2C) = vars->combat.thickness > 1.f ? 1.f : vars->combat.thickness;
+				else
+					*reinterpret_cast<float*>(projectile + 0x2C) = 0.01f;
 				break;
 			}
 
@@ -1130,7 +1135,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 #pragma region static_method_hooks
 		static uintptr_t* serverrpc_projecshoot;
 		if (!serverrpc_projecshoot) {
-			auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot);
+			//auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot);
+			auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileShoot___);
 
 			if (method_serverrpc_projecshoot) {
 				serverrpc_projecshoot = **(uintptr_t***)(method_serverrpc_projecshoot + 0x30);
@@ -1191,8 +1197,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			vars->desyncTime = (unity::get_realtimesincestartup() - tick_time) - 0.03125 * 3;
 
 			auto wpn = baseplayer->GetActiveItem();
-
 			auto held = wpn ? wpn->GetHeldEntity<BaseProjectile>() : nullptr;
+			float time = get_fixedTime();
 
 			if (vars->misc.attack_on_mountables) {
 				auto mountable = baseplayer->mounted();
@@ -1230,94 +1236,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				}
 			}
 
-			float mm_eye = ((0.01f + ((vars->desyncTime + 2.f / 60.f + 0.125f) * baseplayer->max_velocity())));
-			float time = get_fixedTime();
-			if (esp::best_target.ent && held && wpn)
-			{
-				//auto mag = *reinterpret_cast<uintptr_t*>(held + 0x2C0);
-				Vector3 target = esp::best_target.pos;
-				auto mag_ammo = held->ammo_left();
 
-				/*
-				//old manip
-				if (vars->combat.manipulator && ((unity::GetKey(vars->keybinds.manipulator))
-					|| misc::manipulate_vis))
-				{
-					float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
-					if (misc::can_manipulate(baseplayer, target, mm_eye))
-						if (nextshot < time
-							&& (held->timeSinceDeploy() > held->deployDelay() ||
-								!strcmp(held->get_class_name(), _("BowWeapon")) ||
-								!strcmp(held->get_class_name(), _("CompoundBowWeapon")) ||
-								!strcmp(held->get_class_name(), _("CrossbowWeapon")))
-							&& mag_ammo > 0)
-						{
-							auto v = esp::local_player->eyes()->get_position() + misc::best_lean;
-							esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - manipulator attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(vars->desyncTime * 100.f)));
-
-							misc::manual = true;
-							hk_projectile_launchprojectile(held);
-							misc::best_target = Vector3(0, 0, 0);
-							baseplayer->SendClientTick();
-						}
-				}*/
-
-				if ((vars->combat.manipulator2
-					&& esp::best_target.ent->is_alive()
-					&& !(!GetAsyncKeyState(vars->keybinds.manipulator)))
-					|| misc::manipulate_vis)
-				{
-					if (wpn && held && esp::best_target.ent) {
-						float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
-						if (CanManipulate(held, (BasePlayer*)esp::best_target.ent, state))
-							if (nextshot < time
-								&& (held->timeSinceDeploy() > held->deployDelay() ||
-									!strcmp(held->get_class_name(), _("BowWeapon")) ||
-									!strcmp(held->get_class_name(), _("CompoundBowWeapon")) ||
-									!strcmp(held->get_class_name(), _("CrossbowWeapon")))
-								&& held->ammo_left() > 0)
-							{
-								auto v = settings::RealGangstaShit;//esp::local_player->eyes()->get_position() + misc::best_lean;
-								esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - manipulator attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(vars->desyncTime * 100.f)));
-
-								misc::manual = true;
-								hk_projectile_launchprojectile(held);
-								baseplayer->SendClientTick();
-							}
-					}
-				}
-
-				if ((vars->combat.autoshoot || unity::GetKey(vars->keybinds.autoshoot))
-					&& esp::best_target.ent->is_alive())
-				{
-					float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
-					if (baseplayer->is_visible(target, baseplayer->model()->boneTransforms()->get(48)->get_position())
-						&& get_fixedTime() > nextshot
-						&& held->timeSinceDeploy() > held->deployDelay()
-						&& mag_ammo > 0)
-					{
-						misc::autoshot = true;
-						hk_projectile_launchprojectile(held);
-						baseplayer->SendClientTick();
-					}
-					else if (!baseplayer->is_visible(baseplayer->model()->boneTransforms()->get(48)->get_position(), target)
-						&& vars->combat.manipulator2
-						&& mag_ammo > 0)
-					{
-						if (misc::can_manipulate(baseplayer, target, 9.f))
-						{//maybe check more later idk
-							misc::manipulate_vis = true;
-						}
-						else misc::manipulate_vis = false;
-					}
-				}
-				else misc::manipulate_vis = false;
-			}
-			else misc::manipulate_vis = false;
 			//desync on key
-
-
-
 			if (unity::GetKey(vars->keybinds.desync_ok)
 				|| (vars->combat.manipulator2
 					&& (unity::GetKey(vars->keybinds.manipulator)
@@ -1372,6 +1292,90 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 			auto item = baseplayer->GetActiveItem();
 
+			float mm_eye = ((0.01f + ((vars->desyncTime + 2.f / 60.f + 0.125f) * baseplayer->max_velocity())));
+			if (esp::best_target.ent && held && wpn)
+			{
+				//auto mag = *reinterpret_cast<uintptr_t*>(held + 0x2C0);
+				Vector3 target = esp::best_target.pos;
+				auto mag_ammo = held->ammo_left();
+
+				/*
+				//old manip
+				if (vars->combat.manipulator && ((unity::GetKey(vars->keybinds.manipulator))
+					|| misc::manipulate_vis))
+				{
+					float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
+					if (misc::can_manipulate(baseplayer, target, mm_eye))
+						if (nextshot < time
+							&& (held->timeSinceDeploy() > held->deployDelay() ||
+								!strcmp(held->get_class_name(), _("BowWeapon")) ||
+								!strcmp(held->get_class_name(), _("CompoundBowWeapon")) ||
+								!strcmp(held->get_class_name(), _("CrossbowWeapon")))
+							&& mag_ammo > 0)
+						{
+							auto v = esp::local_player->eyes()->get_position() + misc::best_lean;
+							esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - manipulator attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(vars->desyncTime * 100.f)));
+
+							misc::manual = true;
+							hk_projectile_launchprojectile(held);
+							misc::best_target = Vector3(0, 0, 0);
+							baseplayer->SendClientTick();
+						}
+				}*/
+
+
+				if ((vars->combat.manipulator2
+					&& esp::best_target.ent->is_alive()
+					&& !(!GetAsyncKeyState(vars->keybinds.manipulator)))
+					|| misc::manipulate_vis)
+				{
+					if (wpn && held && esp::best_target.ent) {
+						float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
+						if (CanManipulate(held, (BasePlayer*)esp::best_target.ent, baseplayer->input()->state()))
+							if (nextshot < time
+								&& (held->timeSinceDeploy() > held->deployDelay() ||
+									!strcmp(held->get_class_name(), _("BowWeapon")) ||
+									!strcmp(held->get_class_name(), _("CompoundBowWeapon")) ||
+									!strcmp(held->get_class_name(), _("CrossbowWeapon")))
+								&& held->ammo_left() > 0)
+							{
+								auto v = settings::RealGangstaShit;//esp::local_player->eyes()->get_position() + misc::best_lean;
+								esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - manipulator attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(vars->desyncTime * 100.f)));
+
+								misc::manual = true;
+								hooks::hk_projectile_launchprojectile(held);
+								baseplayer->SendClientTick();
+							}
+					}
+				}
+
+				if ((vars->combat.autoshoot || unity::GetKey(vars->keybinds.autoshoot))
+					&& esp::best_target.ent->is_alive())
+				{
+					float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
+					if (baseplayer->is_visible(target, baseplayer->model()->boneTransforms()->get(48)->get_position())
+						&& get_fixedTime() > nextshot
+						&& held->timeSinceDeploy() > held->deployDelay()
+						&& mag_ammo > 0)
+					{
+						misc::autoshot = true;
+						hooks::hk_projectile_launchprojectile(held);
+						baseplayer->SendClientTick();
+					}
+					else if (!baseplayer->is_visible(baseplayer->model()->boneTransforms()->get(48)->get_position(), target)
+						&& vars->combat.manipulator2
+						&& mag_ammo > 0)
+					{
+						if (misc::can_manipulate(baseplayer, target, 9.f))
+						{//maybe check more later idk
+							misc::manipulate_vis = true;
+						}
+						else misc::manipulate_vis = false;
+					}
+				}
+				else misc::manipulate_vis = false;
+			}
+			else misc::manipulate_vis = false;
 
 			if (vars->misc.speedhack || unity::GetKey(vars->keybinds.timescale)) {
 				set_timeScale(vars->misc.speedhackspeed);
@@ -1412,8 +1416,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						auto target = current.ent;
 						if (vars->combat.thick_bullet
 							&& projectile->authoritative()
-							&& projectile->IsAlive()
-							&& false)
+							&& projectile->IsAlive())
 						//&& vars->combat.thickness > 1.1f)//)
 						{
 							if (target.ent)
@@ -1421,15 +1424,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								auto current_position = projectile->get_transform()->get_position();
 					
 								//transform* bonetrans = target.player->find_closest_bone(current_position, true
-								Transform* bonetrans = target.ent->model()->boneTransforms()->get(48);
+								//Transform* bonetrans = target.ent->model()->boneTransforms()->get(48);
+								auto bone = ((BasePlayer*)esp::best_target.ent)->closest_bone(esp::local_player, current_position);
 					
-								if (bonetrans)
+								if (bone)
 								{
-									if (vars->combat.bodyaim)
-										bonetrans = target.ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis);
-					
-					
-									Vector3 target_bone = bonetrans->get_position(); //target_bone.y -= 0.8f;
+									Vector3 target_bone = bone->position; //target_bone.y -= 0.8f;
 								//Sphere(target_bone, 2.2f, col(12, 150, 100, 50), 10.f, 100.f);
 					
 									if (misc::LineCircleIntersection(target_bone, vars->combat.thickness, current_position, projectile->previousPosition(), offset))
@@ -1473,7 +1473,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 											DoHit(projectile, ht, newpos, HitNormalWorld((uintptr_t)ht));
 										}
 									}*/
-									if (dist < 2.0f)
+									if (dist < 1.8f)
 									{
 										auto newpos = Vector3::move_towards(current_position, target_bone, 1.0f);
 										set_position(projectile->get_transform(), newpos);
@@ -1482,9 +1482,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 										HitTest* ht = (HitTest*)projectile->hitTest();
 										ht->DidHit() = true;
 										ht->HitEntity() = target.ent;
-										ht->HitTransform() = bonetrans;
-										ht->HitPoint() = bonetrans->InverseTransformPoint(newpos);
-										ht->HitNormal() = bonetrans->InverseTransformDirection(newpos);
+										ht->HitTransform() = bone->transform;
+										ht->HitPoint() = bone->transform->InverseTransformPoint(newpos);
+										ht->HitNormal() = bone->transform->InverseTransformDirection(newpos);
 										Ray r(projectile->get_transform()->get_position(), newpos);
 										safe_write(ht + 0x14, r, Ray);
 										DoHit(projectile, ht, newpos, HitNormalWorld((uintptr_t)ht));
@@ -1496,43 +1496,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							misc::fired_projectiles[i] = { nullptr, nullptr, 1, 0 };
 						}
 					}
-
-					//for (int i = 0; i < 32; i++)
-					//{
-					//	bool ret = false;
-					//	auto current = misc::fired_projectiles[i];
-					//	if (current.fired_at < 1.f)
-					//		continue;
-					//	auto updates = current.updates;
-					//	float update_time = current.fired_at + (updates * 0.03125f);
-					//	current.updates = updates + 1;
-					//
-					//
-					//	//LI_FIND(fprintf)(stdout,
-					//	//	_("Projectile [%i]:\nUpdates: %i\nUpdate time: %.2f\n"),
-					//	//	i,
-					//	//	updates,
-					//	//	update_time);
-					//
-					//
-					//	if (time < update_time)
-					//		continue;
-					//	float lifetime = time - current.fired_at;
-					//	if (current.pr->IsAlive())
-					//		current.pr->UpdateVelocity(0.03125f, current.pr, ret);
-					//	//current.pr->UpdateVelocity(get_fixeddeltaTime(), current.pr, ret);
-					//	else {
-					//		//has died
-					//		//Retire(current->pr);
-					//		misc::fired_projectiles[i] = { nullptr, 0, 0 };
-					//		continue;
-					//	}
-					//	if (lifetime > 8.f) {
-					//		//Retire(current->pr);
-					//		misc::fired_projectiles[i] = { nullptr, 0, 0 };
-					//		continue;
-					//	}
-					//}
 
 					auto wep_class_name = *(const char**)(*(uintptr_t*)(uintptr_t)baseprojectile + 0x10);
 
@@ -1657,7 +1620,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 					if (!(*(int*)(wep_class_name + 4) == 'eleM' && *(int*)(wep_class_name) == 'esaB')) {
 						if (unity::GetKey(VK_LBUTTON) && vars->misc.instant_med) {
-							const auto item_id = item->get_item_definition_id();
+							//const auto item_id = item->info()->itemid;
+							const auto item_id = item->info()->itemid;
 
 							if (item_id == 1079279582 || item_id == -2072273936) {
 								auto time = get_time();
@@ -1670,7 +1634,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							}
 						}
 						else if (unity::GetKey(VK_RBUTTON) && vars->misc.instant_med) {
-							const auto item_id = item->get_item_definition_id();
+							const auto item_id = item->info()->itemid;
 
 							if (item_id == 1079279582 || item_id == -2072273936) {
 								esp::matrix = unity::get_view_matrix();
@@ -1702,27 +1666,24 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						//////weapon mods/////
 						if (*(int*)(wep_class_name) == 'esaB' && *(int*)(wep_class_name + 4) == 'jorP' || *(int*)(wep_class_name) == 'nilF') {
 							if (item->is_weapon()) {
-								const auto item_id = item->get_item_definition_id();
+								//const auto item_id = item->info()->itemid;
 
-								switch (item_id) {
-								case -75944661:
+								if (*(int*)(wep_class_name) == 'nilF') {
 									mem::write<float>((uint64_t)baseprojectile + 0x378, 1.f); //eoka success fraction
 									mem::write<bool>((uint64_t)baseprojectile + 0x388, true); //eoka _didSparkThisFrame
-									break;
-								default:
-									if (vars->combat.fast_bullet)
-										if (item_id != 1318558775)
-											baseprojectile->projectileVelocityScale() = 1.49f;
+								}
+								else {
 									if (vars->combat.rapidfire)
 										baseprojectile->repeatDelay() = 0.02f;
 									if (vars->combat.automatic)
 										baseprojectile->automatic() = true;
-									if (vars->combat.nospread)
-										baseprojectile->set_no_spread();
-									baseprojectile->set_recoil();
-									break;
-
 								}
+
+								if (vars->combat.fast_bullet)
+									baseprojectile->projectileVelocityScale() = 1.49f;
+								if (vars->combat.nospread)
+									baseprojectile->set_no_spread();
+								baseprojectile->set_recoil();
 							}
 						}
 					}
@@ -1733,7 +1694,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 				if (target.ent)
 				{
-					esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - sending RPC_Assist to player %s"), ((BasePlayer*)target.ent)->_displayName()));
+					//esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - sending RPC_Assist to player %s"), ((BasePlayer*)target.ent)->_displayName()));
 
 					if (!target.is_heli && target.distance <= 5 && target.ent->health() <= 4 && target.visible)
 						target.ent->ServerRPC(_(L"RPC_Assist"));

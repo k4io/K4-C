@@ -6,6 +6,10 @@
 #include <D3D11.h>
 #include <d3d9.h>
 #include "imgui/imgui.h"
+
+#include <wingdi.h>
+
+#pragma comment(lib, "gdi32.lib")
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "dwrite.lib")
 
@@ -27,6 +31,7 @@ private:
 	ID2D1RenderTarget* Canvas; 
 	IDWriteFactory1* TextEngine;
 	IDWriteTextFormat* TextFormat;
+	IDWriteFontCollection* fontCollection;
 	ID2D1SolidColorBrush* SolidColor;
 	ID2D1LinearGradientBrush* LinearGradientBrush;
 	ID2D1RadialGradientBrush* RadialGradientBrush;
@@ -47,8 +52,28 @@ private:
 			initialized = true; D2D1_FACTORY_OPTIONS CreateOpt = { D2D1_DEBUG_LEVEL_NONE };
 			auto dwrite = DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(TextEngine), (IUnknown**)&TextEngine);
 			auto d2d1 = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory), &CreateOpt, (void**)&Interface);
-			TextEngine->CreateTextFormat(_(L"minecraftchmc"), NULL, DWRITE_FONT_WEIGHT_THIN, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_CONDENSED, 18.f, L"", &TextFormat);
+			
+			auto fontname = _(L"mc.ttf");
+			if (std::filesystem::exists(fontname))
+			{
+				if (SUCCEEDED(TextEngine->GetSystemFontCollection(&fontCollection, false)))
+				{
+					if (SUCCEEDED(TextEngine->CreateTextFormat(_(L"MinecraftCHMC"),
+						fontCollection,
+						DWRITE_FONT_WEIGHT_NORMAL,
+						DWRITE_FONT_STYLE_NORMAL,
+						DWRITE_FONT_STRETCH_NORMAL,
+						14.f,
+						_(L""),
+						&TextFormat)))
+					{
+						if (!Interface || !TextEngine || !TextFormat) return false;
+					}
+				}
+			}
+			//TextEngine->CreateTextFormat(_(L"Consolas"), NULL, DWRITE_FONT_WEIGHT_THIN, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_CONDENSED, 14.f, L"", &TextFormat);
 			if (!Interface || !TextEngine || !TextFormat) return false;
+			RemoveFontResource(fontname);
 		}
 		//get window flags var
 		ID3D11Device* d3d_device;

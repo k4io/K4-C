@@ -411,14 +411,14 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 				{
 					auto dist_color = is_visible ? vars->colors.players.details.distance.visible : vars->colors.players.details.distance.invisible;
 					auto nstr = string::wformat(_(L"[%dm]"), (int)distance);
-					render.StringCenter({ bounds.center, bounds.bottom + 5 }, nstr, { 0, 0, 0, 1 });
-					render.StringCenter({ bounds.center, bounds.bottom + 4}, nstr, FLOAT4TOD3DCOLOR(dist_color));
+					render.StringCenter({ bounds.center, bounds.bottom + 10 }, nstr, { 0, 0, 0, 1 });
+					render.StringCenter({ bounds.center, bounds.bottom + 9 }, nstr, FLOAT4TOD3DCOLOR(dist_color));
 					//gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.bottom + 1.f, 79.f + half * 2 + 80.f , 30 }, nstr, gui::Color(0, 0, 0, 120), true, 10.5);
 					//gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.bottom, 80.f + half * 2 + 80.f , 30 }, nstr, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
 				}
 
-				render.StringCenter({ bounds.center, bounds.top - 14 }, name, { 0, 0, 0, 1 });
-				render.StringCenter({ bounds.center, bounds.top - 13 }, name, FLOAT4TOD3DCOLOR(name_color));
+				render.StringCenter({ bounds.center, bounds.top - 9 }, name, { 0, 0, 0, 1 });
+				render.StringCenter({ bounds.center, bounds.top - 8 }, name, FLOAT4TOD3DCOLOR(name_color));
 				//gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.top - 23.f, 79.f + half * 2 + 80.f , 30 }, name, gui::Color(0, 0, 0, 120), true, 10.5);
 				//gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.top - 24.f, 80.f + half * 2 + 80.f , 30 }, name, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
 			}
@@ -685,9 +685,11 @@ void iterate_entities() {
 				{
 					auto target = aim_target();
 					if (vars->combat.bodyaim)
-						target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->get_position();
+						target.pos = ((BasePlayer*)ent)->bones()->pelvis->position;
+						//target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->get_position();
 					else
-						target.pos = ent->model()->boneTransforms()->get(48)->get_position();
+						target.pos = ((BasePlayer*)ent)->bones()->head->position;
+						//target.pos = ent->model()->boneTransforms()->get(48)->get_position();
 
 					auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().get_3d_dist(target.pos); //crashes bc non game thread
 					target.distance = distance;
@@ -802,6 +804,7 @@ void iterate_entities() {
 				vars->visual.airdrops ||
 				vars->visual.ladder ||
 				vars->visual.cloth ||
+				vars->visual.tc_esp ||
 				vars->visual.corpses)
 			{
 				auto object_name = *reinterpret_cast<esp::rust_str*>(object_name_ptr);
@@ -892,7 +895,7 @@ void iterate_entities() {
 				//heli
 				if (*(int*)(entity_class_name + 4) == 'ileH' && vars->visual.heli_esp) {
 					auto base_heli = reinterpret_cast<BaseHelicopter*>(ent);
-
+					if (!base_heli) continue;
 					Vector2 rearrotor, beam, mainrotor;
 					esp::out_w2s(base_heli->model()->boneTransforms()->get(22)->get_position(), rearrotor);
 					esp::out_w2s(base_heli->model()->boneTransforms()->get(19)->get_position(), mainrotor);
@@ -932,8 +935,8 @@ void iterate_entities() {
 						{
 							target.ent = base_heli;
 
-							auto visible = esp::local_player->is_visible(esp::local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
-							target.visible = visible;
+							//auto visible = esp::local_player->is_visible(esp::local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
+							//target.visible = visible;
 
 							if (target < esp::best_target)
 							{

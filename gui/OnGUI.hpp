@@ -570,7 +570,7 @@ namespace gui {
 		label = mem::read<uintptr_t>(skin + 0x38);
 
 		unity::bundle = unity::LoadFromFile(_(L"rust.assets"));
-		//unity::galaxy_bundle = unity::LoadFromFile(_(L"galaxy.chams"));
+		unity::galaxy_bundle = unity::LoadFromFile(_(L"galaxy.chams"));
 		unity::bundle_font = unity::LoadFromFile(_(L"font.assets"));
 
 		const auto set_font = [&](System::string font_name, int size) {
@@ -1228,7 +1228,7 @@ namespace gui {
 								settings::vert_flyhack,
 								settings::vert_flyhack);
 						}
-						else {
+						else if (settings::vert_flyhack >= .1f) {
 							gui::Progbar({ screen_center.x - 300, screen_center.y - 500 },
 								{ 600, 5 },
 								settings::vert_flyhack,
@@ -1241,7 +1241,7 @@ namespace gui {
 								settings::hor_flyhack,
 								settings::hor_flyhack);
 						}
-						else {
+						else if(settings::hor_flyhack >= .1f){
 							gui::Progbar({ screen_center.x - 300, screen_center.y - 470 },
 								{ 600, 5 },
 								settings::hor_flyhack,
@@ -1260,6 +1260,33 @@ namespace gui {
 							cache::CacheBones(p, esp::local_player);
 						}
 				//esp::start();
+				auto baseplayer = esp::local_player;
+				if (vars->misc.autorefill) {
+					auto inv = baseplayer->inventory();
+					if (inv)
+					{
+						auto main = inv->containerMain();
+						auto belt = inv->containerBelt();
+						if (main && belt)
+						{
+							auto mainitems = main->itemList();
+							auto beltitems = belt->itemList();
+							if (mainitems && beltitems)
+							{
+								auto size = beltitems->get_size();
+
+								beltitems->for_each([&](Item* item, int32_t idx)
+								{
+									esp::local_player->console_echo(item->get_weapon_name());
+								});
+								mainitems->for_each([&](Item * item, int32_t idx)
+								{
+									esp::local_player->console_echo(item->get_weapon_name());
+								});
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -2043,6 +2070,29 @@ namespace esp
 		}
 	}
 
+	void rock_chams(BaseEntity* ent) {
+		Shader* shader = 0;
+		if (vars->visual.rock_chams >= 1) {
+			switch (vars->visual.rock_chams)
+			{
+			case 1:
+				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 2:
+				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"SeethroughShader"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 3:
+				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"WireframeTransparent"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 4:
+				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"chamslit"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			}
+
+			auto renderers = ((Networkable*)model)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
+		}
+	}
+
 	void do_chams(BasePlayer* ent)
 	{
 		if (!ent->is_alive() || (ent->is_sleeping() && !vars->visual.sleeper_esp)) return;
@@ -2065,23 +2115,23 @@ namespace esp
 				break;
 			}
 
-			//if (vars->visual.shader == 5
-			//	|| vars->visual.hand_chams == 3)
-			//{
-			//	if(!unity::galaxy_material)
-			//		unity::galaxy_material = unity::LoadAsset(unity::galaxy_bundle, _(L"GalaxyMaterial_15"), unity::GetType(_("UnityEngine"), _("Material")));
-			//}
+			if (vars->visual.shader == 5
+				|| vars->visual.hand_chams == 3)
+			{
+				if(!unity::galaxy_material)
+					unity::galaxy_material = unity::LoadAsset(unity::galaxy_bundle, _(L"GalaxyMaterial_15"), unity::GetType(_("UnityEngine"), _("Material")));
+			}
 
 			if ((!shader && !unity::galaxy_material) && vars->visual.hand_chams < 1) return;
 
-			static int cases = 0;
-			switch (cases) {
-			case 0: { r -= 0.004f; if (r <= 0) cases += 1; break; }
-			case 1: { g += 0.004f; b -= 0.004f; if (g >= 1) cases += 1; break; }
-			case 2: { r += 0.004f; if (r >= 1) cases += 1; break; }
-			case 3: { b += 0.004f; g -= 0.004f; if (b >= 1) cases = 0; break; }
-			default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
-			}
+			//static int cases = 0;
+			//switch (cases) {
+			//case 0: { r -= 0.004f; if (r <= 0) cases += 1; break; }
+			//case 1: { g += 0.004f; b -= 0.004f; if (g >= 1) cases += 1; break; }
+			//case 2: { r += 0.004f; if (r >= 1) cases += 1; break; }
+			//case 3: { b += 0.004f; g -= 0.004f; if (b >= 1) cases = 0; break; }
+			//default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
+			//}
 
 			if (vars->visual.hand_chams >= 1
 				&& ent->is_local_player()) {
@@ -2113,6 +2163,7 @@ namespace esp
 							auto s = (Shader*)FindShader(System::string(_(L"Standard")));
 							material->SetShader(s);
 							material->SetColor(_(L"_Color"), col(r, g, b, 0.5));
+							SetInt((uintptr_t)material, _(L"_ZTest"), 4);
 							break;
 						}
 						case 3:
@@ -2136,14 +2187,14 @@ namespace esp
 			if (vars->visual.shader >= 1 && (shader || unity::galaxy_material)) {
 				uintptr_t chams_shader = 0;
 
-				static int cases = 0;
-				switch (cases) {
-				case 0: { r -= 0.004f; if (r <= 0) cases += 1; break; }
-				case 1: { g += 0.004f; b -= 0.004f; if (g >= 1) cases += 1; break; }
-				case 2: { r += 0.004f; if (r >= 1) cases += 1; break; }
-				case 3: { b += 0.004f; g -= 0.004f; if (b >= 1) cases = 0; break; }
-				default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
-				}
+				//static int cases = 0;
+				//switch (cases) {
+				//case 0: { r -= 0.004f; if (r <= 0) cases += 1; break; }
+				//case 1: { g += 0.004f; b -= 0.004f; if (g >= 1) cases += 1; break; }
+				//case 2: { r += 0.004f; if (r >= 1) cases += 1; break; }
+				//case 3: { b += 0.004f; g -= 0.004f; if (b >= 1) cases = 0; break; }
+				//default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
+				//}
 				//unity::chams_shader = unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
 
 				auto _multiMesh = ent->playerModel()->_multiMesh();//mem::read<uintptr_t>(player->playerModel() + 0x2D0); //SkinnedMultiMesh _multiMesh;
@@ -2179,19 +2230,26 @@ namespace esp
 							case 1:
 								material->SetColor(_(L"_ColorVisible"), viscolor);
 								material->SetColor(_(L"_ColorBehind"), inviscolor);
+								SetInt((uintptr_t)material, _(L"_ZTest"), 1);
 								break;
 							case 3:
 								material->SetColor(_(L"_WireColor"), viscolor);
+								SetInt((uintptr_t)material, _(L"_ZTest"), 1);
 								break;
 							case 4:
 								material->SetColor(_(L"_ColorVisible"), viscolor);
 								material->SetColor(_(L"_ColorBehind"), inviscolor);
+								SetInt((uintptr_t)material, _(L"_ZTest"), 1);
 								break;
 							}
 						}
 					}
 				}
 			}
+
+			//clothes chams
+
+
 			return;
 		}
 	}
@@ -2563,6 +2621,8 @@ namespace esp
 				gui::fill_box(rust::classes::Rect(bounds.left + 1, bounds.bottom + 7, ((box_width / max_health) * cur_health) - 1, 2), health_color);
 				break;
 			case 2:
+
+
 				gui::fill_box(rust::classes::Rect(bounds.left - 7, bounds.top - 1, 4, box_height + 3), gui::Color(0, 0, 0, 120));
 				gui::fill_box(rust::classes::Rect(bounds.left - 6, bounds.top + box_height - height + 1, 2, height), health_color);
 				break;

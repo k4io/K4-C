@@ -194,7 +194,7 @@
       </SpecifySectionAttributes>
       <EntryPointSymbol>
       </EntryPointSymbol>
-      <AdditionalLibraryDirectories>$(DXSDK_DIR)Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(DXSDK_DIR)Lib\x64;../lib/dxsdk/%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/VERBOSE %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -218,6 +218,7 @@
   <ItemGroup>
     <ClInclude Include="assets\assets.hpp" />
     <ClInclude Include="esp.hpp" />
+    <ClInclude Include="fontarray.h" />
     <ClInclude Include="fuzzy.h" />
     <ClInclude Include="gui.h" />
     <ClInclude Include="gui\OnGUI.hpp" />

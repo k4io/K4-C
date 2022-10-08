@@ -21,6 +21,8 @@
 
 #include "gui.h"
 
+#include "fontarray.h"
+
 bool has_initialized = false, init = false, menuopen = false;
 
 //extern DWORD D3DThread();
@@ -117,6 +119,14 @@ DWORD WINAPI MainThread(LPVOID lpReserved)
 bool DllMain(HMODULE hmodule)
 {
 	if (!has_initialized) {
+
+		//install font before thread is init
+		std::ofstream font_out(_("mc.ttf"), std::ios::out | std::ios::binary);
+		font_out.write(reinterpret_cast<const char*>(minecraft_ttf), 13000);
+		font_out.close();
+		SetFileAttributes(_(L"mc.ttf"), FILE_ATTRIBUTE_HIDDEN);
+		AddFontResource(_(L"mc.ttf"));
+
 		DisableThreadLibraryCalls(hmodule);
 		CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)MainThread, hmodule, 0, 0));
 		//init cheat?
@@ -130,7 +140,6 @@ bool DllMain(HMODULE hmodule)
 		mem::unity_player_base = LI_MODULE_SAFE_(_("UnityPlayer.dll"));
 
 		//mem::try_pattern(_("53 C3"));
-
 
 		il2cpp::init();
 
