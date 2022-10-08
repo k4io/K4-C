@@ -2089,7 +2089,47 @@ namespace esp
 				break;
 			}
 
-			auto renderers = ((Networkable*)model)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
+			auto renderers = ((Networkable*)ent->model())->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
+
+			if (renderers)
+			{
+				auto sz = *reinterpret_cast<int*>(renderers + 0x18);
+
+				for (int i = 0; i < sz; i++) {
+					//if (sz == 2) i == 1; //skips front of weapon
+					auto renderer = *reinterpret_cast<Renderer**>(renderers + 0x20 + i * 0x8);
+
+					if (!renderer) continue;
+					Material* material = renderer->GetMaterial();
+					if (!material) continue;
+					auto viscolor = col(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1);
+					auto inviscolor = col(vars->visual.InvRcolor, vars->visual.InvGcolor, vars->visual.InvBcolor, 1);
+
+					if (vars->visual.rainbow_chams)
+					{
+						viscolor = col(r, g, b, 1);
+						inviscolor = col(1.f - r, 1.f - g, 1.f - b, 1);
+					}
+
+					switch (vars->visual.rock_chams)
+					{
+					case 1:
+						material->SetColor(_(L"_ColorVisible"), viscolor);
+						material->SetColor(_(L"_ColorBehind"), inviscolor);
+						SetInt((uintptr_t)material, _(L"_ZTest"), 1);
+						break;
+					case 3:
+						material->SetColor(_(L"_WireColor"), viscolor);
+						SetInt((uintptr_t)material, _(L"_ZTest"), 1);
+						break;
+					case 4:
+						material->SetColor(_(L"_ColorVisible"), viscolor);
+						material->SetColor(_(L"_ColorBehind"), inviscolor);
+						SetInt((uintptr_t)material, _(L"_ZTest"), 1);
+						break;
+					}
+				}
+			}
 		}
 	}
 

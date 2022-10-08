@@ -593,7 +593,7 @@ void iterate_entities() {
 	bool found_lp = false;
 	Vector4 esp_color(1, 0, 1, 1);
 
-	uintptr_t esp_name;
+	wchar_t* esp_name;
 
 	for (int i = 0; i <= size; i++) {
 		auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
@@ -856,7 +856,7 @@ void iterate_entities() {
 
 				//ladder
 				if (vars->visual.ladder && !strcmp(entity_class_name, _("BaseLadder"))) {
-					esp_name = il2cpp::methods::new_string(_("Ladder"));
+					esp_name = _(L"Ladder");
 					esp_color = Vector4(0, 219, 58, 255);
 
 					Vector2 w2s_position = {};
@@ -900,7 +900,7 @@ void iterate_entities() {
 					esp::out_w2s(base_heli->model()->boneTransforms()->get(22)->get_position(), rearrotor);
 					esp::out_w2s(base_heli->model()->boneTransforms()->get(19)->get_position(), mainrotor);
 					esp::out_w2s(base_heli->model()->boneTransforms()->get(56)->get_position(), beam);
-					esp_name = il2cpp::methods::new_string(("Patrol-heli"));
+					esp_name = _(L"Patrol-heli");
 					esp_color = Vector4(232, 232, 232, 255);
 
 
@@ -966,12 +966,12 @@ void iterate_entities() {
 
 				//stash
 				if (vars->visual.stash && *(int*)(object_name.zpad + 46) == '_hsa') {
-					esp_name = il2cpp::methods::new_string(_("Stash"));
+					esp_name = _(L"Stash");
 				}
 
 				//recycler
 				else if (vars->misc.norecycler && *(int*)(entity_class_name) == 'yceR' && get_fixedTime() > esp::last_recycler + 0.35f) {
-					esp_name = il2cpp::methods::new_string(_("Recycler"));
+					esp_name = _(L"Recycler");
 					esp_color = Vector4(232, 232, 232, 255);
 					if (esp::local_player->model()->boneTransforms()->get(48)->get_position().distance(world_position) < 4.5f)
 					{
@@ -982,64 +982,71 @@ void iterate_entities() {
 
 				//stone
 				else if (vars->visual.stone_ore && (*(int*)(object_name.zpad + 52) == 'nots' || *(int*)(object_name.zpad + 47) == 'nots')) {
-					esp_name = il2cpp::methods::new_string(_("Stone Ore"));
+					esp_name = _(L"Stone Ore");
 					esp_color = Vector4(232, 232, 232, 255);
+					if (vars->visual.rock_chams >= 1)
+						esp::rock_chams(ent);
 				}
 
 				//sulfur
 				else if (vars->visual.sulfur_ore && (*(int*)(object_name.zpad + 52) == 'flus' || *(int*)(object_name.zpad + 47) == 'flus')) {
-					esp_name = il2cpp::methods::new_string((_("Sulfur Ore")));
+					esp_name = _(L"Sulfur Ore");
 					esp_color = Vector4(203, 207, 0, 255);
+					if (vars->visual.rock_chams >= 1)
+						esp::rock_chams(ent);
 				}
 
 				//metal
 				else if (vars->visual.metal_ore && (*(int*)(object_name.zpad + 52) == 'atem' || *(int*)(object_name.zpad + 47) == 'atem')) {
-					esp_name = il2cpp::methods::new_string(_("Metal Ore"));
+					esp_name = _(L"Metal Ore");
 					esp_color = Vector4(145, 145, 145, 255);
+					if (vars->visual.rock_chams >= 1)
+						esp::rock_chams(ent);
 				}
 
 				//traps
 				else if (vars->visual.traps && (*(int*)(object_name.zpad + 36) == 'terr' || *(int*)(object_name.zpad + 43) == 'tnug' || *(int*)(object_name.zpad + 38) == 'rtra')) {
 					if (*(int*)(object_name.zpad + 36) == 'terr')
-						esp_name = il2cpp::methods::new_string(_("Auto Turret*"));
+						esp_name = _(L"Auto Turret*");
 					else if (*(int*)(object_name.zpad + 43) == 'tnug')
-						esp_name = il2cpp::methods::new_string(_("Shotgun Trap*"));
+						esp_name = _(L"Shotgun Trap*");
 					else if (*(int*)(object_name.zpad + 38) == 'rtra')
-						esp_name = il2cpp::methods::new_string(_("Bear Trap*"));
+						esp_name = _(L"Bear Trap*");
 
 					esp_color = Vector4(255, 166, 0, 255);
 				}
 
 				//vehicles
 				else if (vars->visual.vehicles && *(int*)(entity_class_name + 4) == 'iheV') {
-					esp_name = il2cpp::methods::new_string(_("Vehicle"));
+					esp_name = _(L"Vehicle");
 					esp_color = Vector4(0, 161, 219, 255);
 				}
 
 				//airdrop
 				else if (vars->visual.airdrops && *(int*)(object_name.zpad + 39) == 'pord') {
-					esp_name = il2cpp::methods::new_string(_("Airdrop"));
+					esp_name = _(L"Airdrop");
 					esp_color = Vector4(0, 161, 219, 255);
 				}
 
 				//cloth
 				else if (vars->visual.cloth && *(int*)(object_name.zpad + 52) == 'c-pm') {
-					esp_name = il2cpp::methods::new_string(_("Cloth"));
+					esp_name = _(L"Cloth");
 					esp_color = Vector4(0, 219, 58, 255);
 				}
 
 				//corpse
 				else if (vars->visual.corpses && *(int*)(object_name.zpad + 29) == 'proc') {
-					esp_name = il2cpp::methods::new_string(_("Player Corpse"));
+					esp_name = _(L"Player Corpse");
 					esp_color = Vector4(230, 230, 230, 255);
 				}
 				else if (tag != 6)
 					continue;
 
 				//stash open?
-				if (tag != 6) {
+				if (tag != 6
+					&& !std::wstring(esp_name).empty()) {
 					if (*(int*)(entity_class_name) == 'satS') {
-						auto flag = *reinterpret_cast<int*>(ent + 0x128);
+						auto flag = *reinterpret_cast<int*>(ent + 0x138);
 						if (flag != 2048)
 							continue;
 					}
@@ -1047,7 +1054,9 @@ void iterate_entities() {
 					Vector2 w2s_position = {};
 					if (esp::out_w2s(world_position, w2s_position))
 					{
-						esp::draw_item(w2s_position, esp_name, esp_color);
+						float color[3] = { esp_color.x / 255.f, esp_color.w / 255.f, esp_color.z / 255.f };
+						render.StringCenter(w2s_position, esp_name, FLOAT4TOD3DCOLOR(color));
+						//esp::draw_item(w2s_position, esp_name, esp_color);
 
 						if (vars->visual.distance)
 						{

@@ -67,6 +67,8 @@ namespace esp {
 
 	void draw_player(BasePlayer* ent, bool is_npc);
 
+	void rock_chams(BaseEntity* ent);
+
 	void do_chams(BasePlayer* ent);
 
 	void draw_target_hotbar(aim_target target);
