@@ -1257,8 +1257,8 @@ namespace gui {
 						if (vars->visual.playeresp)
 						{
 							esp::do_chams(p);
+							esp::local_player->console_echo(string::wformat(_(L"[trap]: OnGUI - Caching bones for: %d"), p->userID()));
 							cache::CacheBones(p, esp::local_player);
-							//esp::local_player->console_echo(string::wformat(_(L"[trap]: OnGUI - Caching bones for: %d"), p->userID()));
 						}
 				//esp::start();
 				auto baseplayer = esp::local_player;

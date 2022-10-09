@@ -87,7 +87,7 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 	bool is_visible = false, is_teammate = ply->is_teammate(esp::local_player);
 	auto camera_position = unity::get_camera_pos();
 
-	/*
+	
 	const auto get_bounds = [&](bounds_t& out, float expand = 0) -> bool {
 		bounds = { FLT_MAX, FLT_MIN, FLT_MAX, FLT_MIN };
 
@@ -132,17 +132,18 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 
 		return true;
 	};
-	*/
+	
 	//if () {
-	bounds = ply->bones()->bounds;
-	if (!bounds.empty()) {
-	//if (get_bounds(bounds, 4)) {
+	//bounds = ply->bones()->bounds;
+	//if (!bounds.empty()) {
+	if (get_bounds(bounds, 4)) {
 		//is_visible = unity::is_visible(camera_position, bones[8].world_position, (uintptr_t)esp::local_player);
 		//for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
 		//	if (is_visible) break;
 		//	is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
 		//}
-		is_visible = ply->visible();
+		//is_visible = ply->visible();
+		is_visible = true;
 
 		//safezone flag???
 
@@ -689,11 +690,11 @@ void iterate_entities() {
 				{
 					auto target = aim_target();
 					if (vars->combat.bodyaim)
-						target.pos = ((BasePlayer*)ent)->bones()->pelvis->position;
-						//target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->get_position();
+						//target.pos = ((BasePlayer*)ent)->bones()->pelvis->position;
+						target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->get_position();
 					else
-						target.pos = ((BasePlayer*)ent)->bones()->head->position;
-						//target.pos = ent->model()->boneTransforms()->get(48)->get_position();
+						//target.pos = ((BasePlayer*)ent)->bones()->head->position;
+						target.pos = ent->model()->boneTransforms()->get(48)->get_position();
 
 					auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().get_3d_dist(target.pos); //crashes bc non game thread
 					target.distance = distance;
