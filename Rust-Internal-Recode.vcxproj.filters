@@ -83,6 +83,9 @@
     <ClCompile Include="kiero\minhook\src\hde\hde64.c">
       <Filter>kiero\minhook\src\hde</Filter>
     </ClCompile>
+    <ClCompile Include="memory\VMTHook.cpp">
+      <Filter>memory</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="assets\assets.hpp">
@@ -204,6 +207,10 @@
     <ClInclude Include="RenderClass.h" />
     <ClInclude Include="fuzzy.h">
       <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="fontarray.h" />
+    <ClInclude Include="memory\VMTHook.h">
+      <Filter>memory</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

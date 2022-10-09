@@ -213,6 +213,7 @@
     <ClCompile Include="kiero\minhook\src\hde\hde64.c" />
     <ClCompile Include="kiero\minhook\src\hook.cpp" />
     <ClCompile Include="kiero\minhook\src\trampoline.cpp" />
+    <ClCompile Include="memory\VMTHook.cpp" />
     <ClCompile Include="utils\pattern\pattern.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -246,6 +247,7 @@
     <ClInclude Include="memory\il2cpp.hpp" />
     <ClInclude Include="memory\lazy_importer.hpp" />
     <ClInclude Include="memory\memory.hpp" />
+    <ClInclude Include="memory\VMTHook.h" />
     <ClInclude Include="misc.hpp" />
     <ClInclude Include="nine_meter_poggers.hpp" />
     <ClInclude Include="noimp.h" />

@@ -133,9 +133,10 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 		return true;
 	};
 	*/
-	//if (get_bounds(bounds, 4)) {
+	//if () {
 	bounds = ply->bones()->bounds;
 	if (!bounds.empty()) {
+	//if (get_bounds(bounds, 4)) {
 		//is_visible = unity::is_visible(camera_position, bones[8].world_position, (uintptr_t)esp::local_player);
 		//for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
 		//	if (is_visible) break;
@@ -427,7 +428,8 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 	}
 }
 
-void DrawToolcupboard(Vector2 w2s, System::list<PlayerNameID*>* authed) {
+void DrawToolcupboard(Vector2 w2s, System::list<PlayerNameID*>* authed) 
+{
 	Vector2 screen = { 0, 0 }; 
 
 	//create window length based off amount of items in belt
@@ -654,16 +656,20 @@ void iterate_entities() {
 		{
 			auto entity = (BasePlayer*)ent;
 
+			//cache::CacheBones(entity, esp::local_player);
+			bool exists_in_list = false;
 			for (BasePlayer* p : player_list)
 			{
 				if (!p->is_alive()
-					|| (entity->is_sleeping() && !vars->visual.sleeper_esp)
-					|| p->userID() == entity->userID())
+					|| (entity->is_sleeping() && !vars->visual.sleeper_esp))
 				{
 					player_list.erase(std::remove(player_list.begin(), player_list.end(), p), player_list.end());
 				}
+				if (entity->userID() == p->userID())
+					exists_in_list = true;
 			}
-			player_list.push_back(entity);
+			if(!exists_in_list)
+				player_list.push_back(entity);
 			//hit player for silent melee, but not here as may crash due to not being run from a game thread
 
 			//check valid

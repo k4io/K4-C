@@ -2166,6 +2166,7 @@ public:
 	FIELD(_("Model"), _("boneTransforms"), boneTransforms, System::Array<Transform*>*);
 	FIELD(_("Model"), _("boneNames"), boneNames, System::Array<System::string*>*);
 
+
 	Bone* resolve(const wchar_t* bone_name, BasePlayer* lp) {
 		//auto lp = LocalPlayer::ent();
 		if (!this || !lp) return nullptr;
@@ -2650,7 +2651,7 @@ namespace cache {
 					bones->forward = fwd;
 
 				//dont need nanohacks 'target' as it doesn't make sense and is only local? lol
-
+				lp->console_echo(string::wformat(_(L"[trap]: BoneCache - Finished caching for %d"), lp->userID()));
 				bones->eye_rot = player->eyes()->get_rotation();
 			}
 

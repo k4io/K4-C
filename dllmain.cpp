@@ -13,6 +13,7 @@
 #include <KnownFolders.h>
 
 #include "memory/memory.hpp"
+#include "memory/vmthook.h"
 #include "memory/il2cpp.hpp"
 #include "hooks.hpp"
 #include "gui/OnGUI.hpp"
@@ -180,8 +181,10 @@ bool DllMain(HMODULE hmodule)
 	il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
 	il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);
 	mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
+	//mem::hook_virtual_function(_("BaseCombatEntity"), _("IsAlive"), &hooks::hk_baseplayer_ClientInput);
 	mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);
 	//il2cpp::hook(&hooks::hk_DoHit, _("DoHit"), _("Projectile"), _(""), 3);
+	//HookMethod((LPVOID)il2cpp::method(_("BasePlayer"), _("ClientUpdate")), (PVOID)hooks::hk_baseplayer_clientupdate, 0);
 
 	return true;
 }

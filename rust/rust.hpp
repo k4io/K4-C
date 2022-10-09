@@ -38,6 +38,18 @@ namespace System {
 		}
 	};
 
+	template<typename T = void*>
+	class ListDictionary
+	{
+	public:
+		T get(uint32_t idx) {
+			auto listcontent = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x18);
+			return *reinterpret_cast<T*>(listcontent + 0x20 + (idx * 8));
+		}
+		int32_t size() {
+			return *reinterpret_cast<int32_t*>((uintptr_t)this + 0x10);
+		}
+	};
 	template<typename T>
 	class list {
 	public:
