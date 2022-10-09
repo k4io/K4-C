@@ -2651,7 +2651,7 @@ namespace cache {
 					bones->forward = fwd;
 
 				//dont need nanohacks 'target' as it doesn't make sense and is only local? lol
-				lp->console_echo(string::wformat(_(L"[trap]: BoneCache - Finished caching for %d"), lp->userID()));
+				//lp->console_echo(string::wformat(_(L"[trap]: BoneCache - Finished caching for %d"), lp->userID()));
 				bones->eye_rot = player->eyes()->get_rotation();
 			}
 
