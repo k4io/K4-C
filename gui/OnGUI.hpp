@@ -1209,7 +1209,7 @@ namespace gui {
 						&& vars->visual.snapline > 1)
 					{
 						Vector2 start = vars->visual.snapline == 1 ? Vector2(ScreenWidth / 2, 0) :
-							vars->visual.snapline == 2 ? Vector2(ScreenWidth / 2, ScreenHeight/2) :
+							vars->visual.snapline == 2 ? Vector2(ScreenWidth / 2, ScreenHeight / 2) :
 							vars->visual.snapline == 3 ? Vector2(ScreenWidth / 2, ScreenHeight) :
 							Vector2(ScreenWidth / 2, 1080); // does not matter
 						Vector3 o = WorldToScreen(esp::best_target.pos);
@@ -1241,49 +1241,50 @@ namespace gui {
 								settings::hor_flyhack,
 								settings::hor_flyhack);
 						}
-						else if(settings::hor_flyhack >= .1f){
+						else if (settings::hor_flyhack >= .1f) {
 							gui::Progbar({ screen_center.x - 300, screen_center.y - 470 },
 								{ 600, 5 },
 								settings::hor_flyhack,
 								6.5f);
 						}
 					}
-				}
 
-				esp::matrix = unity::get_view_matrix();
+					esp::matrix = unity::get_view_matrix();
 
-				if (!player_list.empty())
-					for (auto p : player_list)
-						if (vars->visual.playeresp)
-						{
-							esp::do_chams(p);
-							esp::local_player->console_echo(string::wformat(_(L"[trap]: OnGUI - Caching bones for: %d"), p->userID()));
-							cache::CacheBones(p, esp::local_player);
-						}
-				//esp::start();
-				auto baseplayer = esp::local_player;
-				if (vars->misc.autorefill) {
-					auto inv = baseplayer->inventory();
-					if (inv)
-					{
-						auto main = inv->containerMain();
-						auto belt = inv->containerBelt();
-						if (main && belt)
-						{
-							auto mainitems = main->itemList();
-							auto beltitems = belt->itemList();
-							if (mainitems && beltitems)
+					if (!player_list.empty())
+						for (auto p : player_list)
+							if (vars->visual.playeresp
+								&& p)
 							{
-								auto size = beltitems->get_size();
+								esp::do_chams(p);
+								//esp::local_player->console_echo(string::wformat(_(L"[trap]: OnGUI - Caching bones for: %d"), p->userID()));
+								//cache::CacheBones(p, esp::local_player);
+							}
+					//esp::start();
+					auto baseplayer = esp::local_player;
+					if (vars->misc.autorefill) {
+						auto inv = baseplayer->inventory();
+						if (inv)
+						{
+							auto main = inv->containerMain();
+							auto belt = inv->containerBelt();
+							if (main && belt)
+							{
+								auto mainitems = main->itemList();
+								auto beltitems = belt->itemList();
+								if (mainitems && beltitems)
+								{
+									auto size = beltitems->get_size();
 
-								beltitems->for_each([&](Item* item, int32_t idx)
-								{
-									esp::local_player->console_echo(item->get_weapon_name());
-								});
-								mainitems->for_each([&](Item * item, int32_t idx)
-								{
-									esp::local_player->console_echo(item->get_weapon_name());
-								});
+									beltitems->for_each([&](Item* item, int32_t idx)
+										{
+											esp::local_player->console_echo(item->get_weapon_name());
+										});
+									mainitems->for_each([&](Item* item, int32_t idx)
+										{
+											esp::local_player->console_echo(item->get_weapon_name());
+										});
+								}
 							}
 						}
 					}
@@ -2136,6 +2137,7 @@ namespace esp
 
 	void do_chams(BasePlayer* ent)
 	{
+		if (!local_player) return;
 		if (!ent->is_alive() || (ent->is_sleeping() && !vars->visual.sleeper_esp)) return;
 		if (unity::bundle)
 		{

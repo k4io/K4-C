@@ -143,13 +143,10 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 		//	is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
 		//}
 		//is_visible = ply->visible();
+
 		is_visible = true;
-
-		//safezone flag???
-
 		float box_width = bounds.right - bounds.left;
 		float box_height = bounds.bottom - bounds.top;
-
 		auto name = ply->_displayName()->str;
 		auto activeitem = ply->GetActiveItem();
 
@@ -817,8 +814,13 @@ void iterate_entities() {
 					continue;
 
 				float dist = 10.f;
-				if (esp::local_player && vars->visual.distance)
-					dist = esp::local_player->model()->boneTransforms()->get(48)->get_position().distance(world_position);
+				auto m = esp::local_player->model();
+				if (m)
+				{
+					auto trans = m->boneTransforms()->get(48);
+					if (esp::local_player && vars->visual.distance && trans)
+						dist = trans->get_position().distance(world_position);
+				}
 
 				//dropped items
 				if (*(int*)(entity_class_name) == 'porD') {
@@ -1123,7 +1125,8 @@ void iterate_entities() {
 	}
 
 	if (esp::best_target.ent
-		&& vars->visual.hotbar_esp)
+		&& vars->visual.hotbar_esp
+		&& esp::local_player)
 		DrawPlayerHotbar(esp::best_target);
 }
 

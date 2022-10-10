@@ -52,7 +52,7 @@ namespace offsets {
 #define oTerrainMeta_TypeInfo 56627184
 #define oPlayerEyes_TypeInfo 56512408
 //REAL RUST
-namespace offsets {
+namespace offsets { 
     constexpr auto Method_BaseEntity_ServerRPC_string_bool_address = 56859744;// address "Name": "Method$BaseEntity.ServerRPC<string, bool>()",
     constexpr auto BaseEntity$$ServerRPC_string_bool_Address = 14739920;// method address
     constexpr auto Method$BaseEntity_ServerRPC_CreateBuilding___ = 56861592;// "Name": "Method$BaseEntity.ServerRPC<CreateBuilding>()"
@@ -64,4 +64,3 @@ namespace offsets {
     constexpr auto Method$BaseEntity_ServerRPC_uint = 56858680;// "Address":,"Method$BaseEntity.ServerRPC<uint>()" //both addresses
     constexpr auto BaseEntity$$ServerRPC_uint_ = 14738480;// method address
 }
-

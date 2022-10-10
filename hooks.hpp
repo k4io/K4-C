@@ -1070,11 +1070,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 	//	cache::CacheBones(p, esp::local_player);
 	//}
 
-	bool hk_basecombatentity_isalive(BasePlayer* player) {
-		cache::CacheBones(player, esp::local_player);
-		return player->lifestate() == 0;
-	}
-
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
 	{
 		//if(!do_fixed_update_ptr)
