@@ -766,9 +766,15 @@ public:
 	FIELD(_("BaseEntity"), _("model"), model, Model*);
 
 	Vector3 GetWorldVelocity() {
-		if (!this) return Vector3(0, 0, 0);
-		auto off = reinterpret_cast<Vector3(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetWorldVelocity"), 0, _(""), _(""))));
-		return off(this);
+		__try {
+			if (!this) return Vector3(0, 0, 0);
+			auto off = reinterpret_cast<Vector3(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetWorldVelocity"), 0, _(""), _(""))));
+			if (!off) return Vector3(0, 0, 0);
+			return off(this);
+		}
+		__except (false) {
+			return Vector3(0, 0, 0);
+		}
 	}
 	Vector3 GetParentVelocity() {
 		if (!this) return Vector3(0, 0, 0);

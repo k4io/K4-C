@@ -13,12 +13,12 @@ namespace std
 	[[noreturn]] inline void __cdecl  __security_check_cookie() { __ud2(); }
 } // namespace std
 
-#ifndef _DEBUG
-extern "C" void __chkstk() {} // Disables stack allocation size limits.
-extern "C" void __CxxFrameHandler4() { __ud2(); }
-extern "C" void __std_terminate() { __ud2(); }
-extern "C" void _fltused() { __ud2(); }
-#endif
+//#ifndef _DEBUG
+//extern "C" void __chkstk() {} // Disables stack allocation size limits.
+//extern "C" void __CxxFrameHandler4() { __ud2(); }
+//extern "C" void __std_terminate() { __ud2(); }
+//extern "C" void _fltused() { __ud2(); }
+//#endif
 
 #define _Xlength_error(x) __ud2()
 #define ABS(N) ((N<0)?(-N):(N))
