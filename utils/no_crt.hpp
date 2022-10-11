@@ -25,7 +25,7 @@ namespace std
 
 unsigned short lfsr = 0xACE1u;
 unsigned int bit = 0;
-
+//
 unsigned my_rand()
 {
 	if (!lfsr) {
