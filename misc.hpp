@@ -279,6 +279,8 @@ namespace misc
 	float time_since_last_shot = 0.0f;
 	float fixed_time_last_shot = 0.0f;
 
+	bool hasNavigator = false;
+
 	bool isInAir = false;
 	bool manual = false;
 	bool autoshot = false;
@@ -896,7 +898,8 @@ namespace misc
 			for (size_t i = 2; i < ref.size(); i++)
 			{
 				next = ref[i];
-				if (lp->is_visible(current, next))
+				if (lp->is_visible(current, next)
+					&& dist_from_ground(next) <= 1.5f)
 					continue;
 				else
 					new_path.push_back(next);
@@ -963,9 +966,9 @@ namespace misc
 					point = best;
 				}
 			}
+			if (!node.path.empty())
+				PathSmooth(node.path);
 			node.path = path;
-			//if (!node.path.empty())
-			//	PathSmooth(node.path);
 		}
 
 		void do_jump(PlayerWalkMovement* pwm,

@@ -9,7 +9,7 @@ static auto dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*
 
 static auto create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
 
-static auto add_component = reinterpret_cast<void(*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_AddComponentWithType"), 0, _(""), _("UnityEngine"))));
+static auto add_component = reinterpret_cast<Component*(*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_AddComponentWithType"), 0, _(""), _("UnityEngine"))));
 
 namespace hooks {
 	namespace orig {
@@ -79,7 +79,7 @@ namespace hooks {
 	void init_hooks() {
 		dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
 		create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
-		add_component = reinterpret_cast<void(*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_AddComponentWithType"), 0, _(""), _("UnityEngine"))));
+		add_component = reinterpret_cast<Component*(*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_AddComponentWithType"), 0, _(""), _("UnityEngine"))));
 
 		orig::IsConnected = reinterpret_cast<bool (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("IsConnected"), 0, _(""), _("Network"))));
 		orig::OnNetworkMessage = reinterpret_cast<void (*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("OnNetworkMessage"), 1, _(""), _(""))));
@@ -936,6 +936,18 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					misc::time_since_last_shot = 0;
 				}
 				if (!loco->is_sleeping()) {
+
+					//auto nm = il2cpp::methods::object_new(il2cpp::init_class(_("GameObject"), _("UnityEngine")));
+					//create(nm, _(L""));
+					//if (vars->misc.autofarm
+					//	&& !misc::hasNavigator) {
+					//	misc::hasNavigator = true;
+					//	auto comp = (BaseNavigator*)add_component((uintptr_t)((Networkable*)loco)->GetComponent<GameObject>(unity::GetType(_("UnityEngine"), _("GameObject"))),
+					//		il2cpp::type_object(_(""), _("BaseNavigator")));
+					//	if (misc::node.ent == 0)
+					//		misc::node.ent = (BaseEntity*)loco->find_closest(_("OreResourceEntity"), (Networkable*)loco, 200.f);
+					//	comp->Destination() = misc::node.ent->get_transform()->get_position();
+					//}
 					if (vars->misc.autofarm)
 					{
 						if (misc::node.ent == 0)
@@ -1057,7 +1069,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 	void hk_performance_update(void* instance) {
 		if (wake) {
 			__go = il2cpp::methods::object_new(il2cpp::init_class(_("GameObject"), _("UnityEngine")));
-			
 			create(__go, _(L""));
 			add_component(__go, il2cpp::type_object(_(""), _("DevControls")));
 			dont_destroy_on_load(__go);

@@ -2235,6 +2235,11 @@ public:
 	}
 };
 
+class BaseNavigator : public BaseMonoBehaviour {
+public:
+	FIELD(_("BaseNavigator"), _("Destination"), Destination, Vector3);
+};
+
 namespace ConVar {
 	class Graphics {
 	public:
@@ -2493,7 +2498,7 @@ void attack_melee(aim_target target, BaseMelee* melee, bool is_player = false) {
 		return;
 
 	HitTest* hit_test = (HitTest*)il2cpp::methods::object_new(hit_test_class);
-	
+		
 	Ray ray = Ray(local_position, (target.pos - local_position).Normalized());
 
 	auto get_transform = reinterpret_cast<Transform * (*)(BaseCombatEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
@@ -2507,9 +2512,10 @@ void attack_melee(aim_target target, BaseMelee* melee, bool is_player = false) {
 	hit_test->set_attack_ray(ray);
 	hit_test->set_did_hit(true);
 	hit_test->set_hit_entity((BasePlayer*)target.ent);
-	hit_test->set_hit_point(trans->InverseTransformPoint(target.pos));
+	hit_test->set_hit_point(_InverseTransformPoint((uintptr_t)trans, target.pos));
 	hit_test->set_hit_normal(Vector3(0, 0, 0));
-	hit_test->set_damage_properties((uintptr_t)melee->damageProperties());
+	//hit_test->set_damage_properties((uintptr_t)melee->damageProperties());
+	hit_test->set_damage_properties(*reinterpret_cast<uintptr_t*>((uintptr_t)melee + 0x288));
 	
 	//esp::local_player->console_echo(string::wformat(_(L"[trap]: attack_melee - point: (%d, %d, %d)"), (int)v.x, (int)v.y, (int)v.z));
 
