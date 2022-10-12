@@ -64,11 +64,10 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 
 		bool IsMounted = LocalPlayer->modelState()->has_flag(rust::classes::ModelState_Flag::Mounted);
 
-		float maxVelocity;
-		if (!IsMounted)
-			maxVelocity = get_maxspeed(LocalPlayer);
-		else
-			maxVelocity = GetMountedVelocity(LocalPlayer);//LocalPlayer->GetPlayerMaxVelocity();
+		float maxVelocity = get_maxspeed(LocalPlayer);
+		if (IsMounted)
+			maxVelocity *= 4;
+			//maxVelocity = GetMountedVelocity(LocalPlayer);//LocalPlayer->GetPlayerMaxVelocity();
 
 		auto time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
 		float _timeSinceLastTick = time - LocalPlayer->lastSentTickTime();

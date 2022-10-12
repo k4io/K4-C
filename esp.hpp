@@ -137,14 +137,14 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 	//bounds = ply->bones()->bounds;
 	//if (!bounds.empty()) {
 	if (get_bounds(bounds, 4)) {
-		//is_visible = unity::is_visible(camera_position, bones[8].world_position, (uintptr_t)esp::local_player);
-		//for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
-		//	if (is_visible) break;
-		//	is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
-		//}
+		is_visible = unity::is_visible(camera_position, bones[8].world_position, (uintptr_t)esp::local_player);
+		for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
+			if (is_visible) break;
+			is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
+		}
+		//is_visible = true;
 		//is_visible = ply->visible();
 
-		is_visible = true;
 		float box_width = bounds.right - bounds.left;
 		float box_height = bounds.bottom - bounds.top;
 		auto name = ply->_displayName()->str;
@@ -713,6 +713,14 @@ void iterate_entities() {
 					//	visibleplayerswithin300m.push_back(target);
 					//}
 
+					if (vars->combat.locktarget)
+					{
+						if (unity::GetKey(vars->keybinds.locktarget))
+							goto choosetarget;
+						else goto draw;
+					}
+
+				choosetarget:
 					if (target < esp::best_target
 						|| !esp::best_target.ent->is_alive()
 						|| (target.ent && ((BasePlayer*)target.ent)->userID() == ((BasePlayer*)esp::best_target.ent)->userID()))
@@ -754,6 +762,8 @@ void iterate_entities() {
 						}
 					}
 
+					if (esp::best_target.distance > 400.f)
+						esp::best_target = aim_target();
 					if (target < esp::best_target
 						&& target.fov < vars->combat.aimbotfov)
 						esp::best_target = target;
@@ -761,6 +771,7 @@ void iterate_entities() {
 						esp::best_target = aim_target();
 				}
 
+			draw:
 				if (vars->visual.playeresp && esp::local_player)
 				{
 					DrawPlayer(entity, npc);

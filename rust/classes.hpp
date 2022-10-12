@@ -950,6 +950,7 @@ class BaseMelee : public AttackEntity {
 public:
 	FIELD(_("BaseMelee"), _("gathering"), gathering, GatherProperties*);
 	FIELD(_("BaseMelee"), _("damageProperties"), damageProperties, DamageProperties*);
+	FIELD(_("BaseMelee"), _("maxDistance"), maxDistance, float);
 
 
 	bool CanHit(HitTest* ht) {
@@ -2163,7 +2164,8 @@ public:
 	void console_echo(const wchar_t* str) {
 		//string::format(("%s %d"), _("B:"), (int)vars->visual.VisBcolor))
 		//auto s = string::wformat(_(L"trap [%d]: %s"), (int)get_fixedTime(), str);
-		console_msg((uintptr_t)this, str);
+		if(vars->misc.logs)
+			console_msg((uintptr_t)this, str);
 	}
 };
 

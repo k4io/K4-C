@@ -688,7 +688,7 @@ namespace Gui
 
 			im::Checkbox(_("PSilent"), &vars->combat.psilent);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
-			im::Hotkey(_(""), &vars->keybinds.psilent, ImVec2(50, 15));
+			im::Hotkey(_("P"), &vars->keybinds.psilent, ImVec2(50, 15));
 
 
 			im::SliderFloat(_("Target fov"), &vars->combat.aimbotfov, 1.f, 900.f, _("%.0f"));
@@ -697,6 +697,10 @@ namespace Gui
 
 			im::Checkbox(_("No spread (quick ban)"), &vars->combat.nospread);
 			im::Checkbox(_("Remove shoot restrictions"), &vars->combat.always_shoot);
+
+			im::Checkbox(_("Lock target"), &vars->combat.locktarget);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
+			im::Hotkey(_("L"), &vars->keybinds.locktarget, ImVec2(50, 15));
 			im::EndChild();
 		}
 		im::SameLine();;
@@ -713,6 +717,8 @@ namespace Gui
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
 			im::Checkbox(_("Bullet tp"), &vars->combat.bullet_tp);
 			im::Checkbox(_("Fast bullets"), &vars->combat.fast_bullet);
+			im::Checkbox(_("Instant eoka"), &vars->combat.instaeoka);
+			im::Checkbox(_("Heli-weakspot"), &vars->combat.weakspots);
 			im::Checkbox(_("Thick bullets"), &vars->combat.thick_bullet);
 			im::SliderFloat(_("Thickness"), &vars->combat.thickness, 0.1f, 2.2f, _("%.2f"), 1.f);
 			im::Checkbox(_("Autoshoot"), &vars->combat.autoshoot);
@@ -784,7 +790,8 @@ namespace Gui
 		{
 			im::Text(_("Gameplay"));
 			im::Separator();
-			im::SliderFloat(_("Player fov"), &vars->visual.playerfov, 50.f, 180.f, _("%.1f"));
+			im::SliderFloat(_("Player fov"), &vars->visual.playerfov, 50.f, 179.9f, _("%.1f"));
+			im::Checkbox(_("Bullet tracers"), &vars->visual.tracers);
 			im::Checkbox(_("Crosshair 1"), &vars->visual.crosshair1);
 			im::Checkbox(_("Crosshair 2"), &vars->visual.crosshair2);
 			im::Checkbox(_("Crosshair 3"), &vars->visual.crosshair3);
@@ -793,6 +800,8 @@ namespace Gui
 			im::Hotkey(_("Z"), &vars->keybinds.zoom, ImVec2(50, 14));
 			im::SliderFloat(_("Zoom fov"), &vars->visual.zoomfov, 1.f, 100.f, _("%.1f"));
 			im::SliderFloat(_("Stars"), &vars->visual.staramount, 1.f, 1000.f, _("%.0f"));
+			im::SliderFloat(_("Brightness"), &vars->visual.day, 1.f, 10.f, _("%.1f"), 0.1f);
+			im::SliderFloat(_("Nightness"), &vars->visual.night, 1.f, 10.f, _("%.1f"), 0.1f);
 			im::Checkbox(_("Manipulator angles"), &vars->visual.angles);
 			im::EndChild();
 		}
@@ -823,6 +832,7 @@ namespace Gui
 			im::Checkbox(_("Food"), &vars->visual.food);
 			im::Checkbox(_("Barrels"), &vars->visual.barrels);
 			im::Checkbox(_("Cloth"), &vars->visual.cloth);
+			im::SliderFloat(_("Distance"), &vars->visual.dist_on_items, 1.f, 400.f, _("%.0f"), 0.1f);
 			im::EndChild();
 		}
 		im::SameLine();
@@ -892,6 +902,7 @@ namespace Gui
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("T"), &vars->keybinds.timescale, ImVec2(50, 14));
 			im::Checkbox(_("Silent farm"), &vars->misc.silent_farm);
+			im::Checkbox(_("Console logs"), &vars->misc.logs);
 			im::EndChild();
 		}
 	}

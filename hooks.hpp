@@ -201,10 +201,10 @@ namespace hooks {
 						const auto TOD_Night = *reinterpret_cast<uintptr_t*>(tod_sky + 0x58);
 						const auto TOD_Stars = *reinterpret_cast<uintptr_t*>(tod_sky + 0x70);
 						if (vars->visual.always_day) {
-							*(float*)(TOD_Night + 0x50) = 4.f;
-							*(float*)(TOD_Night + 0x54) = 2.f;
-							*(float*)(TOD_Day + 0x50) = 2.f;
-							*(float*)(TOD_Day + 0x54) = 2.f;
+							*(float*)(TOD_Night + 0x50) = vars->visual.night;
+							*(float*)(TOD_Night + 0x54) = vars->visual.night;
+							*(float*)(TOD_Day + 0x50) = vars->visual.day;
+							*(float*)(TOD_Day + 0x54) = vars->visual.day;
 							*(float*)(TOD_Stars + 0x14) = vars->visual.staramount;
 						}
 
@@ -611,7 +611,8 @@ StringPool::Get(xorstr_("l_knee")) = 3892428003
 StringPool::Get(xorstr_("spine4")) = 827230707
 */
 
-			if (!target.is_heli && vars->combat.hitbox_override) {
+			//if (!target.is_heli && vars->combat.hitbox_override) {
+			if (false) {
 
 				int hitbone = 698017942;
 				int hitpartid = 2173623152;
@@ -724,7 +725,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				attack->hitPositionLocal = { -.1f, -.1f, 0 };
 				attack->hitNormalLocal = { 0, -1, 0 };
 			}
-			else {
+			else if(target.is_heli && vars->combat.weakspots) {
 				auto weakspots = ((BaseHelicopter*)target.ent)->weakspots();
 				if (!weakspots)
 					break;
@@ -1683,7 +1684,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							if (item->is_weapon()) {
 								//const auto item_id = item->info()->itemid;
 
-								if (*(int*)(wep_class_name) == 'nilF') {
+								if (*(int*)(wep_class_name) == 'nilF'
+									&& vars->combat.instaeoka) {
 									mem::write<float>((uint64_t)baseprojectile + 0x378, 1.f); //eoka success fraction
 									mem::write<bool>((uint64_t)baseprojectile + 0x388, true); //eoka _didSparkThisFrame
 								}
@@ -1700,6 +1702,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 									baseprojectile->set_no_spread();
 								baseprojectile->set_recoil();
 							}
+						}
+						else if (std::string(wep_class_name).find(_("melee")) != std::string::npos) {
+							((BaseMelee*)item)->maxDistance() = vars->combat.melee_range;
 						}
 					}
 				}

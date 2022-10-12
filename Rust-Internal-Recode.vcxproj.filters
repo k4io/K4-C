@@ -40,13 +40,15 @@
     <Filter Include="kiero\minhook\src\hde">
       <UniqueIdentifier>{7284634c-7877-41ab-bd0c-d973bfadab9d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gui\assets">
+      <UniqueIdentifier>{22a37c5f-4804-47dc-9c9e-2b8c20714b22}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="utils\pattern\pattern.cpp">
       <Filter>utils\pattern</Filter>
     </ClCompile>
-    <ClCompile Include="gui.cpp" />
     <ClCompile Include="kiero\kiero.cpp">
       <Filter>kiero</Filter>
     </ClCompile>
@@ -86,6 +88,9 @@
     <ClCompile Include="memory\VMTHook.cpp">
       <Filter>memory</Filter>
     </ClCompile>
+    <ClCompile Include="gui.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="assets\assets.hpp">
@@ -94,7 +99,6 @@
     <ClInclude Include="gui\OnGUI.hpp">
       <Filter>gui</Filter>
     </ClInclude>
-    <ClInclude Include="hooks.hpp" />
     <ClInclude Include="memory\il2cpp.hpp">
       <Filter>memory</Filter>
     </ClInclude>
@@ -119,7 +123,6 @@
     <ClInclude Include="rust\unity.hpp">
       <Filter>rust</Filter>
     </ClInclude>
-    <ClInclude Include="settings.hpp" />
     <ClInclude Include="utils\no_crt.hpp">
       <Filter>utils</Filter>
     </ClInclude>
@@ -135,19 +138,12 @@
     <ClInclude Include="utils\xor_float.hpp">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="offsets.h" />
     <ClInclude Include="utils\string_format.h">
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="utils\stb_sprintf.h">
       <Filter>utils</Filter>
     </ClInclude>
-    <ClInclude Include="spherearray.h" />
-    <ClInclude Include="gui.h" />
-    <ClInclude Include="icons.h" />
-    <ClInclude Include="iconscpp.h" />
-    <ClInclude Include="vars.hpp" />
-    <ClInclude Include="includes.h" />
     <ClInclude Include="kiero\kiero.h">
       <Filter>kiero</Filter>
     </ClInclude>
@@ -199,18 +195,59 @@
     <ClInclude Include="kiero\minhook\src\hde\table64.h">
       <Filter>kiero\minhook\src\hde</Filter>
     </ClInclude>
-    <ClInclude Include="misc.hpp" />
-    <ClInclude Include="projectile1.hpp" />
-    <ClInclude Include="nine_meter_poggers.hpp" />
-    <ClInclude Include="noimp.h" />
-    <ClInclude Include="esp.hpp" />
-    <ClInclude Include="RenderClass.h" />
     <ClInclude Include="fuzzy.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="fontarray.h" />
     <ClInclude Include="memory\VMTHook.h">
       <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="esp.hpp">
+      <Filter>rust\features</Filter>
+    </ClInclude>
+    <ClInclude Include="vars.hpp">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="spherearray.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="settings.hpp">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderClass.h">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.h">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="hooks.hpp">
+      <Filter>rust\features</Filter>
+    </ClInclude>
+    <ClInclude Include="misc.hpp">
+      <Filter>rust\features</Filter>
+    </ClInclude>
+    <ClInclude Include="nine_meter_poggers.hpp">
+      <Filter>rust\features</Filter>
+    </ClInclude>
+    <ClInclude Include="iconscpp.h">
+      <Filter>gui\assets</Filter>
+    </ClInclude>
+    <ClInclude Include="icons.h">
+      <Filter>gui\assets</Filter>
+    </ClInclude>
+    <ClInclude Include="fontarray.h">
+      <Filter>gui\assets</Filter>
+    </ClInclude>
+    <ClInclude Include="noimp.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="includes.h">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="offsets.h">
+      <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="projectile1.hpp">
+      <Filter>rust</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

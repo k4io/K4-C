@@ -27,12 +27,15 @@ struct Vars
 		bool automatic = false;
 		bool thick_bullet = false;
 		bool always_shoot = false;
+		bool locktarget = false;
 		float melee_range = 1.f;
 		float thickness = 1.f;
 		bool HitScan = false;
 		bool norecoil = false;
 		bool nospread = false;
 		bool fast_bullet = false;
+		bool instaeoka = false;
+		bool weakspots = false;
 		bool targetbehindwall = false;
 		float recoilx = 1.f;
 		float recoily = 1.f;
@@ -55,6 +58,9 @@ struct Vars
 		bool crosshair1 = false;
 		bool crosshair2 = false;
 		bool crosshair3 = false;
+		float day = 0.f;
+		float night = 0.f;
+		float dist_on_items = 100.f;
 		float playerfov = 90.f;
 		bool zoomtoggle = false;
 		float staramount = 350;
@@ -174,6 +180,7 @@ struct Vars
 		bool silentwalk = false;
 		bool autofarm = false;
 		bool autorefill = false;
+		bool logs = false;
 		bool interactive_debug = false;
 
 		int gesture_spam = 0;
@@ -194,6 +201,7 @@ struct Vars
 		int zoom = 0;
 		int bullettp = 0;
 		int fakelag = 0;
+		int locktarget = 0;
 	}; keybinds keybinds;
 
 	struct colors {

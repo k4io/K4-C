@@ -22,7 +22,7 @@ namespace offsets {
 }
 */
 
-/*
+
 #define oLineOfSightRadius 0x7DE8D0
 #define oSphereCast 0x2500770
 #define oConsoleSystem_GetAll 38898304 //"ConsoleSystem.Index$$get_All"
@@ -42,8 +42,8 @@ namespace offsets {
     constexpr auto Method$BaseEntity_ServerRPC_uint = 56858800;// "Address":,"Method$BaseEntity.ServerRPC<uint>()" //both addresses
     constexpr auto BaseEntity$$ServerRPC_uint_ = 14741152;// method address
 }
-*/
 
+/*
 //ALKAD
 #define oLineOfSightRadius 0x7DE0C0
 #define oSphereCast 0x24FFD00
@@ -64,3 +64,4 @@ namespace offsets {
     constexpr auto Method$BaseEntity_ServerRPC_uint = 56858680;// "Address":,"Method$BaseEntity.ServerRPC<uint>()" //both addresses
     constexpr auto BaseEntity$$ServerRPC_uint_ = 14738480;// method address
 }
+*/
