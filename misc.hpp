@@ -927,7 +927,7 @@ namespace misc
 			int iterations = 0;
 			while (point.distance(node.pos) > 1.0f)
 			{
-				if (iterations++ > 50)
+				if (iterations++ > 500)
 					break;
 
 				path.push_back(point);
@@ -987,7 +987,8 @@ namespace misc
 			pwm->set_body_velocity(Vector3(vel.x, force, vel.z));
 		}
 
-		void pathfind(PlayerWalkMovement* pwm, Vector3 marker_pos) {
+		void pathfind(PlayerWalkMovement* pwm, 
+			Vector3 marker_pos) {
 			Vector3 vel = pwm->get_TargetMovement();
 			vel = Vector3(vel.x / vel.length() * 5.5f, vel.y, vel.z / vel.length() * 5.5f);
 			auto eyepos = esp::local_player->get_transform()->get_position();

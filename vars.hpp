@@ -15,6 +15,7 @@ struct Vars
 		float aimbotfov = 500.f;
 		float aimbot_smooth = 0.5f;
 		bool hitbox_override = false;
+		bool randomize = false;
 		int hitbox = 0;
 		bool silent_melee = false;
 		bool manipulator = false;

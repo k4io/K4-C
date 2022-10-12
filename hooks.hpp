@@ -612,9 +612,7 @@ StringPool::Get(xorstr_("l_knee")) = 3892428003
 StringPool::Get(xorstr_("spine4")) = 827230707
 */
 
-			//if (!target.is_heli && vars->combat.hitbox_override) {
-			if (false) {
-
+			if (!target.is_heli && vars->combat.hitbox_override) {
 				int hitbone = 698017942;
 				int hitpartid = 2173623152;
 
@@ -623,64 +621,46 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					int64_t partid;
 				};
 
-				srand(time(0));
-				hitt test[7] = { 
-					{ 0, 0 }, 
-					{ 0, 0 }, 
-					{ 0, 0 }, 
-					{ 0, 0 }, 
-					{ 0, 0 }, 
-					{ 0, 0 }, 
-					{ 0, 0 }, 
+				hitt test[1] = { 
+					{ 0, 0 }
 				};
 				
-				if (vars->combat.hitboxes.Head
+				if (vars->combat.hitbox == 0
 					 && esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
 						 (int)rust::classes::Bone_List::head)->get_position(), projectile->get_current_position()))
 					test[0] = { 698017942, 2173623152 };
-				if (vars->combat.hitboxes.Body
+				if (vars->combat.hitbox == 1
 					&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
 						(int)rust::classes::Bone_List::pelvis)->get_position(), projectile->get_current_position()))
-					test[1] = { 1031402764, 1750816991 };
-				if (vars->combat.hitboxes.Upperbody
+					test[0] = { 1031402764, 1750816991 };
+				if (vars->combat.hitbox == 2
 					&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
 						(int)rust::classes::Bone_List::spine4)->get_position(), projectile->get_current_position()))
-					test[2] = { 3901657145, 1750816991 };
-				if (vars->combat.hitboxes.Hands
+					test[0] = { 3901657145, 1750816991 };
+				if (vars->combat.hitbox == 3
 					&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
 						(int)rust::classes::Bone_List::r_hand)->get_position(), projectile->get_current_position()))
-					test[3] = { 102231371, 1750816991 };
-				if (vars->combat.hitboxes.Penis
+					test[0] = { 102231371, 1750816991 };
+				if (vars->combat.hitbox == 4
 					&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
 						(int)rust::classes::Bone_List::penis)->get_position(), projectile->get_current_position()))
-					test[4] = { 612182976, 2173623152 };
-				if (vars->combat.hitboxes.Legs
+					test[0] = { 612182976, 2173623152 };
+				if (vars->combat.hitbox == 5
 					&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
 						(int)rust::classes::Bone_List::l_hip)->get_position(), projectile->get_current_position()))
-					test[5] = { 3892428003, 1750816991 };
-				if (vars->combat.hitboxes.Feet
+					test[0] = { 3892428003, 1750816991 };
+				if (vars->combat.hitbox == 6
 					&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
 						(int)rust::classes::Bone_List::r_foot)->get_position(), projectile->get_current_position()))
-					test[6] = { 920055401, 1750816991 };
+					test[0] = { 920055401, 1750816991 };
 
-				int d = rand() % 6;
-				int t = 0;
-				while (test[d].hitbone == 0)
-				{
-					if (t++ > 100) {
-						test[d] = { 698017942, 2173623152 };
-						break;
-					}
-					srand(time(0));
-					d = rand() % 7;
-				}
 
-				attack->hitBone = test[d].hitbone;
-				attack->hitPartID = test[d].partid;
+				attack->hitBone = test[0].hitbone;
+				attack->hitPartID = test[0].partid;
 				attack->hitPositionLocal = { -.1f, -.1f, 0 };
 				attack->hitNormalLocal = { 0, -1, 0 };
 			}
-			else if (!target.is_heli) {
+			else if (!target.is_heli && vars->combat.randomize) {
 				switch (my_rand() % 10) {
 				case 0: // Head
 					attack->hitBone   = 698017942;
@@ -957,7 +937,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							misc::node.ent = (BaseEntity*)loco->find_closest(_("OreResourceEntity"), (Networkable*)loco, 200.f);
 						misc::autobot::auto_farm(player_walk_movement);
 					}
-					else
+					else if(!vars->misc.walktomarker)
 					{
 						misc::node.ent = 0;
 						misc::node.path.clear();

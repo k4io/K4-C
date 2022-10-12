@@ -111,8 +111,12 @@ namespace Gui
 			else if (name == _("manipulator")) vars->combat.manipulator2 = std::stoi(value);
 			else if (name == _("doubletap")) vars->combat.doubletap = std::stoi(value);
 			else if (name == _("always_reload")) vars->combat.always_reload = std::stoi(value);
+			else if (name == _("randomize")) vars->combat.randomize = std::stoi(value);
 			else if (name == _("autoshoot")) vars->combat.autoshoot = std::stoi(value);
 			else if (name == _("bullet_tp")) vars->combat.bullet_tp = std::stoi(value);
+			else if (name == _("instaeoka")) vars->combat.instaeoka = std::stoi(value);
+			else if (name == _("weakspots")) vars->combat.weakspots = std::stoi(value);
+			else if (name == _("locktarget")) vars->combat.locktarget = std::stoi(value);
 			else if (name == _("rapidfire")) vars->combat.rapidfire = std::stoi(value);
 			else if (name == _("automatic")) vars->combat.automatic = std::stoi(value);
 			else if (name == _("thick_bullet")) vars->combat.thick_bullet = std::stoi(value);
@@ -315,6 +319,9 @@ namespace Gui
 		itoa((int)vars->combat.hitbox_override, buffer, 4);
 		str = (std::string(_("hitbox_override=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
+		itoa((int)vars->combat.randomize, buffer, 4);
+		str = (std::string(_("randomize=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
 		itoa(vars->combat.hitbox, buffer, 4);
 		str = (std::string(_("hitbox=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
@@ -326,6 +333,15 @@ namespace Gui
 		f.write(str.c_str(), str.size());
 		itoa(vars->combat.doubletap, buffer, 4);
 		str = (std::string(_("doubletap=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->combat.weakspots, buffer, 4);
+		str = (std::string(_("weakspots=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->combat.locktarget, buffer, 4);
+		str = (std::string(_("locktarget=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->combat.instaeoka, buffer, 4);
+		str = (std::string(_("instaeoka=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
 		itoa(vars->combat.always_reload, buffer, 4);
 		str = (std::string(_("always_reload=")) + std::string(buffer) + _("\n"));
@@ -711,6 +727,7 @@ namespace Gui
 			im::Checkbox(_("Hitbox override"), &vars->combat.hitbox_override);
 			im::Combo(_("Hitboxes"), &vars->combat.hitbox,
 				_("Head\0Body\0Upperbody\0Penis\0Hands\0Legs\0Feet"));
+			im::Checkbox(_("Randomize hitboxes"), &vars->combat.randomize);
 			im::Checkbox(_("Manipulator"), &vars->combat.manipulator2);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(50, 15));
