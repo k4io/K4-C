@@ -150,6 +150,8 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 		auto name = ply->_displayName()->str;
 		auto activeitem = ply->GetActiveItem();
 
+		//chams
+		esp::do_chams(ply);
 
 		//boxes
 		auto box_color = is_visible ? vars->colors.players.boxes.visible : vars->colors.players.boxes.invisible;
@@ -655,19 +657,19 @@ void iterate_entities() {
 			auto entity = (BasePlayer*)ent;
 
 			//cache::CacheBones(entity, esp::local_player);
-			bool exists_in_list = false;
-			for (BasePlayer* p : player_list)
-			{
-				if (!p->is_alive()
-					|| (entity->is_sleeping() && !vars->visual.sleeper_esp))
-				{
-					player_list.erase(std::remove(player_list.begin(), player_list.end(), p), player_list.end());
-				}
-				if (entity->userID() == p->userID())
-					exists_in_list = true;
-			}
-			if(!exists_in_list)
-				player_list.push_back(entity);
+			//bool exists_in_list = false;
+			//for (BasePlayer* p : player_list)
+			//{
+			//	if (!p->is_alive()
+			//		|| (entity->is_sleeping() && !vars->visual.sleeper_esp))
+			//	{
+			//		player_list.erase(std::remove(player_list.begin(), player_list.end(), p), player_list.end());
+			//	}
+			//	if (entity->userID() == p->userID())
+			//		exists_in_list = true;
+			//}
+			//if(!exists_in_list)
+			//	player_list.push_back(entity);
 			//hit player for silent melee, but not here as may crash due to not being run from a game thread
 
 			//check valid
@@ -685,6 +687,28 @@ void iterate_entities() {
 			else {
 				if (esp::local_player)
 				{
+					if (GetAsyncKeyState(0x37))
+					{
+						auto look = esp::local_player->_lookingAtEntity();
+						if (look)
+						{
+							auto net2 = *reinterpret_cast<Networkable**>(look + 0x58);
+							auto look_id = net2->get_id();
+							if (look_id == ent_id)
+							{
+								//is_looking_at_entity = true;
+
+								//if (!map_contains_key(selected_entity_parent_mapping, selected_entity_id))
+								//	selected_entity_parent_mapping.insert(std::make_pair(selected_entity_id, 0));
+								//else //does contain the key
+								//	if (selected_entity_parent_mapping[selected_entity_id] == 0)
+								//		selected_entity_parent_mapping[selected_entity_id] = ent_id;
+
+								esp::selected_entity_id = ent_id;
+							}
+						}
+					}
+
 					auto target = aim_target();
 					if (vars->combat.bodyaim)
 						//target.pos = ((BasePlayer*)ent)->bones()->pelvis->position;
@@ -776,6 +800,32 @@ void iterate_entities() {
 				{
 					DrawPlayer(entity, npc);
 
+					if (vars->combat.silent_melee || unity::GetKey(vars->keybinds.silentmelee)
+						&& esp::best_target.distance < vars->combat.melee_range)
+					{
+						auto hit_player = [&]() {
+							auto Item = esp::local_player->GetActiveItem();
+							if (Item) {
+								auto melee = Item->GetHeldEntity<BaseMelee>();
+								if (melee) {
+									auto class_name = melee->get_class_name();
+									if (*(int*)(class_name + 4) == 'eleM' || *(int*)(class_name + 4) == 'mmah') {
+										auto world_position = ent->model()->boneTransforms()->get(48)->get_position();
+										auto local = ClosestPoint(esp::local_player, world_position);
+										auto camera = esp::local_player->model()->boneTransforms()->get(48)->get_position();
+
+										if (camera.get_3d_dist(world_position) >= 4.2f)
+											return;
+
+										aim_target target = esp::best_target;
+
+										attack_melee(target, melee, true);
+									}
+								}
+							}
+						};
+						hit_player();
+					}
 					//offscreen indicator?
 					//silent melee?
 				}
@@ -818,8 +868,10 @@ void iterate_entities() {
 				vars->visual.ladder ||
 				vars->visual.cloth ||
 				vars->visual.tc_esp ||
-				vars->visual.corpses)
+				vars->visual.corpses
+				&& world_position.distance(esp::local_player->get_transform()->get_position()) < vars->visual.dist_on_items)
 			{
+				esp_name = _(L"");
 				auto object_name = *reinterpret_cast<esp::rust_str*>(object_name_ptr);
 				if (!object_name.zpad)
 					continue;
@@ -934,52 +986,49 @@ void iterate_entities() {
 					Vector2 w2s_position = {};
 					if (esp::out_w2s(world_position, w2s_position))
 					{
-
-						//esp::draw_item(w2s_position, esp_name, esp_color);
-					}
-
-					if (base_heli->is_alive())
-					{
-						auto target = aim_target();
-						target.pos = base_heli->model()->boneTransforms()->get(19)->get_position();
-
-						auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().get_3d_dist(target.pos);
-						target.distance = distance;
-
-						auto fov = unity::get_fov(target.pos);
-						target.fov = fov;
-
-						target.network_id = ent_id;
-
-						if (fov < vars->combat.aimbotfov)
+						if (base_heli->is_alive())
 						{
-							target.ent = base_heli;
+							auto target = aim_target();
+							target.pos = base_heli->model()->boneTransforms()->get(19)->get_position();
 
-							//auto visible = esp::local_player->is_visible(esp::local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
-							//target.visible = visible;
+							auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().get_3d_dist(target.pos);
+							target.distance = distance;
 
-							if (target < esp::best_target)
+							auto fov = unity::get_fov(target.pos);
+							target.fov = fov;
+
+							target.network_id = ent_id;
+
+							if (fov < vars->combat.aimbotfov)
 							{
-								esp::best_target = target;
-								esp::best_target.is_heli = true;
-							}
-							else if (esp::best_target.is_heli)
-								esp::best_target.pos = target.pos;
-							else esp::best_target.is_heli = false;
-						}
-						else
-						{
-							esp::best_target = aim_target();
-						}
-					}
-					else esp::best_target.is_heli = false;
+								target.ent = base_heli;
 
-					if (vars->visual.heli_esp
-						&& base_heli->is_alive())
-					{
-						render.StringCenter({ x, y - 5 }, _(L"Patrol-heli"), { 1, 1, 1, 1 });
-						render.Rectangle({ x - w, y - h }, { w * 2, h }, { 0, 0, 0, 0 }, 2);
-						render.Rectangle({ x - w, y - h }, { w * 2, h }, FLOAT4TOD3DCOLOR(vars->colors.players.boxes.visible), 1);
+								//auto visible = esp::local_player->is_visible(esp::local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
+								//target.visible = visible;
+
+								if (target < esp::best_target)
+								{
+									esp::best_target = target;
+									esp::best_target.is_heli = true;
+								}
+								else if (esp::best_target.is_heli)
+									esp::best_target.pos = target.pos;
+								else esp::best_target.is_heli = false;
+							}
+							else
+							{
+								esp::best_target = aim_target();
+							}
+						}
+						else esp::best_target.is_heli = false;
+
+						if (vars->visual.heli_esp
+							&& base_heli->is_alive())
+						{
+							render.StringCenter({ x, y - 5 }, _(L"Patrol-heli"), { 1, 1, 1, 1 });
+							render.Rectangle({ x - w, y - h }, { w * 2, h }, { 0, 0, 0, 0 }, 2);
+							render.Rectangle({ x - w, y - h }, { w * 2, h }, FLOAT4TOD3DCOLOR(vars->colors.players.boxes.visible), 1);
+						}
 					}
 					continue;
 				}
@@ -1074,7 +1123,6 @@ void iterate_entities() {
 						esp_name = _(L"Snowmobile");
 					else if(std::string(object_name.zpad).find(_("saddle")) != std::string::npos)
 						esp_name = _(L"Horse");
-					else esp_name = _(L"Vehicle");
 
 					esp_color = Vector4(0, 161, 219, 255);
 					world_position.y += 1.f;

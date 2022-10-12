@@ -1251,15 +1251,15 @@ namespace gui {
 
 					esp::matrix = unity::get_view_matrix();
 
-					if (!player_list.empty())
-						for (auto p : player_list)
-							if (vars->visual.playeresp
-								&& p)
-							{
-								esp::do_chams(p);
-								//esp::local_player->console_echo(string::wformat(_(L"[trap]: OnGUI - Caching bones for: %d"), p->userID()));
-								//cache::CacheBones(p, esp::local_player);
-							}
+					//if (!player_list.empty())
+					//	for (auto p : player_list)
+					//		if (vars->visual.playeresp
+					//			&& p)
+					//		{
+					//			esp::do_chams(p);
+					//			//esp::local_player->console_echo(string::wformat(_(L"[trap]: OnGUI - Caching bones for: %d"), p->userID()));
+					//			//cache::CacheBones(p, esp::local_player);
+					//		}
 					//esp::start();
 					auto baseplayer = esp::local_player;
 					if (vars->misc.autorefill) {

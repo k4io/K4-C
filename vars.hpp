@@ -58,8 +58,8 @@ struct Vars
 		bool crosshair1 = false;
 		bool crosshair2 = false;
 		bool crosshair3 = false;
-		float day = 0.f;
-		float night = 0.f;
+		float day = 1.f;
+		float night = 1.f;
 		float dist_on_items = 100.f;
 		float playerfov = 90.f;
 		bool zoomtoggle = false;

@@ -951,6 +951,7 @@ public:
 	FIELD(_("BaseMelee"), _("gathering"), gathering, GatherProperties*);
 	FIELD(_("BaseMelee"), _("damageProperties"), damageProperties, DamageProperties*);
 	FIELD(_("BaseMelee"), _("maxDistance"), maxDistance, float);
+	FIELD(_("BaseMelee"), _("attackRadius"), attackRadius, float);
 
 
 	bool CanHit(HitTest* ht) {
@@ -1191,6 +1192,7 @@ public:
 		float recoilx = vars->combat.recoilx;
 		float recoily = vars->combat.recoily;
 
+		if (!recoil_properties) return;
 		//after update June 5th 2022
 		auto new_recoil_properties = *reinterpret_cast<uintptr_t*>((uintptr_t)recoil_properties + 0x78);
 

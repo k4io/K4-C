@@ -1703,9 +1703,13 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								baseprojectile->set_recoil();
 							}
 						}
-						else if (std::string(wep_class_name).find(_("melee")) != std::string::npos) {
-							((BaseMelee*)item)->maxDistance() = vars->combat.melee_range;
-						}
+					}
+					else //is BaseMelee
+					{
+						((BaseMelee*)item)->maxDistance() = vars->combat.melee_range;
+						((BaseMelee*)item)->attackRadius() = vars->combat.melee_range;
+
+						//melee manipulator? lol
 					}
 				}
 			}

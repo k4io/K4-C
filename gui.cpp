@@ -773,7 +773,7 @@ namespace Gui
 			im::Checkbox(_("Hotbar"), &vars->visual.hotbar_esp);
 			im::Checkbox(_("Skeleton"), &vars->visual.skeleton);
 			im::Combo(_("Box type"), &vars->visual.boxtype,
-				_("None\0Full\0Corner\0Cube"));
+				_("None\0Full\0Corner\0Cube\0Box"));
 			//im::Checkbox(_("Full box"), &vars->visual.full_box);
 			//im::Checkbox(_("Corner box"), &vars->visual.corner_box);
 			//im::Checkbox(_("3D Cube"), &vars->visual.cube);
@@ -781,7 +781,7 @@ namespace Gui
 			im::Checkbox(_("Crosshair hp"), &vars->visual.midname);
 			im::Checkbox(_("Sleeper"), &vars->visual.sleeper_esp);
 			im::Checkbox(_("NPC"), &vars->visual.npc_esp);
-			im::Checkbox(_("Held item icon"), &vars->visual.spriteitem);
+			//im::Checkbox(_("Held item icon"), &vars->visual.spriteitem);
 			im::EndChild();
 		}
 
@@ -800,8 +800,8 @@ namespace Gui
 			im::Hotkey(_("Z"), &vars->keybinds.zoom, ImVec2(50, 14));
 			im::SliderFloat(_("Zoom fov"), &vars->visual.zoomfov, 1.f, 100.f, _("%.1f"));
 			im::SliderFloat(_("Stars"), &vars->visual.staramount, 1.f, 1000.f, _("%.0f"));
-			im::SliderFloat(_("Brightness"), &vars->visual.day, 1.f, 10.f, _("%.1f"), 0.1f);
-			im::SliderFloat(_("Nightness"), &vars->visual.night, 1.f, 10.f, _("%.1f"), 0.1f);
+			im::SliderFloat(_("Brightness"), &vars->visual.day, 0.0f, 10.0f, _("%.0f"), 1.f);
+			im::SliderFloat(_("Nightness"), &vars->visual.night, 0.0f, 10.0f, _("%.0f"), 1.f);
 			im::Checkbox(_("Manipulator angles"), &vars->visual.angles);
 			im::EndChild();
 		}
