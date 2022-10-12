@@ -153,17 +153,22 @@ namespace unity {
 	}
 
 	bool is_visible(Vector3 source, Vector3 destination, uintptr_t ent, float p1 = 0.18f) {
+		__try {
+			auto layer = (int)rust::classes::Layers::ProjectileLineOfSightCheck | (int)rust::classes::Layers::Terrain | (int)rust::classes::Layers::z;
+			typedef bool (*AAA)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t);//real rust 0x50F790         //cracked 0x50ED80
 
-		auto layer = (int)rust::classes::Layers::ProjectileLineOfSightCheck | (int)rust::classes::Layers::Terrain | (int)rust::classes::Layers::z;
-		typedef bool (*AAA)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t);//real rust 0x50F790         //cracked 0x50ED80
+			//real rust 0x52D200
+			//alkad rust 0x52C6A0
 
-		//real rust 0x52D200
-		//alkad rust 0x52C6A0
-
-		return ((AAA)(mem::game_assembly_base + oLineOfSightRadius))(source, destination, rust::classes::Layers(layer), p1, ent)
-			&& ((AAA)(mem::game_assembly_base + oLineOfSightRadius))(destination, source, rust::classes::Layers(layer), p1, ent);
-		//return LineOfSightRadius(source, destination, rust::classes::Layers(layer), p1, ent)
-		//	&& LineOfSightRadius(destination, source, rust::classes::Layers(layer), p1, ent);
+			return ((AAA)(mem::game_assembly_base + oLineOfSightRadius))(source, destination, rust::classes::Layers(layer), p1, ent)
+				&& ((AAA)(mem::game_assembly_base + oLineOfSightRadius))(destination, source, rust::classes::Layers(layer), p1, ent);
+			//return LineOfSightRadius(source, destination, rust::classes::Layers(layer), p1, ent)
+			//	&& LineOfSightRadius(destination, source, rust::classes::Layers(layer), p1, ent);
+		}
+		__except (false)
+		{
+			return false;
+		}
 	}
 
 	auto camera = unity::get_main_camera();
