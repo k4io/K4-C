@@ -174,10 +174,12 @@ struct Vars
 		bool norecycler = false;
 		bool instant_med = false;
 		bool instant_revive = false;
+		bool fastloot = false;
 		bool skinchanger = false;
 		bool no_playercollision = false;
 		bool spiderman = false;
 		bool silentwalk = false;
+		bool walktomarker = false;
 		bool autofarm = false;
 		bool autorefill = false;
 		bool logs = false;

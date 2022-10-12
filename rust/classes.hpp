@@ -772,7 +772,7 @@ public:
 			if (!off) return Vector3(0, 0, 0);
 			return off(this);
 		}
-		__except (false) {
+		__except (true) {
 			return Vector3(0, 0, 0);
 		}
 	}
@@ -959,6 +959,12 @@ public:
 		auto off = reinterpret_cast<bool (*)(BaseMelee*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("CanHit"), 1, _(""), _(""))));
 		return off(this, ht);
 	}
+};
+
+class MapNote {
+public:
+	member(Vector3, worldPosition, 0x18);
+	//FIELD(_("MapNote"), _("worldPosition"), worldPosition, Vector3);
 };
 
 class Magazine {
@@ -1695,6 +1701,7 @@ public:
 	FIELD(_("BasePlayer"), _("clientTickInterval"), clientTickInterval, float);
 	FIELD(_("BasePlayer"), _("mounted"), mounted, BaseMountable*);
 	FIELD(_("BasePlayer"), _("inventory"), inventory, PlayerInventory*);
+	FIELD(_("BasePlayer"), _("ClientCurrentMapNote"), ClientCurrentMapNote, MapNote*);
 
 	bool isCached() {
 		if (!this) return false;

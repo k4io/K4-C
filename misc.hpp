@@ -927,7 +927,7 @@ namespace misc
 			int iterations = 0;
 			while (point.distance(node.pos) > 1.0f)
 			{
-				if (iterations++ > 500)
+				if (iterations++ > 50)
 					break;
 
 				path.push_back(point);
@@ -987,6 +987,78 @@ namespace misc
 			pwm->set_body_velocity(Vector3(vel.x, force, vel.z));
 		}
 
+		void pathfind(PlayerWalkMovement* pwm, Vector3 marker_pos) {
+			Vector3 vel = pwm->get_TargetMovement();
+			vel = Vector3(vel.x / vel.length() * 5.5f, vel.y, vel.z / vel.length() * 5.5f);
+			auto eyepos = esp::local_player->get_transform()->get_position();
+
+			if (node.steps > 0
+				&& eyepos.distance(node.pos) < 1.f)
+			{
+				node.path.clear();
+				node.pos = Vector3(0, 0, 0);
+				node.steps = 0;
+				vel = Vector3(0, 0, 0);
+				time_at_node += get_deltaTime();
+			}
+
+			if (eyepos.distance(node.pos) >= 1.f)
+			{
+				if (node.path.empty() || ((node.pos.is_empty() || node.pos == Vector3(0, 0, 0))
+					&& eyepos.distance(node.pos)) > 1.f)
+					CreatePath(marker_pos, eyepos);
+
+				Vector3 current_step = node.path[node.steps];
+
+				psteps = node.steps;
+				if (current_step.distance(node.pos) <= 0.5f)
+				{
+					vel = Vector3(0, 0, 0);
+					node.path.clear();
+					node.pos = Vector3(0, 0, 0);
+					node.steps = 0;
+					return;
+				}
+
+				//draw path
+				if (!node.path.empty())
+				{
+					for (size_t i = 1; i < node.path.size(); i++)
+					{
+						if (node.path[i] == current_step)
+							Line(node.path[i - 1], node.path[i], col(190, 20, 20, 50), 0.02f, false, true);
+						else
+							Line(node.path[i - 1], node.path[i], col(190, 190, 190, 50), 0.02f, false, true);
+					}
+				}
+
+				if (eyepos.distance(current_step) < 1.6f)
+					node.steps += 1;
+
+				if (node.steps >= node.path.size() - 1)
+				{
+					vel = Vector3(0, 0, 0);
+					node.path.clear();
+					node.pos = Vector3(0, 0, 0);
+					node.steps = 0;
+					return;
+				}
+
+				Vector3 dir = ((Vector3(current_step.x, current_step.y - dist_from_ground(current_step) + 0.1f, current_step.z)) - eyepos).Normalized();
+				vel = { (dir.x / dir.length() * 5.5f), vel.y, (dir.z / dir.length() * 5.5f) };
+				pwm->set_TargetMovement(vel);
+
+				last_pos = eyepos;
+				last_pos_time = get_fixedTime();
+
+				if (node.path[node.steps].y - eyepos.y > 1.f)
+				{
+					needs_to_jump = true;
+					pwm->set_TargetMovement({ vel.x, vel.y += 10, vel.z });
+				}
+			}
+		}
+
 		void auto_farm(PlayerWalkMovement* pwm) {
 			auto lp = esp::local_player;
 			if (!lp || !pwm) return;
@@ -1000,79 +1072,7 @@ namespace misc
 			if (Transform && hp > 60 && time_at_node < 7.f) {
 				auto marker_pos = Transform->get_position();
 				//Sphere(marker_pos, 1.f, col(1, 1, 1, 1), 0.02f, 100.f);
-				if (node.steps > 0
-					&& eyepos.distance(node.pos) < 1.f)
-				{
-					node.path.clear();
-					node.pos = Vector3(0, 0, 0);
-					node.steps = 0;
-					vel = Vector3(0, 0, 0);
-					time_at_node += get_deltaTime();
-				}
-
-				if (eyepos.distance(node.pos) >= 1.f)
-				{
-					if (node.path.empty() && (node.pos.is_empty() || node.pos == Vector3(0, 0, 0))
-						&& eyepos.distance(node.pos) > 1.f)
-						CreatePath(marker_pos, eyepos);
-
-					Vector3 current_step = node.path[node.steps];
-
-					psteps = node.steps;
-					if (current_step.distance(node.pos) <= 0.5f)
-					{
-						vel = Vector3(0, 0, 0);
-						node.path.clear();
-						node.pos = Vector3(0, 0, 0);
-						node.steps = 0;
-						return;
-					}
-
-					//draw path
-					if (!node.path.empty())
-					{
-						for (size_t i = 1; i < node.path.size(); i++)
-						{
-							if (node.path[i] == current_step)
-								Line(node.path[i - 1], node.path[i], col(190, 20, 20, 50), 0.02f, false, true);
-							else
-								Line(node.path[i - 1], node.path[i], col(190, 190, 190, 50), 0.02f, false, true);
-						}
-					}
-
-					if (eyepos.distance(current_step) < 1.6f)
-						node.steps += 1;
-
-					if (node.steps >= node.path.size() - 1)
-					{
-						vel = Vector3(0, 0, 0);
-						node.path.clear();
-						node.pos = Vector3(0, 0, 0);
-						node.steps = 0;
-						return;
-					}
-
-					Vector3 dir = ((Vector3(current_step.x, current_step.y - dist_from_ground(current_step) + 0.1f, current_step.z)) - eyepos).Normalized();
-					vel = { (dir.x / dir.length() * 5.5f), vel.y, (dir.z / dir.length() * 5.5f) };
-					pwm->set_TargetMovement(vel);
-
-					last_pos = eyepos;
-					last_pos_time = get_fixedTime();
-
-					if (node.path[node.steps].y - eyepos.y > 1.f)
-					{
-						needs_to_jump = true;
-						pwm->set_TargetMovement({ vel.x, vel.y += 10, vel.z });
-
-
-						//auto state = lp->modelState();
-						//if (settings::vert_flyhack < 2.5f && settings::hor_flyhack < 6.f)
-						//{
-						//	pwm->force_jump(state, true);
-						//	do_jump(pwm, state, 3.f);
-						//}
-					}
-				}
+				pathfind(pwm, marker_pos);
 			}
 			else
 			{

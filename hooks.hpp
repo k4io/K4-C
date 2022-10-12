@@ -4,6 +4,7 @@
 #include "esp.hpp"
 
 //#include "gui/OnGUI.hpp"
+#define CALLED_BY(func,off) (reinterpret_cast<std::uint64_t>(_ReturnAddress()) > func && reinterpret_cast<std::uint64_t>(_ReturnAddress()) < func + off)
 
 static auto dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
 
@@ -879,6 +880,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 			if (loco && !loco->is_sleeping() && vars->desyncTime < 0.f)
 			{
+				float max_speed = (player_walk_movement->get_swimming() || player_walk_movement->get_ducking() > 0.5) ? 1.7f : 5.5f;
+
 				set_sprinting(model_state, true);
 				flying = player_walk_movement->get_flying();
 
@@ -892,7 +895,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 				model_state->remove_flag(rust::classes::ModelState_Flag::Flying);
 
-				float max_speed = (player_walk_movement->get_swimming() || player_walk_movement->get_ducking() > 0.5) ? 1.7f : 5.5f;
 				if (vars->misc.always_sprint) {
 					if (vel.length() > 0.f) {
 						Vector3 target_vel = Vector3(vel.x / vel.length() * max_speed, vel.y, vel.z / vel.length() * max_speed);
@@ -1017,6 +1019,19 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						set_onLadder(model_state, false);
 					}
 				}
+
+				if (vars->misc.walktomarker) {
+					auto note = esp::local_player->ClientCurrentMapNote();
+					if (note) {
+						auto pos = esp::local_player->get_transform()->get_position();
+						Vector3 marker_pos = note->worldPosition;
+						misc::node.pos = marker_pos;
+						misc::autobot::pathfind(player_walk_movement, marker_pos);
+						//Vector3 dir = (marker_pos - pos).normalize();
+						//Vector3 vel = Vector3(dir.x / dir.length() * max_speed, dir.y, dir.z / dir.length() * max_speed);
+						//player_walk_movement->set_TargetMovement(vel);
+					}
+				}
 			}
 		}
 		else return orig::playerwalkmovement_client_input(player_walk_movement, inputstate, model_state);
@@ -1078,9 +1093,18 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		PerformanceUI_Update(instance);
 	}
 
-	//void hk_baseplayer_clientupdate(BasePlayer* p) {
-	//	cache::CacheBones(p, esp::local_player);
-	//}
+	Object* hk_monobehaviour_coroutine(MonoBehaviour* a1, Object* un2)
+	{
+		if (vars->misc.fastloot) {
+			auto method = il2cpp::method(_("ItemIcon"), _("SetTimedLootAction"));
+			if (CALLED_BY(method, 0x656)) {
+				*reinterpret_cast<float*>(un2 + 0x28) = -0.2f;
+			}
+		}
+
+		auto coroutine = il2cpp::method(_("MonoBehaviour"), _("StartCoroutine"), 1, _(""), _("UnityEngine"));
+		return reinterpret_cast<Object * (*)(MonoBehaviour*, Object*)>(coroutine)(a1, un2);
+	}
 
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
 	{
@@ -1780,7 +1804,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				vars->tick_time_when_called = tick_time;
 			}
 
-			if (vars->misc.autofarm) {
+			if (vars->misc.autofarm
+				|| vars->misc.walktomarker) {
 				if (misc::node.pos != Vector3(0, 0, 0))
 				{
 					auto dir = (misc::node.pos - baseplayer->eyes()->get_position()).Normalized();

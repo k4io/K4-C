@@ -870,6 +870,7 @@ namespace Gui
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("F"), &vars->keybinds.flywall, ImVec2(50, 14));
 			im::Checkbox(_("No collisions"), &vars->misc.no_playercollision);
+			im::Checkbox(_("Walk to marker"), &vars->misc.walktomarker);
 			im::Checkbox(_("Spinbot"), &vars->misc.spinbot);
 			im::Checkbox(_("Autofarm"), &vars->misc.autofarm);
 			im::EndChild();

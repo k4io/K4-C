@@ -180,6 +180,7 @@ bool DllMain(HMODULE hmodule)
 	il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
 	il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
 	il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);
+	//il2cpp::hook(&hooks::hk_monobehaviour_coroutine, _("StartCoroutine"), _("MonoBehaviour"), _("UnityEngine"));
 	mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
 	//mem::hook_virtual_function(_("BaseCombatEntity"), _("IsAlive"), &hooks::hk_baseplayer_ClientInput);
 	mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);

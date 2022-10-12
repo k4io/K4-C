@@ -165,7 +165,7 @@ namespace unity {
 			//return LineOfSightRadius(source, destination, rust::classes::Layers(layer), p1, ent)
 			//	&& LineOfSightRadius(destination, source, rust::classes::Layers(layer), p1, ent);
 		}
-		__except (false)
+		__except (1)
 		{
 			return false;
 		}

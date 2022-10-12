@@ -1251,15 +1251,15 @@ namespace gui {
 
 					esp::matrix = unity::get_view_matrix();
 
-					//if (!player_list.empty())
-					//	for (auto p : player_list)
-					//		if (vars->visual.playeresp
-					//			&& p)
-					//		{
-					//			esp::do_chams(p);
-					//			//esp::local_player->console_echo(string::wformat(_(L"[trap]: OnGUI - Caching bones for: %d"), p->userID()));
-					//			//cache::CacheBones(p, esp::local_player);
-					//		}
+					if (!player_list.empty())
+						for (auto p : player_list)
+							if (vars->visual.playeresp
+								&& p)
+							{
+								esp::do_chams(p);
+								//esp::local_player->console_echo(string::wformat(_(L"[trap]: OnGUI - Caching bones for: %d"), p->userID()));
+								//cache::CacheBones(p, esp::local_player);
+							}
 					//esp::start();
 					auto baseplayer = esp::local_player;
 					if (vars->misc.autorefill) {
@@ -2273,16 +2273,13 @@ namespace esp
 							case 1:
 								material->SetColor(_(L"_ColorVisible"), viscolor);
 								material->SetColor(_(L"_ColorBehind"), inviscolor);
-								SetInt((uintptr_t)material, _(L"_ZTest"), 1);
 								break;
 							case 3:
 								material->SetColor(_(L"_WireColor"), viscolor);
-								SetInt((uintptr_t)material, _(L"_ZTest"), 1);
 								break;
 							case 4:
 								material->SetColor(_(L"_ColorVisible"), viscolor);
 								material->SetColor(_(L"_ColorBehind"), inviscolor);
-								SetInt((uintptr_t)material, _(L"_ZTest"), 1);
 								break;
 							}
 						}
@@ -2304,7 +2301,7 @@ namespace esp
 		if (!local_player)
 			return;
 
-		do_chams(ent);
+		//do_chams(ent);
 
 		//   esp colors
 		auto visible_color = gui::Color(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1);
