@@ -11,6 +11,11 @@
 #define safe_read(Addr, Type) mem::read<Type>((DWORD64)Addr)
 #define safe_write(Addr, Data, Type) mem::write<Type>((DWORD64)Addr, Data);
 
+struct rust_str
+{
+	char zpad[128];
+};
+
 class default_t
 {
 public:
@@ -1933,7 +1938,7 @@ public:
 	}
 
 	template<typename T = Networkable*>
-	T find_closest(char* class_name , Networkable* target_entity, float max_distance) {
+	T find_closest(Networkable* target_entity, float max_distance, const char* class_name = "", const char* object_name = "") {
 		auto client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
 		if (!client_entities)
 			return { nullptr };
@@ -1980,11 +1985,28 @@ public:
 			if(best_ent)
 				best_position = ((BaseEntity*)best_ent)->get_transform()->get_position();
 
-			if (!LI_FIND(strcmp)(entity_class_name, class_name)
-				&& ent_position.distance(target_position) < max_distance
-				&& (!best_ent || ent_position.distance(target_position) < best_position.distance(target_position)))
+			if(strlen(class_name) > 0)
 			{
-				best_ent = reinterpret_cast<T>(ent);
+				if (!LI_FIND(strcmp)(entity_class_name, class_name)
+					&& ent_position.distance(target_position) < max_distance
+					&& (!best_ent || ent_position.distance(target_position) < best_position.distance(target_position)))
+				{
+					best_ent = reinterpret_cast<T>(ent);
+				}
+			}
+			else if (strlen(object_name) > 0)
+			{
+				uintptr_t object_name_ptr = mem::read<uintptr_t>(object + 0x60);
+				if (!object_name_ptr)
+					continue;
+				auto obj_name = *reinterpret_cast<rust_str*>(object_name_ptr);
+				auto n = obj_name.zpad;
+				if (std::string(n).find(object_name) != std::string::npos
+					&& ent_position.distance(target_position) < max_distance
+					&& (!best_ent || ent_position.distance(target_position) < best_position.distance(target_position)))
+				{
+					best_ent = reinterpret_cast<T>(ent);
+				}
 			}
 		}
 		return best_ent;

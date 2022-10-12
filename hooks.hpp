@@ -931,11 +931,38 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					//		misc::node.ent = (BaseEntity*)loco->find_closest(_("OreResourceEntity"), (Networkable*)loco, 200.f);
 					//	comp->Destination() = misc::node.ent->get_transform()->get_position();
 					//}
+
+					switch (vars->misc.walkto)
+					{
+					case 0: //None					
+						break;
+					case 1: //Marker
+					{
+						auto note = esp::local_player->ClientCurrentMapNote();
+						if (note) {
+							auto pos = esp::local_player->get_transform()->get_position();
+							Vector3 marker_pos = note->worldPosition;
+							misc::node.pos = marker_pos;
+							misc::autobot::pathfind(player_walk_movement, marker_pos);
+						}
+						break;
+					}
+					case 2: //Stone
+						misc::autobot::auto_farm(player_walk_movement, _("stone"));
+						break;
+					case 3: //Sulfur
+						misc::autobot::auto_farm(player_walk_movement, _("sulfur"));
+						break;
+					case 4: //Metal
+						misc::autobot::auto_farm(player_walk_movement, _("metal"));
+						break;
+					case 5: //Player
+						misc::autobot::walktoplayer(player_walk_movement, vars->misc.playerselected);
+						break;
+					}
+
 					if (vars->misc.autofarm)
 					{
-						if (misc::node.ent == 0)
-							misc::node.ent = (BaseEntity*)loco->find_closest(_("OreResourceEntity"), (Networkable*)loco, 200.f);
-						misc::autobot::auto_farm(player_walk_movement);
 					}
 					else if(!vars->misc.walktomarker)
 					{
@@ -997,19 +1024,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					else
 					{
 						set_onLadder(model_state, false);
-					}
-				}
-
-				if (vars->misc.walktomarker) {
-					auto note = esp::local_player->ClientCurrentMapNote();
-					if (note) {
-						auto pos = esp::local_player->get_transform()->get_position();
-						Vector3 marker_pos = note->worldPosition;
-						misc::node.pos = marker_pos;
-						misc::autobot::pathfind(player_walk_movement, marker_pos);
-						//Vector3 dir = (marker_pos - pos).normalize();
-						//Vector3 vel = Vector3(dir.x / dir.length() * max_speed, dir.y, dir.z / dir.length() * max_speed);
-						//player_walk_movement->set_TargetMovement(vel);
 					}
 				}
 			}
@@ -1373,12 +1387,14 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					&& esp::best_target.ent->is_alive())
 				{
 					float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
-					if (baseplayer->is_visible(target, baseplayer->model()->boneTransforms()->get(48)->get_position())
+					if ((baseplayer->is_visible(target, baseplayer->model()->boneTransforms()->get(48)->get_position())
 						&& get_fixedTime() > nextshot
 						&& held->timeSinceDeploy() > held->deployDelay()
 						&& mag_ammo > 0)
+						|| misc::autobot::wants_shoot)
 					{
 						misc::autoshot = true;
+						misc::autobot::wants_shoot = false;
 						hooks::hk_projectile_launchprojectile(held);
 						baseplayer->SendClientTick();
 					}

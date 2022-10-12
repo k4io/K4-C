@@ -2,7 +2,7 @@
 #include "memory/il2cpp.hpp"
 #include "settings.hpp"
 #include <math.h>
-//#include "esp.hpp"
+#include "esp.hpp"
 #include "spherearray.h"
 
 #include <Windows.h>
@@ -887,10 +887,12 @@ namespace misc
 
 	namespace autobot {
 		bool needs_to_jump = false;
+		bool wants_shoot = false;
 		int psteps = 0;
 		Vector3 last_pos = Vector3(0, 0, 0);
 		float last_pos_time = 0.f;
 		float time_at_node = 0.f;
+		float last_player_follow_update = 0.f;
 
 		void PathSmooth(std::vector<Vector3>& ref) {
 			std::vector<int> indexes = { };
@@ -987,7 +989,90 @@ namespace misc
 			pwm->set_body_velocity(Vector3(vel.x, force, vel.z));
 		}
 
-		void pathfind(PlayerWalkMovement* pwm, 
+		void checkandshoot(PlayerWalkMovement* pwm) {
+			auto lp = esp::local_player;
+			if (!pwm || lp) return;
+			std::vector<BasePlayer*> internal_playerlist = {};
+			auto lppos = lp->get_transform()->get_position();
+			//maybe check for manipulator
+			for (auto p : player_list)
+				if (p->visible()
+					&& p->get_transform()->get_position().distance(lppos) < vars->misc.autoattackdist) 
+					internal_playerlist.push_back(p);
+
+			BasePlayer* ply = nullptr;
+			for (auto p : internal_playerlist)
+			{
+				auto pos = p->get_transform()->get_position();
+				switch (vars->misc.targetting_mode)
+				{
+				case 0: //closest
+				{
+					if (!ply) {
+						ply = p;
+						continue;
+					}
+					if (ply->get_transform()->get_position().distance(lppos) > pos.distance(lppos))
+					{
+						ply = p;
+						continue;
+					}
+					break;
+				}
+				case 1: //lowest hp
+				{
+					if (!ply) {
+						ply = p;
+						continue;
+					}
+					if (ply->health() > p->health())
+					{
+						ply = p;
+						continue;
+					}
+					break;
+				}
+				}
+			}
+			auto target = aim_target();
+
+			if (vars->combat.bodyaim)
+				//target.pos = ((BasePlayer*)ent)->bones()->pelvis->position;
+				target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->get_position();
+			else
+				//target.pos = ((BasePlayer*)ent)->bones()->head->position;
+				target.pos = ply->model()->boneTransforms()->get(48)->get_position();
+			auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().get_3d_dist(target.pos); //crashes bc non game thread
+			target.distance = distance;
+			auto fov = unity::get_fov(target.pos);
+			target.fov = fov;
+			target.ent = (BaseCombatEntity*)ply;
+			target.network_id = ply->userID();
+			target.avg_vel = ply->GetWorldVelocity();
+			//only shoots at visible players anyway
+			auto visible = true;
+
+			esp::best_target = target;
+
+			auto item = lp->GetActiveItem();
+			if (item)
+			{
+				auto held = item->GetHeldEntity<BaseProjectile>();
+				if (held)
+				{
+					auto mag_ammo = held->ammo_left();
+					float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
+					if (get_fixedTime() > nextshot
+						&& held->timeSinceDeploy() > held->deployDelay()
+						&& mag_ammo > 0)
+					{
+						wants_shoot = true;
+					}
+				}
+			}
+		}
+
+		void pathfind(PlayerWalkMovement* pwm,
 			Vector3 marker_pos) {
 			Vector3 vel = pwm->get_TargetMovement();
 			vel = Vector3(vel.x / vel.length() * 5.5f, vel.y, vel.z / vel.length() * 5.5f);
@@ -1052,6 +1137,9 @@ namespace misc
 				last_pos = eyepos;
 				last_pos_time = get_fixedTime();
 
+				if (vars->misc.autoattack)
+					checkandshoot(pwm);
+
 				if (node.path[node.steps].y - eyepos.y > 1.f)
 				{
 					needs_to_jump = true;
@@ -1060,7 +1148,30 @@ namespace misc
 			}
 		}
 
-		void auto_farm(PlayerWalkMovement* pwm) {
+		void walktoplayer(PlayerWalkMovement* pwm,
+			int pid) {
+			auto lp = esp::local_player;
+			if (!pwm || lp) return;
+			BasePlayer* ply = player_list[pid];
+			if (!ply) return;
+			auto position = ply->get_transform()->get_position();
+
+			Vector3 vel = pwm->get_TargetMovement();
+			vel = Vector3(vel.x / vel.length() * 5.5f, vel.y, vel.z / vel.length() * 5.5f);
+			auto eyepos = lp->get_transform()->get_position();//lp->eyes()->get_position();
+
+			node.pos = position;
+			//update path every 5 seconds to allow for player following
+			if (last_player_follow_update + 5.f < get_fixedTime())
+			{
+				last_player_follow_update = get_fixedTime();
+				CreatePath(position, eyepos);
+			}
+			pathfind(pwm, position);
+		}
+
+		void auto_farm(PlayerWalkMovement* pwm,
+			std::string name) {
 			auto lp = esp::local_player;
 			if (!lp || !pwm) return;
 
@@ -1077,7 +1188,7 @@ namespace misc
 			}
 			else
 			{
-				misc::node.ent = (BaseEntity*)lp->find_closest(_("OreResourceEntity"), (Networkable*)lp, 200.f);
+				misc::node.ent = (BaseEntity*)lp->find_closest((Networkable*)lp, 200.f, "", name.c_str());
 				time_at_node = 0.f;
 				misc::node.path.clear();
 				misc::node.pos = Vector3(0, 0, 0);

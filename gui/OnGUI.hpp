@@ -1251,6 +1251,7 @@ namespace gui {
 
 					esp::matrix = unity::get_view_matrix();
 
+					int fff = 0;
 					if (!player_list.empty())
 						for (auto p : player_list)
 							if (vars->visual.playeresp

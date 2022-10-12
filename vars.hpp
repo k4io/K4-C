@@ -4,8 +4,11 @@
 #define GUI_NAME "Rust"
 #define CUSTOM_ICONS FALSE
 
+#include <map>
+
 struct Vars
 {
+	std::map<int, wchar_t*> player_id_name = {};
 	bool open = false;
 
 	struct combat {
@@ -178,10 +181,15 @@ struct Vars
 		bool fastloot = false;
 		bool skinchanger = false;
 		bool no_playercollision = false;
+		int playerselected = 0;
 		bool spiderman = false;
 		bool silentwalk = false;
 		bool walktomarker = false;
+		int walkto = 0;
 		bool autofarm = false;
+		bool autoattack = false;
+		float autoattackdist = 0.f;
+		int targetting_mode = 0;
 		bool autorefill = false;
 		bool logs = false;
 		bool interactive_debug = false;

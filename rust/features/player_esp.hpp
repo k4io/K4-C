@@ -23,11 +23,6 @@ namespace esp {
 
 	std::vector<aim_target> visibleplayerswithin300m = {};
 
-	struct rust_str
-	{
-		char zpad[128];
-	};
-
 	bool out_w2s(const Vector3& position, Vector2& screen_pos) {
 		if (!matrix.m) {
 			return false;

@@ -657,18 +657,26 @@ void iterate_entities() {
 
 			//cache::CacheBones(entity, esp::local_player);
 			bool exists_in_list = false;
+			auto fff = 0;
 			for (BasePlayer* p : player_list)
 			{
 				if (!p->is_alive()
-					|| (entity->is_sleeping() && !vars->visual.sleeper_esp))
+					|| (entity->is_sleeping() && !vars->visual.sleeper_esp)
+					|| !p)
 				{
+					vars->player_id_name.erase(fff);
 					player_list.erase(std::remove(player_list.begin(), player_list.end(), p), player_list.end());
 				}
 				if (entity->userID() == p->userID())
 					exists_in_list = true;
+				if(!map_contains_key(vars->player_id_name, fff))
+					vars->player_id_name.insert(std::make_pair(fff, entity->get_player_name()));
+				fff++;
 			}
-			if(!exists_in_list)
+			if (!exists_in_list)
+			{
 				player_list.push_back(entity);
+			}
 			//hit player for silent melee, but not here as may crash due to not being run from a game thread
 
 			//check valid
@@ -871,7 +879,7 @@ void iterate_entities() {
 				&& world_position.distance(esp::local_player->get_transform()->get_position()) < vars->visual.dist_on_items)
 			{
 				esp_name = _(L"");
-				auto object_name = *reinterpret_cast<esp::rust_str*>(object_name_ptr);
+				auto object_name = *reinterpret_cast<rust_str*>(object_name_ptr);
 				if (!object_name.zpad)
 					continue;
 
