@@ -8,6 +8,7 @@
 
 struct Vars
 {
+	std::string playersnamesstr;
 	std::map<int, wchar_t*> player_id_name = {};
 	bool open = false;
 

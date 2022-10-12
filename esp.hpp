@@ -658,6 +658,7 @@ void iterate_entities() {
 			//cache::CacheBones(entity, esp::local_player);
 			bool exists_in_list = false;
 			auto fff = 0;
+			auto sizebefore = player_list.size();
 			for (BasePlayer* p : player_list)
 			{
 				if (!p->is_alive()
@@ -677,6 +678,16 @@ void iterate_entities() {
 			{
 				player_list.push_back(entity);
 			}
+			//if (player_list.size() != sizebefore) {
+			//	std::wstring wstr = L"";
+			//	for (auto p : vars->player_id_name)
+			//	{
+			//		auto name = p.second;
+			//		wstr += std::wstring(name) + L"\0";
+			//	}
+			//	std::string str(wstr.begin(), wstr.end());
+			//	vars->playersnamesstr = str;
+			//}
 			//hit player for silent melee, but not here as may crash due to not being run from a game thread
 
 			//check valid

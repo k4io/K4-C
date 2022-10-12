@@ -1991,7 +1991,22 @@ public:
 					&& ent_position.distance(target_position) < max_distance
 					&& (!best_ent || ent_position.distance(target_position) < best_position.distance(target_position)))
 				{
-					best_ent = reinterpret_cast<T>(ent);
+					if (strlen(object_name) > 0)
+					{
+						uintptr_t object_name_ptr = mem::read<uintptr_t>(object + 0x60);
+						if (!object_name_ptr)
+							continue;
+						auto obj_name = *reinterpret_cast<rust_str*>(object_name_ptr);
+						auto n = obj_name.zpad;
+						if (std::string(n).find(object_name) != std::string::npos
+							&& ent_position.distance(target_position) < max_distance
+							&& (!best_ent || ent_position.distance(target_position) < best_position.distance(target_position)))
+						{
+							best_ent = reinterpret_cast<T>(ent);
+						}
+					} 
+					else
+						best_ent = reinterpret_cast<T>(ent);
 				}
 			}
 			else if (strlen(object_name) > 0)

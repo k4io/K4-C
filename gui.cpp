@@ -873,7 +873,7 @@ namespace Gui
 		}
 	}
 	void misc() {
-		if (im::BeginChild(_("Movement"), ImVec2(235, 150), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
+		if (im::BeginChild(_("Movement"), ImVec2(235, 160), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Movement"));
 			im::Separator();
@@ -890,30 +890,23 @@ namespace Gui
 			im::Checkbox(_("Spinbot"), &vars->misc.spinbot);
 			im::EndChild();
 		}
-		if (im::BeginChild(_("Automation"), ImVec2(235, 150), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
+		im::SetCursorPosY(im::GetCursorPosY() + 2);
+		if (im::BeginChild(_("Automation"), ImVec2(235, 164), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
+			im::Text(_("Automation"));
+			im::Separator();
 			im::Combo(_("Walk to"), &vars->misc.walkto,
 				_("None\0Map Marker\0Stone ore\0Sulfur ore\0Metal ore\0Player"));
-			if (vars->misc.walkto == 5)
-			{
-				std::wstring wstr = L"";
-				for (auto p : vars->player_id_name)
-				{
-					auto name = p.second;
-					wstr += std::wstring(name) + L"\0";
-				}
-				std::string str(wstr.begin(), wstr.end());
-				im::Combo(_("Players"), &vars->misc.playerselected, str.c_str());
-			}
-			im::Checkbox(_("Auto-farm"), &vars->misc.autofarm);
+			im::Combo(_("Players"), &vars->misc.playerselected, vars->playersnamesstr.c_str());
 			im::Checkbox(_("Auto-attack"), &vars->misc.autoattack);
 			im::SliderFloat(_("Max dist"), &vars->misc.autoattackdist, 0.1f, 400.f, _("%.0f"), 10.f);
 			im::Combo(_("Targetting mode"), &vars->misc.targetting_mode, 
 				_("Closest (distance)\0Lowest hp"));
+			im::EndChild();
 		}
-		im::SetCursorPosY(im::GetCursorPosY() - 160);
+		//im::SetCursorPosX(im::GetCursorPosX() + 245);
 		im::SameLine();
-		//im::SetCursorPosX(im::GetCursorPosX() + 132);
+		im::SetCursorPosY(im::GetCursorPosY() - 166);
 		if (im::BeginChild(_("Gameplay"), ImVec2(235, 330), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
 			im::Text(_("Gameplay"));

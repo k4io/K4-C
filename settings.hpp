@@ -10,7 +10,6 @@ void load_config() {
 	auto p = s + std::string(_("\\trap\\configs\\")) + std::string(vars->config_name.begin(), vars->config_name.end()) + _(".t");
 	std::ifstream cFile(p, std::ios::in);
 
-
 	std::string line;
 	while (getline(cFile, line))
 	{

@@ -1174,6 +1174,7 @@ namespace misc
 			std::string name) {
 			auto lp = esp::local_player;
 			if (!lp || !pwm) return;
+			misc::node.ent = (BaseEntity*)lp->find_closest((Networkable*)lp, 200.f, _("OreResourceEntity"), name.c_str());
 
 			Vector3 vel = pwm->get_TargetMovement();
 			vel = Vector3(vel.x / vel.length() * 5.5f, vel.y, vel.z / vel.length() * 5.5f);
@@ -1184,11 +1185,12 @@ namespace misc
 			if (Transform && hp > 60 && time_at_node < 7.f) {
 				auto marker_pos = Transform->get_position();
 				//Sphere(marker_pos, 1.f, col(1, 1, 1, 1), 0.02f, 100.f);
+				node.pos = marker_pos;
 				pathfind(pwm, marker_pos);
 			}
 			else
 			{
-				misc::node.ent = (BaseEntity*)lp->find_closest((Networkable*)lp, 200.f, "", name.c_str());
+				misc::node.ent = (BaseEntity*)lp->find_closest((Networkable*)lp, 200.f, _("OreResourceEntity"), name.c_str());
 				time_at_node = 0.f;
 				misc::node.path.clear();
 				misc::node.pos = Vector3(0, 0, 0);
