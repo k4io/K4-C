@@ -1219,11 +1219,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		//}
 #pragma endregion
 
-		if (baseplayer) {
-			auto loco = esp::local_player;
-			if(!loco)
-				return orig::baseplayer_client_input(baseplayer, state);
-
+		auto loco = esp::local_player;
+		if (baseplayer && loco && !loco->is_sleeping()) {
 			get_skydome();
 
 			auto fixed_time = get_fixedTime();
@@ -1427,6 +1424,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				auto baseprojectile = *reinterpret_cast<BaseProjectile**>((uintptr_t)item + heldEntity);//item->GetHeldEntity<BaseProjectile>();
 				if (baseprojectile) {
 					for (int i = 0; i < 32; i++) {
+						break;
 						auto current = misc::fired_projectiles[i];
 						if (current.fired_at <= 2.f)
 							continue;
@@ -1452,7 +1450,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						auto target = current.ent;
 						if (vars->combat.thick_bullet
 							&& projectile->authoritative()
-							&& projectile->IsAlive())
+							&& projectile->IsAlive()
+							&& false)
 						//&& vars->combat.thickness > 1.1f)//)
 						{
 							if (target.ent)
@@ -1726,9 +1725,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					}
 					else //is BaseMelee
 					{
-						((BaseMelee*)item)->maxDistance() = vars->combat.melee_range;
-						((BaseMelee*)item)->attackRadius() = vars->combat.melee_range;
-
 						//melee manipulator? lol
 					}
 				}
@@ -1809,14 +1805,18 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				}
 			}
 		}
+		else vars->visual.snapline = 0;
 
 
 		orig::baseplayer_client_input(baseplayer, state);
 
-		auto model_state = baseplayer->modelState();
+		if (baseplayer)
+		{
+			auto model_state = baseplayer->modelState();
 
-		if (vars->misc.spinbot) {
-			state->set_aim_angles(Vector3(100, my_rand() % 999 + -999, 100));
+			if (vars->misc.spinbot) {
+				state->set_aim_angles(Vector3(100, my_rand() % 999 + -999, 100));
+			}
 		}
 	}
 }

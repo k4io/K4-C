@@ -517,62 +517,57 @@ namespace misc
 		Vector3 newPos = Vector3(0, 0, 0),
 		bool verifyGrounded = true)
 	{
-		__try {
-			if (verifyGrounded)
+		if (verifyGrounded)
+		{
+			auto extrusion = 2.f;
+			Vector3 vec = (oldPos + newPos) * 0.5f;
+			auto margin = 0.05f;
+			float radius = _GetRadius(ply);
+			float height = GetHeight(ply);
+			Vector3 vec2 = vec + Vector3(0.f, radius - extrusion, 0.f);
+			Vector3 vec3 = vec + Vector3(0.f, height - radius, 0.f);
+			float radius2 = radius - margin;
+			isInAir = !unity::CheckCapsule(vec2, vec3, radius2, 1503731969, 1);
+
+			if (isInAir)
 			{
-				auto extrusion = 2.f;
-				Vector3 vec = (oldPos + newPos) * 0.5f;
-				auto margin = 0.05f;
-				float radius = _GetRadius(ply);
-				float height = GetHeight(ply);
-				Vector3 vec2 = vec + Vector3(0.f, radius - extrusion, 0.f);
-				Vector3 vec3 = vec + Vector3(0.f, height - radius, 0.f);
-				float radius2 = radius - margin;
-				isInAir = !unity::CheckCapsule(vec2, vec3, radius2, 1503731969, 1);
+				bool flag = false;
+				Vector3 vec4 = newPos - oldPos;
+				float num2 = std::fabs(vec4.y);
+				float num3 = vec4.length_2d();
 
-				if (isInAir)
+				if (vec4.y >= 0.f)
 				{
-					bool flag = false;
-					Vector3 vec4 = newPos - oldPos;
-					float num2 = std::fabs(vec4.y);
-					float num3 = vec4.length_2d();
-
-					if (vec4.y >= 0.f)
-					{
-						flag = true;
-						flyhackDistanceVertical += vec4.y;
-					}
-
-					if (num2 < num3)
-					{
-						flag = true;
-						flyhackDistanceHorizontal += num3;
-					}
-
-					if (flag)
-					{
-						float num4 = max((flyhackPauseTime > 0.f ? 10.f : 1.5f), 0.f);
-						float num5 = _getjumpheight(ply) + num4;
-						if (flyhackDistanceVertical > num5)
-							return true;
-
-						float num6 = num4;
-						float num7 = 5.f + num6;
-						if (flyhackDistanceHorizontal > num7)
-							return true;
-					}
+					flag = true;
+					flyhackDistanceVertical += vec4.y;
 				}
-				else
+
+				if (num2 < num3)
 				{
-					flyhackDistanceVertical = 0.0f;
-					flyhackDistanceHorizontal = 0.0f;
+					flag = true;
+					flyhackDistanceHorizontal += num3;
+				}
+
+				if (flag)
+				{
+					float num4 = max((flyhackPauseTime > 0.f ? 10.f : 1.5f), 0.f);
+					float num5 = _getjumpheight(ply) + num4;
+					if (flyhackDistanceVertical > num5)
+						return true;
+
+					float num6 = num4;
+					float num7 = 5.f + num6;
+					if (flyhackDistanceHorizontal > num7)
+						return true;
 				}
 			}
-			return false;
+			else
+			{
+				flyhackDistanceVertical = 0.0f;
+				flyhackDistanceHorizontal = 0.0f;
+			}
 		}
-		__except (false) {
-			return false;
-		}
+		return false;
 	}
 
 	bool IsSpeeding(BasePlayer* ply,

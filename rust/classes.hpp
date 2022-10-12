@@ -771,15 +771,10 @@ public:
 	FIELD(_("BaseEntity"), _("model"), model, Model*);
 
 	Vector3 GetWorldVelocity() {
-		__try {
-			if (!this) return Vector3(0, 0, 0);
-			auto off = reinterpret_cast<Vector3(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetWorldVelocity"), 0, _(""), _(""))));
-			if (!off) return Vector3(0, 0, 0);
-			return off(this);
-		}
-		__except (true) {
-			return Vector3(0, 0, 0);
-		}
+		if (!this) return Vector3(0, 0, 0);
+		auto off = reinterpret_cast<Vector3(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetWorldVelocity"), 0, _(""), _(""))));
+		if (!off) return Vector3(0, 0, 0);
+		return off(this);
 	}
 	Vector3 GetParentVelocity() {
 		if (!this) return Vector3(0, 0, 0);
@@ -1233,6 +1228,7 @@ public:
 		float recoilx = vars->combat.recoilx;
 		float recoily = vars->combat.recoily;
 
+		if (!recoil_properties) return;
 		//after update June 5th 2022
 		auto new_recoil_properties = *reinterpret_cast<uintptr_t*>((uintptr_t)recoil_properties + 0x78);
 
