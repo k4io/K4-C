@@ -249,5 +249,17 @@
     <ClInclude Include="projectile1.hpp">
       <Filter>rust</Filter>
     </ClInclude>
+    <ClInclude Include="memory\hooks.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\defs.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\detours.h">
+      <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="leo.h">
+      <Filter>memory</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

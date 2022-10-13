@@ -704,6 +704,13 @@ public:
 			(z - vector.z) * (z - vector.z));
 	}
 
+	float distancexz(const Vector3& vector)
+	{
+		return my_sqrt(
+			(x - vector.x) * (x - vector.x) +
+			(z - vector.z) * (z - vector.z));
+	}
+
 	Vector3 Normalized() {
 		float len = Length();
 		return Vector3(x / len, y / len, z / len);

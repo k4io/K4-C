@@ -195,9 +195,9 @@ namespace esp {
 						if (baseprojectile) {
 							auto class_name = baseprojectile->get_class_name();
 							if (*(int*)(class_name + 4) == 'eleM' || *(int*)(class_name + 4) == 'mmah') {
-								auto world_position = ent->model()->boneTransforms()->get(48)->get_position();
+								auto world_position = ent->model()->boneTransforms()->get(48)->position();
 								auto local = ClosestPoint(esp::local_player, world_position);
-								auto camera = esp::local_player->model()->boneTransforms()->get(48)->get_position();
+								auto camera = esp::local_player->model()->boneTransforms()->get(48)->position();
 
 								if (camera.get_3d_dist(world_position) >= 4.2f)
 									return;
@@ -234,11 +234,11 @@ namespace esp {
 					if (esp::local_player) {
 						auto target = aim_target();
 						if (vars->combat.bodyaim)
-							target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->get_position();
+							target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
 						else
-							target.pos = ent->model()->boneTransforms()->get(48)->get_position();
+							target.pos = ent->model()->boneTransforms()->get(48)->position();
 
-						auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().get_3d_dist(target.pos);
+						auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos);
 						target.distance = distance;
 
 						auto fov = unity::get_fov(target.pos);
@@ -248,7 +248,7 @@ namespace esp {
 
 						target.network_id = ent_id;
 
-						auto visible = ent->is_visible(esp::local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
+						auto visible = ent->is_visible(esp::local_player->model()->boneTransforms()->get(48)->position(), target.pos);
 						target.visible = visible;
 
 						//if (distance < 300.0f)
@@ -311,7 +311,7 @@ namespace esp {
 						if (vars->visual.offscreen_indicator
 							&& !is_npc)
 						{
-							offscreen_indicator(((BasePlayer*)ent)->eyes()->get_position());
+							offscreen_indicator(((BasePlayer*)ent)->eyes()->position());
 						}
 
 						if (vars->combat.silent_melee || unity::GetKey(vars->keybinds.silentmelee))
@@ -374,11 +374,11 @@ namespace esp {
 				{
 					if (!LI_FIND(strcmp)(entity_class_name, _("BuildingBlock")))
 					{
-						auto lpos = local_player->get_transform()->get_position();
+						auto lpos = local_player->transform()->position();
 						float dist_to_new = lpos.distance(world_position);
 						if (!closest_building_block)
 							closest_building_block = (uintptr_t)ent;
-						else if (dist_to_new < lpos.distance(((BaseEntity*)closest_building_block)->get_transform()->get_position()))
+						else if (dist_to_new < lpos.distance(((BaseEntity*)closest_building_block)->transform()->position()))
 							closest_building_block = (uintptr_t)ent;
 					}
 				}
@@ -400,7 +400,7 @@ namespace esp {
 				{
 					float dist = 10.f;
 					if (esp::local_player && vars->visual.distance)
-						dist = esp::local_player->model()->boneTransforms()->get(48)->get_position().distance(world_position);
+						dist = esp::local_player->model()->boneTransforms()->get(48)->position().distance(world_position);
 
 					//dropped items
 					if (*(int*)(entity_class_name) == 'porD') {
@@ -481,9 +481,9 @@ namespace esp {
 						auto base_heli = reinterpret_cast<BaseHelicopter*>(ent);
 
 						Vector2 rearrotor, beam, mainrotor;
-						out_w2s(base_heli->model()->boneTransforms()->get(22)->get_position(), rearrotor);
-						out_w2s(base_heli->model()->boneTransforms()->get(19)->get_position(), mainrotor);
-						out_w2s(base_heli->model()->boneTransforms()->get(56)->get_position(), beam);
+						out_w2s(base_heli->model()->boneTransforms()->get(22)->position(), rearrotor);
+						out_w2s(base_heli->model()->boneTransforms()->get(19)->position(), mainrotor);
+						out_w2s(base_heli->model()->boneTransforms()->get(56)->position(), beam);
 						esp_name = il2cpp::methods::new_string(("Patrol-heli"));
 						esp_color = Vector4(232, 232, 232, 255);
 
@@ -502,9 +502,9 @@ namespace esp {
 						if (base_heli->is_alive())
 						{
 							auto target = aim_target();
-							target.pos = base_heli->model()->boneTransforms()->get(19)->get_position();
+							target.pos = base_heli->model()->boneTransforms()->get(19)->position();
 
-							auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().get_3d_dist(target.pos);
+							auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos);
 							target.distance = distance;
 
 							auto fov = unity::get_fov(target.pos);
@@ -516,7 +516,7 @@ namespace esp {
 							{
 								target.ent = base_heli;
 
-								auto visible = local_player->is_visible(esp::local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
+								auto visible = local_player->is_visible(esp::local_player->model()->boneTransforms()->get(48)->position(), target.pos);
 								target.visible = visible;
 
 								if (target < best_target)
@@ -548,7 +548,7 @@ namespace esp {
 					else if (vars->misc.norecycler && *(int*)(entity_class_name) == 'yceR' && get_fixedTime() > last_recycler + 0.35f) {
 						esp_name = il2cpp::methods::new_string(_("Recycler"));
 						esp_color = Vector4(232, 232, 232, 255);
-						if (esp::local_player->model()->boneTransforms()->get(48)->get_position().distance(world_position) < 4.5f)
+						if (esp::local_player->model()->boneTransforms()->get(48)->position().distance(world_position) < 4.5f)
 						{
 							ent->ServerRPC(_(L"SVSwitch"));
 							last_recycler = get_fixedTime();
@@ -650,58 +650,7 @@ namespace esp {
 
 		/*
 		return;
-		if (vars->misc.auto_upgrade
-			&& closest_building_block)
-		{
-			auto block = (BuildingBlock*)closest_building_block;
-			auto tranny = block->get_transform();
-			auto pos = tranny->get_position();
-			auto distance = local_player->eyes()->get_position().distance(pos);
-
-			rust::classes::BuildingGrade upgrade_tier = rust::classes::BuildingGrade::Stone;
-
-			if (distance < 4.2f) {
-				auto grade = block->grade();
-				if (block && (get_fixedTime() > esp::time_last_upgrade + 0.35f))
-				{
-					switch ((int)upgrade_tier)
-					{
-					case 1:
-						if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Wood, local_player)
-							&& block->CanChangeToGrade(rust::classes::BuildingGrade::Wood, local_player)
-							&& grade != rust::classes::BuildingGrade::Wood)
-						{
-							block->Upgrade(rust::classes::BuildingGrade::Wood, local_player);
-							esp::time_last_upgrade = get_fixedTime();
-						}
-					case 2:
-						if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Stone, local_player)
-							&& block->CanChangeToGrade(rust::classes::BuildingGrade::Stone, local_player)
-							&& grade != rust::classes::BuildingGrade::Stone)
-						{
-							block->Upgrade(rust::classes::BuildingGrade::Stone, local_player);
-							esp::time_last_upgrade = get_fixedTime();
-						}
-					case 3:
-						if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Metal, local_player)
-							&& block->CanChangeToGrade(rust::classes::BuildingGrade::Metal, local_player)
-							&& grade != rust::classes::BuildingGrade::Metal)
-						{
-							block->Upgrade(rust::classes::BuildingGrade::Metal, local_player);
-							esp::time_last_upgrade = get_fixedTime();
-						}
-					case 4:
-						if (block->CanAffordUpgrade(rust::classes::BuildingGrade::TopTier, local_player)
-							&& block->CanChangeToGrade(rust::classes::BuildingGrade::TopTier, local_player)
-							&& grade != rust::classes::BuildingGrade::TopTier)
-						{
-							block->Upgrade(rust::classes::BuildingGrade::TopTier, local_player);
-							esp::time_last_upgrade = get_fixedTime();
-						}
-					}
-				}
-			}
-		}
+		
 		*/
 		esp::draw_target_hotbar(best_target);
 		esp::draw_middle(best_target);
@@ -734,7 +683,7 @@ namespace esp {
 				continue;
 
 			auto position = mem::read<Vector3>(ent + 0x2C);
-			auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().distance(position);
+			auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().distance(position);
 			if (distance < 350.f)
 				continue;
 
@@ -783,7 +732,7 @@ namespace esp {
 			unsigned int id = net->get_id();
 
 			if (id == id_to_check)
-				return ent->get_transform();
+				return ent->transform();
 		}
 	}
 

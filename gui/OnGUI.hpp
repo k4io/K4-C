@@ -1262,7 +1262,67 @@ namespace gui {
 								//cache::CacheBones(p, esp::local_player);
 							}
 					//esp::start();
+
+					if (vars->misc.auto_upgrade)
+					{
+						auto block = (BuildingBlock*)esp::closest_building_block;
+
+						if (block) {
+							rust::classes::BuildingGrade upgrade_tier = (rust::classes::BuildingGrade)(vars->misc.upgrade_tier + 1);
+
+							auto tranny = block->transform();
+							auto pos = tranny->position();
+							auto distance = esp::local_player->eyes()->position().distance(pos);
+
+							auto local_player = esp::local_player;
+
+							if (distance < 4.2f) {
+								if (get_fixedTime() > esp::time_last_upgrade + 0.35f)
+								{
+									auto grade = block->grade();
+									if ((int)upgrade_tier == 1) {
+
+										if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Wood, local_player)
+											&& block->CanChangeToGrade(rust::classes::BuildingGrade::Wood, local_player)
+											&& grade != rust::classes::BuildingGrade::Wood)
+										{
+											block->Upgrade(rust::classes::BuildingGrade::Wood, local_player);
+											esp::time_last_upgrade = get_fixedTime();
+										}
+									}
+									else if ((int)upgrade_tier == 2) {
+										if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Stone, local_player)
+											&& block->CanChangeToGrade(rust::classes::BuildingGrade::Stone, local_player)
+											&& grade != rust::classes::BuildingGrade::Stone)
+										{
+											block->Upgrade(rust::classes::BuildingGrade::Stone, local_player);
+											esp::time_last_upgrade = get_fixedTime();
+										}
+									}
+									else if ((int)upgrade_tier == 3) {
+										if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Metal, local_player)
+											&& block->CanChangeToGrade(rust::classes::BuildingGrade::Metal, local_player)
+											&& grade != rust::classes::BuildingGrade::Metal)
+										{
+											block->Upgrade(rust::classes::BuildingGrade::Metal, local_player);
+											esp::time_last_upgrade = get_fixedTime();
+										}
+									}
+									else if ((int)upgrade_tier == 4) {
+										if (block->CanAffordUpgrade(rust::classes::BuildingGrade::TopTier, local_player)
+											&& block->CanChangeToGrade(rust::classes::BuildingGrade::TopTier, local_player)
+											&& grade != rust::classes::BuildingGrade::TopTier)
+										{
+											block->Upgrade(rust::classes::BuildingGrade::TopTier, local_player);
+											esp::time_last_upgrade = get_fixedTime();
+										}
+									}
+								}
+							}
+						}
+					}
 					auto baseplayer = esp::local_player;
+
 					if (vars->misc.autorefill) {
 						auto inv = baseplayer->inventory();
 						if (inv)
@@ -2037,9 +2097,9 @@ namespace esp
 	}
 
 	void offscreen_indicator(Vector3 position) {
-		Vector3 local = esp::local_player->eyes()->get_position();
+		Vector3 local = esp::local_player->eyes()->position();
 		lollll(Vector2(1920 / 2, 1080 / 2));
-		float num = atan2(local.x - position.x, local.z - position.z) * 57.29578f - 180.f - EulerAngles(esp::local_player->eyes()->get_rotation()).y;
+		float num = atan2(local.x - position.x, local.z - position.z) * 57.29578f - 180.f - EulerAngles(esp::local_player->eyes()->rotation()).y;
 
 		if (!(num < -420 || num > -300)) return;
 
@@ -2090,9 +2150,12 @@ namespace esp
 			case 4:
 				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"chamslit"), unity::GetType(_("UnityEngine"), _("Shader")));
 				break;
+			case 5:
+				if (!unity::galaxy_material)
+					unity::galaxy_material = unity::LoadAsset(unity::galaxy_bundle, _(L"GalaxyMaterial_15"), unity::GetType(_("UnityEngine"), _("Material")));
 			}
 
-			auto renderers = ((Networkable*)ent->model())->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
+			auto renderers = ((Networkable*)ent)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
 
 			if (renderers)
 			{
@@ -2105,8 +2168,18 @@ namespace esp
 					if (!renderer) continue;
 					Material* material = renderer->GetMaterial();
 					if (!material) continue;
-					auto viscolor = col(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1);
-					auto inviscolor = col(vars->visual.InvRcolor, vars->visual.InvGcolor, vars->visual.InvBcolor, 1);
+					auto viscolor = col(vars->colors.players.chams.visible[0], 
+						vars->colors.players.chams.visible[1], 
+						vars->colors.players.chams.visible[2], 1);
+					auto inviscolor = col(vars->colors.players.chams.invisible[0],
+						vars->colors.players.chams.invisible[1], 
+						vars->colors.players.chams.invisible[2], 1);
+
+					if (vars->visual.rock_chams == 5) {
+						if ((uintptr_t)material != unity::galaxy_material && unity::galaxy_material)
+							renderer->SetMaterial((Material*)unity::galaxy_material);
+						continue;
+					}
 
 					if (vars->visual.rainbow_chams)
 					{
@@ -2218,7 +2291,8 @@ namespace esp
 								//auto s = FindShader(System::string(_(L"Standard")));
 								//unity::set_shader(unity::galaxy_material, s);
 								//set_material((uintptr_t)renderer, unity::galaxy_material);
-								renderer->SetMaterial((Material*)unity::galaxy_material);
+								if((uintptr_t)renderer->GetMaterial() != unity::galaxy_material)
+									renderer->SetMaterial((Material*)unity::galaxy_material);
 								SetInt(unity::galaxy_material, _(L"_ZTest"), 8);
 							}
 							break;
@@ -2254,7 +2328,7 @@ namespace esp
 					if (shader || (vars->visual.shader >= 5 && unity::galaxy_material))
 					{
 						if (shader != material->GetShader()) {
-							if (vars->visual.shader >= 5 && unity::galaxy_material)
+							if (vars->visual.shader >= 5 && unity::galaxy_material && (uintptr_t)renderer->GetMaterial() != unity::galaxy_material)
 								renderer->SetMaterial((Material*)unity::galaxy_material);
 							else material->SetShader(shader);
 						}
@@ -2389,7 +2463,7 @@ namespace esp
 
 				auto Transform = ent->model()->boneTransforms()->get(bone_idx);
 
-				world_position = Transform->get_position();
+				world_position = Transform->position();
 
 				if (bone_idx == 48) // lol
 					world_position.y += 0.2f;
@@ -2487,9 +2561,9 @@ namespace esp
 				Bounds cbounds = Bounds();
 
 				auto lfoott = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_foot);
-				auto lfootp = lfoott->get_position();
+				auto lfootp = lfoott->position();
 				auto rfoott = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_foot);
-				auto rfootp = lfoott->get_position();
+				auto rfootp = lfoott->position();
 				auto mp = lfootp.midPoint(rfootp);
 
 				if (ent->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked)) {
@@ -2499,7 +2573,7 @@ namespace esp
 				}
 				else {
 					if (ent->modelState()->has_flag(rust::classes::ModelState_Flag::Crawling) || ent->modelState()->has_flag(rust::classes::ModelState_Flag::Sleeping)) {
-						cbounds.center = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->get_position();
+						cbounds.center = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
 						cbounds.extents = Vector3(0.9f, 0.2f, 0.4f);
 					}
 					else {
@@ -2521,7 +2595,7 @@ namespace esp
 					return Vector3(num6, origin.y, num5);
 				};
 
-				float y = EulerAngles(ent->eyes()->get_rotation()).y;
+				float y = EulerAngles(ent->eyes()->rotation()).y;
 				Vector3 center = cbounds.center;
 				Vector3 extents = cbounds.extents;
 				Vector3 middleTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, 0), y);
@@ -2557,9 +2631,9 @@ namespace esp
 				Bounds cbounds = Bounds();
 
 				auto lfoott = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_foot);
-				auto lfootp = lfoott->get_position();
+				auto lfootp = lfoott->position();
 				auto rfoott = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_foot);
-				auto rfootp = lfoott->get_position();
+				auto rfootp = lfoott->position();
 				auto mp = lfootp.midPoint(rfootp);
 
 				if (ent->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked)) {
@@ -2569,7 +2643,7 @@ namespace esp
 				}
 				else {
 					if (ent->modelState()->has_flag(rust::classes::ModelState_Flag::Crawling) || ent->modelState()->has_flag(rust::classes::ModelState_Flag::Sleeping)) {
-						cbounds.center = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->get_position();
+						cbounds.center = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
 						cbounds.extents = Vector3(0.9f, 0.2f, 0.4f);
 					}
 					else {
@@ -2591,7 +2665,7 @@ namespace esp
 					return Vector3(num6, origin.y, num5);
 				};
 
-				float y = EulerAngles(ent->eyes()->get_rotation()).y;
+				float y = EulerAngles(ent->eyes()->rotation()).y;
 				Vector3 center = cbounds.center;
 				Vector3 extents = cbounds.extents;
 				Vector3 frontTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z - extents.z), y);
@@ -2729,109 +2803,109 @@ namespace esp
 				//jaw
 				auto Transform = ent->model()->boneTransforms()->get(48);
 				if (!Transform) return;
-				Vector3 world_position = Transform->get_position();
+				Vector3 world_position = Transform->position();
 				Vector3 jaw = WorldToScreen(world_position);
 
 				//spine4
 				Transform = ent->model()->boneTransforms()->get(22);
 				if (!Transform) return;
-				world_position = Transform->get_position();
+				world_position = Transform->position();
 				Vector3 spine4 = WorldToScreen(world_position);
 
 				//spine3
 				Transform = ent->model()->boneTransforms()->get(21);
 				if (!Transform) return;
-				world_position = Transform->get_position();
+				world_position = Transform->position();
 				Vector3 spine3 = WorldToScreen(world_position);
 
 				//pelvis
 				Transform = ent->model()->boneTransforms()->get(7);
 				if (!Transform) return;
-				world_position = Transform->get_position();
+				world_position = Transform->position();
 				Vector3 pelvis = WorldToScreen(world_position);
 
 				//l_hip
 				Transform = ent->model()->boneTransforms()->get(3);
 				if (!Transform) return;
-				world_position = Transform->get_position();
+				world_position = Transform->position();
 				Vector3 l_hip = WorldToScreen(world_position);
 
 				//r_knee
 				Transform = ent->model()->boneTransforms()->get(14);
 				if (!Transform) return;
-				world_position = Transform->get_position();
+				world_position = Transform->position();
 				Vector3 r_knee = WorldToScreen(world_position);
 
 				//l_ankle_scale
 				Transform = ent->model()->boneTransforms()->get(6);
 				if (!Transform) return;
-				world_position = Transform->get_position();
+				world_position = Transform->position();
 				Vector3 l_ankle_scale = WorldToScreen(world_position);
 
 				//r_ankle_scale
 				Transform = ent->model()->boneTransforms()->get(17);
 				if (!Transform) return;
-				world_position = Transform->get_position();
+				world_position = Transform->position();
 				Vector3 r_ankle_scale = WorldToScreen(world_position);
 
 				//r_foot
 				Transform = ent->model()->boneTransforms()->get(15);
 				if (!Transform) return;
-				world_position = Transform->get_position();
+				world_position = Transform->position();
 				Vector3 r_foot = WorldToScreen(world_position);
 
 				//l_foot
 				Transform = ent->model()->boneTransforms()->get(4);
 				if (!Transform) return;
-				world_position = Transform->get_position();
+				world_position = Transform->position();
 				Vector3 l_foot = WorldToScreen(world_position);
 
 				//r_upperarm
 				Transform = ent->model()->boneTransforms()->get(55);
 				if (!Transform) return;
-				world_position = Transform->get_position();
+				world_position = Transform->position();
 				Vector3 r_upperarm = WorldToScreen(world_position);
 
 				//l_upperarm
 				Transform = ent->model()->boneTransforms()->get(24);
 				if (!Transform) return;
-				world_position = Transform->get_position();
+				world_position = Transform->position();
 				Vector3 l_upperarm = WorldToScreen(world_position);
 
 				//r_forearm
 				Transform = ent->model()->boneTransforms()->get(56);
 				if (!Transform) return;
-				world_position = Transform->get_position();
+				world_position = Transform->position();
 				Vector3 r_forearm = WorldToScreen(world_position);
 
 				//l_forearm
 				Transform = ent->model()->boneTransforms()->get(25);
 				if (!Transform) return;
-				world_position = Transform->get_position();
+				world_position = Transform->position();
 				Vector3 l_forearm = WorldToScreen(world_position);
 
 				//r_hip
 				Transform = ent->model()->boneTransforms()->get(13);
 				if (!Transform) return;
-				world_position = Transform->get_position();
+				world_position = Transform->position();
 				Vector3 r_hip = WorldToScreen(world_position);
 
 				//l_knee
 				Transform = ent->model()->boneTransforms()->get(2);
 				if (!Transform) return;
-				world_position = Transform->get_position();
+				world_position = Transform->position();
 				Vector3 l_knee = WorldToScreen(world_position);
 
 				//l_hand
 				Transform = ent->model()->boneTransforms()->get(26);
 				if (!Transform) return;
-				world_position = Transform->get_position();
+				world_position = Transform->position();
 				Vector3 l_hand = WorldToScreen(world_position);
 
 				//r_hand
 				Transform = ent->model()->boneTransforms()->get(57);
 				if (!Transform) return;
-				world_position = Transform->get_position();
+				world_position = Transform->position();
 				Vector3 r_hand = WorldToScreen(world_position);
 
 				if (jaw.y >= 1080 || jaw.x >= 1920 || jaw.x <= 0 || jaw.y <= 0) return;
@@ -2881,9 +2955,9 @@ namespace esp
 				auto Transform = ent->model()->boneTransforms()->get(48);
 				if (!Transform) return;
 
-				auto position = Transform->get_position();
+				auto position = Transform->position();
 
-				auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().distance(position);
+				auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().distance(position);
 				//const char* new_name = ;
 				// PLAYER NAME
 

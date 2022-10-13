@@ -32,6 +32,96 @@ std::vector<std::string> split(std::string s, std::string delimiter) {
 
 namespace Gui
 {
+	class dot
+	{
+	public:
+		dot(Vector3 p, Vector3 v) {
+			m_vel = v;
+			m_pos = p;
+		}
+
+		void update();
+		void draw();
+
+		Vector3 m_pos, m_vel;
+	};
+
+	std::vector<dot*> dots = { };
+
+	void dot::update() {
+		auto opacity = 240 / 255.0f;
+
+		m_pos += m_vel * (opacity);
+	}
+
+	void dot::draw() {
+		int opacity = 55.0f * (240 / 255.0f);
+
+		im::GetWindowDrawList()->AddRectFilled({ m_pos.x - 2, m_pos.y - 2 }, { m_pos.x + 2, m_pos.y + 2 }, ImColor(70, 130, 180, 100));
+
+		auto t = std::find(dots.begin(), dots.end(), this);
+		if (t == dots.end()) {
+			return;
+		}
+
+		for (auto i = t; i != dots.end(); i++) {
+			if ((*i) == this) continue;
+
+			auto dist = (m_pos - (*i)->m_pos).length_2d();
+
+			auto ydist = m_pos.y - (*i)->m_pos.y;
+
+			if (dist < 128
+				&& ydist < 50) {
+				int alpha = opacity * (dist / 128);
+				im::GetWindowDrawList()->AddLine({ m_pos.x - 1, m_pos.y - 2 }, { (*i)->m_pos.x - 2, (*i)->m_pos.y - 1 }, ImColor(192, 192, 192, 100));
+			}
+		}
+	}
+
+	void dotdraw() {
+		struct screen_size {
+			int x, y;
+		}; screen_size sc;
+
+		sc.x = vars->ScreenX, sc.y = vars->ScreenY;
+
+		int s = rand() % 9;
+		/*
+		if (s == 0) {
+			dots.push_back(new dot(Vector3(rand() % (int)sc.x, -16 - 100, 0), Vector3((rand() % 7) - 3, rand() % 3 + 1, 0)));
+		}
+		else if (s == 3) {
+			dots.push_back(new dot(Vector3((int)sc.x + 16, rand() % (int)sc.y - 100, 0), Vector3(-1 * (rand() % 3 + 1), (rand() % 7) - 3, 0)));
+		}
+		else if (s == 2) {
+			dots.push_back(new dot(Vector3(-16, rand() % (int)sc.y - 100, 0), Vector3(rand() % 3 + 1, (rand() % 7) - 3, 0)));
+		}*/
+		if (s == 1) {
+			dots.push_back(new dot(Vector3(rand() % (int)sc.x, (int)sc.y + 16 - 100, 0), Vector3((rand() % 7) - 3, -1 * (rand() % 3 + 1), 0)));
+		}
+
+		auto alph = 135.0f * (240 / 255.0f);
+		auto a_int = (int)(alph);
+
+		im::GetWindowDrawList()->AddRectFilled({ 0, 0 }, { (float)sc.x / 2, (float)sc.y / 2 }, ImColor(a_int, 0, 0, 0));
+
+		for (auto i = dots.begin(); i < dots.end();) {
+			if ((*i)->m_pos.y < -20 || (*i)->m_pos.y > sc.y + 20 || (*i)->m_pos.x < -20 || (*i)->m_pos.x > sc.x + 20) {
+				delete (*i);
+				i = dots.erase(i);
+			}
+			else {
+				(*i)->update();
+				i++;
+			}
+		}
+
+		for (auto i = dots.begin(); i < dots.end(); i++) {
+			(*i)->draw();
+		}
+	}
+
 	bool init = false;
 	int selected_tab = 0;
 	static char str0[32] = "";
@@ -729,12 +819,17 @@ namespace Gui
 				_("Head\0Body\0Upperbody\0Penis\0Hands\0Legs\0Feet"));
 			im::Checkbox(_("Randomize hitboxes"), &vars->combat.randomize);
 			im::Checkbox(_("Manipulator"), &vars->combat.manipulator2);
+			//im::Checkbox(_("Manipulator2"), &vars->combat.manipulator);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(50, 15));
+			//im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
+			//im::Checkbox(_("Pierce"), &vars->combat.pierce);
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
 			im::Checkbox(_("Bullet tp"), &vars->combat.bullet_tp);
+			//im::Checkbox(_("Lower velocities"), &vars->combat.lower_vel);
 			im::Checkbox(_("Fast bullets"), &vars->combat.fast_bullet);
 			im::Checkbox(_("Instant eoka"), &vars->combat.instaeoka);
+			//im::Checkbox(_("Fast bow"), &vars->combat.fastbow);
 			im::Checkbox(_("Heli-weakspot"), &vars->combat.weakspots);
 			im::Checkbox(_("Thick bullets"), &vars->combat.thick_bullet);
 			im::SliderFloat(_("Thickness"), &vars->combat.thickness, 0.1f, 2.2f, _("%.2f"), 1.f);
@@ -834,7 +929,7 @@ namespace Gui
 			im::Combo(_("Hands"), &vars->visual.hand_chams,
 				_("None\0Seethrough\0Normal\0Galaxy"));
 			im::Combo(_("Rocks"), &vars->visual.rock_chams,
-				_("None\0Seethrough\0Normal\0Galaxy"));
+				_("None\0Normal\0Seethrough\0Wireframe\0Lit\0Galaxy"));
 			im::EndChild();
 		}
 	}
@@ -923,6 +1018,8 @@ namespace Gui
 			im::Hotkey(_("L"), &vars->keybinds.neck, ImVec2(50, 14));
 			im::SliderFloat(_("Size"), &vars->misc.PlayerEyes, 1.f, 1.5f, _("%.2f"), 0.1f);
 			im::Checkbox(_("Auto upgrade"), &vars->misc.auto_upgrade);
+			im::Combo(_("Upgrade tier"), &vars->misc.upgrade_tier,
+				_("Wood\0Stone\0Metal\0Armored"));
 			im::Checkbox(_("Auto refill"), &vars->misc.autorefill);
 			im::Checkbox(_("Fakelag"), &vars->misc.fake_lag);
 			im::Checkbox(_("Desync on key"), &vars->misc.desync);
@@ -1026,37 +1123,53 @@ namespace Gui
 
 	void Render()
 	{
-		im::Begin(GUI_NAME, nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-		ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
-
-		im::Separator();
-		if (im::Button(_("Combat"),			ImVec2(73, 20))) { selected_tab = 0; }  im::SameLine();	  
-		if (im::Button(_("Visuals"),		ImVec2(73, 20))) { selected_tab = 1; }  im::SameLine();	
-		if (im::Button(_("ESP Items"),		ImVec2(73, 20))) { selected_tab = 2; }  im::SameLine();	  
-		if (im::Button(_("Misc"),			ImVec2(73, 20))) { selected_tab = 3; }  im::SameLine();	  
-		if (im::Button(_("Configs"),		ImVec2(73, 20))) { selected_tab = 4; }  im::SameLine();	
-		if (im::Button(_("Colors"),			ImVec2(73, 20))) { selected_tab = 5; }	
-		im::Separator();
-		switch (selected_tab)
+		im::SetNextWindowPos({ 0,0 });
+		im::SetNextWindowSize(im::GetIO().DisplaySize);
+		im::PushStyleColor(ImGuiCol_WindowBg, { 0,0,0,0 });
+		im::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
+		im::Begin("##DOTSDOTS", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove);
 		{
-		case 0:
-			combat();
-			break;
-		case 1:
-			visual();
-			break;
-		case 2:
-			esp_items();
-			break;
-		case 3:
-			misc();
-			break;
-		case 4:
-			configs();
-			break;
-		case 5:
-			colors();
-			break;
+			dotdraw();
+		}
+		im::End();
+		im::PopStyleColor();
+		im::PopStyleVar();
+
+		//im::SetNextWindowPos(ImVec2(x + 170, y + 60));
+		//im::SetNextWindowSize(ImVec2(520, plus2));
+		im::Begin(GUI_NAME, nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+		{
+			ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
+
+			im::Separator();
+			if (im::Button(_("Combat"), ImVec2(73, 20))) { selected_tab = 0; }  im::SameLine();
+			if (im::Button(_("Visuals"), ImVec2(73, 20))) { selected_tab = 1; }  im::SameLine();
+			if (im::Button(_("ESP Items"), ImVec2(73, 20))) { selected_tab = 2; }  im::SameLine();
+			if (im::Button(_("Misc"), ImVec2(73, 20))) { selected_tab = 3; }  im::SameLine();
+			if (im::Button(_("Configs"), ImVec2(73, 20))) { selected_tab = 4; }  im::SameLine();
+			if (im::Button(_("Colors"), ImVec2(73, 20))) { selected_tab = 5; }
+			im::Separator();
+			switch (selected_tab)
+			{
+			case 0:
+				combat();
+				break;
+			case 1:
+				visual();
+				break;
+			case 2:
+				esp_items();
+				break;
+			case 3:
+				misc();
+				break;
+			case 4:
+				configs();
+				break;
+			case 5:
+				colors();
+				break;
+			}
 		}
 		im::End();
 	}

@@ -374,7 +374,7 @@ namespace misc
 	{
 		bool flag = false;
 		auto loco = esp::local_player;
-		auto eyepos = loco->eyes()->get_position() + offset;
+		auto eyepos = loco->eyes()->position() + offset;
 		float num = 1.5f;
 		float num2 = 2.f / 60.f;
 		float deltatime = get_deltaTime();
@@ -394,17 +394,22 @@ namespace misc
 			flag = true;
 		}
 
-		auto t = loco->get_transform();
-		Vector3 position2 = t->get_position();
-		Vector3 actual_eye_pos = loco->eyes()->get_position();
+		auto t = loco->transform();
+		Vector3 loco_position = t->position();
+		Vector3 actual_eye_pos = loco->eyes()->position();
+			
+		//LOS from eyes.center to eyes.position on server, i think eyes.position is lastSentTick.pos
+		//if(loco->is_visible(, pos))
+		if (!loco->is_visible(cLastTickPos, eyepos, 0.18f))
+			flag = true;
 
-		if (position2.distance(loco->eyes()->get_position()) > 0.06f
-			&& TestNoClipping(loco, cLastTickPos, position2))
+		if (loco_position.distance(loco->eyes()->position()) > 0.06f
+			&& TestNoClipping(loco, cLastTickPos, loco_position, .3f))
 			//&& TestNoClipping(loco, cLastTickEyePos, position2))
 		{
 			flag = true;
 		}
-		else if (position2.distance(loco->eyes()->get_position()) > 0.01f
+		else if (loco_position.distance(loco->eyes()->position()) > 0.02f
 			&& TestNoClipping(loco, actual_eye_pos, eyepos)) {
 			flag = true;
 		}
@@ -428,7 +433,7 @@ namespace misc
 		float mm_eye = 7.f) //7m only check rn
 	{
 		Vector3 v = *reinterpret_cast<Vector3*>((uintptr_t)ply + eyes);
-		Vector3 re_p = ply->model()->boneTransforms()->get(47)->get_position() + ply->model()->boneTransforms()->get(47)->up() * (ply->eyes()->get_view_offset().y + v.y);
+		Vector3 re_p = ply->model()->boneTransforms()->get(47)->position() + ply->model()->boneTransforms()->get(47)->up() * (ply->eyes()->get_view_offset().y + v.y);
 
 		if (ply->is_visible(re_p, pos)) {
 			misc::best_lean = Vector3(0, 0, 0);
@@ -582,7 +587,7 @@ namespace misc
 		}
 		else
 		{
-			auto trans = esp::local_player->get_transform();
+			auto trans = esp::local_player->transform();
 			bool flag = trans ? !(!trans) : false;
 			VMatrix _mv; _mv.matrix_identity();
 
@@ -660,7 +665,7 @@ namespace misc
 
 		flyhackPauseTime = max(0.f, flyhackPauseTime - deltaTime);
 		ticks.Reset();
-		auto trans = esp::local_player->get_transform();
+		auto trans = esp::local_player->transform();
 
 		if (ticks.HasNext()) {
 			bool flag = trans ? !(!trans) : false;
@@ -761,7 +766,7 @@ namespace misc
 			//settings::speedhack = speedhackDistance + 4.0f;
 			vars->speedhack = speedhackDistance + 3.9f;
 		}
-		ticks.Reset(esp::local_player->get_transform()->get_position());
+		ticks.Reset(esp::local_player->transform()->position());
 		ValidateEyeHistory(lp);
 		//ticks.Reset(esp::local_player->eyes()->get_position());
 	}
@@ -988,17 +993,17 @@ namespace misc
 			auto lp = esp::local_player;
 			if (!pwm || lp) return;
 			std::vector<BasePlayer*> internal_playerlist = {};
-			auto lppos = lp->get_transform()->get_position();
+			auto lppos = lp->transform()->position();
 			//maybe check for manipulator
 			for (auto p : player_list)
 				if (p->visible()
-					&& p->get_transform()->get_position().distance(lppos) < vars->misc.autoattackdist) 
+					&& p->transform()->position().distance(lppos) < vars->misc.autoattackdist) 
 					internal_playerlist.push_back(p);
 
 			BasePlayer* ply = nullptr;
 			for (auto p : internal_playerlist)
 			{
-				auto pos = p->get_transform()->get_position();
+				auto pos = p->transform()->position();
 				switch (vars->misc.targetting_mode)
 				{
 				case 0: //closest
@@ -1007,7 +1012,7 @@ namespace misc
 						ply = p;
 						continue;
 					}
-					if (ply->get_transform()->get_position().distance(lppos) > pos.distance(lppos))
+					if (ply->transform()->position().distance(lppos) > pos.distance(lppos))
 					{
 						ply = p;
 						continue;
@@ -1033,11 +1038,11 @@ namespace misc
 
 			if (vars->combat.bodyaim)
 				//target.pos = ((BasePlayer*)ent)->bones()->pelvis->position;
-				target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->get_position();
+				target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
 			else
 				//target.pos = ((BasePlayer*)ent)->bones()->head->position;
-				target.pos = ply->model()->boneTransforms()->get(48)->get_position();
-			auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().get_3d_dist(target.pos); //crashes bc non game thread
+				target.pos = ply->model()->boneTransforms()->get(48)->position();
+			auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos); //crashes bc non game thread
 			target.distance = distance;
 			auto fov = unity::get_fov(target.pos);
 			target.fov = fov;
@@ -1071,7 +1076,7 @@ namespace misc
 			Vector3 marker_pos) {
 			Vector3 vel = pwm->get_TargetMovement();
 			vel = Vector3(vel.x / vel.length() * 5.5f, vel.y, vel.z / vel.length() * 5.5f);
-			auto eyepos = esp::local_player->get_transform()->get_position();
+			auto eyepos = esp::local_player->transform()->position();
 
 			if (node.steps > 0
 				&& eyepos.distance(node.pos) < 1.f)
@@ -1149,11 +1154,11 @@ namespace misc
 			if (!pwm || lp) return;
 			BasePlayer* ply = player_list[pid];
 			if (!ply) return;
-			auto position = ply->get_transform()->get_position();
+			auto position = ply->transform()->position();
 
 			Vector3 vel = pwm->get_TargetMovement();
 			vel = Vector3(vel.x / vel.length() * 5.5f, vel.y, vel.z / vel.length() * 5.5f);
-			auto eyepos = lp->get_transform()->get_position();//lp->eyes()->get_position();
+			auto eyepos = lp->transform()->position();//lp->eyes()->get_position();
 
 			node.pos = position;
 			//update path every 5 seconds to allow for player following
@@ -1173,12 +1178,12 @@ namespace misc
 
 			Vector3 vel = pwm->get_TargetMovement();
 			vel = Vector3(vel.x / vel.length() * 5.5f, vel.y, vel.z / vel.length() * 5.5f);
-			auto eyepos = lp->get_transform()->get_position();//lp->eyes()->get_position();
+			auto eyepos = lp->transform()->position();//lp->eyes()->get_position();
 
-			auto Transform = node.ent->get_transform();
+			auto Transform = node.ent->transform();
 			auto hp = *reinterpret_cast<float*>(node.ent + 0x178); //detect if broken with this fuck knows why
 			if (Transform && hp > 60 && time_at_node < 7.f) {
-				auto marker_pos = Transform->get_position();
+				auto marker_pos = Transform->position();
 				//Sphere(marker_pos, 1.f, col(1, 1, 1, 1), 0.02f, 100.f);
 				node.pos = marker_pos;
 				pathfind(pwm, marker_pos);
@@ -1354,6 +1359,62 @@ namespace misc
 					if (!aimbot_velocity.is_empty())
 						break;
 				}
+			}
+		}
+	}
+
+	void lower_velocity(aim_target target,
+		Vector3 rpc_position,
+		Vector3 target_pos,
+		Vector3 original_vel,
+		float original_velmax,
+		Vector3& aimbot_velocity,
+		Vector3& _aimdir,
+		float& travel_t,
+		Projectile* p,
+		bool skip_draw = false) {
+		Vector2 angle = CalcAngle(rpc_position, target_pos);
+
+		float yRad = DEG2RAD(angle.y);
+
+		GenerateBuilletDropPredictionData(p->drag(), p->gravityModifier());
+
+		int currentIndex = 0;
+		for (float pitch = 35.f; pitch <= 85.f; pitch += 5.f)
+		{
+			float pitchRad = DEG2RAD(pitch);
+
+			Vector3 dir = {
+				(float)(sinf(yRad) * cosf(pitchRad)),
+				(float)sinf(pitchRad),
+				(float)(cosf(yRad) * cosf(pitchRad))
+			};
+
+			float heightDiff = target_pos.y - target_pos.y;
+			float dist2D = target_pos.distancexz(rpc_position);
+
+			BulletDropPredictionData& predData = bulletDropData[currentIndex++];
+			float idealSpeed = dist2D / predData.distCoeff;
+			float yTravel = (predData.startY + (idealSpeed - 30.f) * predData.yCoeff);
+			if (idealSpeed <= original_velmax && yTravel < heightDiff)
+			{
+				Vector3 vel = original_vel.normalize() * idealSpeed;
+				get_prediction(target, 
+					rpc_position, 
+					target_pos, 
+					vel, 
+					aimbot_velocity, 
+					dir,
+					travel_t, 
+					p, 
+					skip_draw);
+				if (!aimbot_velocity.is_empty()) {
+					target.visible = true;
+					return;
+				}
+				// your prediction here,
+				// idealSpeed = the projectile speed to shoot with
+				// dir = the direction of the projectile to shoot 
 			}
 		}
 	}

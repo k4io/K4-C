@@ -95,7 +95,7 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 
 			auto Transform = ply->model()->boneTransforms()->get(bone_idx);
 
-			world_position = Transform->get_position();
+			world_position = Transform->position();
 
 			if (bone_idx == 48) // lol
 				world_position.y += 0.2f;
@@ -239,109 +239,109 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			//jaw
 			auto Transform = ply->model()->boneTransforms()->get(48);
 			if (!Transform) return;
-			Vector3 world_position = Transform->get_position();
+			Vector3 world_position = Transform->position();
 			Vector3 jaw = WorldToScreen(world_position);
 
 			//spine4
 			Transform = ply->model()->boneTransforms()->get(22);
 			if (!Transform) return;
-			world_position = Transform->get_position();
+			world_position = Transform->position();
 			Vector3 spine4 = WorldToScreen(world_position);
 
 			//spine3
 			Transform = ply->model()->boneTransforms()->get(21);
 			if (!Transform) return;
-			world_position = Transform->get_position();
+			world_position = Transform->position();
 			Vector3 spine3 = WorldToScreen(world_position);
 
 			//pelvis
 			Transform = ply->model()->boneTransforms()->get(7);
 			if (!Transform) return;
-			world_position = Transform->get_position();
+			world_position = Transform->position();
 			Vector3 pelvis = WorldToScreen(world_position);
 
 			//l_hip
 			Transform = ply->model()->boneTransforms()->get(3);
 			if (!Transform) return;
-			world_position = Transform->get_position();
+			world_position = Transform->position();
 			Vector3 l_hip = WorldToScreen(world_position);
 
 			//r_knee
 			Transform = ply->model()->boneTransforms()->get(14);
 			if (!Transform) return;
-			world_position = Transform->get_position();
+			world_position = Transform->position();
 			Vector3 r_knee = WorldToScreen(world_position);
 
 			//l_ankle_scale
 			Transform = ply->model()->boneTransforms()->get(6);
 			if (!Transform) return;
-			world_position = Transform->get_position();
+			world_position = Transform->position();
 			Vector3 l_ankle_scale = WorldToScreen(world_position);
 
 			//r_ankle_scale
 			Transform = ply->model()->boneTransforms()->get(17);
 			if (!Transform) return;
-			world_position = Transform->get_position();
+			world_position = Transform->position();
 			Vector3 r_ankle_scale = WorldToScreen(world_position);
 
 			//r_foot
 			Transform = ply->model()->boneTransforms()->get(15);
 			if (!Transform) return;
-			world_position = Transform->get_position();
+			world_position = Transform->position();
 			Vector3 r_foot = WorldToScreen(world_position);
 
 			//l_foot
 			Transform = ply->model()->boneTransforms()->get(4);
 			if (!Transform) return;
-			world_position = Transform->get_position();
+			world_position = Transform->position();
 			Vector3 l_foot = WorldToScreen(world_position);
 
 			//r_upperarm
 			Transform = ply->model()->boneTransforms()->get(55);
 			if (!Transform) return;
-			world_position = Transform->get_position();
+			world_position = Transform->position();
 			Vector3 r_upperarm = WorldToScreen(world_position);
 
 			//l_upperarm
 			Transform = ply->model()->boneTransforms()->get(24);
 			if (!Transform) return;
-			world_position = Transform->get_position();
+			world_position = Transform->position();
 			Vector3 l_upperarm = WorldToScreen(world_position);
 
 			//r_forearm
 			Transform = ply->model()->boneTransforms()->get(56);
 			if (!Transform) return;
-			world_position = Transform->get_position();
+			world_position = Transform->position();
 			Vector3 r_forearm = WorldToScreen(world_position);
 
 			//l_forearm
 			Transform = ply->model()->boneTransforms()->get(25);
 			if (!Transform) return;
-			world_position = Transform->get_position();
+			world_position = Transform->position();
 			Vector3 l_forearm = WorldToScreen(world_position);
 
 			//r_hip
 			Transform = ply->model()->boneTransforms()->get(13);
 			if (!Transform) return;
-			world_position = Transform->get_position();
+			world_position = Transform->position();
 			Vector3 r_hip = WorldToScreen(world_position);
 
 			//l_knee
 			Transform = ply->model()->boneTransforms()->get(2);
 			if (!Transform) return;
-			world_position = Transform->get_position();
+			world_position = Transform->position();
 			Vector3 l_knee = WorldToScreen(world_position);
 
 			//l_hand
 			Transform = ply->model()->boneTransforms()->get(26);
 			if (!Transform) return;
-			world_position = Transform->get_position();
+			world_position = Transform->position();
 			Vector3 l_hand = WorldToScreen(world_position);
 
 			//r_hand
 			Transform = ply->model()->boneTransforms()->get(57);
 			if (!Transform) return;
-			world_position = Transform->get_position();
+			world_position = Transform->position();
 			Vector3 r_hand = WorldToScreen(world_position);
 
 			if (jaw.y >= 1080 || jaw.x >= 1920 || jaw.x <= 0 || jaw.y <= 0) return;
@@ -388,9 +388,9 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			auto Transform = ply->model()->boneTransforms()->get(48);
 			if (!Transform) return;
 
-			auto position = Transform->get_position();
+			auto position = Transform->position();
 
-			auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().distance(position);
+			auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().distance(position);
 			//const char* new_name = ;
 			// PLAYER NAME
 
@@ -727,15 +727,16 @@ void iterate_entities() {
 						}
 					}
 
+
 					auto target = aim_target();
 					if (vars->combat.bodyaim)
 						//target.pos = ((BasePlayer*)ent)->bones()->pelvis->position;
-						target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->get_position();
+						target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
 					else
 						//target.pos = ((BasePlayer*)ent)->bones()->head->position;
-						target.pos = ent->model()->boneTransforms()->get(48)->get_position();
+						target.pos = ent->model()->boneTransforms()->get(48)->position();
 
-					auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().get_3d_dist(target.pos); //crashes bc non game thread
+					auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos); //crashes bc non game thread
 					target.distance = distance;
 
 					auto fov = unity::get_fov(target.pos);
@@ -759,7 +760,15 @@ void iterate_entities() {
 					{
 						if (unity::GetKey(vars->keybinds.locktarget))
 							goto choosetarget;
-						else goto draw;
+						else if (target.network_id == esp::best_target.network_id) {
+							esp::best_target.pos = target.pos;
+							esp::best_target.distance = target.distance;
+							esp::best_target.fov = target.fov;
+							esp::best_target.ent = target.ent;
+							esp::best_target.visible = visible;
+						}
+						else
+							goto draw;
 					}
 
 				choosetarget:
@@ -828,14 +837,16 @@ void iterate_entities() {
 								if (melee) {
 									auto class_name = melee->get_class_name();
 									if (*(int*)(class_name + 4) == 'eleM' || *(int*)(class_name + 4) == 'mmah') {
-										auto world_position = ent->model()->boneTransforms()->get(48)->get_position();
+										auto world_position = ent->model()->boneTransforms()->get(48)->position();
 										auto local = ClosestPoint(esp::local_player, world_position);
-										auto camera = esp::local_player->model()->boneTransforms()->get(48)->get_position();
+										auto camera = esp::local_player->model()->boneTransforms()->get(48)->position();
 
 										if (camera.get_3d_dist(world_position) >= 4.2f)
 											return;
 
 										aim_target target = esp::best_target;
+
+										target.visible = esp::local_player->is_visible(camera, local);
 
 										attack_melee(target, melee, true);
 									}
@@ -871,6 +882,27 @@ void iterate_entities() {
 			}
 
 			//auto upgrade?
+			if (vars->misc.auto_upgrade) {
+				if (!strcmp(entity_class_name, _("BuildingBlock"))) {
+					auto block = (BuildingBlock*)ent;
+					rust::classes::BuildingGrade upgrade_tier = (rust::classes::BuildingGrade)(vars->misc.upgrade_tier + 1);
+					auto distance = esp::local_player->eyes()->position().distance(world_position);
+					if (distance < 4.2f) {
+						if (!esp::closest_building_block)
+							esp::closest_building_block = (uintptr_t)block;
+						else
+						{
+							if (block->grade() != upgrade_tier) {
+								auto tranny = ((BuildingBlock*)esp::closest_building_block)->transform();
+								auto pos = tranny->position();
+								auto lastdist = esp::local_player->eyes()->position().distance(pos);
+								if (lastdist > distance)
+									esp::closest_building_block = (uintptr_t)block;
+							}
+						}
+					}
+				}
+			}
 
 			if (vars->visual.stash ||
 				vars->misc.norecycler ||
@@ -887,7 +919,7 @@ void iterate_entities() {
 				vars->visual.cloth ||
 				vars->visual.tc_esp ||
 				vars->visual.corpses
-				&& world_position.distance(esp::local_player->get_transform()->get_position()) < vars->visual.dist_on_items)
+				&& world_position.distance(esp::local_player->transform()->position()) < vars->visual.dist_on_items)
 			{
 				esp_name = _(L"");
 				auto object_name = *reinterpret_cast<rust_str*>(object_name_ptr);
@@ -900,7 +932,7 @@ void iterate_entities() {
 				{
 					auto trans = m->boneTransforms()->get(48);
 					if (esp::local_player && vars->visual.distance && trans)
-						dist = trans->get_position().distance(world_position);
+						dist = trans->position().distance(world_position);
 				}
 
 				//dropped items
@@ -975,7 +1007,7 @@ void iterate_entities() {
 					{
 						world_position.y += 1.5f;
 						//if(esp::local_player->bones()->head->position.distance(world_position) < 50.f)
-						if(esp::local_player->model()->boneTransforms()->get(48)->get_position().distance(world_position) < 50.f)
+						if(esp::local_player->model()->boneTransforms()->get(48)->position().distance(world_position) < 50.f)
 							DrawToolcupboard(w2s_position, authorizedPlayers_list);
 						//esp::draw_tool_cupboard(w2s_position, il2cpp::methods::new_string(_("Tool Cupboard")), Vector4(255, 0, 0, 255), authorizedPlayers_list);
 					}
@@ -987,9 +1019,9 @@ void iterate_entities() {
 					auto base_heli = reinterpret_cast<BaseHelicopter*>(ent);
 					if (!base_heli) continue;
 					Vector2 rearrotor, beam, mainrotor;
-					esp::out_w2s(base_heli->model()->boneTransforms()->get(22)->get_position(), rearrotor);
-					esp::out_w2s(base_heli->model()->boneTransforms()->get(19)->get_position(), mainrotor);
-					esp::out_w2s(base_heli->model()->boneTransforms()->get(56)->get_position(), beam);
+					esp::out_w2s(base_heli->model()->boneTransforms()->get(22)->position(), rearrotor);
+					esp::out_w2s(base_heli->model()->boneTransforms()->get(19)->position(), mainrotor);
+					esp::out_w2s(base_heli->model()->boneTransforms()->get(56)->position(), beam);
 					esp_name = _(L"Patrol-heli");
 					esp_color = Vector4(232, 232, 232, 255);
 
@@ -1007,9 +1039,9 @@ void iterate_entities() {
 						if (base_heli->is_alive())
 						{
 							auto target = aim_target();
-							target.pos = base_heli->model()->boneTransforms()->get(19)->get_position();
+							target.pos = base_heli->model()->boneTransforms()->get(19)->position();
 
-							auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().get_3d_dist(target.pos);
+							auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos);
 							target.distance = distance;
 
 							auto fov = unity::get_fov(target.pos);
@@ -1060,7 +1092,7 @@ void iterate_entities() {
 				else if (vars->misc.norecycler && *(int*)(entity_class_name) == 'yceR' && get_fixedTime() > esp::last_recycler + 0.35f) {
 					esp_name = _(L"Recycler");
 					esp_color = Vector4(232, 232, 232, 255);
-					if (esp::local_player->model()->boneTransforms()->get(48)->get_position().distance(world_position) < 4.5f)
+					if (esp::local_player->model()->boneTransforms()->get(48)->position().distance(world_position) < 4.5f)
 					{
 						ent->ServerRPC(_(L"SVSwitch"));
 						esp::last_recycler = get_fixedTime();

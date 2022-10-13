@@ -19,10 +19,11 @@
 #include "gui/OnGUI.hpp"
 
 #include "esp.hpp"
-
 #include "gui.h"
-
 #include "fontarray.h"
+
+#include "leo.h"
+#include "imgui/imgui_internal.h"
 
 bool has_initialized = false, init = false, menuopen = false;
 
@@ -91,8 +92,10 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 			new_frame();
 		}
 		render.EndFrame();
-		if(vars->open)
+		if (vars->open)
+		{
 			Gui::Render();
+		}
 	} catch(...) {}
 	im::End();
 	
@@ -140,7 +143,9 @@ bool DllMain(HMODULE hmodule)
 		mem::game_assembly_base = LI_MODULE_SAFE_(_("GameAssembly.dll"));
 		mem::unity_player_base = LI_MODULE_SAFE_(_("UnityPlayer.dll"));
 
-		//mem::try_pattern(_("53 C3"));
+		
+		//AllocConsole();
+
 
 		il2cpp::init();
 
@@ -186,6 +191,10 @@ bool DllMain(HMODULE hmodule)
 	mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);
 	//il2cpp::hook(&hooks::hk_DoHit, _("DoHit"), _("Projectile"), _(""), 3);
 	//HookMethod((LPVOID)il2cpp::method(_("BasePlayer"), _("ClientUpdate")), (PVOID)hooks::hk_baseplayer_clientupdate, 0);
+
+	//dhook((void*)(uintptr_t)(mem::game_assembly_base + 0x808C20), (void**)&hk_defs::original_dohit, hooks::hk_dohit);
+	//LeoHook l;
+	//l.Hook(mem::game_assembly_base + 0x808C20, (uintptr_t)&hooks::hk_dohit);
 
 	return true;
 }

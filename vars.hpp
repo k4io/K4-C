@@ -28,6 +28,7 @@ struct Vars
 		bool always_reload = false;
 		bool autoshoot = false;
 		bool bullet_tp = false;
+		bool lower_vel = false;
 		bool rapidfire = false;
 		bool automatic = false;
 		bool thick_bullet = false;
@@ -40,6 +41,8 @@ struct Vars
 		bool nospread = false;
 		bool fast_bullet = false;
 		bool instaeoka = false;
+		bool pierce = false;
+		bool fastbow = false;
 		bool weakspots = false;
 		bool targetbehindwall = false;
 		float recoilx = 1.f;
@@ -145,7 +148,7 @@ struct Vars
 		bool emulate_p = false;
 		bool flywall = false;
 		bool force_privlidge = false;
-		int upgrade_tier = 1;
+		int upgrade_tier = 2;
 		bool flyhack_stop = false;
 		bool antispeed = false;
 		float    m_idebugcam_speed = 1.f;
@@ -219,74 +222,74 @@ struct Vars
 	struct colors {
 		struct players {
 			struct boxes {
-				float visible[3] = { 1, 1, 1 };
-				float invisible[3] = { 1, 1, 1 };
+				float visible[4] = { 1, 1, 1, 1 };
+				float invisible[4] = { 1, 1, 1, 1 };
 			}; boxes boxes;
 			struct chams {
-				float visible[3] = { 1, 1, 1 };
-				float invisible[3] = { 1, 1, 1 };
+				float visible[4] = { 1, 1, 1, 1 };
+				float invisible[4] = { 1, 1, 1, 1 };
 			}; chams chams;
 
 			struct details {
 				struct name {
-					float visible[3] = { 1, 1, 1 };
-					float invisible[3] = { 1, 1, 1 };
+					float visible[4] = { 1, 1, 1, 1 };
+					float invisible[4] = { 1, 1, 1, 1 };
 				}; name name;
 				struct distance {
-					float visible[3] = { 1, 1, 1 };
-					float invisible[3] = { 1, 1, 1 };
+					float visible[4] = { 1, 1, 1, 1 };
+					float invisible[4] = { 1, 1, 1, 1 };
 				}; distance distance;
 				struct flags {
-					float visible[3] = { 1, 1, 1 };
-					float invisible[3] = { 1, 1, 1 };
+					float visible[4] = { 1, 1, 1, 1 };
+					float invisible[4] = { 1, 1, 1, 1 };
 				}; flags flags;
 				struct skeleton {
-					float visible[3] = { 1, 1, 1 };
-					float invisible[3] = { 1, 1, 1 };
+					float visible[4] = { 1, 1, 1, 1 };
+					float invisible[4] = { 1, 1, 1, 1 };
 				}; skeleton skeleton;
 			}; details details;
 		}; players players;
 
 		struct ui {
 			struct snapline {
-				float visible[3] = { 1, 1, 1 };
-				float invisible[3] = { 1, 1, 1 };
+				float visible[4] = { 1, 1, 1, 1 };
+				float invisible[4] = { 1, 1, 1, 1 };
 			}; snapline snapline;
 			struct fov {
-				float visible[3] = { 1, 1, 1 };
-				float invisible[3] = { 1, 1, 1 };
+				float visible[4] = { 1, 1, 1, 1 };
+				float invisible[4] = { 1, 1, 1, 1 };
 			}; fov fov;
-			float crosshair[3] = { 1, 1, 1 };
+			float crosshair[4] = { 1, 1, 1, 1 };
 		}; ui ui;
 
 		struct items {
 			struct hemp {
-				float visible[3] = { 1, 1, 1 };
-				float invisible[3] = { 1, 1, 1 };
+				float visible[4] = { 1, 1, 1, 1 };
+				float invisible[4] = { 1, 1, 1, 1 };
 			}; hemp hemp;
 			struct stone {
-				float visible[3] = { 1, 1, 1 };
-				float invisible[3] = { 1, 1, 1 };
+				float visible[4] = { 1, 1, 1, 1 };
+				float invisible[4] = { 1, 1, 1, 1 };
 			}; stone stone;
 			struct sulfur {
-				float visible[3] = { 1, 1, 1 };
-				float invisible[3] = { 1, 1, 1 };
+				float visible[4] = { 1, 1, 1, 1 };
+				float invisible[4] = { 1, 1, 1, 1 };
 			}; sulfur sulfur;
 			struct metal {
-				float visible[3] = { 1, 1, 1 };
-				float invisible[3] = { 1, 1, 1 };
+				float visible[4] = { 1, 1, 1, 1 };
+				float invisible[4] = { 1, 1, 1, 1 };
 			}; metal metal;
 			struct stash {
-				float open[3] = { 1, 1, 1 };
-				float closed[3] = { 1, 1, 1 };
+				float open[4] = { 1, 1, 1, 1 };
+				float closed[4] = { 1, 1, 1, 1 };
 			}; stash stash;
 			struct barrel {
-				float visible[3] = { 1, 1, 1 };
-				float invisible[3] = { 1, 1, 1 };
+				float visible[4] = { 1, 1, 1, 1 };
+				float invisible[4] = { 1, 1, 1, 1 };
 			}; barrel barrel;
 			struct animal {
-				float visible[3] = { 1, 1, 1 };
-				float invisible[3] = { 1, 1, 1 };
+				float visible[4] = { 1, 1, 1, 1 };
+				float invisible[4] = { 1, 1, 1, 1 };
 			}; animal animal;
 		}; items items;
 	}; colors colors;

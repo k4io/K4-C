@@ -26,9 +26,10 @@ namespace offsets {
 #define oLineOfSightRadius 0x7DE8D0
 #define oSphereCast 0x2500770
 #define oConsoleSystem_GetAll 38898304 //"ConsoleSystem.Index$$get_All"
-#define oConvar 56614104
+#define oConvar 56627016
 #define oTerrainMeta_TypeInfo 56627368
 #define oPlayerEyes_TypeInfo 56512632
+#define oLocalPlayer_TypeInfo 56631152
 //REAL RUST
 namespace offsets {
     constexpr auto Method_BaseEntity_ServerRPC_string_bool_address = 56859864;// address "Name": "Method$BaseEntity.ServerRPC<string, bool>()",

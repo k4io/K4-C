@@ -11,6 +11,61 @@
 #define safe_read(Addr, Type) mem::read<Type>((DWORD64)Addr)
 #define safe_write(Addr, Data, Type) mem::write<Type>((DWORD64)Addr, Data);
 
+//PASTE XD
+struct BulletDropPredictionData
+{
+	float distCoeff;
+	float startY;
+	float yCoeff;
+};
+BulletDropPredictionData bulletDropData[11];
+
+Vector3 GetEndPointForTrajectory(float speed, float angle, float drag, float gravityMod)
+{
+	float pitchRad = DEG2RAD(angle);
+
+	Vector3 dir = {
+		(float)(sinf(90.f) * cosf(pitchRad)),
+		(float)sinf(pitchRad),
+		(float)(cosf(90.f) * cosf(pitchRad))
+	};
+
+	Vector3 position = Vector3();
+	Vector3 velCheck = dir * speed;
+
+	const float stepSize = 0.03125f;
+
+	for (float travelTime = 0.f; travelTime < 8.f; travelTime += stepSize)
+	{
+		position += velCheck * stepSize;
+		velCheck.y -= 9.81f * gravityMod * stepSize;
+		velCheck -= velCheck * drag * stepSize;
+	}
+
+	return position;
+}
+
+Vector2 CalcAngle(const Vector3& src, const Vector3& dst) {
+	Vector3 d = src - dst;
+	return Vector2(RAD2DEG(Vector3::my_asin(d.y / d.length())), RAD2DEG(-Vector3::my_atan2(d.x, -d.z)));
+};
+
+void GenerateBuilletDropPredictionData(float drag, float gravityMod)
+{
+	int currentIndex = 0;
+	for (float angle = 35.f; angle <= 85.f; angle += 5.f)
+	{
+		BulletDropPredictionData& predData = bulletDropData[currentIndex++];
+
+		Vector3 a1 = GetEndPointForTrajectory(30.f, angle, drag, gravityMod);
+		Vector3 a2 = GetEndPointForTrajectory(50.f, angle, drag, gravityMod);
+
+		predData.distCoeff = a2.length_2d() / 50.f;
+		predData.startY = a1.y;
+		predData.yCoeff = (a2.y - a1.y) / 20.f;
+	}
+}
+
 struct rust_str
 {
 	char zpad[128];
@@ -558,7 +613,7 @@ class Object {
 
 class Component : public Object {
 public:
-	Transform* get_transform() {
+	Transform* transform() {
 		if (!this) return nullptr;
 		auto off = *reinterpret_cast<uintptr_t* (*)(Component*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 		return (Transform*)off(this);
@@ -628,7 +683,7 @@ public:
 		return reinterpret_cast<Vector3*>(visual_state + 0x90);
 	}
 
-	Vector3 get_position() {
+	Vector3 position() {
 		if (!(uintptr_t)this)
 			return {};
 		auto off = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
@@ -1016,10 +1071,10 @@ public:
 	}
 
 	void remove_ammo() {
-		const auto primary_magazine = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x2C0);
-		if (!primary_magazine) return;
-		auto ammo = *reinterpret_cast<int*>(primary_magazine + 0x1C);
-		*reinterpret_cast<int*>(primary_magazine + 0x1C) = (ammo - 1);
+		const auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x2C0);
+		if (!mag || mag < 0xFFFF) return;
+		auto ammo = *reinterpret_cast<int*>(mag + 0x1C);
+		*reinterpret_cast<int*>(mag + 0x1C) = (ammo - 1);
 
 		updateammodisplay((uintptr_t)this);
 		shot_fired((uintptr_t)this);
@@ -1028,9 +1083,10 @@ public:
 	}
 
 	int ammo_left() {
-		const auto primary_magazine = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x2C0);
-		if (!primary_magazine) return 0;
-		const auto ammo = *reinterpret_cast<int*>(primary_magazine + 0x1C);
+		if (!this) return 0;
+		const auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x2C0);
+		if (!mag || mag < 0xFFFF) return 0;
+		const auto ammo = *reinterpret_cast<int*>(mag + 0x1C);
 		return ammo;
 	}
 
@@ -1546,12 +1602,12 @@ public:
 		return *reinterpret_cast<Vector3*>((uintptr_t)this + viewOffset);
 	}
 
-	Vector3 get_position() {
+	Vector3 position() {
 		if (!this) return Vector3(0, 0, 0);
 		return PEyes_get_position((uintptr_t)this);
 	}
 	
-	Vector4 get_rotation() {
+	Vector4 rotation() {
 		if (!this) return Vector4(0, 0, 0, 0);
 		return PEyes_get_rotation((uintptr_t)this);
 	}
@@ -1975,11 +2031,11 @@ public:
 
 			auto name = *(int*)(entity_class_name);
 
-			auto target_position = ((BaseEntity*)target_entity)->get_transform()->get_position();
-			auto ent_position = ((BaseEntity*)ent)->get_transform()->get_position();
+			auto target_position = ((BaseEntity*)target_entity)->transform()->position();
+			auto ent_position = ((BaseEntity*)ent)->transform()->position();
 			auto best_position = Vector3(0, 0, 0);
 			if(best_ent)
-				best_position = ((BaseEntity*)best_ent)->get_transform()->get_position();
+				best_position = ((BaseEntity*)best_ent)->transform()->position();
 
 			if(strlen(class_name) > 0)
 			{
@@ -2102,7 +2158,7 @@ public:
 			auto world_position = *reinterpret_cast<Vector3*>(visual_state + 0x90);
 
 			//auto bone_pos = this->model()->boneTransforms()->get(48)->get_position();
-			auto bone_pos = this->get_transform()->get_position();
+			auto bone_pos = this->transform()->position();
 
 			auto distance = bone_pos.get_3d_dist(world_position);
 			if (distance < closest_entity_distance && distance < max_distance) {
@@ -2206,8 +2262,14 @@ public:
 	void console_echo(const wchar_t* str) {
 		//string::format(("%s %d"), _("B:"), (int)vars->visual.VisBcolor))
 		//auto s = string::wformat(_(L"trap [%d]: %s"), (int)get_fixedTime(), str);
-		if(vars->misc.logs)
+		if (vars->misc.logs)
 			console_msg((uintptr_t)this, str);
+		//else {
+		//	freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
+		//	freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
+		//	wcscat(const_cast<wchar_t*>(str), _(L"\n"));
+		//	wprintf(str);
+		//}
 	}
 };
 
@@ -2232,8 +2294,8 @@ public:
 			if (!name || !tr) continue;
 			auto name_w = name->str;
 			if (!(wcscmp(name_w, bone_name))) {
-				Vector3 ref = lp->get_transform()->get_position() + lp->get_transform()->up() * (lp->eyes()->EyeOffset().y + lp->eyes()->get_view_offset().y); ref.y += 1.6f;
-				return new Bone(tr->get_position(), unity::is_visible(tr->get_position(), ref, 0), tr);
+				Vector3 ref = lp->transform()->position() + lp->transform()->up() * (lp->eyes()->EyeOffset().y + lp->eyes()->get_view_offset().y); ref.y += 1.6f;
+				return new Bone(tr->position(), unity::is_visible(tr->position(), ref, 0), tr);
 			}
 		}
 	}
@@ -2256,6 +2318,13 @@ class StabilityEntity : public DecayEntity {
 public:
 };
 
+class BowWeapon : public BaseProjectile {
+public:
+	FIELD(_("BowWeapon"), _("arrowBack"), arrowBack, float);
+	FIELD(_("BowWeapon"), _("wasAiming"), wasAiming, bool);
+	FIELD(_("BowWeapon"), _("attackReady"), attackReady, bool);
+};
+
 class BuildingBlock : public StabilityEntity{
 public:
 	rust::classes::BuildingGrade grade() { 
@@ -2267,7 +2336,7 @@ public:
 		if (!this) return false;
 
 		typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7202688
-		return ((AAA)(mem::game_assembly_base + 7202688))((uintptr_t)this, (int)g, p);
+		return ((AAA)(mem::game_assembly_base + 0x6F7240))((uintptr_t)this, (int)g, p);
 		//return canaffordupgrade((uintptr_t)this, g, p);
 	}
 
@@ -2275,19 +2344,33 @@ public:
 		if (!this) return false;
 
 		typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7203152
-		return ((AAA)(mem::game_assembly_base + 7203152))((uintptr_t)this, (int)g, p);
+		return ((AAA)(mem::game_assembly_base + 0x6F7410))((uintptr_t)this, (int)g, p);
 		//return canchangetograde((uintptr_t)this, g, p);
 	}
 
 	void Upgrade(rust::classes::BuildingGrade g, BasePlayer* p) {
 		if (!this) return;
-		return upgradetograde((uintptr_t)this, g, p);
+		typedef void (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7203152
+		return ((AAA)(mem::game_assembly_base + 0x6FAA30))((uintptr_t)this, (int)g, p);
+		//return upgradetograde((uintptr_t)this, g, p);
 	}
 };
 
 class BaseNavigator : public BaseMonoBehaviour {
 public:
 	FIELD(_("BaseNavigator"), _("Destination"), Destination, Vector3);
+};
+
+class ThrownWeapon : public AttackEntity {
+public:
+};
+
+class GrenadeWeapon : public AttackEntity {
+public:
+};
+
+class MolotovCocktail : public AttackEntity {
+public:
 };
 
 namespace ConVar {
@@ -2479,15 +2562,15 @@ public:
 
 	float Distance(BasePlayer* ent, Vector3 point)
 	{
-		Vector3 position = ent->get_transform()->get_position();
+		Vector3 position = ent->transform()->position();
 		if (Count() == 0)
 		{
 			return position.distance(point);
 		}
-		Vector4 rotation = ent->get_transform()->get_rotation();
+		Vector4 rotation = ent->transform()->get_rotation();
 		Bounds bounds = GetBounds((uintptr_t)ent);
 
-		auto trans = ent->get_transform();
+		auto trans = ent->transform();
 		bool flag = trans ? !(!trans) : false;
 		VMatrix _mv; _mv.matrix_identity();
 		VMatrix matrix4x = flag ? _mv : get_localToWorldMatrix(trans);
@@ -2628,7 +2711,7 @@ namespace cache {
 			{
 				auto transform = player->model()->boneTransforms()->get(id);
 				if (transform) {
-					auto pos = transform->get_position();
+					auto pos = transform->position();
 					if (id == 48)
 						pos.y += .2f;
 					auto v3 = WorldToScreen(pos);
@@ -2708,7 +2791,7 @@ namespace cache {
 
 				//dont need nanohacks 'target' as it doesn't make sense and is only local? lol
 				//lp->console_echo(string::wformat(_(L"[trap]: BoneCache - Finished caching for %d"), lp->userID()));
-				bones->eye_rot = player->eyes()->get_rotation();
+				bones->eye_rot = player->eyes()->rotation();
 			}
 
 			if (!map_contains_key(cachedBones, pid))

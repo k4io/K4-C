@@ -124,7 +124,7 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 				for (auto bone : { 48, 3, 4, 15, 14, 26, 57 }) {
 					Vector3 TargetPosition;
 					if (bone == 48) TargetPosition = head_pos_;
-					else TargetPosition = esp::best_target.ent->model()->boneTransforms()->get(bone)->get_position();
+					else TargetPosition = esp::best_target.ent->model()->boneTransforms()->get(bone)->position();
 					if (PLOS(from, TargetPosition, layermask)) {
 						settings::HitScanBone = bone;
 						return std::make_pair(true, TargetPosition);

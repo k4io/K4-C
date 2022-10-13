@@ -244,6 +244,10 @@
     <ClInclude Include="kiero\minhook\src\hde\table32.h" />
     <ClInclude Include="kiero\minhook\src\hde\table64.h" />
     <ClInclude Include="kiero\minhook\src\trampoline.h" />
+    <ClInclude Include="leo.h" />
+    <ClInclude Include="memory\defs.h" />
+    <ClInclude Include="memory\detours.h" />
+    <ClInclude Include="memory\hooks.h" />
     <ClInclude Include="memory\il2cpp.hpp" />
     <ClInclude Include="memory\lazy_importer.hpp" />
     <ClInclude Include="memory\memory.hpp" />

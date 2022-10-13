@@ -496,8 +496,8 @@ public:
 			previoustraveledTime(this->traveledTime());
 		}
 
-		Transform* Transform = pr->get_transform();
-		Vector3 pos = Transform->get_position();
+		Transform* Transform = pr->transform();
+		Vector3 pos = Transform->position();
 		this->currentPosition(pos);
 
 		if (traveledTime() == 0) {
@@ -521,7 +521,7 @@ public:
 
 		Line(this->currentPosition(), this->previousPosition(), col(0.6, 0.1, 0.7, 1), 10.f, false, true);
 		
-		auto Trans = pr->get_transform();
+		auto Trans = pr->transform();
 		set_position(Trans, currentPosition()); //Transform | void set_position(Vector3 value); 
 
 		Vector4 rotation = LookRotation(currentVelocity(), Vector3(0, 1, 0));
