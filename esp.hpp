@@ -1275,6 +1275,10 @@ void IndicatorSpeedhack() {
 	float x = vars->ScreenX / 2, y = vars->ScreenY / 2;
 	render.ProgressBar({ x - 60, y + 40 }, { 120, 4 }, vars->speedhack, 1.0f);
 }
+void IndicatorTp() {
+	float x = vars->ScreenX / 2, y = vars->ScreenY / 2;
+	render.ProgressBar({ x - 60, y + 50 }, { 120, 4 }, vars->last_teleport_time - get_fixedTime(), 10.0f);
+}
 
 void DrawSnapline() {
 	Vector2 start = vars->visual.snapline == 1 ? Vector2(vars->ScreenX / 2, 0) :
@@ -1321,6 +1325,8 @@ void new_frame() {
 		IndicatorFlyhack();
 	if (vars->visual.speedhack_indicator)
 		IndicatorSpeedhack();
+	if (vars->misc.tp)
+		IndicatorTp();
 
 	//Draw FOV
 	if (vars->visual.show_fov)

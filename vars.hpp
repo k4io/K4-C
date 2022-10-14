@@ -150,6 +150,7 @@ struct Vars
 		bool force_privlidge = false;
 		int upgrade_tier = 2;
 		bool flyhack_stop = false;
+		bool tp = false;
 		bool antispeed = false;
 		float    m_idebugcam_speed = 1.f;
 		float code_lock_code = 1000;
@@ -216,6 +217,7 @@ struct Vars
 		int zoom = 0;
 		int bullettp = 0;
 		int fakelag = 0;
+		int tp = 0;
 		int locktarget = 0;
 	}; keybinds keybinds;
 
@@ -299,6 +301,7 @@ struct Vars
 	std::wstring config_name = L"default";
 
 
+	float last_teleport_time = 0;
 	float ScreenX = 1920;
 	float ScreenY = 1080;
 	float tick_time_when_called;

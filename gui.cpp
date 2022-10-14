@@ -822,7 +822,7 @@ namespace Gui
 			//im::Checkbox(_("Manipulator2"), &vars->combat.manipulator);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(50, 15));
-			//im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
+			im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
 			//im::Checkbox(_("Pierce"), &vars->combat.pierce);
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
 			im::Checkbox(_("Bullet tp"), &vars->combat.bullet_tp);
@@ -972,6 +972,8 @@ namespace Gui
 		{
 			im::Text(_("Movement"));
 			im::Separator();
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
+			im::Hotkey(_("T"), &vars->keybinds.tp, ImVec2(50, 15));
 			im::Checkbox(_("Anti-flyhack"), &vars->misc.flyhack_stop);
 			im::Checkbox(_("Anti-speedhack"), &vars->misc.antispeed);
 			im::Checkbox(_("Omnisprint"), &vars->misc.always_sprint);
@@ -983,6 +985,7 @@ namespace Gui
 			im::Hotkey(_("F"), &vars->keybinds.flywall, ImVec2(50, 14));
 			im::Checkbox(_("No collisions"), &vars->misc.no_playercollision);
 			im::Checkbox(_("Spinbot"), &vars->misc.spinbot);
+			im::Checkbox(_("Teleport (5m)"), &vars->misc.tp);
 			im::EndChild();
 		}
 		im::SetCursorPosY(im::GetCursorPosY() + 2);

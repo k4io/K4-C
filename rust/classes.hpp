@@ -353,6 +353,8 @@ static auto PEyes_get_rotation = reinterpret_cast<Vector4(*)(uintptr_t)>(*reinte
 
 static auto bodyforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("BodyForward"), 0, _(""), _(""))));
 
+static auto bodyright = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("BodyRight"), 0, _(""), _(""))));
+
 static auto _SendClientTick = reinterpret_cast<void(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("SendClientTick"), 0, _(""), _(""))));
 
 static auto _getjumpheight = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetJumpHeight"), 0, _(""), _(""))));
@@ -473,7 +475,7 @@ void init_bp() {
 	get_frameCount = reinterpret_cast<int(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_frameCount"), 0, _(""), _("UnityEngine"))));
 	get_rotation = reinterpret_cast<Vector4(*)(uintptr_t Transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
 	GetBounds = reinterpret_cast<Bounds(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetBounds"), 0, _(""), _(""))));
-
+	bodyright = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("BodyRight"), 0, _(""), _(""))));
 	get_components_in_children = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("GetComponentsInChildren"), 0, _(""), _("UnityEngine"))));
 	get_component = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("GetComponent"), 0, _(""), _("UnityEngine"))));
 
@@ -1617,6 +1619,11 @@ public:
 		return bodyforward((uintptr_t)this);
 	}
 
+	Vector3 body_right() {
+		if (!this) return Vector3(0, 0, 0);
+		return bodyright((uintptr_t)this);
+	}
+
 	Vector3 GetCenter() {
 		if (!this) return Vector3(0, 0, 0);
 		return get_center((uintptr_t)this);
@@ -2264,12 +2271,12 @@ public:
 		//auto s = string::wformat(_(L"trap [%d]: %s"), (int)get_fixedTime(), str);
 		if (vars->misc.logs)
 			console_msg((uintptr_t)this, str);
-		//else {
-		//	freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
-		//	freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
-		//	wcscat(const_cast<wchar_t*>(str), _(L"\n"));
-		//	wprintf(str);
-		//}
+		else {
+			freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
+			freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
+			wcscat(const_cast<wchar_t*>(str), _(L"\n"));
+			wprintf(str);
+		}
 	}
 };
 

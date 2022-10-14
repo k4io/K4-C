@@ -278,6 +278,7 @@ namespace misc
 	float violationLevel = 0.f;
 	float time_since_last_shot = 0.0f;
 	float fixed_time_last_shot = 0.0f;
+	float last_teleport_time = 0.f; //cooldown 10s?
 
 	bool hasNavigator = false;
 

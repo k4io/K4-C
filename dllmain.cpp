@@ -144,7 +144,7 @@ bool DllMain(HMODULE hmodule)
 		mem::unity_player_base = LI_MODULE_SAFE_(_("UnityPlayer.dll"));
 
 		
-		//AllocConsole();
+		AllocConsole();
 
 
 		il2cpp::init();
@@ -181,20 +181,11 @@ bool DllMain(HMODULE hmodule)
 		has_initialized = true;
 	}
 
-	//il2cpp::hook(&hooks::hk_ddraw_ongui, _("OnGUI"), _("DDraw"), _("UnityEngine"), 0);
 	il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
 	il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
 	il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);
-	//il2cpp::hook(&hooks::hk_monobehaviour_coroutine, _("StartCoroutine"), _("MonoBehaviour"), _("UnityEngine"));
 	mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
-	//mem::hook_virtual_function(_("BaseCombatEntity"), _("IsAlive"), &hooks::hk_baseplayer_ClientInput);
 	mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);
-	//il2cpp::hook(&hooks::hk_DoHit, _("DoHit"), _("Projectile"), _(""), 3);
-	//HookMethod((LPVOID)il2cpp::method(_("BasePlayer"), _("ClientUpdate")), (PVOID)hooks::hk_baseplayer_clientupdate, 0);
-
-	//dhook((void*)(uintptr_t)(mem::game_assembly_base + 0x808C20), (void**)&hk_defs::original_dohit, hooks::hk_dohit);
-	//LeoHook l;
-	//l.Hook(mem::game_assembly_base + 0x808C20, (uintptr_t)&hooks::hk_dohit);
 
 	return true;
 }

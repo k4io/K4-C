@@ -444,7 +444,7 @@ namespace hooks {
 						if (target.visible || vis_fat)
 						{
 							projectile->set_current_velocity(aimbot_velocity);
-
+							original_vel = aimbot_velocity;
 							if (manipulated) {
 								auto g = get_gameObject((uintptr_t)projectile);
 								auto t = get_game_object_transform(g);
@@ -476,6 +476,19 @@ namespace hooks {
 						break;
 					}
 
+				if (!vars->combat.bullet_tp)
+					p->SetInitialDistance(0);
+
+				p->currentVelocity(original_vel);
+				p->initialVelocity(original_vel);
+				p->previousVelocity(original_vel);
+				p->currentPosition(rpc_position);
+				p->previousPosition(rpc_position);
+				p->sentPosition(rpc_position);
+				p->prevSentVelocity(rpc_position); //?
+				p->launchTime(get_fixedTime());
+				p->traveledTime(0);
+
 				if (vars->combat.manipulator2
 					&& (unity::GetKey(vars->keybinds.manipulator)
 						&& settings::RealGangstaShit != Vector3(0, 0, 0)))
@@ -483,11 +496,6 @@ namespace hooks {
 					p->currentVelocity(aimbot_velocity);
 					p->initialVelocity(aimbot_velocity);
 					p->previousVelocity(aimbot_velocity);
-
-					p->currentPosition(rpc_position);
-					p->previousPosition(rpc_position);
-					p->sentPosition(rpc_position);
-					p->prevSentVelocity(rpc_position); //?
 				}
 
 				if (vars->combat.targetbehindwall)
@@ -498,7 +506,6 @@ namespace hooks {
 			if (vars->combat.targetbehindwall)
 			{
 				typedef void(*cclear)(uintptr_t);
-				esp::local_player->console_echo(_(L"[trap]: ProjectileShoot - Clearing createdProjectiles"));
 				((cclear)(mem::game_assembly_base + 15396864))((uintptr_t)baseprojectile + 0x370); //"System.Collections.Generic.List<Projectile>$$Clear",
 			}
 
@@ -839,6 +846,40 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				return;
 			auto time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
 			float _timeSinceLastTick = time - loco->lastSentTickTime();
+			if (loco && !loco->is_sleeping()) {
+				if (unity::GetKey(vars->keybinds.tp)) {
+					if (vars->last_teleport_time + 20.f < get_fixedTime()) {
+						vars->last_teleport_time = get_fixedTime();
+
+						Vector3 a = Vector3::Zero();
+						auto fwd = loco->eyes()->body_forward() * 5;
+						auto right = loco->eyes()->body_right() * 5;
+						auto up = Vector3(0, 5, 0);
+
+						if (unity::GetKey(0x57)) //W
+						{
+							a = fwd;
+						}
+						else if (unity::GetKey(0x41)) //A
+						{
+							a = -right;
+						}
+						else if (unity::GetKey(0x53)) //S
+						{
+							a = -fwd;
+						}
+						else if (unity::GetKey(0x44)) //D
+						{
+							a = right;
+						}
+						else {
+							a = up;
+						}
+
+						player_walk_movement->teleport_to(loco->transform()->position() + a, loco);
+					}
+				}
+			}
 			if (loco && !loco->is_sleeping() && vars->desyncTime < 0.f) {
 				if (vars->misc.flyhack_stop) {
 					Vector3 curr = esp::local_player->transform()->position();
