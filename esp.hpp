@@ -5,7 +5,10 @@
 #include "rust/features/player_esp.hpp"
 //#include "rust/classes.hpp"
 
+float r = 1.00f, g = 0.00f, b = 1.00f;
+
 std::vector<BasePlayer*> player_list = {};
+std::map<int32_t, BasePlayer*> player_map = {};
 
 void ColorConvertHSVtoRGB2(float h, float s, float v, float& out_r, float& out_g, float& out_b)
 {
@@ -137,11 +140,12 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 	//bounds = ply->bones()->bounds;
 	//if (!bounds.empty()) {
 	if (get_bounds(bounds, 4)) {
-		//is_visible = unity::is_visible(camera_position, bones[8].world_position, (uintptr_t)esp::local_player);
+		//is_visible = unity::is_visible(camera_position, bones[48].world_position, (uintptr_t)esp::local_player);
 		//for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
 		//	if (is_visible) break;
 		//	is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
 		//}
+		//is_visible = ply->visible();
 		is_visible = true;
 
 		float box_width = bounds.right - bounds.left;
@@ -152,8 +156,18 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 		//chams
 		esp::do_chams(ply);
 
+
+		//health bar
+		const auto cur_health = ply->health();
+		const auto max_health = (npc ? ply->maxHealth() : 100);
+		const auto health_pc = min(cur_health / max_health, 1);
+		const auto health_color =
+			HSVD((health_pc * .25f), 1, .875f * 1);
+		const auto h = (bounds.bottom - bounds.top) * health_pc;
+
 		//boxes
 		auto box_color = is_visible ? vars->colors.players.boxes.visible : vars->colors.players.boxes.invisible;
+		if (vars->visual.rainbowbox) { box_color[0] = r; box_color[1] = g; box_color[2] = b; }
 		switch (vars->visual.boxtype)
 		{
 		case 1: //full box
@@ -184,18 +198,193 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			render.Line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 2.f);
 			break;
 		case 3: //3d cube
+		{
 			//LMAO I WILL DO THIS LATER
+
+			auto wid = 4;
+			Bounds cbounds = Bounds();
+
+			auto lfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_foot);
+			auto lfootp = lfoott->position();
+			auto rfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_foot);
+			auto rfootp = lfoott->position();
+			auto spine3 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine3)->position();
+			auto spine4 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine4)->position();
+			auto eyepos = spine3.midPoint(spine4);
+			Vector3 mp = Vector3(eyepos.x, eyepos.y - 1.2f, eyepos.z);//lfootp.midPoint(rfootp);
+
+			if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked)) {
+				//auto midpoint = ent->FindBone(_(L""))
+				cbounds.center = mp + Vector3(0.0f, 0.55f, 0.0f);
+				cbounds.extents = Vector3(0.4f, 0.65f, 0.4f);
+			}
+			else {
+				if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Crawling) || ply->modelState()->has_flag(rust::classes::ModelState_Flag::Sleeping)) {
+					cbounds.center = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
+					cbounds.extents = Vector3(0.9f, 0.2f, 0.4f);
+				}
+				else {
+					cbounds.center = mp + Vector3(0.0f, 0.85f, 0.0f);
+					cbounds.extents = Vector3(0.4f, 0.9f, 0.4f);
+				}
+			}
+
+			auto rotate_point = [&](Vector3 center, Vector3 origin, float angle) {
+				float num = angle * 0.0174532924f;
+				float num2 = -std::sin(num);
+				float num3 = std::cos(num);
+				origin.x -= center.x;
+				origin.z -= center.z;
+				float num4 = origin.x * num3 - origin.z * num2;
+				float num5 = origin.x * num2 + origin.z * num3;
+				float num6 = num4 + center.x;
+				num5 += center.z;
+				return Vector3(num6, origin.y, num5);
+			};
+
+			float y = EulerAngles(ply->eyes()->rotation()).y;
+			Vector3 center = cbounds.center;
+			Vector3 extents = cbounds.extents;
+			Vector3 frontTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z - extents.z), y);
+			Vector3 frontTopRight = rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z - extents.z), y);
+			Vector3 frontBottomLeft = rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z - extents.z), y);
+			Vector3 frontBottomRight = rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z - extents.z), y);
+			Vector3 backTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z + extents.z), y);
+			Vector3 backTopRight = rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z + extents.z), y);
+			Vector3 backBottomLeft = rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z + extents.z), y);
+			Vector3 backBottomRight = rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z + extents.z), y);
+
+			Vector2 frontTopLeft_2d, frontTopRight_2d, frontBottomLeft_2d, frontBottomRight_2d, backTopLeft_2d, backTopRight_2d, backBottomLeft_2d, backBottomRight_2d;
+
+			auto xy = WorldToScreen(frontTopLeft);
+			frontTopLeft_2d = Vector2(xy.x, xy.y);
+			xy = WorldToScreen(frontTopRight);
+			frontTopRight_2d = Vector2(xy.x, xy.y);
+			xy = WorldToScreen(frontBottomLeft);
+			frontBottomLeft_2d = Vector2(xy.x, xy.y);
+			xy = WorldToScreen(frontBottomRight);
+			frontBottomRight_2d = Vector2(xy.x, xy.y);
+			xy = WorldToScreen(backTopLeft);
+			backTopLeft_2d = Vector2(xy.x, xy.y);
+			xy = WorldToScreen(backTopRight);
+			backTopRight_2d = Vector2(xy.x, xy.y);
+			xy = WorldToScreen(backBottomLeft);
+			backBottomLeft_2d = Vector2(xy.x, xy.y);
+			xy = WorldToScreen(backBottomRight);
+			backBottomRight_2d = Vector2(xy.x, xy.y);
+
+			if (!frontTopLeft_2d.empty() &&
+				!frontTopRight_2d.empty() &&
+				!frontBottomLeft_2d.empty() &&
+				!frontBottomRight_2d.empty() &&
+				!backTopLeft_2d.empty() &&
+				!backTopRight_2d.empty() &&
+				!backBottomLeft_2d.empty() &&
+				!backBottomRight_2d.empty()) {
+				render.Line(frontTopLeft_2d, frontTopRight_2d, FLOAT4TOD3DCOLOR(box_color));
+				render.Line(frontTopRight_2d, frontBottomRight_2d, FLOAT4TOD3DCOLOR(box_color));
+				render.Line(frontBottomRight_2d, frontBottomLeft_2d, FLOAT4TOD3DCOLOR(box_color));
+				render.Line(frontBottomLeft_2d, frontTopLeft_2d, FLOAT4TOD3DCOLOR(box_color));
+				render.Line(backTopLeft_2d, backTopRight_2d, FLOAT4TOD3DCOLOR(box_color));
+				render.Line(backTopRight_2d, backBottomRight_2d, FLOAT4TOD3DCOLOR(box_color));
+				render.Line(backBottomRight_2d, backBottomLeft_2d, FLOAT4TOD3DCOLOR(box_color));
+				render.Line(backBottomLeft_2d, backTopLeft_2d, FLOAT4TOD3DCOLOR(box_color));
+				render.Line(frontTopLeft_2d, backTopLeft_2d, FLOAT4TOD3DCOLOR(box_color));
+				render.Line(frontTopRight_2d, backTopRight_2d, FLOAT4TOD3DCOLOR(box_color));
+				render.Line(frontBottomRight_2d, backBottomRight_2d, FLOAT4TOD3DCOLOR(box_color));
+				render.Line(frontBottomLeft_2d, backBottomLeft_2d, FLOAT4TOD3DCOLOR(box_color));
+			}
 			break;
 		}
+		case 4: //3d box
+		{
+			auto wid = 4;
+			Bounds cbounds = Bounds();
 
+			auto lfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_foot);
+			auto lfootp = lfoott->position();
+			auto rfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_foot);
+			auto rfootp = lfoott->position();
+			auto spine3 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine3)->position();
+			auto spine4 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine4)->position();
+			auto eyepos = spine3.midPoint(spine4);
+			Vector3 mp = Vector3(eyepos.x, eyepos.y - 1.2f, eyepos.z);//lfootp.midPoint(rfootp);
 
-		//health bar
-		const auto cur_health = ply->health();
-		const auto max_health = (npc ? ply->maxHealth() : 100);
-		const auto health_pc = min(cur_health / max_health, 1);
-		const auto health_color =
-			HSVD((health_pc * .25f), 1, .875f * 1);
-		const auto h = (bounds.bottom - bounds.top) * health_pc;
+			if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked)) {
+				//auto midpoint = ent->FindBone(_(L""))
+				cbounds.center = mp + Vector3(0.0f, 0.55f, 0.0f);
+				cbounds.extents = Vector3(0.4f, 0.65f, 0.4f);
+			}
+			else {
+				if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Crawling) || ply->modelState()->has_flag(rust::classes::ModelState_Flag::Sleeping)) {
+					cbounds.center = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
+					cbounds.extents = Vector3(0.9f, 0.2f, 0.4f);
+				}
+				else {
+					cbounds.center = mp + Vector3(0.0f, 0.85f, 0.0f);
+					cbounds.extents = Vector3(0.4f, 0.9f, 0.4f);
+				}
+			}
+
+			auto rotate_point = [&](Vector3 center, Vector3 origin, float angle) {
+				float num = angle * 0.0174532924f;
+				float num2 = -std::sin(num);
+				float num3 = std::cos(num);
+				origin.x -= center.x;
+				origin.z -= center.z;
+				float num4 = origin.x * num3 - origin.z * num2;
+				float num5 = origin.x * num2 + origin.z * num3;
+				float num6 = num4 + center.x;
+				num5 += center.z;
+				return Vector3(num6, origin.y, num5);
+			};
+
+			float y = EulerAngles(ply->eyes()->rotation()).y;
+			Vector3 center = cbounds.center;
+			Vector3 extents = cbounds.extents;
+			Vector3 frontTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z - extents.z), y);
+			Vector3 frontTopRight = rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z - extents.z), y);
+			Vector3 frontBottomLeft = rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z - extents.z), y);
+			Vector3 frontBottomRight = rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z - extents.z), y);
+			Vector3 backTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z + extents.z), y);
+			Vector3 backTopRight = rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z + extents.z), y);
+			Vector3 backBottomLeft = rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z + extents.z), y);
+			Vector3 backBottomRight = rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z + extents.z), y);
+
+			Vector3 middleBottomLeft = backBottomLeft.midPoint(frontBottomLeft);
+			Vector3 middleBottomRight = backBottomRight.midPoint(frontBottomRight);
+			Vector3 middleTopLeft = backTopLeft.midPoint(frontTopLeft);
+			Vector3 middleTopRight = backTopRight.midPoint(frontTopRight);
+
+			Vector2 middleBottomLeft_2d, middleBottomRight_2d, middleTopLeft_2d, middleTopRight_2d;
+
+			auto xy = WorldToScreen(middleBottomLeft);
+			middleBottomLeft_2d = Vector2(xy.x, xy.y);
+			xy = WorldToScreen(middleBottomRight);
+			middleBottomRight_2d = Vector2(xy.x, xy.y);
+			xy = WorldToScreen(middleTopLeft);
+			middleTopLeft_2d = Vector2(xy.x, xy.y);
+			xy = WorldToScreen(middleTopRight);
+			middleTopRight_2d = Vector2(xy.x, xy.y);
+
+			if (!middleBottomLeft_2d.empty() &&
+				!middleBottomRight_2d.empty() &&
+				!middleTopLeft_2d.empty() &&
+				!middleTopRight_2d.empty()) {
+
+				render.Line(middleBottomLeft_2d, middleBottomRight_2d, { 0, 0, 0, 1 }, 3);
+				render.Line(middleBottomLeft_2d, middleBottomRight_2d, FLOAT4TOD3DCOLOR(box_color), 2);
+				render.Line(middleBottomLeft_2d, middleTopLeft_2d, { 0, 0, 0, 1 }, 3);
+				render.Line(middleBottomLeft_2d, middleTopLeft_2d, FLOAT4TOD3DCOLOR(box_color), 2);
+				render.Line(middleBottomRight_2d, middleTopRight_2d, { 0, 0, 0, 1 }, 3);
+				render.Line(middleBottomRight_2d, middleTopRight_2d, FLOAT4TOD3DCOLOR(box_color), 2);
+				render.Line(middleTopLeft_2d, middleTopRight_2d, { 0, 0, 0, 1 }, 3);
+				render.Line(middleTopLeft_2d, middleTopRight_2d, FLOAT4TOD3DCOLOR(box_color), 2);
+			}
+			break;
+		}
+		}
+
 		switch (vars->visual.hpbar)
 		{
 		case 1:
@@ -381,7 +570,6 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			//HANDS??
 		}
 
-
 		//name, flags and distance
 		if (name)
 		{
@@ -394,31 +582,51 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			//const char* new_name = ;
 			// PLAYER NAME
 
-			//const wchar_t* nw;
+			auto name_color = is_visible ? vars->colors.players.details.name.visible : vars->colors.players.details.name.invisible;
+			auto half = (bounds.right - bounds.left) / 2;
 
+			//selected flag for automation following
+			//std::wstring ws(name);
+			//std::string s(ws.begin(), ws.end());
+			//if (!vars->misc.playerselected)
+			//	vars->misc.playerselected = _("~");
+			//if (!strcmp(vars->misc.playerselected, s.c_str()))
+			//{
+			//	render.String({ bounds.right + 5, bounds.top }, _(L"[Selected]"), { 0, 0, 0, 1 });
+			//	render.String({ bounds.right + 5, bounds.top + 1 }, _(L"[Selected]"), FLOAT4TOD3DCOLOR(name_color));
+			//}
+			//wounded
+			if (vars->visual.woundedflag) {
+				if (HasPlayerFlag(ply, rust::classes::PlayerFlags::Wounded)) {
+					render.String({ bounds.right + 5, bounds.top }, _(L"[Wounded]"), { 0, 0, 0, 1 });
+					render.String({ bounds.right + 5, bounds.top + 1 }, _(L"[Wounded]"), FLOAT4TOD3DCOLOR(name_color));
+				}
+			}
+
+			//distance
+			if (vars->visual.distance)
+			{
+				auto dist_color = is_visible ? vars->colors.players.details.distance.visible : vars->colors.players.details.distance.invisible;
+				auto nstr = string::wformat(_(L"[%dm]"), (int)distance);
+				render.StringCenter({ bounds.center - 1, bounds.bottom + 10 }, nstr, { 0, 0, 0, 1 });
+				render.StringCenter({ bounds.center + 1, bounds.bottom + 10 }, nstr, { 0, 0, 0, 1 });
+				render.StringCenter({ bounds.center - 1, bounds.bottom + 8 }, nstr, { 0, 0, 0, 1 });
+				render.StringCenter({ bounds.center + 1, bounds.bottom + 8 }, nstr, { 0, 0, 0, 1 });
+				render.StringCenter({ bounds.center, bounds.bottom + 9 }, nstr, FLOAT4TOD3DCOLOR(dist_color));
+				//gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.bottom + 1.f, 79.f + half * 2 + 80.f , 30 }, nstr, gui::Color(0, 0, 0, 120), true, 10.5);
+				//gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.bottom, 80.f + half * 2 + 80.f , 30 }, nstr, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
+			}
+
+
+
+			//name
 			if (vars->visual.nameesp) {
-				auto name_color = is_visible ? vars->colors.players.details.name.visible : vars->colors.players.details.name.invisible;
-				auto half = (bounds.right - bounds.left) / 2;
 
-				if (vars->visual.woundedflag) {
-					if (HasPlayerFlag(ply, rust::classes::PlayerFlags::Wounded)) {
-						render.String({ bounds.right, bounds.top + 1 }, _(L"Wounded"), { 0, 0, 0, 1 });
-						render.String({ bounds.right, bounds.top }, _(L"Wounded"), FLOAT4TOD3DCOLOR(name_color));
-					}
-				}
-
-				if (vars->visual.distance)
-				{
-					auto dist_color = is_visible ? vars->colors.players.details.distance.visible : vars->colors.players.details.distance.invisible;
-					auto nstr = string::wformat(_(L"[%dm]"), (int)distance);
-					render.StringCenter({ bounds.center, bounds.bottom + 10 }, nstr, { 0, 0, 0, 1 });
-					render.StringCenter({ bounds.center, bounds.bottom + 9 }, nstr, FLOAT4TOD3DCOLOR(dist_color));
-					//gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.bottom + 1.f, 79.f + half * 2 + 80.f , 30 }, nstr, gui::Color(0, 0, 0, 120), true, 10.5);
-					//gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.bottom, 80.f + half * 2 + 80.f , 30 }, nstr, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
-				}
-
-				render.StringCenter({ bounds.center, bounds.top - 9 }, name, { 0, 0, 0, 1 });
-				render.StringCenter({ bounds.center, bounds.top - 8 }, name, FLOAT4TOD3DCOLOR(name_color));
+				render.StringCenter({ bounds.center - 1, bounds.top - 9 }, name, { 0, 0, 0, 1 });
+				render.StringCenter({ bounds.center + 1, bounds.top - 9 }, name, { 0, 0, 0, 1 });
+				render.StringCenter({ bounds.center - 1, bounds.top - 7 }, name, { 0, 0, 0, 1 });
+				render.StringCenter({ bounds.center + 1, bounds.top - 7 }, name, { 0, 0, 0, 1 });
+				render.StringCenter({ bounds.center, bounds.top - 8 }, name, vars->visual.rainbowname ? D2D1::ColorF{ r, g, b, 1 } : FLOAT4TOD3DCOLOR(name_color));
 				//gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.top - 23.f, 79.f + half * 2 + 80.f , 30 }, name, gui::Color(0, 0, 0, 120), true, 10.5);
 				//gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.top - 24.f, 80.f + half * 2 + 80.f , 30 }, name, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
 			}
@@ -573,6 +781,15 @@ void iterate_entities() {
 
 	rust::classes::list* entity_list = (rust::classes::list*)esp::client_entities;
 
+	static int cases = 0;
+	switch (cases) {
+	case 0: { r -= 0.003f; if (r <= 0) cases += 1; break; }
+	case 1: { g += 0.003f; b -= 0.003f; if (g >= 1) cases += 1; break; }
+	case 2: { r += 0.003f; if (r >= 1) cases += 1; break; }
+	case 3: { b += 0.003f; g -= 0.003f; if (b >= 1) cases = 0; break; }
+	default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
+	}
+
 	auto list_value = entity_list->get_value<uintptr_t>();
 	if (!list_value) {
 		//get_client_entities();
@@ -596,6 +813,7 @@ void iterate_entities() {
 
 	wchar_t* esp_name = _(L"");
 
+	vars->player_name_list.clear();
 	for (int i = 0; i <= size; i++) {
 		auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
 		if (!current_object || current_object <= 100000)
@@ -654,7 +872,6 @@ void iterate_entities() {
 		if (tag == 6)
 		{
 			auto entity = (BasePlayer*)ent;
-
 			//cache::CacheBones(entity, esp::local_player);
 			bool exists_in_list = false;
 			auto fff = 0;
@@ -665,29 +882,25 @@ void iterate_entities() {
 					|| (entity->is_sleeping() && !vars->visual.sleeper_esp)
 					|| !p)
 				{
-					vars->player_id_name.erase(fff);
+					//vars->player_id_name.erase(fff);
 					player_list.erase(std::remove(player_list.begin(), player_list.end(), p), player_list.end());
 				}
 				if (entity->userID() == p->userID())
 					exists_in_list = true;
-				if(!map_contains_key(vars->player_id_name, fff))
-					vars->player_id_name.insert(std::make_pair(fff, entity->get_player_name()));
-				fff++;
 			}
+			if (!map_contains_key(player_map, ent_id))
+				player_map.insert(std::make_pair(ent_id, entity));
+			//	//std::wstring ws(entity->get_player_name());
+				//std::string s(ws.begin(), ws.end());
+				//vars->player_name_list.push_back(s);
+				//if(!map_contains_key(vars->player_id_name, fff))
+				//	vars->player_id_name.insert(std::make_pair(fff, entity->get_player_name()));
+			//	fff++;
+			//}
 			if (!exists_in_list)
 			{
 				player_list.push_back(entity);
 			}
-			//if (player_list.size() != sizebefore) {
-			//	std::wstring wstr = L"";
-			//	for (auto p : vars->player_id_name)
-			//	{
-			//		auto name = p.second;
-			//		wstr += std::wstring(name) + L"\0";
-			//	}
-			//	std::string str(wstr.begin(), wstr.end());
-			//	vars->playersnamesstr = str;
-			//}
 			//hit player for silent melee, but not here as may crash due to not being run from a game thread
 
 			//check valid
@@ -705,6 +918,36 @@ void iterate_entities() {
 			else {
 				if (esp::local_player)
 				{
+					if (vars->visual.targetted)
+					{
+						auto pl = ((BasePlayer*)ent);
+						//project bodyforward distance between ent and local player, if within 1,2m indicate?
+						auto playerpos = pl->model()->boneTransforms()->get(48)->position();
+						auto localpos = esp::local_player->model()->boneTransforms()->get(48)->position();
+						auto distance = playerpos.distance(localpos);
+						auto fwd = pl->eyes()->body_forward() *  distance;
+
+						auto w2 = WorldToScreen(fwd);
+						auto w1 = WorldToScreen(playerpos);
+						Vector2 w1s = { w1.x, w1.y };
+						Vector2 w2s = { w2.x, w2.y };
+						if (!w2s.empty())
+						{
+							render.Line(w1s, w2s, { 1, 1, 1, 1 }, 2.f);
+						}
+
+						//Sphere(fwd, 0.05, { 1, 1, 1, 1 }, 0.05f, 10.f);
+						if (fwd.distance(localpos) < 1.f)
+						{
+							auto ws = std::wstring(string::wformat(_(L"[%s is looking at you]"), ((BasePlayer*)ent)->get_player_name()));
+							render.StringCenter({ vars->ScreenX / 2 + 1, (vars->ScreenY / 2) - 30 }, ws.c_str(), { 0, 0, 0, 1 });
+							render.StringCenter({ vars->ScreenX / 2 - 1, (vars->ScreenY / 2) - 30 }, ws.c_str(), { 0, 0, 0, 1 });
+							render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 30 + 1 }, ws.c_str(), { 0, 0, 0, 1 });
+							render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 30 - 1 }, ws.c_str(), { 0, 0, 0, 1 });
+							render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 30 }, ws.c_str(), { 227 / 255.f, 32 / 255.f, 61 / 255.f, 1 });
+						}
+					}
+
 					if (GetAsyncKeyState(0x37))
 					{
 						auto look = esp::local_player->_lookingAtEntity();
@@ -727,15 +970,34 @@ void iterate_entities() {
 						}
 					}
 
+					if (vars->wants_shoot)
+						goto draw;
 
 					auto target = aim_target();
-					if (vars->combat.bodyaim)
-						//target.pos = ((BasePlayer*)ent)->bones()->pelvis->position;
+					switch (vars->combat.aimbone)
+					{
+					case 0: //Head
+						target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::head)->position();
+						break;
+					case 1: //Spine 4
+						target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine4)->position();
+						break;
+					case 2: //Pelvis
 						target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
-					else
-						//target.pos = ((BasePlayer*)ent)->bones()->head->position;
-						target.pos = ent->model()->boneTransforms()->get(48)->position();
-
+						break;
+					case 3: //R arm
+						target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_forearm)->position();
+						break;
+					case 4: //L arm
+						target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_forearm)->position();
+						break;
+					case 5: //R leg
+						target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_knee)->position();
+						break;
+					case 6: //L leg
+						target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_knee)->position();
+						break;
+					}
 					auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos); //crashes bc non game thread
 					target.distance = distance;
 

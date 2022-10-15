@@ -278,8 +278,32 @@ public:
 	}
 
 	//text
-	__forceinline Vector2 StringCenter(const Vector2& Start, const wchar_t* Str, const D2D1::ColorF& Clr = D2D1::ColorF(D2D1::ColorF::White))
+	__forceinline Vector2 StringCenter(const Vector2& Start, const wchar_t* Str, const D2D1::ColorF& Clr = D2D1::ColorF(D2D1::ColorF::White), bool outline = true)
 	{
+		if (vars->visual.text_background_box)
+		{
+			SolidColor->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
+			IDWriteTextLayout* TextLayout;
+			TextEngine->CreateTextLayout(Str, wcslen(Str), TextFormat, 200.f, 100.f, &TextLayout);
+			DWRITE_TEXT_METRICS TextInfo;
+			TextLayout->GetMetrics(&TextInfo);
+			Vector2 TextSize = { TextInfo.width, TextInfo.height };
+			Vector2 st = { Start.x - (TextSize.x / 2) - 3, Start.y - (TextSize.y / 2) - 1 };
+			TextSize.x += 5; TextSize.y += 2;
+			switch (vars->visual.text_background_box) {
+			case 0:
+				break;
+			case 1: //Gradient full
+				FillRectangle({ st.x, st.y }, TextSize, { 0.07f, 0.07f, 0.07f, 0.65f });
+				Rectangle({ st.x, st.y }, TextSize, { 0.21, 0.21, 0.21, 1 }, 0.5f);
+				break;
+			case 2: //Gradient rounded
+				FillRoundedRectangle({ st.x, st.y }, TextSize, { 0.07f, 0.07f, 0.07f, 0.65f }, 4);
+				RoundedRectangle({ st.x, st.y }, TextSize, { 0.21, 0.21, 0.21, 1 }, 4, 0.5f);
+				break;
+			}
+		}
+
 		SolidColor->SetColor(Clr); IDWriteTextLayout* TextLayout; TextEngine->CreateTextLayout(Str, this->wcslen(Str), TextFormat, 200.f, 100.f, &TextLayout);
 		DWRITE_TEXT_METRICS TextInfo; TextLayout->GetMetrics(&TextInfo); Vector2 TextSize = { TextInfo.width / 2.f, TextInfo.height / 2.f };
 		Canvas->DrawTextLayout({ Start.x - TextSize.x, Start.y - TextSize.y }, TextLayout, SolidColor); TextLayout->Release();
@@ -372,7 +396,33 @@ public:
 
 	__forceinline void String(const Vector2& Start, const wchar_t* Str, const D2D1::ColorF& Clr = D2D1::ColorF(D2D1::ColorF::White))
 	{
-		SolidColor->SetColor(Clr); Canvas->DrawTextW(Str, this->wcslen(Str), TextFormat, { Start.x, Start.y, FLT_MAX, FLT_MAX }, SolidColor);
+		if (vars->visual.text_background_box)
+		{
+			SolidColor->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
+			IDWriteTextLayout* TextLayout;
+			TextEngine->CreateTextLayout(Str, wcslen(Str), TextFormat, 200.f, 100.f, &TextLayout);
+			DWRITE_TEXT_METRICS TextInfo;
+			TextLayout->GetMetrics(&TextInfo);
+			Vector2 TextSize = { TextInfo.width + 2, TextInfo.height + 3 };
+			switch (vars->visual.text_background_box) {
+			case 0:
+				break;
+			case 1: //Gradient full
+				FillRectangle_GradientLinear({ Start.x - 1, Start.y - 1 }, TextSize,
+					{ 0.14f, 0.14f, 0.14f, 0.65f },
+					{ 159.f / 255.f, 40.f / 255.f, 29.f / 255.f, 0.65f });
+				Rectangle({ Start.x - 1, Start.y - 1 }, TextSize, { 0.21, 0.21, 0.21, 1 }, 2);
+				break;
+			case 2: //Gradient rounded
+				FillRoundedRectangle_GradientLinear({ Start.x - 1, Start.y - 1 }, TextSize,
+					{ 0.14f, 0.14f, 0.14f, 0.65f },
+					{ 159.f / 255.f, 40.f / 255.f, 29.f / 255.f, 0.65f }, 2);
+				RoundedRectangle({ Start.x - 1, Start.y - 1 }, TextSize, { 0.21, 0.21, 0.21, 1 }, 3, 2);
+				break;
+			}
+		}
+		SolidColor->SetColor(Clr); 
+		Canvas->DrawTextW(Str, this->wcslen(Str), TextFormat, { Start.x, Start.y, FLT_MAX, FLT_MAX }, SolidColor);
 	}
 };
 

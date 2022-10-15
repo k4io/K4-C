@@ -6,53 +6,9 @@
 
 #include "../esp.hpp"	
 
-inline float NormalizeAngle(float angle) {
-	while (angle > 360.0f) {
-		angle -= 360.0f;
-	}
-	while (angle < 0.0f) {
-		angle += 360.0f;
-	}
-	return angle;
-}
-
-inline Vector3 NormalizeAngles(Vector3 angles) {
-	angles.x = NormalizeAngle(angles.x);
-	angles.y = NormalizeAngle(angles.y);
-	angles.z = NormalizeAngle(angles.z);
-	return angles;
-}
-
-inline Vector3 EulerAngles(Vector4 q1) {
-	float num = q1.w * q1.w;
-	float num2 = q1.x * q1.x;
-	float num3 = q1.y * q1.y;
-	float num4 = q1.z * q1.z;
-	float num5 = num2 + num3 + num4 + num;
-	float num6 = q1.x * q1.w - q1.y * q1.z;
-	Vector3 vector;
-	if (num6 > 0.4995f * num5) {
-		vector.y = 2.0f * std::atan2f(q1.y, q1.x);
-		vector.x = 1.57079637f;
-		vector.z = 0.0f;
-		return NormalizeAngles(vector * 57.2958f);
-	}
-	if (num6 < -0.4995f * num5) {
-		vector.y = -2.0f * std::atan2f(q1.y, q1.x);
-		vector.x = -1.57079637f;
-		vector.z = 0.0f;
-		return NormalizeAngles(vector * 57.2958f);
-	}
-	Vector4 quaternion = Vector4(q1.w, q1.z, q1.x, q1.y);
-	vector.y = std::atan2f(2.0f * quaternion.x * quaternion.w + 2.0f * quaternion.y * quaternion.z, 1.0f - 2.0f * (quaternion.z * quaternion.z + quaternion.w * quaternion.w));
-	vector.x = std::asin(2.0f * (quaternion.x * quaternion.z - quaternion.w * quaternion.y));
-	vector.z = std::atan2f(2.0f * quaternion.x * quaternion.y + 2.0f * quaternion.z * quaternion.w, 1.0f - 2.0f * (quaternion.y * quaternion.y + quaternion.z * quaternion.z));
-	return NormalizeAngles(vector * 57.2958f);
-}
-
 #define rgba(r,g,b,a) gui::Color(r / 255.f, g / 255.f, b / 255.f, a)
 
-static float r = 1.00f, g = 0.00f, b = 1.00f;
+//static float r = 1.00f, g = 0.00f, b = 1.00f;
 
 namespace gui {
 	class Color {
@@ -1251,15 +1207,15 @@ namespace gui {
 
 					esp::matrix = unity::get_view_matrix();
 
-					int fff = 0;
+					//int fff = 0;
 					if (!player_list.empty())
-						for (auto p : player_list)
+						for (auto p : player_map)
 							if (vars->visual.playeresp
-								&& p)
+								&& p.second)
 							{
-								esp::do_chams(p);
+								esp::do_chams(p.second);
 								//esp::local_player->console_echo(string::wformat(_(L"[trap]: OnGUI - Caching bones for: %d"), p->userID()));
-								//cache::CacheBones(p, esp::local_player);
+								cache::CacheBones(p.second, esp::local_player);
 							}
 					//esp::start();
 
@@ -1271,50 +1227,53 @@ namespace gui {
 							rust::classes::BuildingGrade upgrade_tier = (rust::classes::BuildingGrade)(vars->misc.upgrade_tier + 1);
 
 							auto tranny = block->transform();
-							auto pos = tranny->position();
-							auto distance = esp::local_player->eyes()->position().distance(pos);
+							if (tranny)
+							{
+								auto pos = tranny->position();
+								auto distance = esp::local_player->eyes()->position().distance(pos);
 
-							auto local_player = esp::local_player;
+								auto local_player = esp::local_player;
 
-							if (distance < 4.2f) {
-								if (get_fixedTime() > esp::time_last_upgrade + 0.35f)
-								{
-									auto grade = block->grade();
-									if ((int)upgrade_tier == 1) {
+								if (distance < 4.2f) {
+									if (get_fixedTime() > esp::time_last_upgrade + 0.35f)
+									{
+										auto grade = block->grade();
+										if ((int)upgrade_tier == 1) {
 
-										if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Wood, local_player)
-											&& block->CanChangeToGrade(rust::classes::BuildingGrade::Wood, local_player)
-											&& grade != rust::classes::BuildingGrade::Wood)
-										{
-											block->Upgrade(rust::classes::BuildingGrade::Wood, local_player);
-											esp::time_last_upgrade = get_fixedTime();
+											if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Wood, local_player)
+												&& block->CanChangeToGrade(rust::classes::BuildingGrade::Wood, local_player)
+												&& grade != rust::classes::BuildingGrade::Wood)
+											{
+												block->Upgrade(rust::classes::BuildingGrade::Wood, local_player);
+												esp::time_last_upgrade = get_fixedTime();
+											}
 										}
-									}
-									else if ((int)upgrade_tier == 2) {
-										if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Stone, local_player)
-											&& block->CanChangeToGrade(rust::classes::BuildingGrade::Stone, local_player)
-											&& grade != rust::classes::BuildingGrade::Stone)
-										{
-											block->Upgrade(rust::classes::BuildingGrade::Stone, local_player);
-											esp::time_last_upgrade = get_fixedTime();
+										else if ((int)upgrade_tier == 2) {
+											if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Stone, local_player)
+												&& block->CanChangeToGrade(rust::classes::BuildingGrade::Stone, local_player)
+												&& grade != rust::classes::BuildingGrade::Stone)
+											{
+												block->Upgrade(rust::classes::BuildingGrade::Stone, local_player);
+												esp::time_last_upgrade = get_fixedTime();
+											}
 										}
-									}
-									else if ((int)upgrade_tier == 3) {
-										if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Metal, local_player)
-											&& block->CanChangeToGrade(rust::classes::BuildingGrade::Metal, local_player)
-											&& grade != rust::classes::BuildingGrade::Metal)
-										{
-											block->Upgrade(rust::classes::BuildingGrade::Metal, local_player);
-											esp::time_last_upgrade = get_fixedTime();
+										else if ((int)upgrade_tier == 3) {
+											if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Metal, local_player)
+												&& block->CanChangeToGrade(rust::classes::BuildingGrade::Metal, local_player)
+												&& grade != rust::classes::BuildingGrade::Metal)
+											{
+												block->Upgrade(rust::classes::BuildingGrade::Metal, local_player);
+												esp::time_last_upgrade = get_fixedTime();
+											}
 										}
-									}
-									else if ((int)upgrade_tier == 4) {
-										if (block->CanAffordUpgrade(rust::classes::BuildingGrade::TopTier, local_player)
-											&& block->CanChangeToGrade(rust::classes::BuildingGrade::TopTier, local_player)
-											&& grade != rust::classes::BuildingGrade::TopTier)
-										{
-											block->Upgrade(rust::classes::BuildingGrade::TopTier, local_player);
-											esp::time_last_upgrade = get_fixedTime();
+										else if ((int)upgrade_tier == 4) {
+											if (block->CanAffordUpgrade(rust::classes::BuildingGrade::TopTier, local_player)
+												&& block->CanChangeToGrade(rust::classes::BuildingGrade::TopTier, local_player)
+												&& grade != rust::classes::BuildingGrade::TopTier)
+											{
+												block->Upgrade(rust::classes::BuildingGrade::TopTier, local_player);
+												esp::time_last_upgrade = get_fixedTime();
+											}
 										}
 									}
 								}
@@ -1337,14 +1296,14 @@ namespace gui {
 								{
 									auto size = beltitems->get_size();
 
-									beltitems->for_each([&](Item* item, int32_t idx)
+									beltitems->for_each([&](Item* item, int32_t idx) {
 										{
 											esp::local_player->console_echo(item->get_weapon_name());
-										});
-									mainitems->for_each([&](Item* item, int32_t idx)
+										} });
+									mainitems->for_each([&](Item* item, int32_t idx) {
 										{
 											esp::local_player->console_echo(item->get_weapon_name());
-										});
+										} });
 								}
 							}
 						}
@@ -2213,6 +2172,7 @@ namespace esp
 	{
 		if (!local_player) return;
 		if (!ent->is_alive() || (ent->is_sleeping() && !vars->visual.sleeper_esp)) return;
+
 		if (unity::bundle)
 		{
 			Shader* shader = 0;
@@ -2251,7 +2211,7 @@ namespace esp
 			//}
 
 			if (vars->visual.hand_chams >= 1
-				&& ent->is_local_player()) {
+				&& ent->is_local_player()) { //crashes on islocalplayer
 				auto model = gui::methods::get_activemodel();
 				auto renderers = ((Networkable*)model)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
 				if (renderers)
@@ -2627,97 +2587,6 @@ namespace esp
 			}
 			else if (vars->visual.cube)
 			{
-				auto wid = 4;
-				Bounds cbounds = Bounds();
-
-				auto lfoott = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_foot);
-				auto lfootp = lfoott->position();
-				auto rfoott = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_foot);
-				auto rfootp = lfoott->position();
-				auto mp = lfootp.midPoint(rfootp);
-
-				if (ent->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked)) {
-					//auto midpoint = ent->FindBone(_(L""))
-					cbounds.center = mp + Vector3(0.0f, 0.55f, 0.0f);
-					cbounds.extents = Vector3(0.4f, 0.65f, 0.4f);
-				}
-				else {
-					if (ent->modelState()->has_flag(rust::classes::ModelState_Flag::Crawling) || ent->modelState()->has_flag(rust::classes::ModelState_Flag::Sleeping)) {
-						cbounds.center = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
-						cbounds.extents = Vector3(0.9f, 0.2f, 0.4f);
-					}
-					else {
-						cbounds.center = mp + Vector3(0.0f, 0.85f, 0.0f);
-						cbounds.extents = Vector3(0.4f, 0.9f, 0.4f);
-					}
-				}
-
-				auto rotate_point = [&](Vector3 center, Vector3 origin, float angle) {
-					float num = angle * 0.0174532924f;
-					float num2 = -std::sin(num);
-					float num3 = std::cos(num);
-					origin.x -= center.x;
-					origin.z -= center.z;
-					float num4 = origin.x * num3 - origin.z * num2;
-					float num5 = origin.x * num2 + origin.z * num3;
-					float num6 = num4 + center.x;
-					num5 += center.z;
-					return Vector3(num6, origin.y, num5);
-				};
-
-				float y = EulerAngles(ent->eyes()->rotation()).y;
-				Vector3 center = cbounds.center;
-				Vector3 extents = cbounds.extents;
-				Vector3 frontTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z - extents.z), y);
-				Vector3 frontTopRight = rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z - extents.z), y);
-				Vector3 frontBottomLeft = rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z - extents.z), y);
-				Vector3 frontBottomRight = rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z - extents.z), y);
-				Vector3 backTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z + extents.z), y);
-				Vector3 backTopRight = rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z + extents.z), y);
-				Vector3 backBottomLeft = rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z + extents.z), y);
-				Vector3 backBottomRight = rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z + extents.z), y);
-
-				Vector2 frontTopLeft_2d, frontTopRight_2d, frontBottomLeft_2d, frontBottomRight_2d, backTopLeft_2d, backTopRight_2d, backBottomLeft_2d, backBottomRight_2d;
-
-				auto xy = WorldToScreen(frontTopLeft);
-				frontTopLeft_2d = Vector2(xy.x, xy.y);
-				 xy = WorldToScreen(frontTopRight);
-				frontTopRight_2d = Vector2(xy.x, xy.y);
-				 xy = WorldToScreen(frontBottomLeft);
-				frontBottomLeft_2d = Vector2(xy.x, xy.y);
-				 xy = WorldToScreen(frontBottomRight);
-				frontBottomRight_2d = Vector2(xy.x, xy.y);
-				 xy = WorldToScreen(backTopLeft);
-				backTopLeft_2d = Vector2(xy.x, xy.y);
-				 xy = WorldToScreen(backTopRight);
-				backTopRight_2d = Vector2(xy.x, xy.y);
-				 xy = WorldToScreen(backBottomLeft);
-				backBottomLeft_2d = Vector2(xy.x, xy.y);
-				 xy = WorldToScreen(backBottomRight);
-				backBottomRight_2d = Vector2(xy.x, xy.y);
-
-				if (!frontTopLeft_2d.empty() &&
-					!frontTopRight_2d.empty() &&
-					!frontBottomLeft_2d.empty() &&
-					!frontBottomRight_2d.empty() &&
-					!backTopLeft_2d.empty() &&
-					!backTopRight_2d.empty() &&
-					!backBottomLeft_2d.empty() &&
-					!backBottomRight_2d.empty()) {
-
-					gui::line(frontTopLeft_2d, frontTopRight_2d, clr, wid);
-					gui::line(frontTopRight_2d, frontBottomRight_2d, clr, wid);
-					gui::line(frontBottomRight_2d, frontBottomLeft_2d, clr, wid);
-					gui::line(frontBottomLeft_2d, frontTopLeft_2d, clr, wid);
-					gui::line(backTopLeft_2d, backTopRight_2d, clr, wid);
-					gui::line(backTopRight_2d, backBottomRight_2d, clr, wid);
-					gui::line(backBottomRight_2d, backBottomLeft_2d, clr, wid);
-					gui::line(backBottomLeft_2d, backTopLeft_2d, clr, wid);
-					gui::line(frontTopLeft_2d, backTopLeft_2d, clr, wid);
-					gui::line(frontTopRight_2d, backTopRight_2d, clr, wid);
-					gui::line(frontBottomRight_2d, backBottomRight_2d, clr, wid);
-					gui::line(frontBottomLeft_2d, backBottomLeft_2d, clr, wid);
-				}
 			}
 
 #pragma region healthbars

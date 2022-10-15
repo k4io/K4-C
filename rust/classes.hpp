@@ -11,6 +11,50 @@
 #define safe_read(Addr, Type) mem::read<Type>((DWORD64)Addr)
 #define safe_write(Addr, Data, Type) mem::write<Type>((DWORD64)Addr, Data);
 
+inline float NormalizeAngle(float angle) {
+	while (angle > 360.0f) {
+		angle -= 360.0f;
+	}
+	while (angle < 0.0f) {
+		angle += 360.0f;
+	}
+	return angle;
+}
+
+inline Vector3 NormalizeAngles(Vector3 angles) {
+	angles.x = NormalizeAngle(angles.x);
+	angles.y = NormalizeAngle(angles.y);
+	angles.z = NormalizeAngle(angles.z);
+	return angles;
+}
+
+inline Vector3 EulerAngles(Vector4 q1) {
+	float num = q1.w * q1.w;
+	float num2 = q1.x * q1.x;
+	float num3 = q1.y * q1.y;
+	float num4 = q1.z * q1.z;
+	float num5 = num2 + num3 + num4 + num;
+	float num6 = q1.x * q1.w - q1.y * q1.z;
+	Vector3 vector;
+	if (num6 > 0.4995f * num5) {
+		vector.y = 2.0f * std::atan2f(q1.y, q1.x);
+		vector.x = 1.57079637f;
+		vector.z = 0.0f;
+		return NormalizeAngles(vector * 57.2958f);
+	}
+	if (num6 < -0.4995f * num5) {
+		vector.y = -2.0f * std::atan2f(q1.y, q1.x);
+		vector.x = -1.57079637f;
+		vector.z = 0.0f;
+		return NormalizeAngles(vector * 57.2958f);
+	}
+	Vector4 quaternion = Vector4(q1.w, q1.z, q1.x, q1.y);
+	vector.y = std::atan2f(2.0f * quaternion.x * quaternion.w + 2.0f * quaternion.y * quaternion.z, 1.0f - 2.0f * (quaternion.z * quaternion.z + quaternion.w * quaternion.w));
+	vector.x = std::asin(2.0f * (quaternion.x * quaternion.z - quaternion.w * quaternion.y));
+	vector.z = std::atan2f(2.0f * quaternion.x * quaternion.y + 2.0f * quaternion.z * quaternion.w, 1.0f - 2.0f * (quaternion.y * quaternion.y + quaternion.z * quaternion.z));
+	return NormalizeAngles(vector * 57.2958f);
+}
+
 //PASTE XD
 struct BulletDropPredictionData
 {
@@ -1329,6 +1373,7 @@ class Item {
 public:
 	FIELD(_("Item"), _("heldEntity"), heldEntity, HeldEntity*);
 	FIELD(_("Item"), _("info"), info, ItemDefinition*);
+	FIELD(_("Item"), _("name"), name, System::string*);
 	//FIELD(_("Item"), _("name"), name, str);
 
 	uintptr_t get_icon_sprite() {
@@ -1828,7 +1873,7 @@ public:
 	}
 
 	wchar_t* get_player_name() {
-		auto player_name = (str)(*reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x6E8)); //zzzz
+		auto player_name = (str)(*reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x6F0)); //zzzz
 		return player_name->str;
 	}
 

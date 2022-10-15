@@ -86,7 +86,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 	//memu
 	im::NewFrame();
-	try {
+	__try {
 		if (render.NewFrame(pSwapChain))
 		{
 			new_frame();
@@ -96,7 +96,9 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		{
 			Gui::Render();
 		}
-	} catch(...) {}
+	} __except(true) {
+		esp::local_player->console_echo(_(L"[trap]: ERROR. Crash inside: " __FUNCTION__));
+	}
 	im::End();
 	
 	im::Render();

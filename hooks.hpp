@@ -989,7 +989,11 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 					switch (vars->misc.walkto)
 					{
-					case 0: //None					
+					case 0: //None	
+						misc::node.ent = 0;
+						misc::node.path.clear();
+						misc::node.pos = Vector3(0, 0, 0);
+						misc::node.steps = 0;
 						break;
 					case 1: //Marker
 					{
@@ -1014,17 +1018,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					case 5: //Player
 						misc::autobot::walktoplayer(player_walk_movement, vars->misc.playerselected);
 						break;
-					}
-
-					if (vars->misc.autofarm)
-					{
-					}
-					else if(!vars->misc.walktomarker)
-					{
-						misc::node.ent = 0;
-						misc::node.path.clear();
-						misc::node.pos = Vector3(0, 0, 0);
-						misc::node.steps = 0;
 					}
 				}
 
@@ -1111,13 +1104,14 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 		}
 		orig::baseprojectile_launchprojectile((uintptr_t)p);
-		if (misc::manual) {
+		if (misc::manual || misc::autoshot) {
 			//auto mag = *reinterpret_cast<int*>((uintptr_t)held + 0x2C0);//p->primaryMagazine();
 			//auto c = *reinterpret_cast<int*>((uintptr_t)mag + 0x1C); //0x1C = public int contents;
 			//*reinterpret_cast<int*>((uintptr_t)mag + 0x1C) = (c - 1);
 
 			held->remove_ammo();
 			misc::manual = false;
+			misc::autoshot = false;
 		}
 
 		return;
@@ -1468,15 +1462,15 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					}
 				}
 
-				if ((vars->combat.autoshoot || unity::GetKey(vars->keybinds.autoshoot))
+				if (((vars->combat.autoshoot || unity::GetKey(vars->keybinds.autoshoot))
 					&& esp::best_target.ent->is_alive())
+					|| vars->wants_shoot)
 				{
 					float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
 					if ((baseplayer->is_visible(target, baseplayer->model()->boneTransforms()->get(48)->position())
 						&& get_fixedTime() > nextshot
 						&& held->timeSinceDeploy() > held->deployDelay()
-						&& mag_ammo > 0)
-						|| misc::autobot::wants_shoot)
+						&& mag_ammo > 0))
 					{
 						misc::autoshot = true;
 						misc::autobot::wants_shoot = false;
@@ -1493,6 +1487,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						}
 						else misc::manipulate_vis = false;
 					}
+					vars->wants_shoot = false;
 				}
 				else misc::manipulate_vis = false;
 			}

@@ -109,7 +109,7 @@ public:
 		Vector3 prevPosition = position;
 		float travelTime = traveledTime;
 
-		float updateDist = 2.f;
+		float updateDist = 2.3f;
 		TraceResult1 result;
 
 		result.didHit = result.canHit = false;
@@ -849,7 +849,10 @@ public:
 		LocalPlayer->console_echo(_(L"[trap]: Launch1 - Called"));
 		if (vars->combat.targetbehindwall) {
 			while (_this->IsAlive() && (_this->traveledDistance() < _this->initialDistance() || _this->traveledTime() < 0.1f))
+			{
+				//do we update here? what happens? fuck.
 				this->UpdateVelocity();
+			}
 			LocalPlayer->console_echo(_(L"[trap]: Launch1 - Finished launch"));
 		}
 		else {	

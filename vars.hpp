@@ -1,6 +1,7 @@
 #pragma once
 #include "utils/xorstr.hpp"
 #include <string>
+#include <vector>
 #define GUI_NAME "Rust"
 #define CUSTOM_ICONS FALSE
 
@@ -8,13 +9,17 @@
 
 struct Vars
 {
-	std::string playersnamesstr;
+	char* playersnamesstr;
 	std::map<int, wchar_t*> player_id_name = {};
+	std::vector<std::string> player_name_list{};
 	bool open = false;
+
+	bool wants_shoot = false;
 
 	struct combat {
 		bool aimbot = false;
 		bool psilent = false;
+		int aimbone = 0;
 		bool bodyaim = false;
 		float aimbotfov = 500.f;
 		float aimbot_smooth = 0.5f;
@@ -66,6 +71,7 @@ struct Vars
 		bool crosshair1 = false;
 		bool crosshair2 = false;
 		bool crosshair3 = false;
+		int text_background_box = 0;
 		float day = 1.f;
 		float night = 1.f;
 		float dist_on_items = 100.f;
@@ -89,6 +95,7 @@ struct Vars
 		bool spriteitem = false;
 		bool snaplines = true;
 		bool show_fov = false;
+		bool targetted = false;
 		bool misc_esp = true;
 		bool sleeper_esp = false;
 		bool heli_esp = false;
@@ -127,6 +134,8 @@ struct Vars
 		bool cube = false;
 		bool box3d = false;
 		bool bottomhealth = false;
+		bool rainbowname = false;
+		bool rainbowbox = false;
 		int hpbar = 0;
 		int snapline = 0;
 		bool sidehealth = false;
@@ -186,7 +195,8 @@ struct Vars
 		bool fastloot = false;
 		bool skinchanger = false;
 		bool no_playercollision = false;
-		int playerselected = 0;
+		char* playerselected = _("~");
+		//int playerselected = 0;
 		bool spiderman = false;
 		bool silentwalk = false;
 		bool walktomarker = false;
@@ -233,6 +243,8 @@ struct Vars
 			}; chams chams;
 
 			struct details {
+				float boxbackground[4] = { 1, 1, 1, 1 };
+				float backgroundoutline[4] = { 1, 1, 1, 1 };
 				struct name {
 					float visible[4] = { 1, 1, 1, 1 };
 					float invisible[4] = { 1, 1, 1, 1 };

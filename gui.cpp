@@ -126,6 +126,7 @@ namespace Gui
 	int selected_tab = 0;
 	static char str0[32] = "";
 	int selected_cfg = 0;
+	std::vector<char*> tempnames;
 
 	void delete_config(char* cfgname) {
 		auto s = LI_FIND(getenv)(_("APPDATA"));
@@ -793,8 +794,13 @@ namespace Gui
 			im::Separator();
 
 			im::Checkbox(_("PSilent"), &vars->combat.psilent);
+			im::Combo(_("Aim bone"), &vars->combat.aimbone, _("Head\0Spine 4\0Pelvis\0Right arm\0Left arm\0Right leg\0Left leg"));
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
 			im::Hotkey(_("P"), &vars->keybinds.psilent, ImVec2(50, 15));
+			im::Checkbox(_("Memory aimbot"), &vars->combat.aimbot);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
+			im::Hotkey(_("A"), &vars->keybinds.aimbot, ImVec2(50, 15));
+			im::SliderFloat(_("Smoothing"), &vars->combat.aimbot_smooth, .1f, .99f, _("%.0f"), 0.01f);
 
 
 			im::SliderFloat(_("Target fov"), &vars->combat.aimbotfov, 1.f, 900.f, _("%.0f"));
@@ -866,6 +872,7 @@ namespace Gui
 			im::Combo(_("Snapline"), &vars->visual.snapline,
 				_("None\0Top\0Center\0Bottom"));
 			im::Checkbox(_("Show target fov"), &vars->visual.show_fov);
+			//im::Checkbox(_("Targetted indicator"), &vars->visual.targetted);
 			//ImGui::Checkbox(_("Target snapline"), &vars->visual.offscreen_indicator);
 			im::EndChild();
 		}
@@ -880,10 +887,14 @@ namespace Gui
 			im::Checkbox(_("Distance"), &vars->visual.distance);
 			im::Combo(_("Health bar"), &vars->visual.hpbar,
 				_("None\0Side\0Bottom"));
+			im::Checkbox(_("Rainbow name"), &vars->visual.rainbowname);
+			im::Checkbox(_("Rainbow box"), &vars->visual.rainbowbox);
 			im::Checkbox(_("Wounded"), &vars->visual.woundedflag);
 			im::Checkbox(_("Weapon"), &vars->visual.weaponesp);
 			im::Checkbox(_("Hotbar"), &vars->visual.hotbar_esp);
 			im::Checkbox(_("Skeleton"), &vars->visual.skeleton);
+			im::Combo(_("Text box"), &vars->visual.text_background_box,
+				_("None\0Full\0Rounded"));
 			im::Combo(_("Box type"), &vars->visual.boxtype,
 				_("None\0Full\0Corner\0Cube\0Box"));
 			//im::Checkbox(_("Full box"), &vars->visual.full_box);
@@ -972,8 +983,6 @@ namespace Gui
 		{
 			im::Text(_("Movement"));
 			im::Separator();
-			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
-			im::Hotkey(_("T"), &vars->keybinds.tp, ImVec2(50, 15));
 			im::Checkbox(_("Anti-flyhack"), &vars->misc.flyhack_stop);
 			im::Checkbox(_("Anti-speedhack"), &vars->misc.antispeed);
 			im::Checkbox(_("Omnisprint"), &vars->misc.always_sprint);
@@ -986,6 +995,8 @@ namespace Gui
 			im::Checkbox(_("No collisions"), &vars->misc.no_playercollision);
 			im::Checkbox(_("Spinbot"), &vars->misc.spinbot);
 			im::Checkbox(_("Teleport (5m)"), &vars->misc.tp);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
+			im::Hotkey(_("T"), &vars->keybinds.tp, ImVec2(50, 15));
 			im::EndChild();
 		}
 		im::SetCursorPosY(im::GetCursorPosY() + 2);
@@ -995,11 +1006,31 @@ namespace Gui
 			im::Separator();
 			im::Combo(_("Walk to"), &vars->misc.walkto,
 				_("None\0Map Marker\0Stone ore\0Sulfur ore\0Metal ore\0Player"));
-			im::Combo(_("Players"), &vars->misc.playerselected, vars->playersnamesstr.c_str());
+			//im::Combo(_("Players"), &vars->misc.playerselected, vars->playersnamesstr);
+			
+			//if (!vars->misc.playerselected
+			//	|| vars->player_name_list.empty())
+			//	vars->misc.playerselected = _("~");
+			//if (im::BeginCombo("Players", vars->misc.playerselected)) // The second parameter is the label previewed before opening the combo.
+			//{
+			//	std::sort(vars->player_name_list.begin(), vars->player_name_list.end());
+			//	vars->player_name_list.erase(std::unique(vars->player_name_list.begin(), vars->player_name_list.end()), vars->player_name_list.end());
+			//	for (auto p : vars->player_name_list)
+			//	{
+			//		bool is_selected = (!strcmp(vars->misc.playerselected, p.c_str())); // You can store your selection however you want, outside or inside your objects
+			//		if (im::Selectable(p.c_str(), is_selected))
+			//			strcpy(vars->misc.playerselected, p.c_str());
+			//		if (is_selected)
+			//			im::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+			//	}
+			//	im::EndCombo();
+			//}
+
 			im::Checkbox(_("Auto-attack"), &vars->misc.autoattack);
 			im::SliderFloat(_("Max dist"), &vars->misc.autoattackdist, 0.1f, 400.f, _("%.0f"), 10.f);
 			im::Combo(_("Targetting mode"), &vars->misc.targetting_mode, 
 				_("Closest (distance)\0Lowest hp"));
+			//vars->playersnamesstr.clear();
 			im::EndChild();
 		}
 		//im::SetCursorPosX(im::GetCursorPosX() + 245);
@@ -1092,6 +1123,8 @@ namespace Gui
 				im::ColorEdit4(_("Flags invisible"), vars->colors.players.details.flags.invisible, ImGuiColorEditFlags_NoInputs);
 				im::ColorEdit4(_("Skeleton visible"),	vars->colors.players.details.skeleton.visible, ImGuiColorEditFlags_NoInputs);
 				im::ColorEdit4(_("Skeleton invisible"), vars->colors.players.details.skeleton.invisible, ImGuiColorEditFlags_NoInputs);
+				//im::ColorEdit4(_("Background box"), vars->colors.players.details.boxbackground, ImGuiColorEditFlags_NoInputs);
+				//im::ColorEdit4(_("Background outline"), vars->colors.players.details.backgroundoutline, ImGuiColorEditFlags_NoInputs);
 				im::EndChild();
 			}
 			im::EndChild();
