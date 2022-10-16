@@ -994,9 +994,9 @@ namespace Gui
 			im::Hotkey(_("F"), &vars->keybinds.flywall, ImVec2(50, 14));
 			im::Checkbox(_("No collisions"), &vars->misc.no_playercollision);
 			im::Checkbox(_("Spinbot"), &vars->misc.spinbot);
-			im::Checkbox(_("Teleport (5m)"), &vars->misc.tp);
-			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
-			im::Hotkey(_("T"), &vars->keybinds.tp, ImVec2(50, 15));
+			//im::Checkbox(_("Teleport (5m)"), &vars->misc.tp);
+			//im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
+			//im::Hotkey(_("T"), &vars->keybinds.tp, ImVec2(50, 15));
 			im::EndChild();
 		}
 		im::SetCursorPosY(im::GetCursorPosY() + 2);

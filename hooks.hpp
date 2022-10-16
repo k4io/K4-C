@@ -1497,7 +1497,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				set_timeScale(vars->misc.speedhackspeed);
 				is_speeding = true;
 			}
-			else {
+			else 
+			{
 				set_timeScale(1);
 				is_speeding = false;
 			}
