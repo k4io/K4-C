@@ -86,7 +86,6 @@ static auto Trace_All = reinterpret_cast<void(*)(uintptr_t, uintptr_t, int)>(0);
 static auto get_magnitude = reinterpret_cast<float(*)(uintptr_t)>(0);
 static auto seteffect = reinterpret_cast<void(*)(uintptr_t, float)>(0);
 
-static auto Sphere = reinterpret_cast<void (*)(Vector3 vPos, float fRadius, col color, float fDuration, bool distanceFade)>(0);
 static auto getrandomvel = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ItemModProjectile"), _("GetRandomVelocity"), 0, _(""), _(""))));
 
 static auto _launch = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Launch"), 0, _(""), _(""))));

@@ -227,6 +227,8 @@ namespace Gui
 			else if (name == _("playerfov")) vars->visual.playerfov = std::stof(value);
 			else if (name == _("zoomtoggle")) vars->visual.zoomtoggle = std::stoi(value);
 			else if (name == _("staramount")) vars->visual.staramount = std::stof(value);
+			else if (name == _("hitpoint")) vars->visual.hitpoint = std::stoi(value);
+			else if (name == _("targetted")) vars->visual.targetted = std::stoi(value);
 			else if (name == _("always_day")) vars->visual.always_day = std::stoi(value);
 			else if (name == _("zoomfov")) vars->visual.zoomfov = std::stof(value);
 			else if (name == _("berry")) vars->visual.berry = std::stoi(value);
@@ -476,6 +478,12 @@ namespace Gui
 		f.write(str.c_str(), str.size());
 		itoa(vars->visual.boxtype, buffer, 4);
 		str = (std::string(_("boxtype=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->visual.hitpoint, buffer, 4);
+		str = (std::string(_("hitpoint=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->visual.targetted, buffer, 4);
+		str = (std::string(_("targetted=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
 		itoa(vars->visual.hpbar, buffer, 4);
 		str = (std::string(_("hpbar=")) + std::string(buffer) + _("\n"));
@@ -872,11 +880,13 @@ namespace Gui
 			im::Combo(_("Snapline"), &vars->visual.snapline,
 				_("None\0Top\0Center\0Bottom"));
 			im::Checkbox(_("Show target fov"), &vars->visual.show_fov);
-			//im::Checkbox(_("Targetted indicator"), &vars->visual.targetted);
+			im::Checkbox(_("Targetted indicator"), &vars->visual.targetted);
+			im::Checkbox(_("Hitpoints"), &vars->visual.hitpoint);
 			//ImGui::Checkbox(_("Target snapline"), &vars->visual.offscreen_indicator);
 			im::EndChild();
 		}
 		im::SameLine();
+
 		//im::SetCursorPosX(im::GetCursorPosX() + 132);
 		if (im::BeginChild(_("Player ESP"), ImVec2(235, 170), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
 		{
@@ -1065,6 +1075,7 @@ namespace Gui
 			im::Hotkey(_("T"), &vars->keybinds.timescale, ImVec2(50, 14));
 			im::Checkbox(_("Silent farm"), &vars->misc.silent_farm);
 			im::Checkbox(_("Console logs"), &vars->misc.logs);
+			im::Combo(_("Gesture spam"), &vars->misc.gesture_spam, _("None\x0000Clap\x0000Friendly\x00Thumbsdown\x00Thumbsup\x00Ok\x00Point\x00Shrug\x00Victory\x00Wave"));
 			im::EndChild();
 		}
 	}
@@ -1137,6 +1148,7 @@ namespace Gui
 			im::ColorEdit4(_("Snapline invisible"), vars->colors.ui.snapline.invisible, ImGuiColorEditFlags_NoInputs);
 			im::ColorEdit4(_("Fov visible"),		vars->colors.ui.fov.visible, ImGuiColorEditFlags_NoInputs);
 			im::ColorEdit4(_("Fov invisible"),		vars->colors.ui.fov.invisible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Hitpoints"),			vars->colors.ui.hitpoints, ImGuiColorEditFlags_NoInputs);
 			im::EndChild();
 		}
 		im::SetCursorPos(ImVec2(im::GetCursorPosX() + 243, im::GetCursorPosY() - 184));

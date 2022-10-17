@@ -95,6 +95,7 @@ struct Vars
 		bool spriteitem = false;
 		bool snaplines = true;
 		bool show_fov = false;
+		bool showpred = false;
 		bool targetted = false;
 		bool misc_esp = true;
 		bool sleeper_esp = false;
@@ -146,6 +147,7 @@ struct Vars
 		bool weaponesp = false;
 		bool desync_indicator = false;
 		bool speedhack_indicator = false;
+		bool hitpoint = false;
 		bool flyhack_indicator = false;
 		bool tracers = false;
 
@@ -274,6 +276,7 @@ struct Vars
 				float invisible[4] = { 1, 1, 1, 1 };
 			}; fov fov;
 			float crosshair[4] = { 1, 1, 1, 1 };
+			float hitpoints[4] = { 1, 1, 1, 1 };
 		}; ui ui;
 
 		struct items {

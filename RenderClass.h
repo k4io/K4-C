@@ -295,11 +295,11 @@ public:
 				break;
 			case 1: //Gradient full
 				FillRectangle({ st.x, st.y }, TextSize, { 0.07f, 0.07f, 0.07f, 0.65f });
-				Rectangle({ st.x, st.y }, TextSize, { 0.21, 0.21, 0.21, 1 }, 0.5f);
+				//Rectangle({ st.x, st.y }, TextSize, { 0.21, 0.21, 0.21, 1 }, 0.5f);
 				break;
 			case 2: //Gradient rounded
 				FillRoundedRectangle({ st.x, st.y }, TextSize, { 0.07f, 0.07f, 0.07f, 0.65f }, 4);
-				RoundedRectangle({ st.x, st.y }, TextSize, { 0.21, 0.21, 0.21, 1 }, 4, 0.5f);
+				//RoundedRectangle({ st.x, st.y }, TextSize, { 0.21, 0.21, 0.21, 1 }, 4, 0.5f);
 				break;
 			}
 		}

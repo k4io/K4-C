@@ -324,6 +324,7 @@ namespace misc
 			|| (protections::debuglevel >= 3 && type != antihacktype::NoClip)
 			|| protections::debuglevel >= 4)
 		{
+			if (!vars->misc.logs) return;
 			ply->console_echo(string::wformat(
 				_(L"[trap] Anti-AntiHack - Added violation [%s] of %d in frame %d (now has %d)"),
 				(type == antihacktype::AttackHack ? _(L"AttackHack") :
@@ -1288,8 +1289,13 @@ namespace misc
 		Vector3& aimbot_velocity,
 		Vector3& _aimdir,
 		float& travel_t,
-		Projectile* p,
-		bool skip_draw = false) 
+		//Projectile* p,
+		float partialTime,
+		float drag,
+		float gravityModifier,
+		Vector3& actualposition,
+		bool skip_draw = false,
+		int simulationsmax = 100) 
 	{
 		Vector3 player_velocity = Vector3(0, 0, 0);
 		std::vector<Vector3> path = {};
@@ -1300,8 +1306,7 @@ namespace misc
 		if (target.ent) {
 			auto travel = 0.f;
 			auto vel = (getmodifiedaimcone(0, rpc_position - target_pos, true)).Normalized() * original_vel.length();
-			auto drag = p->drag();
-			auto grav = p->gravityModifier();
+			auto grav = gravityModifier;
 			auto gravity = get_gravity();
 			auto deltatime = get_deltaTime();
 			auto timescale = get_timeScale();
@@ -1312,7 +1317,7 @@ namespace misc
 			//player_velocity = Vector3(wv.x, 0, wv.z);
 
 
-			while (simulations < 50) {
+			while (simulations < simulationsmax) {
 				travel_t = 0.f;
 				auto pos = rpc_position;
 				auto origin = pos;
@@ -1375,11 +1380,9 @@ namespace misc
 				Vector3 final_vel = player_velocity * travel_t;
 				Vector3 actual = target_pos += final_vel;
 
-				auto partialTime = p->partialTime();
 				auto travel = 0.f;
 				auto vel = (getmodifiedaimcone(0, rpc_position - actual, true)).Normalized() * original_vel.length();
-				auto drag = p->drag();
-				auto grav = p->gravityModifier();
+				auto grav = gravityModifier;
 				auto gravity = get_gravity();
 				auto deltatime = get_deltaTime();
 				auto timescale = get_timeScale();
@@ -1389,7 +1392,7 @@ namespace misc
 
 				travel_t = 0.f;
 
-				while (simulations < 100) {
+				while (simulations < simulationsmax) {
 					path.clear();
 					auto pos = rpc_position;
 					auto origin = pos;
@@ -1419,6 +1422,8 @@ namespace misc
 							//emulate 1 tick has already passed
 							aimbot_velocity += gravity * grav * num;
 							aimbot_velocity -= aimbot_velocity * drag * num;
+
+							actualposition = pos;
 
 							if (!skip_draw && vars->visual.tracers)
 							{
@@ -1454,7 +1459,9 @@ namespace misc
 		Vector3& _aimdir,
 		float& travel_t,
 		Projectile* p,
-		bool skip_draw = false) {
+		Vector3 actualposition,
+		bool skip_draw = false,
+		int simulations = 100) {
 		Vector2 angle = CalcAngle(rpc_position, target_pos);
 
 		float yRad = DEG2RAD(angle.y);
@@ -1480,16 +1487,21 @@ namespace misc
 			float yTravel = (predData.startY + (idealSpeed - 30.f) * predData.yCoeff);
 			if (idealSpeed <= original_velmax && yTravel < heightDiff)
 			{
+				auto t = 0.f;
 				Vector3 vel = original_vel.normalize() * idealSpeed;
-				get_prediction(target, 
-					rpc_position, 
-					target_pos, 
-					vel, 
-					aimbot_velocity, 
+				get_prediction(target,
+					rpc_position,
+					target_pos,
+					vel,
+					aimbot_velocity,
 					dir,
-					travel_t, 
-					p, 
-					skip_draw);
+					t,
+					p->partialTime(),
+					p->drag(),
+					p->gravityModifier(),
+					actualposition,
+					skip_draw,
+					simulations);
 				if (!aimbot_velocity.is_empty()) {
 					target.visible = true;
 					return;

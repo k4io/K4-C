@@ -175,6 +175,7 @@ namespace hooks {
 	float nextActionTime = 0, period = 1.4721, last_gesture_rpc = 0.f;;
 	Vector3 m_debugcam_toggle_pos, m_debugcam_pos;
 	uintptr_t do_fixed_update_ptr, client_input_ptr, bodylean_ptr, mounteyepos_ptr, isdown_ptr, __go;
+	
 
 	void get_skydome()
 	{
@@ -396,10 +397,15 @@ namespace hooks {
 				p = *(Projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
 				Vector3 a;
 				
+				auto tt = 0.f;
+				auto pt = 0.f;
+				auto dr = p->drag();
+				auto gr = p->gravityModifier();
 
+				Vector3 u = {};
 				if (vars->combat.lower_vel)
-					misc::lower_velocity(target, rpc_position, target_pos, original_vel, stats.initial_velocity, aimbot_velocity, a, travel_t, p);
-				else misc::get_prediction(target, rpc_position, target_pos, original_vel, aimbot_velocity, a, travel_t, p);
+					misc::lower_velocity(target, rpc_position, target_pos, original_vel, stats.initial_velocity, aimbot_velocity, a, travel_t, p, u);
+				else misc::get_prediction(target, rpc_position, target_pos, original_vel, aimbot_velocity, a, tt, pt, dr, gr, u);
 
 				if (vars->combat.thick_bullet)
 					*reinterpret_cast<float*>(projectile + 0x2C) = vars->combat.thickness > 1.f ? 1.f : vars->combat.thickness;
@@ -615,6 +621,16 @@ namespace hooks {
 				if (hit_entity->is_teammate(esp::local_player)) {
 					hit_test->ignoreEntity() = hit_entity;
 					return;
+				}
+			}
+
+			auto trans = hit_test->HitTransform();
+			if (trans) {
+				auto pos = trans->position();
+				if (!pos.is_empty() && vars->visual.hitpoint)
+				{
+					hit h = { pos, get_fixedTime() };
+					hitpoints.push_back(h);
 				}
 			}
 
@@ -1001,6 +1017,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						if (note) {
 							auto pos = esp::local_player->transform()->position();
 							Vector3 marker_pos = note->worldPosition;
+							if (marker_pos.is_empty())
+								break;
 							misc::node.pos = marker_pos;
 							misc::autobot::pathfind(player_walk_movement, marker_pos);
 						}
@@ -1404,7 +1422,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					}
 				}
 			}
-
 			auto item = baseplayer->GetActiveItem();
 
 			float mm_eye = ((0.01f + ((vars->desyncTime + 2.f / 60.f + 0.125f) * baseplayer->max_velocity())));
@@ -1832,38 +1849,36 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				case 0:
 					break;
 				case 1:
-					break;
-				case 2:
 					esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"clap"));
 					break;
-				case 3:
+				case 2:
 					esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"friendly"));
 					break;
-				case 4:
+				case 3:
 					esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"thumbsdown"));
 					break;
-				case 5:
+				case 4:
 					esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"thumbsup"));
 					break;
-				case 6:
+				case 5:
 					esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"ok"));
 					break;
-				case 7:
+				case 6:
 					esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"point"));
 					break;
-				case 8:
+				case 7:
 					esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"shrug"));
 					break;
-				case 9:
+				case 8:
 					esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"victory"));
 					break;
-				case 10:
+				case 9:
 					esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"wave"));
 					break;
-				case 11:
+				case 10:
 					esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"dance.cabbagepatch"));
 					break;
-				case 12:
+				case 11:
 					esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"dance.twist"));
 					break;
 				}

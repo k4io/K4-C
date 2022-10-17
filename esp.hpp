@@ -5,6 +5,12 @@
 #include "rust/features/player_esp.hpp"
 //#include "rust/classes.hpp"
 
+struct hit {
+	Vector3 position;
+	float time;
+};
+std::vector<hit> hitpoints = {};
+
 float r = 1.00f, g = 0.00f, b = 1.00f;
 
 std::vector<BasePlayer*> player_list = {};
@@ -921,30 +927,41 @@ void iterate_entities() {
 					if (vars->visual.targetted)
 					{
 						auto pl = ((BasePlayer*)ent);
-						//project bodyforward distance between ent and local player, if within 1,2m indicate?
 						auto playerpos = pl->model()->boneTransforms()->get(48)->position();
 						auto localpos = esp::local_player->model()->boneTransforms()->get(48)->position();
 						auto distance = playerpos.distance(localpos);
-						auto fwd = pl->eyes()->body_forward() *  distance;
+						auto fwd = playerpos + (pl->eyes()->body_forward() *  distance);
 
-						auto w2 = WorldToScreen(fwd);
-						auto w1 = WorldToScreen(playerpos);
-						Vector2 w1s = { w1.x, w1.y };
-						Vector2 w2s = { w2.x, w2.y };
-						if (!w2s.empty())
+						auto dist = fwd.distance(localpos);
+						auto r = (distance / 50.f); r = (r < 1.f ? 1.f : r);
+						//Line(playerpos, fwd, { 1, 1, 1, 1 }, 0.05f, true, true);
+						//Sphere(fwd, r, { 1, 1, 1, 1 }, 0.05f, 100.f);
+						if (dist < r)
 						{
-							render.Line(w1s, w2s, { 1, 1, 1, 1 }, 2.f);
+							auto ws = string::wformat(_(L"%s is looking at you!"), ((BasePlayer*)ent)->get_player_name());
+							render.StringCenter({ vars->ScreenX / 2 + 1, (vars->ScreenY / 2) - 30 }, ws, { 0, 0, 0, 1 });
+							render.StringCenter({ vars->ScreenX / 2 - 1, (vars->ScreenY / 2) - 30 }, ws, { 0, 0, 0, 1 });
+							render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 30 + 1 }, ws, { 0, 0, 0, 1 });
+							render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 30 - 1 }, ws, { 0, 0, 0, 1 });
+							render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 30 }, ws, { 227 / 255.f, 32 / 255.f, 61 / 255.f, 1 });
 						}
+					}
 
-						//Sphere(fwd, 0.05, { 1, 1, 1, 1 }, 0.05f, 10.f);
-						if (fwd.distance(localpos) < 1.f)
-						{
-							auto ws = std::wstring(string::wformat(_(L"[%s is looking at you]"), ((BasePlayer*)ent)->get_player_name()));
-							render.StringCenter({ vars->ScreenX / 2 + 1, (vars->ScreenY / 2) - 30 }, ws.c_str(), { 0, 0, 0, 1 });
-							render.StringCenter({ vars->ScreenX / 2 - 1, (vars->ScreenY / 2) - 30 }, ws.c_str(), { 0, 0, 0, 1 });
-							render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 30 + 1 }, ws.c_str(), { 0, 0, 0, 1 });
-							render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 30 - 1 }, ws.c_str(), { 0, 0, 0, 1 });
-							render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 30 }, ws.c_str(), { 227 / 255.f, 32 / 255.f, 61 / 255.f, 1 });
+					if (vars->visual.showpred
+						&& esp::best_target.ent)
+					{
+						auto pos = esp::local_player->eyes()->position();
+						auto targetpos = esp::best_target.pos;
+						auto item = esp::local_player->GetActiveItem();
+						if (item) {
+							auto held = item->GetHeldEntity<BaseProjectile>();
+							if (held) {
+								auto outvel = Vector3::Zero();
+								auto aimdir = Vector3::Zero();
+								float travel = 0.f;
+								float partialtime = 0.f;
+								//float drag = held->get_item_mod_projectile()
+							}
 						}
 					}
 
@@ -1022,13 +1039,8 @@ void iterate_entities() {
 					{
 						if (unity::GetKey(vars->keybinds.locktarget))
 							goto choosetarget;
-						else if (target.network_id == esp::best_target.network_id) {
-							esp::best_target.pos = target.pos;
-							esp::best_target.distance = target.distance;
-							esp::best_target.fov = target.fov;
-							esp::best_target.ent = target.ent;
-							esp::best_target.visible = visible;
-						}
+						else if (target.network_id == esp::best_target.network_id)
+							goto setandrecordtarget;
 						else
 							goto draw;
 					}
@@ -1038,6 +1050,7 @@ void iterate_entities() {
 						|| !esp::best_target.ent->is_alive()
 						|| (target.ent && ((BasePlayer*)target.ent)->userID() == ((BasePlayer*)esp::best_target.ent)->userID()))
 					{
+					setandrecordtarget:
 						esp::best_target.pos = target.pos;
 						esp::best_target.distance = target.distance;
 						esp::best_target.fov = target.fov;
@@ -1596,6 +1609,22 @@ void new_frame() {
 
 	//Draw watermark
 	Watermark();
+
+	if (esp::local_player) {
+		int rindex = -1;
+		for (size_t i = 0; i < hitpoints.size(); i++)
+		{
+			auto h = hitpoints[i];
+			auto w2s = WorldToScreen(h.position);
+			render.StringCenter({ w2s.x - 1, w2s.y }, _(L"hit"), { 0, 0, 0, 1 });
+			render.StringCenter({ w2s.x + 1, w2s.y }, _(L"hit"), { 0, 0, 0, 1 });
+			render.StringCenter({ w2s.x, w2s.y - 1 }, _(L"hit"), { 0, 0, 0, 1 });
+			render.StringCenter({ w2s.x, w2s.y + 1 }, _(L"hit"), { 0, 0, 0, 1 });
+			render.StringCenter({ w2s.x, w2s.y }, _(L"hit"), FLOAT4TOD3DCOLOR(vars->colors.ui.hitpoints));
+			if (h.time + 5.f < get_fixedTime()) rindex = i;
+		}
+		if (rindex != -1) hitpoints.erase(hitpoints.begin() + rindex);
+	}
 
 	iterate_entities();
 }

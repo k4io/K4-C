@@ -287,6 +287,8 @@ typedef struct Str
 } *str;
 
 #pragma region il2func
+static auto Sphere = reinterpret_cast<void (*)(Vector3 vPos, float fRadius, col color, float fDuration, bool distanceFade)>(0);
+
 static auto GetNormal = reinterpret_cast<Vector3 (*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetNormal"), 1, _(""), _(""))));
 
 static auto get_visplayerlist = reinterpret_cast<System::Array<BasePlayer*>*(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("get_VisiblePlayerList"), -1, _(""), _(""))));
@@ -1756,13 +1758,18 @@ public:
 class PlayerModel : public Component {
 public:
 	FIELD(_("PlayerModel"), _("newVelocity"), newVelocity, Vector3);
-	FIELD(_("PlayerModel"), _("isLocalPlayer"), isLocalPlayer, bool);
+	//FIELD(_("PlayerModel"), _("isLocalPlayer"), isLocalPlayer, bool);
 	FIELD(_("PlayerModel"), _("_multiMesh"), _multiMesh, SkinnedMultiMesh*);
 
 	bool isnpc() {
 		if (!this) return false;
 		auto off = reinterpret_cast<bool(*)(PlayerModel*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerModel"), _("get_IsNpc"), -1, _(""), _(""))));
 		return off(this);
+	}
+	bool isLocalPlayer() {
+		if (!this) return false;
+		//if ((uintptr_t)this > 0xFFFFFFFFFFFF0000)
+		return *reinterpret_cast<bool*>((uintptr_t)this + 0x299);
 	}
 };
 
