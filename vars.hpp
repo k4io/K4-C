@@ -216,6 +216,7 @@ struct Vars
 		int targetting_mode = 0;
 		bool autorefill = false;
 		bool logs = false;
+		bool snake = false;
 		bool interactive_debug = false;
 
 		int gesture_spam = 0;

@@ -1660,11 +1660,11 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							return Vector2(RAD2DEG(Vector3::my_asin(d.y / d.length())), RAD2DEG(-Vector3::my_atan2(d.x, -d.z)));
 						};
 						auto normalize = [&](float& yaw, float& pitch) {
+							//esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - yaw: %d, pitch: %d"), (int)yaw, (int)pitch));
 							if (pitch < -270) pitch = -270;
 							else if (pitch > 180) pitch = 180;
 							if (yaw < -360) yaw = -360;
 							else if (yaw > 360) yaw = 360;
-							//esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - yaw: %d, pitch: %d"), (int)yaw, (int)pitch));
 						};
 						auto step = [&](Vector2& angles) {
 							bool smooth = true;

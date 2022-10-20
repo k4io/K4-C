@@ -261,5 +261,8 @@
     <ClInclude Include="leo.h">
       <Filter>memory</Filter>
     </ClInclude>
+    <ClInclude Include="snake.hpp">
+      <Filter>gui</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

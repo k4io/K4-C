@@ -43,8 +43,8 @@ namespace offsets {
     constexpr auto Method$BaseEntity_ServerRPC_uint = 56916528;// "Address":,"Method$BaseEntity.ServerRPC<uint>()" //both addresses
     constexpr auto BaseEntity$$ServerRPC_uint_ = 17910512;// method address
 }
-/*
 
+/*
 //ALKAD
 #define oLineOfSightRadius 0x7DE0C0
 #define oSphereCast 0x24FFD00
@@ -52,6 +52,7 @@ namespace offsets {
 #define oConvar 56626808
 #define oTerrainMeta_TypeInfo 56627184
 #define oPlayerEyes_TypeInfo 56512408
+#define oGetWorldVelocity 0x82EDB0
 
 namespace offsets { 
     constexpr auto Method_BaseEntity_ServerRPC_string_bool_address = 56859744;// address "Name": "Method$BaseEntity.ServerRPC<string, bool>()",

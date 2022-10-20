@@ -1296,20 +1296,9 @@ namespace misc
 		void walktoplayer(PlayerWalkMovement* pwm,
 			char* selected) {
 			auto lp = esp::local_player;
-			BasePlayer* ply = nullptr;
-			if (!pwm || lp) return;
-			std::string s(selected);
-			std::wstring ws(s.begin(), s.end());
-			for (auto p : player_list)
-				if (!wcscmp(p->get_player_name(), ws.c_str()))
-					ply = p;
+			BasePlayer* ply = (BasePlayer*)esp::best_target.ent;
 			if (!ply) return;
 			auto position = ply->transform()->position();
-
-			Vector3 vel = pwm->get_TargetMovement();
-			vel = Vector3(vel.x / vel.length() * 5.5f, vel.y, vel.z / vel.length() * 5.5f);
-			auto eyepos = lp->transform()->position();//lp->eyes()->get_position();
-
 			node.pos = position;
 			pathfind(pwm, position);
 		}
@@ -1408,7 +1397,7 @@ namespace misc
 					}
 					else
 					{
-						//Line(origin, pos, col(1, 1, 1, 1), 10.f, false, true);
+						//Line(origin, pos, col(1, 1, 1, 1), 2.f, false, true);
 					}
 				}
 				offset += 0.1f;
@@ -1538,7 +1527,7 @@ namespace misc
 				(float)sinf(pitchRad),
 				(float)(cosf(yRad) * cosf(pitchRad))
 			};
-
+			esp::local_player->console_echo(string::wformat(_(L"[trap]: Lower velocities - pitch: %d"), (int)pitch));
 			float heightDiff = target_pos.y - target_pos.y;
 			float dist2D = target_pos.distancexz(rpc_position);
 

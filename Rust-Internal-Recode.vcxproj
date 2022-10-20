@@ -264,6 +264,7 @@
     <ClInclude Include="rust\rust.hpp" />
     <ClInclude Include="rust\unity.hpp" />
     <ClInclude Include="settings.hpp" />
+    <ClInclude Include="snake.hpp" />
     <ClInclude Include="spherearray.h" />
     <ClInclude Include="utils\no_crt.hpp" />
     <ClInclude Include="utils\pattern\pattern.hpp" />

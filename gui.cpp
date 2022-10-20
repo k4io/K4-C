@@ -8,6 +8,8 @@
 #include <filesystem>
 #include <fstream>
 
+#include "snake.hpp"
+
 #if CUSTOM_ICONS
 #include "icons.h"
 #endif
@@ -32,6 +34,95 @@ std::vector<std::string> split(std::string s, std::string delimiter) {
 
 namespace Gui
 {
+	sg::Snake mysnake;
+
+	void SnakeStuff() {
+		im::SetNextWindowSize({ 301, 400 });
+		im::Begin(_("Snake game"), 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
+		{
+			if (im::BeginChild(_("Game"), { 285, 286 }, true))
+			{
+				//game already running?
+				//
+				//render grid
+				
+				auto cpos = im::GetCursorPos(); 
+				cpos.x += im::GetWindowPos().x;
+				cpos.y += im::GetWindowPos().y;
+
+				if (!mysnake.alive) mysnake = sg::Snake();
+				mysnake.DoInput();
+
+				for (size_t i = 0; i < sg::gridsize; i++) {
+					for (size_t f = 0; f < sg::gridsize; f++) {
+						int x = i * 14; x += cpos.x;
+						int y = f * 14; y += cpos.y;
+						int ex = 2; ex += cpos.x;
+						int ey = 2; ey += cpos.y;
+
+						Vector2 vec(i, f);
+
+						bool drew = false;
+
+						for (size_t j = 0; j < mysnake.sp.size(); j++) {
+							if (mysnake.sp[j] == vec) {
+								if(j == 0) //head
+									im::GetForegroundDrawList()->AddRectFilled({ (float)x - 4.f, (float)y - 4.f }, { x + 8.f, y + 8.f }, im::GetColorU32({ 0.24, 0.24, 0.94, 0.95 }), 1.f);
+								else
+									im::GetForegroundDrawList()->AddRectFilled({ (float)x - 4.f, (float)y - 4.f }, { x + 8.f, y + 8.f }, im::GetColorU32({ 0.24, 0.74, 0.24, 0.95 }), 1.f);
+								drew = true;
+							}
+						}
+
+						if (drew) continue;
+
+						for (size_t j = 0; j < sg::apples.size(); j++) {
+							if (sg::apples[j - 1] == vec) {
+								im::GetForegroundDrawList()->AddRectFilled({ (float)x - 4.f, (float)y - 4.f }, { x + 8.f, y + 8.f }, im::GetColorU32({ 0.94, 0.24, 0.24, 0.65 }), 1.f);
+								drew = true;
+							}
+						}
+						if (drew) continue;
+						
+
+						im::GetForegroundDrawList()->AddRect({ (float)x - 4.f, (float)y - 4.f }, { x + 8.f, y + 8.f }, im::GetColorU32({ 0.34, 0.34, 0.34, 0.65 }), 1.f);
+					}
+				}
+
+				im::EndChild();
+			}
+			if (im::BeginChild(_("Control"), { 285, 67 }, true))
+			{
+				im::SetCursorPosX(im::GetCursorPosX() + 66);
+
+				if (GetAsyncKeyState(0x57)) //W
+					im::TextColored({ 0.1, 0.8, 0.1, 1 }, _("W"));
+				else im::Text(_("W"));
+
+				im::SetCursorPosX(im::GetCursorPosX() + 50);
+				if (GetAsyncKeyState(0x41)) //A
+					im::TextColored({ 0.1, 0.8, 0.1, 1 }, _("A"));
+				else im::Text(_("A"));
+				im::SameLine();
+				if (GetAsyncKeyState(0x53)) //S
+					im::TextColored({ 0.1, 0.8, 0.1, 1 }, _("S"));
+				else im::Text(_("S"));
+				im::SameLine();
+				if (GetAsyncKeyState(0x44)) //D
+					im::TextColored({ 0.1, 0.8, 0.1, 1 }, _("D"));
+				else im::Text(_("D"));
+
+				im::SetCursorPos({ im::GetCursorPosX() + 150, im::GetCursorPosY() - 40 });
+				im::LabelText(_("##score"), _("Score: %d"), sg::currentscore);
+				im::SetCursorPosX(im::GetCursorPosX() + 150);
+				im::SetCursorPosY(im::GetCursorPosY() - 10);
+				im::LabelText(_("##highscore"), _("Highscore: %d"), sg::highscore);
+				im::EndChild();
+			}
+		}
+		im::End();
+	}
+
 	class dot
 	{
 	public:
@@ -199,7 +290,7 @@ namespace Gui
 			else if (name == _("hitbox_override")) vars->combat.hitbox_override = std::stoi(value);
 			else if (name == _("hitbox")) vars->combat.hitbox = std::stoi(value);
 			else if (name == _("silent_melee")) vars->combat.silent_melee = std::stoi(value);
-			else if (name == _("manipulator")) vars->combat.manipulator2 = std::stoi(value);
+			else if (name == _("manipulator")) vars->combat.manipulator = std::stoi(value);
 			else if (name == _("doubletap")) vars->combat.doubletap = std::stoi(value);
 			else if (name == _("always_reload")) vars->combat.always_reload = std::stoi(value);
 			else if (name == _("randomize")) vars->combat.randomize = std::stoi(value);
@@ -421,7 +512,7 @@ namespace Gui
 		itoa(vars->combat.silent_melee, buffer, 4);
 		str = (std::string(_("silent_melee=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
-		itoa(vars->combat.manipulator2, buffer, 4);
+		itoa(vars->combat.manipulator, buffer, 4);
 		str = (std::string(_("manipulator=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
 		itoa(vars->combat.doubletap, buffer, 4);
@@ -832,7 +923,7 @@ namespace Gui
 			im::Combo(_("Hitboxes"), &vars->combat.hitbox,
 				_("Head\0Body\0Upperbody\0Penis\0Hands\0Legs\0Feet"));
 			im::Checkbox(_("Randomize hitboxes"), &vars->combat.randomize);
-			im::Checkbox(_("Hitscan"), &vars->combat.HitScan);
+			//im::Checkbox(_("Hitscan"), &vars->combat.HitScan);
 			//im::Checkbox(_("Manipulator"), &vars->combat.manipulator2);
 			im::Checkbox(_("Manipulator"), &vars->combat.manipulator);
 			//im::Checkbox(_("Manipulator2"), &vars->combat.manipulator);
@@ -1083,6 +1174,13 @@ namespace Gui
 			im::Checkbox(_("Silent farm"), &vars->misc.silent_farm);
 			im::Checkbox(_("Console logs"), &vars->misc.logs);
 			im::Combo(_("Gesture spam"), &vars->misc.gesture_spam, _(" None\x00 Clap\x00 Friendly\x00 Thumbsdown\x00 Thumbsup\x00 Ok\x00 Point\x00 Shrug\x00 Victory\x00 Wave"));
+			
+
+			im::Checkbox(_("Snake"), &vars->misc.snake);
+			if(vars->misc.snake)
+			{
+				SnakeStuff();
+			}
 			im::EndChild();
 		}
 	}
@@ -1174,6 +1272,11 @@ namespace Gui
 
 	void Render()
 	{
+		if (!init)
+		{
+			mysnake = sg::Snake();
+			init = true;
+		}
 		im::SetNextWindowPos({ 0,0 });
 		im::SetNextWindowSize(im::GetIO().DisplaySize);
 		im::PushStyleColor(ImGuiCol_WindowBg, { 0,0,0,0 });

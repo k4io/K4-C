@@ -1041,7 +1041,7 @@ void iterate_entities() {
 					{
 						if (unity::GetKey(vars->keybinds.locktarget))
 							goto choosetarget;
-						else if (target.network_id == esp::best_target.network_id)
+						else if (((BasePlayer*)entity)->userID() == ((BasePlayer*)esp::best_target.ent)->userID())
 							goto setandrecordtarget;
 						else
 							goto draw;

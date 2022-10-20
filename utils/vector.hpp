@@ -39,6 +39,11 @@ public:
 	{
 		return Vector2(x / f, y / f);
 	}
+	
+	bool operator==(const Vector2& f) const
+	{
+		return (x == f.x && y == f.y);
+	}
 
 	static Vector2 Lerp(Vector2 value1, Vector2 value2, float amount)
 	{
