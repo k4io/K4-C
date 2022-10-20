@@ -174,221 +174,239 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 		//boxes
 		auto box_color = is_visible ? vars->colors.players.boxes.visible : vars->colors.players.boxes.invisible;
 		if (vars->visual.rainbowbox) { box_color[0] = r; box_color[1] = g; box_color[2] = b; }
-		switch (vars->visual.boxtype)
+
+		if (vars->visual.custombox && strlen(vars->visual.boxfilename) > 0)
 		{
-		case 1: //full box
-			render.Rectangle({ bounds.left, bounds.top }, { box_width, box_height }, { 0,0,0,1 }, 4.f);
-			render.Rectangle({ bounds.left, bounds.top }, { box_width, box_height }, FLOAT4TOD3DCOLOR(box_color), 2.f);
-			break;
-		case 2: //corner box
-
-			//top left
-			render.Line({ bounds.left, bounds.top }, { bounds.left + (box_width / 4), bounds.top }, { 0,0,0,1 }, 4.f);
-			render.Line({ bounds.left, bounds.top }, { bounds.left + (box_width / 4), bounds.top }, FLOAT4TOD3DCOLOR(box_color), 2.f);
-			render.Line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_height / 4) }, { 0,0,0,1 }, 4.f);
-			render.Line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 2.f);
-			//top right
-			render.Line({ bounds.right, bounds.top }, { bounds.right - (box_width / 4), bounds.top }, { 0,0,0,1 }, 4.f);
-			render.Line({ bounds.right, bounds.top }, { bounds.right - (box_width / 4), bounds.top }, FLOAT4TOD3DCOLOR(box_color), 2.f);
-			render.Line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_height / 4) }, { 0,0,0,1 }, 4.f);
-			render.Line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 2.f);
-			//bottom left
-			render.Line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 4), bounds.bottom }, { 0,0,0,1 }, 4.f);
-			render.Line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 4), bounds.bottom }, FLOAT4TOD3DCOLOR(box_color), 2.f);
-			render.Line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_height / 4) }, { 0,0,0,1 }, 4.f);
-			render.Line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 2.f);
-			//bottom right
-			render.Line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 4), bounds.bottom }, { 0,0,0,1 }, 4.f);
-			render.Line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 4), bounds.bottom }, FLOAT4TOD3DCOLOR(box_color), 2.f);
-			render.Line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_height / 4) }, { 0,0,0,1 }, 4.f);
-			render.Line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 2.f);
-			break;
-		case 3: //3d cube
-		{
-			//LMAO I WILL DO THIS LATER
-
-			auto wid = 4;
-			Bounds cbounds = Bounds();
-
-			auto lfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_foot);
-			auto lfootp = lfoott->position();
-			auto rfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_foot);
-			auto rfootp = lfoott->position();
-			auto spine3 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine3)->position();
-			auto spine4 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine4)->position();
-			auto eyepos = spine3.midPoint(spine4);
-			Vector3 mp = Vector3(eyepos.x, eyepos.y - 1.2f, eyepos.z);//lfootp.midPoint(rfootp);
-
-			if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked)) {
-				//auto midpoint = ent->FindBone(_(L""))
-				cbounds.center = mp + Vector3(0.0f, 0.55f, 0.0f);
-				cbounds.extents = Vector3(0.4f, 0.65f, 0.4f);
+			std::string ap(vars->visual.boxfilename);
+			std::string path = vars->data_dir + _("images\\") + ap;
+			if (!ap.empty()) {
+				if (std::filesystem::exists(path)) {
+					if (vars->customboxpath != path) {
+						vars->customboxpath = path;
+						//set custom box
+						//render.SetCustomBox(vars->customboxpath);
+					}
+					//else render.DrawCustomBox({ bounds.left, bounds.top }, { box_width, box_height });//draw custom box
+				}
 			}
-			else {
-				if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Crawling) || ply->modelState()->has_flag(rust::classes::ModelState_Flag::Sleeping)) {
-					cbounds.center = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
-					cbounds.extents = Vector3(0.9f, 0.2f, 0.4f);
+		}
+		else {
+			switch (vars->visual.boxtype)
+			{
+			case 1: //full box
+				render.Rectangle({ bounds.left, bounds.top }, { box_width, box_height }, { 0,0,0,1 }, 4.f);
+				render.Rectangle({ bounds.left, bounds.top }, { box_width, box_height }, FLOAT4TOD3DCOLOR(box_color), 2.f);
+				break;
+			case 2: //corner box
+
+				//top left
+				render.Line({ bounds.left, bounds.top }, { bounds.left + (box_width / 4), bounds.top }, { 0,0,0,1 }, 4.f);
+				render.Line({ bounds.left, bounds.top }, { bounds.left + (box_width / 4), bounds.top }, FLOAT4TOD3DCOLOR(box_color), 2.f);
+				render.Line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_height / 4) }, { 0,0,0,1 }, 4.f);
+				render.Line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 2.f);
+				//top right
+				render.Line({ bounds.right, bounds.top }, { bounds.right - (box_width / 4), bounds.top }, { 0,0,0,1 }, 4.f);
+				render.Line({ bounds.right, bounds.top }, { bounds.right - (box_width / 4), bounds.top }, FLOAT4TOD3DCOLOR(box_color), 2.f);
+				render.Line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_height / 4) }, { 0,0,0,1 }, 4.f);
+				render.Line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 2.f);
+				//bottom left
+				render.Line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 4), bounds.bottom }, { 0,0,0,1 }, 4.f);
+				render.Line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 4), bounds.bottom }, FLOAT4TOD3DCOLOR(box_color), 2.f);
+				render.Line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_height / 4) }, { 0,0,0,1 }, 4.f);
+				render.Line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 2.f);
+				//bottom right
+				render.Line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 4), bounds.bottom }, { 0,0,0,1 }, 4.f);
+				render.Line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 4), bounds.bottom }, FLOAT4TOD3DCOLOR(box_color), 2.f);
+				render.Line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_height / 4) }, { 0,0,0,1 }, 4.f);
+				render.Line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 2.f);
+				break;
+			case 3: //3d cube
+			{
+				//LMAO I WILL DO THIS LATER
+
+				auto wid = 4;
+				Bounds cbounds = Bounds();
+
+				auto lfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_foot);
+				auto lfootp = lfoott->position();
+				auto rfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_foot);
+				auto rfootp = lfoott->position();
+				auto spine3 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine3)->position();
+				auto spine4 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine4)->position();
+				auto eyepos = spine3.midPoint(spine4);
+				Vector3 mp = Vector3(eyepos.x, eyepos.y - 1.2f, eyepos.z);//lfootp.midPoint(rfootp);
+
+				if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked)) {
+					//auto midpoint = ent->FindBone(_(L""))
+					cbounds.center = mp + Vector3(0.0f, 0.55f, 0.0f);
+					cbounds.extents = Vector3(0.4f, 0.65f, 0.4f);
 				}
 				else {
-					cbounds.center = mp + Vector3(0.0f, 0.85f, 0.0f);
-					cbounds.extents = Vector3(0.4f, 0.9f, 0.4f);
+					if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Crawling) || ply->modelState()->has_flag(rust::classes::ModelState_Flag::Sleeping)) {
+						cbounds.center = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
+						cbounds.extents = Vector3(0.9f, 0.2f, 0.4f);
+					}
+					else {
+						cbounds.center = mp + Vector3(0.0f, 0.85f, 0.0f);
+						cbounds.extents = Vector3(0.4f, 0.9f, 0.4f);
+					}
 				}
+
+				auto rotate_point = [&](Vector3 center, Vector3 origin, float angle) {
+					float num = angle * 0.0174532924f;
+					float num2 = -std::sin(num);
+					float num3 = std::cos(num);
+					origin.x -= center.x;
+					origin.z -= center.z;
+					float num4 = origin.x * num3 - origin.z * num2;
+					float num5 = origin.x * num2 + origin.z * num3;
+					float num6 = num4 + center.x;
+					num5 += center.z;
+					return Vector3(num6, origin.y, num5);
+				};
+
+				float y = EulerAngles(ply->eyes()->rotation()).y;
+				Vector3 center = cbounds.center;
+				Vector3 extents = cbounds.extents;
+				Vector3 frontTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z - extents.z), y);
+				Vector3 frontTopRight = rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z - extents.z), y);
+				Vector3 frontBottomLeft = rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z - extents.z), y);
+				Vector3 frontBottomRight = rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z - extents.z), y);
+				Vector3 backTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z + extents.z), y);
+				Vector3 backTopRight = rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z + extents.z), y);
+				Vector3 backBottomLeft = rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z + extents.z), y);
+				Vector3 backBottomRight = rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z + extents.z), y);
+
+				Vector2 frontTopLeft_2d, frontTopRight_2d, frontBottomLeft_2d, frontBottomRight_2d, backTopLeft_2d, backTopRight_2d, backBottomLeft_2d, backBottomRight_2d;
+
+				auto xy = WorldToScreen(frontTopLeft);
+				frontTopLeft_2d = Vector2(xy.x, xy.y);
+				xy = WorldToScreen(frontTopRight);
+				frontTopRight_2d = Vector2(xy.x, xy.y);
+				xy = WorldToScreen(frontBottomLeft);
+				frontBottomLeft_2d = Vector2(xy.x, xy.y);
+				xy = WorldToScreen(frontBottomRight);
+				frontBottomRight_2d = Vector2(xy.x, xy.y);
+				xy = WorldToScreen(backTopLeft);
+				backTopLeft_2d = Vector2(xy.x, xy.y);
+				xy = WorldToScreen(backTopRight);
+				backTopRight_2d = Vector2(xy.x, xy.y);
+				xy = WorldToScreen(backBottomLeft);
+				backBottomLeft_2d = Vector2(xy.x, xy.y);
+				xy = WorldToScreen(backBottomRight);
+				backBottomRight_2d = Vector2(xy.x, xy.y);
+
+				if (!frontTopLeft_2d.empty() &&
+					!frontTopRight_2d.empty() &&
+					!frontBottomLeft_2d.empty() &&
+					!frontBottomRight_2d.empty() &&
+					!backTopLeft_2d.empty() &&
+					!backTopRight_2d.empty() &&
+					!backBottomLeft_2d.empty() &&
+					!backBottomRight_2d.empty()) {
+					render.Line(frontTopLeft_2d, frontTopRight_2d, FLOAT4TOD3DCOLOR(box_color));
+					render.Line(frontTopRight_2d, frontBottomRight_2d, FLOAT4TOD3DCOLOR(box_color));
+					render.Line(frontBottomRight_2d, frontBottomLeft_2d, FLOAT4TOD3DCOLOR(box_color));
+					render.Line(frontBottomLeft_2d, frontTopLeft_2d, FLOAT4TOD3DCOLOR(box_color));
+					render.Line(backTopLeft_2d, backTopRight_2d, FLOAT4TOD3DCOLOR(box_color));
+					render.Line(backTopRight_2d, backBottomRight_2d, FLOAT4TOD3DCOLOR(box_color));
+					render.Line(backBottomRight_2d, backBottomLeft_2d, FLOAT4TOD3DCOLOR(box_color));
+					render.Line(backBottomLeft_2d, backTopLeft_2d, FLOAT4TOD3DCOLOR(box_color));
+					render.Line(frontTopLeft_2d, backTopLeft_2d, FLOAT4TOD3DCOLOR(box_color));
+					render.Line(frontTopRight_2d, backTopRight_2d, FLOAT4TOD3DCOLOR(box_color));
+					render.Line(frontBottomRight_2d, backBottomRight_2d, FLOAT4TOD3DCOLOR(box_color));
+					render.Line(frontBottomLeft_2d, backBottomLeft_2d, FLOAT4TOD3DCOLOR(box_color));
+				}
+				break;
 			}
+			case 4: //3d box
+			{
+				auto wid = 4;
+				Bounds cbounds = Bounds();
 
-			auto rotate_point = [&](Vector3 center, Vector3 origin, float angle) {
-				float num = angle * 0.0174532924f;
-				float num2 = -std::sin(num);
-				float num3 = std::cos(num);
-				origin.x -= center.x;
-				origin.z -= center.z;
-				float num4 = origin.x * num3 - origin.z * num2;
-				float num5 = origin.x * num2 + origin.z * num3;
-				float num6 = num4 + center.x;
-				num5 += center.z;
-				return Vector3(num6, origin.y, num5);
-			};
+				auto lfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_foot);
+				auto lfootp = lfoott->position();
+				auto rfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_foot);
+				auto rfootp = lfoott->position();
+				auto spine3 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine3)->position();
+				auto spine4 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine4)->position();
+				auto eyepos = spine3.midPoint(spine4);
+				Vector3 mp = Vector3(eyepos.x, eyepos.y - 1.2f, eyepos.z);//lfootp.midPoint(rfootp);
 
-			float y = EulerAngles(ply->eyes()->rotation()).y;
-			Vector3 center = cbounds.center;
-			Vector3 extents = cbounds.extents;
-			Vector3 frontTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z - extents.z), y);
-			Vector3 frontTopRight = rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z - extents.z), y);
-			Vector3 frontBottomLeft = rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z - extents.z), y);
-			Vector3 frontBottomRight = rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z - extents.z), y);
-			Vector3 backTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z + extents.z), y);
-			Vector3 backTopRight = rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z + extents.z), y);
-			Vector3 backBottomLeft = rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z + extents.z), y);
-			Vector3 backBottomRight = rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z + extents.z), y);
-
-			Vector2 frontTopLeft_2d, frontTopRight_2d, frontBottomLeft_2d, frontBottomRight_2d, backTopLeft_2d, backTopRight_2d, backBottomLeft_2d, backBottomRight_2d;
-
-			auto xy = WorldToScreen(frontTopLeft);
-			frontTopLeft_2d = Vector2(xy.x, xy.y);
-			xy = WorldToScreen(frontTopRight);
-			frontTopRight_2d = Vector2(xy.x, xy.y);
-			xy = WorldToScreen(frontBottomLeft);
-			frontBottomLeft_2d = Vector2(xy.x, xy.y);
-			xy = WorldToScreen(frontBottomRight);
-			frontBottomRight_2d = Vector2(xy.x, xy.y);
-			xy = WorldToScreen(backTopLeft);
-			backTopLeft_2d = Vector2(xy.x, xy.y);
-			xy = WorldToScreen(backTopRight);
-			backTopRight_2d = Vector2(xy.x, xy.y);
-			xy = WorldToScreen(backBottomLeft);
-			backBottomLeft_2d = Vector2(xy.x, xy.y);
-			xy = WorldToScreen(backBottomRight);
-			backBottomRight_2d = Vector2(xy.x, xy.y);
-
-			if (!frontTopLeft_2d.empty() &&
-				!frontTopRight_2d.empty() &&
-				!frontBottomLeft_2d.empty() &&
-				!frontBottomRight_2d.empty() &&
-				!backTopLeft_2d.empty() &&
-				!backTopRight_2d.empty() &&
-				!backBottomLeft_2d.empty() &&
-				!backBottomRight_2d.empty()) {
-				render.Line(frontTopLeft_2d, frontTopRight_2d, FLOAT4TOD3DCOLOR(box_color));
-				render.Line(frontTopRight_2d, frontBottomRight_2d, FLOAT4TOD3DCOLOR(box_color));
-				render.Line(frontBottomRight_2d, frontBottomLeft_2d, FLOAT4TOD3DCOLOR(box_color));
-				render.Line(frontBottomLeft_2d, frontTopLeft_2d, FLOAT4TOD3DCOLOR(box_color));
-				render.Line(backTopLeft_2d, backTopRight_2d, FLOAT4TOD3DCOLOR(box_color));
-				render.Line(backTopRight_2d, backBottomRight_2d, FLOAT4TOD3DCOLOR(box_color));
-				render.Line(backBottomRight_2d, backBottomLeft_2d, FLOAT4TOD3DCOLOR(box_color));
-				render.Line(backBottomLeft_2d, backTopLeft_2d, FLOAT4TOD3DCOLOR(box_color));
-				render.Line(frontTopLeft_2d, backTopLeft_2d, FLOAT4TOD3DCOLOR(box_color));
-				render.Line(frontTopRight_2d, backTopRight_2d, FLOAT4TOD3DCOLOR(box_color));
-				render.Line(frontBottomRight_2d, backBottomRight_2d, FLOAT4TOD3DCOLOR(box_color));
-				render.Line(frontBottomLeft_2d, backBottomLeft_2d, FLOAT4TOD3DCOLOR(box_color));
-			}
-			break;
-		}
-		case 4: //3d box
-		{
-			auto wid = 4;
-			Bounds cbounds = Bounds();
-
-			auto lfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_foot);
-			auto lfootp = lfoott->position();
-			auto rfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_foot);
-			auto rfootp = lfoott->position();
-			auto spine3 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine3)->position();
-			auto spine4 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine4)->position();
-			auto eyepos = spine3.midPoint(spine4);
-			Vector3 mp = Vector3(eyepos.x, eyepos.y - 1.2f, eyepos.z);//lfootp.midPoint(rfootp);
-
-			if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked)) {
-				//auto midpoint = ent->FindBone(_(L""))
-				cbounds.center = mp + Vector3(0.0f, 0.55f, 0.0f);
-				cbounds.extents = Vector3(0.4f, 0.65f, 0.4f);
-			}
-			else {
-				if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Crawling) || ply->modelState()->has_flag(rust::classes::ModelState_Flag::Sleeping)) {
-					cbounds.center = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
-					cbounds.extents = Vector3(0.9f, 0.2f, 0.4f);
+				if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked)) {
+					//auto midpoint = ent->FindBone(_(L""))
+					cbounds.center = mp + Vector3(0.0f, 0.55f, 0.0f);
+					cbounds.extents = Vector3(0.4f, 0.65f, 0.4f);
 				}
 				else {
-					cbounds.center = mp + Vector3(0.0f, 0.85f, 0.0f);
-					cbounds.extents = Vector3(0.4f, 0.9f, 0.4f);
+					if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Crawling) || ply->modelState()->has_flag(rust::classes::ModelState_Flag::Sleeping)) {
+						cbounds.center = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
+						cbounds.extents = Vector3(0.9f, 0.2f, 0.4f);
+					}
+					else {
+						cbounds.center = mp + Vector3(0.0f, 0.85f, 0.0f);
+						cbounds.extents = Vector3(0.4f, 0.9f, 0.4f);
+					}
 				}
+
+				auto rotate_point = [&](Vector3 center, Vector3 origin, float angle) {
+					float num = angle * 0.0174532924f;
+					float num2 = -std::sin(num);
+					float num3 = std::cos(num);
+					origin.x -= center.x;
+					origin.z -= center.z;
+					float num4 = origin.x * num3 - origin.z * num2;
+					float num5 = origin.x * num2 + origin.z * num3;
+					float num6 = num4 + center.x;
+					num5 += center.z;
+					return Vector3(num6, origin.y, num5);
+				};
+
+				float y = EulerAngles(ply->eyes()->rotation()).y;
+				Vector3 center = cbounds.center;
+				Vector3 extents = cbounds.extents;
+				Vector3 frontTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z - extents.z), y);
+				Vector3 frontTopRight = rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z - extents.z), y);
+				Vector3 frontBottomLeft = rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z - extents.z), y);
+				Vector3 frontBottomRight = rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z - extents.z), y);
+				Vector3 backTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z + extents.z), y);
+				Vector3 backTopRight = rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z + extents.z), y);
+				Vector3 backBottomLeft = rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z + extents.z), y);
+				Vector3 backBottomRight = rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z + extents.z), y);
+
+				Vector3 middleBottomLeft = backBottomLeft.midPoint(frontBottomLeft);
+				Vector3 middleBottomRight = backBottomRight.midPoint(frontBottomRight);
+				Vector3 middleTopLeft = backTopLeft.midPoint(frontTopLeft);
+				Vector3 middleTopRight = backTopRight.midPoint(frontTopRight);
+
+				Vector2 middleBottomLeft_2d, middleBottomRight_2d, middleTopLeft_2d, middleTopRight_2d;
+
+				auto xy = WorldToScreen(middleBottomLeft);
+				middleBottomLeft_2d = Vector2(xy.x, xy.y);
+				xy = WorldToScreen(middleBottomRight);
+				middleBottomRight_2d = Vector2(xy.x, xy.y);
+				xy = WorldToScreen(middleTopLeft);
+				middleTopLeft_2d = Vector2(xy.x, xy.y);
+				xy = WorldToScreen(middleTopRight);
+				middleTopRight_2d = Vector2(xy.x, xy.y);
+
+				if (!middleBottomLeft_2d.empty() &&
+					!middleBottomRight_2d.empty() &&
+					!middleTopLeft_2d.empty() &&
+					!middleTopRight_2d.empty()) {
+
+					render.Line(middleBottomLeft_2d, middleBottomRight_2d, { 0, 0, 0, 1 }, 3);
+					render.Line(middleBottomLeft_2d, middleBottomRight_2d, FLOAT4TOD3DCOLOR(box_color), 2);
+					render.Line(middleBottomLeft_2d, middleTopLeft_2d, { 0, 0, 0, 1 }, 3);
+					render.Line(middleBottomLeft_2d, middleTopLeft_2d, FLOAT4TOD3DCOLOR(box_color), 2);
+					render.Line(middleBottomRight_2d, middleTopRight_2d, { 0, 0, 0, 1 }, 3);
+					render.Line(middleBottomRight_2d, middleTopRight_2d, FLOAT4TOD3DCOLOR(box_color), 2);
+					render.Line(middleTopLeft_2d, middleTopRight_2d, { 0, 0, 0, 1 }, 3);
+					render.Line(middleTopLeft_2d, middleTopRight_2d, FLOAT4TOD3DCOLOR(box_color), 2);
+				}
+				break;
 			}
-
-			auto rotate_point = [&](Vector3 center, Vector3 origin, float angle) {
-				float num = angle * 0.0174532924f;
-				float num2 = -std::sin(num);
-				float num3 = std::cos(num);
-				origin.x -= center.x;
-				origin.z -= center.z;
-				float num4 = origin.x * num3 - origin.z * num2;
-				float num5 = origin.x * num2 + origin.z * num3;
-				float num6 = num4 + center.x;
-				num5 += center.z;
-				return Vector3(num6, origin.y, num5);
-			};
-
-			float y = EulerAngles(ply->eyes()->rotation()).y;
-			Vector3 center = cbounds.center;
-			Vector3 extents = cbounds.extents;
-			Vector3 frontTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z - extents.z), y);
-			Vector3 frontTopRight = rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z - extents.z), y);
-			Vector3 frontBottomLeft = rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z - extents.z), y);
-			Vector3 frontBottomRight = rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z - extents.z), y);
-			Vector3 backTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z + extents.z), y);
-			Vector3 backTopRight = rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z + extents.z), y);
-			Vector3 backBottomLeft = rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z + extents.z), y);
-			Vector3 backBottomRight = rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z + extents.z), y);
-
-			Vector3 middleBottomLeft = backBottomLeft.midPoint(frontBottomLeft);
-			Vector3 middleBottomRight = backBottomRight.midPoint(frontBottomRight);
-			Vector3 middleTopLeft = backTopLeft.midPoint(frontTopLeft);
-			Vector3 middleTopRight = backTopRight.midPoint(frontTopRight);
-
-			Vector2 middleBottomLeft_2d, middleBottomRight_2d, middleTopLeft_2d, middleTopRight_2d;
-
-			auto xy = WorldToScreen(middleBottomLeft);
-			middleBottomLeft_2d = Vector2(xy.x, xy.y);
-			xy = WorldToScreen(middleBottomRight);
-			middleBottomRight_2d = Vector2(xy.x, xy.y);
-			xy = WorldToScreen(middleTopLeft);
-			middleTopLeft_2d = Vector2(xy.x, xy.y);
-			xy = WorldToScreen(middleTopRight);
-			middleTopRight_2d = Vector2(xy.x, xy.y);
-
-			if (!middleBottomLeft_2d.empty() &&
-				!middleBottomRight_2d.empty() &&
-				!middleTopLeft_2d.empty() &&
-				!middleTopRight_2d.empty()) {
-
-				render.Line(middleBottomLeft_2d, middleBottomRight_2d, { 0, 0, 0, 1 }, 3);
-				render.Line(middleBottomLeft_2d, middleBottomRight_2d, FLOAT4TOD3DCOLOR(box_color), 2);
-				render.Line(middleBottomLeft_2d, middleTopLeft_2d, { 0, 0, 0, 1 }, 3);
-				render.Line(middleBottomLeft_2d, middleTopLeft_2d, FLOAT4TOD3DCOLOR(box_color), 2);
-				render.Line(middleBottomRight_2d, middleTopRight_2d, { 0, 0, 0, 1 }, 3);
-				render.Line(middleBottomRight_2d, middleTopRight_2d, FLOAT4TOD3DCOLOR(box_color), 2);
-				render.Line(middleTopLeft_2d, middleTopRight_2d, { 0, 0, 0, 1 }, 3);
-				render.Line(middleTopLeft_2d, middleTopRight_2d, FLOAT4TOD3DCOLOR(box_color), 2);
 			}
-			break;
-		}
 		}
 
 		switch (vars->visual.hpbar)
@@ -614,10 +632,10 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			{
 				auto dist_color = is_visible ? vars->colors.players.details.distance.visible : vars->colors.players.details.distance.invisible;
 				auto nstr = string::wformat(_(L"[%dm]"), (int)distance);
-				render.StringCenter({ bounds.center - 1, bounds.bottom + 10 }, nstr, { 0, 0, 0, 1 });
-				render.StringCenter({ bounds.center + 1, bounds.bottom + 10 }, nstr, { 0, 0, 0, 1 });
-				render.StringCenter({ bounds.center - 1, bounds.bottom + 8 }, nstr, { 0, 0, 0, 1 });
-				render.StringCenter({ bounds.center + 1, bounds.bottom + 8 }, nstr, { 0, 0, 0, 1 });
+				//render.StringCenter({ bounds.center - 1, bounds.bottom + 10 }, nstr, { 0, 0, 0, 1 });
+				//render.StringCenter({ bounds.center + 1, bounds.bottom + 10 }, nstr, { 0, 0, 0, 1 });
+				//render.StringCenter({ bounds.center - 1, bounds.bottom + 8 }, nstr, { 0, 0, 0, 1 });
+				//render.StringCenter({ bounds.center + 1, bounds.bottom + 8 }, nstr, { 0, 0, 0, 1 });
 				render.StringCenter({ bounds.center, bounds.bottom + 9 }, nstr, FLOAT4TOD3DCOLOR(dist_color));
 				//gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.bottom + 1.f, 79.f + half * 2 + 80.f , 30 }, nstr, gui::Color(0, 0, 0, 120), true, 10.5);
 				//gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.bottom, 80.f + half * 2 + 80.f , 30 }, nstr, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
@@ -628,10 +646,10 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			//name
 			if (vars->visual.nameesp) {
 
-				render.StringCenter({ bounds.center - 1, bounds.top - 9 }, name, { 0, 0, 0, 1 });
-				render.StringCenter({ bounds.center + 1, bounds.top - 9 }, name, { 0, 0, 0, 1 });
-				render.StringCenter({ bounds.center - 1, bounds.top - 7 }, name, { 0, 0, 0, 1 });
-				render.StringCenter({ bounds.center + 1, bounds.top - 7 }, name, { 0, 0, 0, 1 });
+				//render.StringCenter({ bounds.center - 1, bounds.top - 9 }, name, { 0, 0, 0, 1 });
+				//render.StringCenter({ bounds.center + 1, bounds.top - 9 }, name, { 0, 0, 0, 1 });
+				//render.StringCenter({ bounds.center - 1, bounds.top - 7 }, name, { 0, 0, 0, 1 });
+				//render.StringCenter({ bounds.center + 1, bounds.top - 7 }, name, { 0, 0, 0, 1 });
 				render.StringCenter({ bounds.center, bounds.top - 8 }, name, vars->visual.rainbowname ? D2D1::ColorF{ r, g, b, 1 } : FLOAT4TOD3DCOLOR(name_color));
 				//gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.top - 23.f, 79.f + half * 2 + 80.f , 30 }, name, gui::Color(0, 0, 0, 120), true, 10.5);
 				//gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.top - 24.f, 80.f + half * 2 + 80.f , 30 }, name, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
@@ -799,18 +817,21 @@ void iterate_entities() {
 	auto list_value = entity_list->get_value<uintptr_t>();
 	if (!list_value) {
 		//get_client_entities();
+		esp::local_player = nullptr;
 		return;
 	}
 
 	auto size = entity_list->get_size();
 	if (!size) {
 		//get_client_entities();
+		esp::local_player = nullptr;
 		return;
 	}
 
 	auto buffer = entity_list->get_buffer<uintptr_t>();
 	if (!buffer) {
 		//get_client_entities();
+		esp::local_player = nullptr;
 		return;
 	}
 
@@ -820,6 +841,7 @@ void iterate_entities() {
 	wchar_t* esp_name = _(L"");
 
 	vars->player_name_list.clear();
+	bool flp = false;
 	for (int i = 0; i <= size; i++) {
 		auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
 		if (!current_object || current_object <= 100000)
@@ -878,24 +900,24 @@ void iterate_entities() {
 		if (tag == 6)
 		{
 			auto entity = (BasePlayer*)ent;
-			//cache::CacheBones(entity, esp::local_player);
-			bool exists_in_list = false;
-			auto fff = 0;
-			auto sizebefore = player_list.size();
-			for (BasePlayer* p : player_list)
-			{
-				if (!p->is_alive()
-					|| (entity->is_sleeping() && !vars->visual.sleeper_esp)
-					|| !p)
-				{
-					//vars->player_id_name.erase(fff);
-					player_list.erase(std::remove(player_list.begin(), player_list.end(), p), player_list.end());
-				}
-				if (entity->userID() == p->userID())
-					exists_in_list = true;
-			}
 			if (!map_contains_key(player_map, ent_id))
 				player_map.insert(std::make_pair(ent_id, entity));
+			//cache::CacheBones(entity, esp::local_player);
+			//bool exists_in_list = false;
+			//auto fff = 0;
+			//auto sizebefore = player_list.size();
+			//for (BasePlayer* p : player_list)
+			//{
+			//	if (!p->is_alive()
+			//		|| (entity->is_sleeping() && !vars->visual.sleeper_esp)
+			//		|| !p)
+			//	{
+			//		//vars->player_id_name.erase(fff);
+			//		player_list.erase(std::remove(player_list.begin(), player_list.end(), p), player_list.end());
+			//	}
+			//	if (entity->userID() == p->userID())
+			//		exists_in_list = true;
+			//}
 			//	//std::wstring ws(entity->get_player_name());
 				//std::string s(ws.begin(), ws.end());
 				//vars->player_name_list.push_back(s);
@@ -903,10 +925,10 @@ void iterate_entities() {
 				//	vars->player_id_name.insert(std::make_pair(fff, entity->get_player_name()));
 			//	fff++;
 			//}
-			if (!exists_in_list)
-			{
-				player_list.push_back(entity);
-			}
+			//if (!exists_in_list)
+			//{
+			//	player_list.push_back(entity);
+			//}
 			//hit player for silent melee, but not here as may crash due to not being run from a game thread
 
 			//check valid
@@ -919,8 +941,10 @@ void iterate_entities() {
 			if (npc && !vars->visual.npc_esp) continue;
 
 			//local player chams, player average velocity
-			if (entity->is_local_player())
+			if (entity->is_local_player()) {
+				flp = true;
 				esp::local_player = entity;
+			}
 			else {
 				if (esp::local_player)
 				{
@@ -939,10 +963,10 @@ void iterate_entities() {
 						if (dist < r)
 						{
 							auto ws = string::wformat(_(L"%s is looking at you!"), ((BasePlayer*)ent)->get_player_name());
-							render.StringCenter({ vars->ScreenX / 2 + 1, (vars->ScreenY / 2) - 30 }, ws, { 0, 0, 0, 1 });
-							render.StringCenter({ vars->ScreenX / 2 - 1, (vars->ScreenY / 2) - 30 }, ws, { 0, 0, 0, 1 });
-							render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 30 + 1 }, ws, { 0, 0, 0, 1 });
-							render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 30 - 1 }, ws, { 0, 0, 0, 1 });
+							//render.StringCenter({ vars->ScreenX / 2 + 1, (vars->ScreenY / 2) - 30 }, ws, { 0, 0, 0, 1 });
+							//render.StringCenter({ vars->ScreenX / 2 - 1, (vars->ScreenY / 2) - 30 }, ws, { 0, 0, 0, 1 });
+							//render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 30 + 1 }, ws, { 0, 0, 0, 1 });
+							//render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 30 - 1 }, ws, { 0, 0, 0, 1 });
 							render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 30 }, ws, { 227 / 255.f, 32 / 255.f, 61 / 255.f, 1 });
 						}
 					}
@@ -1210,6 +1234,30 @@ void iterate_entities() {
 						dist = trans->position().distance(world_position);
 				}
 
+
+				auto entchams = [&](Shader* s = 0, Material* m = 0) {
+					if (!ent) return;
+					auto renderers = ((Networkable*)ent)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
+					if (!renderers) return;
+					auto sz = renderers->get_size();
+					for (size_t i = 0; i < sz; i++)
+					{
+						auto renderer = (Renderer*)renderers->get(i);
+						if (!renderer) continue;
+						if (m) renderer->SetMaterial(m);
+						else {
+							auto mat = renderer->GetMaterial();
+							SetInt((uintptr_t)mat, _(L"_ZTest"), 8);
+							if (mat) {
+								auto shader = mat->GetShader();
+								if (shader != s)
+									mat->SetShader(s);
+							}
+						}
+					}
+				};
+
+
 				//dropped items
 				if (*(int*)(entity_class_name) == 'porD') {
 					if (!vars->visual.dropped_items)
@@ -1375,12 +1423,47 @@ void iterate_entities() {
 					world_position.y += 1.f;
 				}
 
+				if (std::string(object_name.zpad).find(_("ore")) != std::string::npos) {
+					if (unity::bundle && unity::bundle2)
+					{
+						Shader* shader = 0;
+						Material* mat = 0;
+						switch (vars->visual.rock_chams)
+						{
+						case 1:
+							shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"SeethroughShader"), unity::GetType(_("UnityEngine"), _("Shader")));
+							break;
+						case 2:
+							shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
+							break;
+						case 3:
+							mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/2dmat.mat"), unity::GetType(_("UnityEngine"), _("Material")));
+							break;
+						case 4:
+							shader = (Shader*)unity::LoadAsset(unity::bundle2, _(L"assets/IridescenceMetallic.shader"), unity::GetType(_("UnityEngine"), _("Shader")));
+							break;
+						case 5:
+							shader = (Shader*)unity::LoadAsset(unity::bundle2, _(L"assets/IridescenceSpecular.shader"), unity::GetType(_("UnityEngine"), _("Shader")));
+							break;
+						case 6:
+							shader = (Shader*)unity::LoadAsset(unity::bundle2, _(L"assets/IridescenceTransparent.shader"), unity::GetType(_("UnityEngine"), _("Shader")));
+							break;
+						case 7:
+							shader = (Shader*)unity::LoadAsset(unity::bundle2, _(L"assets/fire.shader"), unity::GetType(_("UnityEngine"), _("Shader")));
+							break;
+						}
+
+						if (vars->visual.rock_chams > 0)
+						{
+							entchams(shader, mat);
+						}
+					}
+				}
+
 				//stone
-				else if (vars->visual.stone_ore && (*(int*)(object_name.zpad + 52) == 'nots' || *(int*)(object_name.zpad + 47) == 'nots')) {
+				if (vars->visual.stone_ore && (*(int*)(object_name.zpad + 52) == 'nots' || *(int*)(object_name.zpad + 47) == 'nots')) {
 					esp_name = _(L"Stone Ore");
 					esp_color = Vector4(232, 232, 232, 255);
-					if (vars->visual.rock_chams >= 1)
-						esp::rock_chams(ent);
 					world_position.y += 1.f;
 				}
 
@@ -1388,8 +1471,6 @@ void iterate_entities() {
 				else if (vars->visual.sulfur_ore && (*(int*)(object_name.zpad + 52) == 'flus' || *(int*)(object_name.zpad + 47) == 'flus')) {
 					esp_name = _(L"Sulfur Ore");
 					esp_color = Vector4(203, 207, 0, 255);
-					if (vars->visual.rock_chams >= 1)
-						esp::rock_chams(ent);
 					world_position.y += 1.f;
 				}
 
@@ -1397,8 +1478,6 @@ void iterate_entities() {
 				else if (vars->visual.metal_ore && (*(int*)(object_name.zpad + 52) == 'atem' || *(int*)(object_name.zpad + 47) == 'atem')) {
 					esp_name = _(L"Metal Ore");
 					esp_color = Vector4(145, 145, 145, 255);
-					if (vars->visual.rock_chams >= 1)
-						esp::rock_chams(ent);
 					world_position.y += 1.f;
 				}
 
@@ -1507,7 +1586,6 @@ void iterate_entities() {
 			}
 		}
 	}
-
 	if (esp::best_target.ent
 		&& vars->visual.hotbar_esp
 		&& esp::local_player)
@@ -1535,12 +1613,16 @@ int indicators_on_screen = 0;
 
 void IndicatorDesync() {
 	float x = vars->ScreenX / 2, y = vars->ScreenY / 2;
-	render.ProgressBar({ x - 60, y + 20 }, { 120, 4 }, vars->desyncTime, 1.0f);
+	if (vars->desyncTime < 0) return;
+	render.StringCenter({ 100.f, y }, _(L"Desync"), {204 / 255.f, 39 / 255.f, 42 / 255.f, 1}, true, 20.f);
+	render.ProgressBar({ 40, y + 10.f }, { 120, 8 }, vars->desyncTime, 1.0f);
 }
 void IndicatorReload() {
 	float x = vars->ScreenX / 2, y = vars->ScreenY / 2;
-	if(vars->time_since_last_shot < vars->reload)
-		render.ProgressBar({ x - 60, y + 30 }, { 120, 4 }, vars->time_since_last_shot, (vars->reload - 0.2f));
+	if (vars->time_since_last_shot < vars->reload) {
+		render.StringCenter({ 100.f, (y - 30.f) }, _(L"Reload"), { 204 / 255.f, 39 / 255.f, 42 / 255.f, 1 }, true, 20.f);
+		render.ProgressBar({ 40, y - 20.f }, { 120, 8 }, vars->time_since_last_shot, (vars->reload - 0.2f));
+	}
 }
 void IndicatorFlyhack() {
 	float x = vars->ScreenX / 2, y = vars->ScreenY / 2;
@@ -1548,7 +1630,9 @@ void IndicatorFlyhack() {
 }
 void IndicatorSpeedhack() {
 	float x = vars->ScreenX / 2, y = vars->ScreenY / 2;
-	render.ProgressBar({ x - 60, y + 40 }, { 120, 4 }, vars->speedhack, 1.0f);
+	if (vars->speedhack <= 0) return;
+	render.StringCenter({ 100.f, (y - 60.f) }, _(L"Speedhack"), { 204 / 255.f, 39 / 255.f, 42 / 255.f, 1 }, true, 20.f);
+	render.ProgressBar({ 40, y - 50.f }, { 120, 8 }, vars->speedhack, 1.0f);
 }
 void IndicatorTp() {
 	float x = vars->ScreenX / 2, y = vars->ScreenY / 2;
@@ -1575,7 +1659,6 @@ void Watermark() {
 }
 
 void new_frame() {
-
 	float Y = GetSystemMetrics(SM_CYSCREEN);
 	float X = GetSystemMetrics(SM_CXSCREEN);
 	Vector2 vScreen = render.CanvasSize();
@@ -1596,12 +1679,14 @@ void new_frame() {
 		IndicatorDesync();
 	if (vars->combat.always_reload)
 		IndicatorReload();
-	if (vars->visual.flyhack_indicator)
-		IndicatorFlyhack();
 	if (vars->visual.speedhack_indicator)
 		IndicatorSpeedhack();
 	if (vars->misc.tp)
 		IndicatorTp();
+
+	if (vars->visual.flyhack_indicator)
+		IndicatorFlyhack();
+
 
 	//Draw FOV
 	if (vars->visual.show_fov)

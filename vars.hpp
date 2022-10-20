@@ -9,6 +9,8 @@
 
 struct Vars
 {
+	std::string data_dir = _("");
+	std::string customboxpath = _("");
 	char* playersnamesstr;
 	std::map<int, wchar_t*> player_id_name = {};
 	std::vector<std::string> player_name_list{};
@@ -92,6 +94,8 @@ struct Vars
 		int rock_chams = 0;
 		int boxtype = 0;
 		bool boxesp = false;
+		bool custombox = false;
+		char* boxfilename = _("");
 		bool spriteitem = false;
 		bool snaplines = true;
 		bool show_fov = false;
@@ -129,6 +133,7 @@ struct Vars
 		bool barrels = false;
 		bool tc_esp = false;
 		bool angles = false;
+		bool followprojectiles = false;
 		bool hackable_crate_esp = false;
 		bool full_box = false;
 		bool corner_box = false;

@@ -96,7 +96,6 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 		Vector3 trg_pos = esp::best_target.pos;//player->model()->boneTransforms()->get(48)->get_bone_position();
 
 		auto HitScan = [&](Vector3 from, bool do_ = true, int val = 0) {
-
 			Vector3 head_pos_ = esp::best_target.pos;//player->model()->boneTransforms()->get(48)->get_bone_position();
 
 			if (vars->combat.targetbehindwall && val) {
@@ -175,26 +174,23 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 			float DegreeZ = sin(val) * maxDist;
 
 			Vector3 DiagonalUp = Vector3(LastLocalEye.x + DegreeX, LastLocalEye.y + max_usable_verical - 0.01f, LastLocalEye.z + DegreeZ);
+			Vector3 DiagonalUpHalf = Vector3(LastLocalEye.x + DegreeX, LastLocalEye.y + (max_usable_verical / 2) - 0.01f, LastLocalEye.z + DegreeZ);
 			Vector3 DiagonalDown = Vector3(LastLocalEye.x + DegreeX, LastLocalEye.y + -max_usable_verical - 0.01f, LastLocalEye.z + DegreeZ);
+			Vector3 DiagonalDownHalf = Vector3(LastLocalEye.x + DegreeX, LastLocalEye.y + -(max_usable_verical / 2) - 0.01f, LastLocalEye.z + DegreeZ);
 			Vector3 Horizontal = Vector3(LastLocalEye.x + DegreeX, LastLocalEye.y, LastLocalEye.z + DegreeZ);
 
-			if (vars->visual.angles)
-			{
-				Sphere(DiagonalUp, 0.1f,	col(100, 100, 100, 255), 0.05f, 0);
-				Sphere(DiagonalDown, 0.1f,	col(100, 100, 100, 255), 0.05f, 0);
-				Sphere(Horizontal, 0.1f,	col(100, 100, 100, 255), 0.05f, 0);
-			}
-
 			auto HitResultDiagonalUp = HitScan(DiagonalUp, true, val); //settings.ManipulationUp
+			auto HitResultDiagonalHalfUp = HitScan(DiagonalUpHalf, true, val); //settings.ManipulationUp
 			auto HitResultDiagonalDown = HitScan(DiagonalDown, true, val); //settings.ManipulationDown
+			auto HitResultDiagonalHalfDown = HitScan(DiagonalDownHalf, true, val); //settings.ManipulationDown
 			auto HitResultHorizontal = HitScan(Horizontal, true, val);
 
-			bool DiagonalUpLOS = false; 
+			bool DiagonalUpLOS = false;
 			//if (settings.ManipulationUp)
 			if (true)
 				//DiagonalUpLOS = LocalPlayer->checkNoclipMagicBullet(LastLocalEye, DiagonalUp) 
-				DiagonalUpLOS = misc::ValidateEyePos(LastLocalEye, DiagonalUp)
-					&& LocalPlayer->is_visible(center, LastLocalEye, 0.2f) 
+				DiagonalUpLOS = //misc::ValidateEyePos(LastLocalEye, DiagonalUp) &&
+					LocalPlayer->is_visible(center, LastLocalEye, 0.2f) 
 					&& LocalPlayer->is_visible(LastLocalEye, DiagonalUp, 0.2f)
 					&& LastLocalEye.distance(DiagonalUp) > 0.01f 
 					&& PLOS(LastLocalEye, DiagonalUp, layermask) 
@@ -203,8 +199,8 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 			bool DiagonalDownLOS = false; 
 			//if (settings.ManipulationDown) 
 			if (true)
-				DiagonalDownLOS = misc::ValidateEyePos(LastLocalEye, DiagonalDown)
-					&& LocalPlayer->is_visible(center, LastLocalEye, 0.2f)
+				DiagonalDownLOS = //misc::ValidateEyePos(LastLocalEye, DiagonalDown)
+					LocalPlayer->is_visible(center, LastLocalEye, 0.2f)
 					&& LocalPlayer->is_visible(LastLocalEye, DiagonalDown, 0.2f)
 					&& LastLocalEye.distance(DiagonalDown) > 0.01f 
 					&& PLOS(LastLocalEye, DiagonalDown, layermask) 
@@ -213,12 +209,50 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 			bool HorizontalLOS = false; 
 			//if (settings.Manipulation)
 			if (true)
-				HorizontalLOS = misc::ValidateEyePos(LastLocalEye, Horizontal)
-					&& LocalPlayer->is_visible(center, LastLocalEye, 0.2f) 
+				HorizontalLOS = //misc::ValidateEyePos(LastLocalEye, Horizontal) &&
+					LocalPlayer->is_visible(center, LastLocalEye, 0.2f) 
 					&& LocalPlayer->is_visible(LastLocalEye, Horizontal, 0.2f)
 					&& LastLocalEye.distance(Horizontal) > 0.01f 
 					&& PLOS(LastLocalEye, Horizontal, layermask) 
 					&& HitResultHorizontal.first;
+
+			bool DiagonalDownHalfLOS = false;
+			//if (settings.Manipulation)
+			if (true)
+				DiagonalDownHalfLOS = //misc::ValidateEyePos(LastLocalEye, DiagonalDownHalf) &&
+					LocalPlayer->is_visible(center, LastLocalEye, 0.2f) 
+					&& LocalPlayer->is_visible(LastLocalEye, DiagonalDownHalf, 0.2f)
+					&& LastLocalEye.distance(DiagonalDownHalf) > 0.01f
+					&& PLOS(LastLocalEye, DiagonalDownHalf, layermask)
+					&& HitResultDiagonalHalfDown.first;
+
+			bool DiagonalUpHalfLOS = false;
+			//if (settings.Manipulation)
+			if (true)
+				DiagonalUpHalfLOS = //misc::ValidateEyePos(LastLocalEye, DiagonalUpHalf) &&
+					LocalPlayer->is_visible(center, LastLocalEye, 0.2f) 
+					&& LocalPlayer->is_visible(LastLocalEye, DiagonalUpHalf, 0.2f)
+					&& LastLocalEye.distance(DiagonalUpHalf) > 0.01f
+					&& PLOS(LastLocalEye, DiagonalUpHalf, layermask)
+					&& HitResultDiagonalHalfUp.first;
+
+			if (vars->visual.angles)
+			{
+				if(DiagonalUpHalfLOS)
+					Sphere(DiagonalUpHalf, 0.1f, col(100, 100, 100, 255), 0.05f, 0);
+
+				if (DiagonalDownHalfLOS)
+					Sphere(DiagonalDownHalf, 0.1f, col(100, 100, 100, 255), 0.05f, 0);
+
+				if (DiagonalUpLOS)
+					Sphere(DiagonalUp, 0.1f, col(100, 100, 100, 255), 0.05f, 0);
+
+				if (DiagonalDownLOS)
+					Sphere(DiagonalDown, 0.1f, col(100, 100, 100, 255), 0.05f, 0);
+
+				if (HorizontalLOS)
+					Sphere(Horizontal, 0.1f, col(100, 100, 100, 255), 0.05f, 0);
+			}
 
 			if (true) {
 				if (DiagonalUpLOS || debug_test)
@@ -243,16 +277,24 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 
 				if (DiagonalDownLOS || debug_test)
 					if (vars->visual.angles)
-						Line(DiagonalDown, HitResultDiagonalDown.second, DiagonalUpLOS ? col(0, 235, 190, 255) : col(190, 0, 130, 255), 0.05f, 0, 1);
+						Line(DiagonalDown, HitResultDiagonalDown.second, DiagonalDownLOS ? col(0, 235, 190, 255) : col(190, 0, 130, 255), 0.05f, 0, 1);
+
+				if (DiagonalDownHalfLOS || debug_test)
+					if (vars->visual.angles)
+						Line(DiagonalDownHalf, HitResultDiagonalHalfDown.second, DiagonalDownHalfLOS ? col(0, 235, 190, 255) : col(190, 0, 130, 255), 0.05f, 0, 1);
+
+				if (DiagonalUpHalfLOS || debug_test)
+					if (vars->visual.angles)
+						Line(DiagonalUpHalf, HitResultDiagonalHalfUp.second, DiagonalUpHalfLOS ? col(0, 235, 190, 255) : col(190, 0, 130, 255), 0.05f, 0, 1);
 				//draw_line_(DiagonalDown, HitResultDiagonalDown.second, DiagonalDownLOS ? ImColor(0, 255, 0, 255) : ImColor(255, 0, 0, 255), 0.1);
 
 				if (HorizontalLOS || debug_test)
 					if (vars->visual.angles)
-						Line(Horizontal, HitResultHorizontal.second, DiagonalUpLOS ? col(0, 235, 190, 255) : col(190, 0, 130, 255), 0.05f, 0, 1);
+						Line(Horizontal, HitResultHorizontal.second, HorizontalLOS ? col(0, 235, 190, 255) : col(190, 0, 130, 255), 0.05f, 0, 1);
 				//draw_line_(Horizontal, HitResultHorizontal.second, HorizontalLOS ? ImColor(0, 255, 0, 255) : ImColor(255, 0, 0, 255), 0.1);
 			}
 
-			if (!DiagonalUpLOS && !DiagonalDownLOS && !HorizontalLOS)
+			if (!DiagonalUpLOS && !DiagonalDownLOS && !HorizontalLOS && !DiagonalDownHalfLOS && !DiagonalUpHalfLOS)
 			{
 				ManipulationPosition = LastLocalEye;
 				ManipStatus = false;
@@ -302,6 +344,26 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 				if (vars->combat.targetbehindwall) {
 					BehindWallStatus = true;
 					BehindWallPoistion = HitResultHorizontal.second;
+				}
+				break;
+			}
+			else if (DiagonalDownHalfLOS)
+			{
+				ManipulationPosition = DiagonalDownHalf;
+				ManipStatus = true;
+				if (vars->combat.targetbehindwall) {
+					BehindWallStatus = true;
+					BehindWallPoistion = HitResultDiagonalHalfDown.second;
+				}
+				break;
+			}
+			else if (DiagonalUpHalfLOS)
+			{
+				ManipulationPosition = DiagonalUpHalf;
+				ManipStatus = true;
+				if (vars->combat.targetbehindwall) {
+					BehindWallStatus = true;
+					BehindWallPoistion = HitResultDiagonalHalfUp.second;
 				}
 				break;
 			}

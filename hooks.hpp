@@ -507,7 +507,8 @@ namespace hooks {
 				if (vars->combat.targetbehindwall)
 				{
 					((Projectile1*)p)->Launch1();
-				}				
+				}			
+				misc::lastFiredProjectile = p;
 			}
 			if (vars->combat.targetbehindwall)
 			{
@@ -857,7 +858,14 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			Vector3 vel = player_walk_movement->get_TargetMovement();
 			auto loco = esp::local_player;
 			auto dont_move = false;
-
+			if ((vars->combat.manipulator2 || vars->combat.manipulator)
+					&& (unity::GetKey(vars->keybinds.manipulator)
+						|| misc::manipulate_vis))
+			{
+				//manipulating
+				player_walk_movement->set_TargetMovement({ 0, 0, 0 });
+				return;
+			}
 			if (!loco || loco->is_sleeping())
 				return;
 			auto time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
@@ -1339,6 +1347,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					mountable->canwielditem() = true;
 			}
 
+
 			bool kyslol = false;
 
 			if (vars->misc.TakeFallDamage && unity::GetKey(vars->keybinds.suicide)) {
@@ -1424,7 +1433,15 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 			auto item = baseplayer->GetActiveItem();
 
-			float mm_eye = ((0.01f + ((vars->desyncTime + 2.f / 60.f + 0.125f) * baseplayer->max_velocity())));
+			//float mm_eye = ((0.01f + ((vars->desyncTime + 2.f / 60.f + 0.125f) * baseplayer->max_velocity())));
+			bool IsMounted = esp::local_player->modelState()->has_flag(rust::classes::ModelState_Flag::Mounted);
+			float maxVelocity = get_maxspeed(esp::local_player);
+			if (IsMounted)
+				maxVelocity *= 4;
+			float _timeSinceLastTick = unity::get_realtimesincestartup() - esp::local_player->lastSentTickTime();
+			float timeSinceLastTickClamped = max(0.f, min(_timeSinceLastTick, 1.f));
+			float mm_eye = 0.1f + (timeSinceLastTickClamped + 2.f / 60.f) * 1.5f * maxVelocity;
+
 			if (esp::best_target.ent && held && wpn)
 			{
 				//auto mag = *reinterpret_cast<uintptr_t*>(held + 0x2C0);

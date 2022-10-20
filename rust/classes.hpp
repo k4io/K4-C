@@ -287,6 +287,10 @@ typedef struct Str
 } *str;
 
 #pragma region il2func
+static auto transgetpos = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
+
+static auto transsetpos = reinterpret_cast<void(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 0, _(""), _("UnityEngine"))));
+
 static auto Sphere = reinterpret_cast<void (*)(Vector3 vPos, float fRadius, col color, float fDuration, bool distanceFade)>(0);
 
 static auto GetNormal = reinterpret_cast<Vector3 (*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetNormal"), 1, _(""), _(""))));
@@ -480,6 +484,8 @@ public:
 float current_time;
 
 void init_bp() {
+	transsetpos = reinterpret_cast<void(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 0, _(""), _("UnityEngine"))));
+	transgetpos = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
 	get_visplayerlist = reinterpret_cast<System::Array<BasePlayer*>*(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("get_VisiblePlayerList"), -1, _(""), _(""))));
 	damageProperties = il2cpp::value(_("BaseMelee"), _("damageProperties"));
 	get_center = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_center"), 0, _(""), _(""))));
@@ -734,8 +740,15 @@ public:
 	Vector3 position() {
 		if (!(uintptr_t)this)
 			return {};
-		auto off = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
-		return off(this);
+		//auto off = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
+		return transgetpos(this);
+	}
+
+	void setposition(Vector3 pos) {
+		if (!(uintptr_t)this)
+			return;
+		//auto off = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
+		return transsetpos(this, pos);
 	}
 
 	Vector4 get_rotation() {
@@ -874,10 +887,15 @@ public:
 	FIELD(_("BaseEntity"), _("model"), model, Model*);
 
 	Vector3 GetWorldVelocity() {
-		if (!this) return Vector3(0, 0, 0);
-		auto off = reinterpret_cast<Vector3(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetWorldVelocity"), 0, _(""), _(""))));
-		if (!off) return Vector3(0, 0, 0);
-		return off(this);
+		__try {
+			if (!this) return Vector3(0, 0, 0);
+			//public Vector3 GetWorldVelocity() { }
+			typedef Vector3(*GWV)(BaseEntity*);
+			//auto off = reinterpret_cast<Vector3(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetWorldVelocity"), 0, _(""), _(""))));
+			//if (!off) return Vector3(0, 0, 0);
+			return ((GWV)(mem::game_assembly_base + oGetWorldVelocity))(this);
+		}
+		__except (true) { return Vector3::Zero(); }
 	}
 	Vector3 GetParentVelocity() {
 		if (!this) return Vector3(0, 0, 0);
@@ -1721,6 +1739,11 @@ public:
 		auto off = reinterpret_cast<void(*)(Material*, System::string, col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetColor"), 2, _("name"), _("UnityEngine"), 1)));
 		return off(this, s, c);
 	}
+	void SetFloat(System::string s, float n) {
+		if (!this) return;
+		auto off = reinterpret_cast<void(*)(Material*, System::string, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetFloat"), 2, _("name"), _("UnityEngine"), 1)));
+		return off(this, s, n);
+	}
 };
 
 class Renderer : public Component {
@@ -2256,12 +2279,14 @@ public:
 
 	bool is_sleeping()
 	{
+		if (!this) return false;
 		auto Flags = *reinterpret_cast<int*>((uintptr_t)this + playerFlags);
 		return Flags & 16;
 	}
 
 	Item* GetActiveItem()
 	{
+		if (!this) return nullptr;
 		//unsigned int ActUID = this->clActiveItem();
 		unsigned int ActUID = mem::read<unsigned int>((uintptr_t)this + 0x5D8); //private uint clActiveItem; //0x5D8
 		if (!ActUID)
@@ -2323,12 +2348,12 @@ public:
 		//auto s = string::wformat(_(L"trap [%d]: %s"), (int)get_fixedTime(), str);
 		if (vars->misc.logs)
 			console_msg((uintptr_t)this, str);
-		else {
-			freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
-			freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
-			wcscat(const_cast<wchar_t*>(str), _(L"\n"));
-			wprintf(str);
-		}
+		//else {
+		//	freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
+		//	freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
+		//	wcscat(const_cast<wchar_t*>(str), _(L"\n"));
+		//	wprintf(str);
+		//}
 	}
 };
 
@@ -2341,9 +2366,13 @@ public:
 	Bone* resolve(const wchar_t* bone_name, BasePlayer* lp) {
 		//auto lp = LocalPlayer::ent();
 		if (!this || !lp) return nullptr;
-		if (!this->boneNames() || !this->boneTransforms()) return nullptr;
-		auto names = this->boneNames();
-		auto trans = this->boneTransforms();
+
+		auto trans = *reinterpret_cast<System::Array<Transform*>**>((uintptr_t)this + 0x48);
+		auto names = *reinterpret_cast<System::Array<System::string*>**>((uintptr_t)this + 0x50);
+
+		//auto names = this->boneNames();
+		//auto trans = this->boneTransforms();
+		if (!names || !trans) return nullptr;
 
 		for (size_t i = 0; i < names->size(); i++)
 		{
@@ -2395,7 +2424,7 @@ public:
 		if (!this) return false;
 
 		typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7202688
-		return ((AAA)(mem::game_assembly_base + 0x6F7240))((uintptr_t)this, (int)g, p);
+		return ((AAA)(mem::game_assembly_base + 0x6E60B0))((uintptr_t)this, (int)g, p);
 		//return canaffordupgrade((uintptr_t)this, g, p);
 	}
 
@@ -2403,14 +2432,14 @@ public:
 		if (!this) return false;
 
 		typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7203152
-		return ((AAA)(mem::game_assembly_base + 0x6F7410))((uintptr_t)this, (int)g, p);
+		return ((AAA)(mem::game_assembly_base + 0x6E6280))((uintptr_t)this, (int)g, p);
 		//return canchangetograde((uintptr_t)this, g, p);
 	}
 
 	void Upgrade(rust::classes::BuildingGrade g, BasePlayer* p) {
 		if (!this) return;
 		typedef void (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7203152
-		return ((AAA)(mem::game_assembly_base + 0x6FAA30))((uintptr_t)this, (int)g, p);
+		return ((AAA)(mem::game_assembly_base + 0x6E98A0))((uintptr_t)this, (int)g, p);
 		//return upgradetograde((uintptr_t)this, g, p);
 	}
 };

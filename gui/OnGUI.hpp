@@ -526,8 +526,9 @@ namespace gui {
 		label = mem::read<uintptr_t>(skin + 0x38);
 
 		unity::bundle = unity::LoadFromFile(_(L"rust.assets"));
-		unity::galaxy_bundle = unity::LoadFromFile(_(L"galaxy.chams"));
-		unity::bundle_font = unity::LoadFromFile(_(L"font.assets"));
+		unity::bundle2 = unity::LoadFromFile(_(L"sampleshaderbundle"));
+		//unity::galaxy_bundle = unity::LoadFromFile(_(L"galaxy.chams"));
+		//unity::bundle_font = unity::LoadFromFile(_(L"font.assets"));
 
 		const auto set_font = [&](System::string font_name, int size) {
 			static auto font = unity::LoadAsset(unity::bundle_font, font_name, il2cpp::type_object("UnityEngine", "Font"));
@@ -539,7 +540,7 @@ namespace gui {
 		//*reinterpret_cast<uintptr_t*>(skin + 0x18) = font;
 
 		//methods::set_fontSize(label, 24);
-		set_font(_(L"tahoma.ttf"), 14);
+		//set_font(_(L"tahoma.ttf"), 14);
 
 		methods::set_alignment(label, 0);
 		methods::set_color(Color(1, 1, 1, 1));
@@ -1098,7 +1099,6 @@ namespace gui {
 
 		auto current = methods::get_current();
 		auto event_type = methods::get_type(current);
-
 		bool md = false;
 		rust::classes::KeyCode k;
 		if (LI_FIND(GetAsyncKeyState)(VK_RBUTTON) & 0x8000)
@@ -1145,6 +1145,7 @@ namespace gui {
 		//gui::Label(rust::classes::Rect{ 12, 4, 80, 20 }, _(L"trap.sh"), gui::Color(1, 1, 1, 1), true, 12);
 
 		//esp
+		return;
 		if (event_type == rust::classes::EventType::Repaint) {
 			{
 				static int cases = 0;
@@ -1208,15 +1209,14 @@ namespace gui {
 					esp::matrix = unity::get_view_matrix();
 
 					//int fff = 0;
-					if (!player_list.empty())
-						for (auto p : player_map)
-							if (vars->visual.playeresp
-								&& p.second)
-							{
-								esp::do_chams(p.second);
-								//esp::local_player->console_echo(string::wformat(_(L"[trap]: OnGUI - Caching bones for: %d"), p->userID()));
-								cache::CacheBones(p.second, esp::local_player);
-							}
+					for (auto p : player_map)
+						if (vars->visual.playeresp
+							&& p.second)
+						{
+							esp::do_chams(p.second);
+							//esp::local_player->console_echo(string::wformat(_(L"[trap]: OnGUI - Caching bones for: %d"), p->userID()));
+							//cache::CacheBones(p.second, esp::local_player);
+						}
 					//esp::start();
 
 					if (vars->misc.auto_upgrade)
@@ -2173,33 +2173,50 @@ namespace esp
 		if (!local_player) return;
 		if (!ent->is_alive() || (ent->is_sleeping() && !vars->visual.sleeper_esp)) return;
 
-		if (unity::bundle)
+		if (unity::bundle && unity::bundle2)
 		{
 			Shader* shader = 0;
-			switch (vars->visual.shader)
+			Material* mat = 0;
+			switch (vars->visual.hand_chams)
 			{
 			case 1:
-				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
-				break;
-			case 2:
 				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"SeethroughShader"), unity::GetType(_("UnityEngine"), _("Shader")));
 				break;
+			case 2:
+				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;			
 			case 3:
-				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"WireframeTransparent"), unity::GetType(_("UnityEngine"), _("Shader")));
+				mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/force field.mat"), unity::GetType(_("UnityEngine"), _("Material")));
 				break;
 			case 4:
-				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"chamslit"), unity::GetType(_("UnityEngine"), _("Shader")));
+				mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/distortionrim.mat"), unity::GetType(_("UnityEngine"), _("Material")));
+				break;
+			case 5:
+				mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/2dmat.mat"), unity::GetType(_("UnityEngine"), _("Material")));
+				break;
+			case 6:
+				shader = (Shader*)unity::LoadAsset(unity::bundle2, _(L"assets/IridescenceMetallic.shader"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 7:
+				shader = (Shader*)unity::LoadAsset(unity::bundle2, _(L"assets/IridescenceSpecular.shader"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 8:
+				shader = (Shader*)unity::LoadAsset(unity::bundle2, _(L"assets/IridescenceTransparent.shader"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 9:
+				shader = (Shader*)unity::LoadAsset(unity::bundle2, _(L"assets/fire.shader"), unity::GetType(_("UnityEngine"), _("Shader")));
 				break;
 			}
 
-			if (vars->visual.shader == 5
-				|| vars->visual.hand_chams == 3)
-			{
-				if(!unity::galaxy_material)
-					unity::galaxy_material = unity::LoadAsset(unity::galaxy_bundle, _(L"GalaxyMaterial_15"), unity::GetType(_("UnityEngine"), _("Material")));
-			}
+			//if (vars->visual.shader == 5
+			//	|| vars->visual.hand_chams == 3)
+			//{
+			//	if(!unity::galaxy_material)
+			//		unity::galaxy_material = unity::LoadAsset(unity::galaxy_bundle, _(L"GalaxyMaterial_15"), unity::GetType(_("UnityEngine"), _("Material")));
+			//}
 
-			if ((!shader && !unity::galaxy_material) && vars->visual.hand_chams < 1) return;
+
+			if ((!shader && !mat) || (vars->visual.hand_chams < 1 && vars->visual.shader < 1)) return;
 
 			//static int cases = 0;
 			//switch (cases) {
@@ -2219,50 +2236,87 @@ namespace esp
 					auto sz = *reinterpret_cast<int*>(renderers + 0x18);
 
 					for (int i = 0; i < sz; i++) {
-						//if (sz == 2) i == 1; //skips front of weapon
 						auto renderer = *reinterpret_cast<Renderer**>(renderers + 0x20 + i * 0x8);
 
 						if (!renderer) continue;
 						Material* material = renderer->GetMaterial();
 						if (!material) continue;
 
-						switch (vars->visual.hand_chams)
-						{
-						case 1:
-						{
-							Shader* s = (Shader*)unity::LoadAsset(unity::bundle, _(L"SeethroughShader"), unity::GetType(_("UnityEngine"), _("Shader")));
-							if (s)
-								material->SetShader(s);
-							break;
-						}
-						case 2:
+						if (vars->visual.hand_chams == 2)
 						{
 							auto s = (Shader*)FindShader(System::string(_(L"Standard")));
 							material->SetShader(s);
 							material->SetColor(_(L"_Color"), col(r, g, b, 0.5));
 							SetInt((uintptr_t)material, _(L"_ZTest"), 4);
-							break;
+							continue;
 						}
-						case 3:
-						{
-							if (unity::galaxy_material)
-							{
-								//unity::set_shader(material, unity::space_material);
-								//auto s = FindShader(System::string(_(L"Standard")));
-								//unity::set_shader(unity::galaxy_material, s);
-								//set_material((uintptr_t)renderer, unity::galaxy_material);
-								if((uintptr_t)renderer->GetMaterial() != unity::galaxy_material)
-									renderer->SetMaterial((Material*)unity::galaxy_material);
-								SetInt(unity::galaxy_material, _(L"_ZTest"), 8);
+
+						if (sz == 2) i == 1; //skips front of weapon
+
+						if (mat) {
+							if (material != mat) {
+								renderer->SetMaterial(mat);
+								SetInt((uintptr_t)material, _(L"_ZTest"), 8);
+								if (vars->visual.hand_chams == 6)
+								{
+									//mat->SetColor(_(L"_RimColor"), viscolor);
+								}
+								else if (vars->visual.hand_chams == 7)
+								{
+									//mat->SetColor(_(L"_Color"), viscolor);
+									//mat->SetColor(_(L"_OutlineColor"), inviscolor);
+									mat->SetFloat(_(L"_OutlineSize"), 20.f);
+								}
 							}
-							break;
 						}
+						else if (shader != material->GetShader()) {
+							if (vars->visual.shader >= 5 && unity::galaxy_material && (uintptr_t)renderer->GetMaterial() != unity::galaxy_material)
+								renderer->SetMaterial((Material*)unity::galaxy_material);
+							else material->SetShader(shader);
 						}
 					}
 				}
+				return;
 			}
 
-			if (vars->visual.shader >= 1 && (shader || unity::galaxy_material)) {
+			switch (vars->visual.shader)
+			{
+			case 1:
+				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 2:
+				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"SeethroughShader"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 3:
+				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"WireframeTransparent"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 4:
+				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"chamslit"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 5:
+				mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/force field.mat"), unity::GetType(_("UnityEngine"), _("Material")));
+				break;
+			case 6:
+				mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/distortionrim.mat"), unity::GetType(_("UnityEngine"), _("Material")));
+				break;
+			case 7:
+				mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/2dmat.mat"), unity::GetType(_("UnityEngine"), _("Material")));
+				break;
+			case 8:
+				shader = (Shader*)unity::LoadAsset(unity::bundle2, _(L"assets/IridescenceMetallic.shader"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 9:
+				shader = (Shader*)unity::LoadAsset(unity::bundle2, _(L"assets/IridescenceSpecular.shader"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 10:
+				shader = (Shader*)unity::LoadAsset(unity::bundle2, _(L"assets/IridescenceTransparent.shader"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 11:
+				shader = (Shader*)unity::LoadAsset(unity::bundle2, _(L"assets/fire.shader"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			}
+
+			if (vars->visual.shader >= 1 && (shader || mat)) {
 				uintptr_t chams_shader = 0;
 
 				//static int cases = 0;
@@ -2275,7 +2329,12 @@ namespace esp
 				//}
 				//unity::chams_shader = unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
 
-				auto _multiMesh = ent->playerModel()->_multiMesh();//mem::read<uintptr_t>(player->playerModel() + 0x2D0); //SkinnedMultiMesh _multiMesh;
+				//this breaks?
+				//auto _multiMesh = ent->playerModel()->_multiMesh();//mem::read<uintptr_t>(player->playerModel() + 0x2D0); //SkinnedMultiMesh _multiMesh;
+				//auto model = ent->playerModel();
+				auto model = *reinterpret_cast<PlayerModel**>((uintptr_t)ent + 0x4D0);
+				if (!model || (uintptr_t)model < 0xFFFF) return;
+				auto _multiMesh = *reinterpret_cast<SkinnedMultiMesh**>((uintptr_t)model + 0x2D0);
 				if (!_multiMesh) return;
 				auto render = _multiMesh->get_Renderers(); //get_Renderers(_multiMesh);
 				if (!render) return;
@@ -2285,24 +2344,40 @@ namespace esp
 					if (!renderer) continue;
 					auto material = renderer->GetMaterial();
 					if (!material) continue;
-					if (shader || (vars->visual.shader >= 5 && unity::galaxy_material))
+					auto viscolor = col(vars->colors.players.chams.visible[0], vars->colors.players.chams.visible[1], vars->colors.players.chams.visible[2], 1);
+					auto inviscolor = col(vars->colors.players.chams.invisible[0], vars->colors.players.chams.invisible[1], vars->colors.players.chams.invisible[2], 1);
+
+					if (vars->visual.rainbow_chams)
 					{
-						if (shader != material->GetShader()) {
+						viscolor = col(r, g, b, 1);
+						inviscolor = col(1.f - r, 1.f - g, 1.f - b, 1);
+					}
+
+					if (shader || mat)//(vars->visual.shader >= 5 && unity::galaxy_material))
+					{
+						if (mat) {
+							if (material != mat) {
+								renderer->SetMaterial(mat);
+								SetInt((uintptr_t)material, _(L"_ZTest"), 8);
+								if (vars->visual.shader == 6)
+								{
+									mat->SetColor(_(L"_RimColor"), viscolor);
+								}
+								else if (vars->visual.shader == 7)
+								{
+									mat->SetColor(_(L"_Color"), viscolor);
+									mat->SetColor(_(L"_OutlineColor"), inviscolor);
+									mat->SetFloat(_(L"_OutlineSize"), 20.f);
+								}
+							}
+						}
+						else if (shader != material->GetShader()) {
 							if (vars->visual.shader >= 5 && unity::galaxy_material && (uintptr_t)renderer->GetMaterial() != unity::galaxy_material)
 								renderer->SetMaterial((Material*)unity::galaxy_material);
 							else material->SetShader(shader);
 						}
 						else
 						{
-							auto viscolor = col(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1);
-							auto inviscolor = col(vars->visual.InvRcolor, vars->visual.InvGcolor, vars->visual.InvBcolor, 1);
-
-							if (vars->visual.rainbow_chams)
-							{
-								viscolor = col(r, g, b, 1);
-								inviscolor = col(1.f - r, 1.f - g, 1.f - b, 1);
-							}
-
 							switch (vars->visual.shader)
 							{
 							case 1:

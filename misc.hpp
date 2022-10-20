@@ -255,6 +255,8 @@ namespace misc
 		int debuglevel = 4;
 	}
 
+	Projectile* lastFiredProjectile = nullptr;
+
 	TickInterpolator ticks;
 	TimeAverageValueData ticksPerSecond = {};
 	TickHistory tickHistory;
@@ -376,7 +378,7 @@ namespace misc
 	bool ValidateEyePos(Vector3 pos,
 		Vector3 offset = Vector3(0, 0, 0))
 	{
-		bool flag = false;
+		bool flag = true;
 		auto loco = esp::local_player;
 		auto eyepos = loco->eyes()->position() + offset;
 		float num = 1.5f;
@@ -395,7 +397,7 @@ namespace misc
 
 		if (num10 > num9)
 		{
-			flag = true;
+			flag = false;
 		}
 
 		auto t = loco->transform();
@@ -404,21 +406,26 @@ namespace misc
 			
 		//LOS from eyes.center to eyes.position on server, i think eyes.position is lastSentTick.pos
 		//if(loco->is_visible(, pos))
-		if (!loco->is_visible(cLastTickPos, eyepos, 0.18f))
-			flag = true;
+		
+		if (unity::LineOfSightRadius(cLastTickPos, eyepos, (uintptr_t)esp::local_player))
+			flag = false;
+		//if (!loco->is_visible(cLastTickPos, eyepos, 0.18f)) {
+		//	esp::local_player->console_echo(_(L"[trap]: ValidateEyePos - eye_los caught"));
+		//	flag = true;
+		//}
 
 		if (loco_position.distance(loco->eyes()->position()) > 0.06f
-			&& TestNoClipping(loco, cLastTickPos, loco_position, .3f))
+			&& TestNoClipping(loco, cLastTickPos, loco_position, .29f))
 			//&& TestNoClipping(loco, cLastTickEyePos, position2))
 		{
-			flag = true;
+			flag = false;
 		}
 		else if (loco_position.distance(loco->eyes()->position()) > 0.02f
 			&& TestNoClipping(loco, actual_eye_pos, eyepos)) {
-			flag = true;
+			flag = false;
 		}
 
-		if (flag)
+		if (!flag)
 		{
 			//AddViolation(loco, 
 			//	antihacktype::EyeHack, 
@@ -443,6 +450,48 @@ namespace misc
 			misc::best_lean = Vector3(0, 0, 0);
 			return true;
 		}
+		auto layermask = 1218519041;
+		auto HitScan = [&](Vector3 from, bool do_ = true, int val = 0) {
+			Vector3 head_pos_ = esp::best_target.pos;//player->model()->boneTransforms()->get(48)->get_bone_position();
+
+			if (vars->combat.targetbehindwall && val) {
+				if ((val % 20) == 0) {
+					Vector3 RealTargetPosition = Vector3(pos.x, pos.y + 1.15f, pos.z);
+					bool LOS = PLOS(from, RealTargetPosition, layermask) && PLOS(pos, RealTargetPosition, layermask);
+					//draw_line_(trg_pos, RealTargetPosition, LOS ? Vector4(0, 255, 0, 255) : ImColor(255, 0, 0, 255));
+					if (LOS)
+						return std::make_pair(LOS, RealTargetPosition);
+				}
+
+				float DegreeEnemyx = cos(val) * 1.7f;
+				float DegreeEnemyz = sin(val) * 1.7f;
+				Vector3 RealTargetPosition = Vector3(pos.x + DegreeEnemyx, pos.y, pos.z + DegreeEnemyz);
+				bool LOS = PLOS(from, RealTargetPosition, layermask) && PLOS(pos, RealTargetPosition, layermask);
+
+				return std::make_pair(LOS, RealTargetPosition);
+			}
+
+			if (!do_)
+				return std::make_pair(false, head_pos_);
+
+			if (vars->combat.HitScan) {
+				if (!esp::best_target.ent) return std::make_pair(false, head_pos_);
+				for (auto bone : { 48, 3, 4, 15, 14, 26, 57 }) {
+					Vector3 TargetPosition;
+					if (bone == 48) TargetPosition = head_pos_;
+					else TargetPosition = esp::best_target.ent->model()->boneTransforms()->get(bone)->position();
+					if (PLOS(from, TargetPosition, layermask)) {
+						settings::HitScanBone = bone;
+						return std::make_pair(true, TargetPosition);
+					}
+				}
+				return std::make_pair(false, head_pos_);
+			}
+			else
+				return std::make_pair(PLOS(from, head_pos_, layermask), head_pos_);
+		};
+
+		//HitScan returns pair { lineofsight, targetposition }
 
 		auto do_check = [&](Vector3 a) {
 			Vector3 p = re_p + a;
@@ -454,20 +503,24 @@ namespace misc
 			//	return false;
 
 			if (vars->visual.angles)
-				Sphere(p, 0.05f, col(10, 30, 90, 1), 0.02f, 10);
+				Sphere(p, 0.05f, col(10, 30, 90, 1), 0.01f, 10);
 
 			if (!ply->is_visible(p, pos))
 			{
-				if (!vars->combat.thick_bullet || !vars->combat.shoot_at_fatbullet) return false;
+				if (!vars->combat.thick_bullet || !vars->combat.targetbehindwall) return false;
 				bool t = false;
 				Vector3 z = pos;
 				//pos.y -= -0.2f; //imagine aiming at chest?????????
-				std::array<Vector3, 5> positions = {
+				std::array<Vector3, 9> positions = {
 					z + Vector3(0, .3f, 0),
-					z + Vector3(.9f, 0, 0),
-					z + Vector3(-.9f, 0, 0),
-					z + Vector3(0, 0, .9f),
-					z + Vector3(0, 0, -.9f)
+					z + Vector3(vars->combat.thickness, 0, 0),
+					z + Vector3(-vars->combat.thickness, 0, 0),
+					z + Vector3(0, 0, vars->combat.thickness),
+					z + Vector3(0, 0, -vars->combat.thickness),
+					z + Vector3(vars->combat.thickness / 2, 0, 0),
+					z + Vector3(-vars->combat.thickness / 2, 0, 0),
+					z + Vector3(0, 0, vars->combat.thickness / 2),
+					z + Vector3(0, 0, -vars->combat.thickness / 2)
 				};
 				////Line(p, pos + Vector3(0, 1, 0), col(1,1,1,1), 10.f, true, false);
 				for (auto v : positions) {
@@ -490,11 +543,14 @@ namespace misc
 			if (ValidateEyePos(p))
 				return false;
 
+			if (vars->visual.angles)
+				Line(p, pos, { r * 100, g * 100, b * 100, 1 }, (vars->desyncTime * 5.f), true, true);
+
 			misc::best_lean = a;
 			return true;
 		};
 
-		for (float y = 1.5f; y > -1.5f; y -= vars->combat.thick_bullet ? 0.3f : 0.1f) {
+		for (float y = 1.5f; y > -1.5f; y -= vars->combat.targetbehindwall ? 0.2f : 0.1f) {
 			int points = vars->combat.thick_bullet ? 7 : 20;
 			float step = (M_PI_2) / points;
 			float x, z, current = 0;
@@ -1019,19 +1075,23 @@ namespace misc
 			auto lppos = lp->model()->boneTransforms()->get(48)->position();
 			//maybe check for manipulator
 			for (auto p : player_map)
-				if (p.second && (p.second->is_alive() && (!vars->visual.sleeper_esp && p.second->is_sleeping())))
+				if (p.second && (p.second->is_alive() && (!p.second->is_sleeping())))
 				{
 					auto model = p.second->model();
 					if (model) {
-						auto trans = model->boneTransforms()->get(48);
-						if (trans)
+						//auto trans = model->boneTransforms()->get(48);
+						auto bonetransforms = *reinterpret_cast<System::Array<Transform*>**>(model + 0x48);
+						if (bonetransforms)
 						{
-							auto pos = trans->position();
-							auto visible = lp->is_visible(pos, lppos);
-							if (visible
-								&& pos.distance(lppos) < vars->misc.autoattackdist
-								&& !p.second->is_local_player())
-								internal_playerlist.push_back(p.second);
+							auto trans = bonetransforms->get(48);
+							if (trans) {
+								auto pos = trans->position();
+								auto visible = lp->is_visible(pos, lppos);
+								if (visible
+									&& pos.distance(lppos) < vars->misc.autoattackdist
+									&& !p.second->is_local_player())
+									internal_playerlist.push_back(p.second);
+							}
 						}
 					}
 				}

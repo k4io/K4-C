@@ -86,19 +86,19 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 	//memu
 	im::NewFrame();
-	__try {
-		if (render.NewFrame(pSwapChain))
-		{
-			new_frame();
-		}
-		render.EndFrame();
-		if (vars->open)
-		{
-			Gui::Render();
-		}
-	} __except(true) {
-		esp::local_player->console_echo(_(L"[trap]: ERROR. Crash inside: " __FUNCTION__));
+	if (render.NewFrame(pSwapChain))
+	{
+		new_frame();
 	}
+	render.EndFrame();
+	if (vars->open)
+	{
+		Gui::Render();
+	}
+	//__try {
+	//} __except(true) {
+	//	esp::local_player->console_echo(_(L"[trap]: ERROR. Crash inside: " __FUNCTION__));
+	//}
 	im::End();
 	
 	im::Render();
@@ -122,6 +122,7 @@ DWORD WINAPI MainThread(LPVOID lpReserved)
 	return TRUE;
 }
 
+float placeholder = 1.f;
 bool DllMain(HMODULE hmodule)
 {
 	if (!has_initialized) {
@@ -137,16 +138,16 @@ bool DllMain(HMODULE hmodule)
 		CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)MainThread, hmodule, 0, 0));
 		//init cheat?
 		auto s = LI_FIND(getenv)(_("APPDATA"));
-		auto p = s + std::string(_("\\trap"));
+		auto p = s + std::string(_("\\trap\\"));
+		vars->data_dir = p;
 		CreateDirectoryA(p.c_str(), 0);
-		p = p + std::string(_("\\configs"));
+		p = p + std::string(_("configs"));
 		CreateDirectoryA(p.c_str(), 0);
 
 		mem::game_assembly_base = LI_MODULE_SAFE_(_("GameAssembly.dll"));
 		mem::unity_player_base = LI_MODULE_SAFE_(_("UnityPlayer.dll"));
 
-		
-		AllocConsole();
+		//AllocConsole();
 
 
 		il2cpp::init();

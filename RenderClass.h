@@ -1,5 +1,6 @@
 #pragma once
 #include <d2d1.h>
+//#include <wincodec.h>
 #include <dwrite_1.h>
 #include <intrin.h>
 #include "utils/vector.hpp"
@@ -12,6 +13,7 @@
 #pragma comment(lib, "gdi32.lib")
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "dwrite.lib")
+//#pragma comment(lib, "windowscodecs.lib")
 
 D3DCOLOR FLOAT4TOD3DCOLOR(float Col[])
 {
@@ -43,6 +45,47 @@ private:
 		for (; *TempStr; ++TempStr);
 		return (UINT)(TempStr - Str);
 	}
+
+	ID2D1Bitmap* custom_box_bitmap = NULL;
+
+	ID2D1Bitmap* boxBitmap = nullptr;
+
+	//HRESULT LoadBitmapFromFile(const wchar_t* filename, ID2D1Bitmap** pBitmap, bool custombox = false)
+	//{
+	//	HRESULT hr = S_FALSE;
+	//	IWICImagingFactory* wic_factory = NULL;
+	//	IWICBitmapDecoder* decoder = NULL;
+	//	IWICBitmapFrameDecode* frame = NULL;
+	//	IWICFormatConverter* converter = NULL;
+	//
+	//	hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, reinterpret_cast<void**>(&wic_factory));
+	//	if FAILED(hr) goto clenaup;
+	//
+	//	hr = wic_factory->CreateDecoderFromFilename(filename, NULL, GENERIC_READ, WICDecodeMetadataCacheOnLoad, &decoder);
+	//	if FAILED(hr) goto clenaup;
+	//
+	//	hr = decoder->GetFrame(0, &frame);
+	//	if FAILED(hr) goto clenaup;
+	//
+	//	hr = wic_factory->CreateFormatConverter(&converter);
+	//	if FAILED(hr) goto clenaup;
+	//
+	//	hr = converter->Initialize(frame, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.f, WICBitmapPaletteTypeMedianCut);
+	//	if FAILED(hr) goto clenaup;
+	//
+	//	if (custombox)
+	//		hr = Canvas->CreateBitmapFromWicBitmap(converter, 0, &boxBitmap);
+	//	else
+	//		hr = Canvas->CreateBitmapFromWicBitmap(converter, 0, pBitmap);
+	//	if FAILED(hr) goto clenaup;
+	//
+	//clenaup:
+	//	decoder->Release();
+	//	converter->Release();
+	//	frame->Release();
+	//	wic_factory->Release();
+	//	return hr;
+	//}
 
 	__declspec(noinline) bool InitRender(IDXGISwapChain* SwapChain)
 	{
@@ -123,6 +166,22 @@ public:
 		if (state == D2DERR_RECREATE_TARGET)
 			ResetCanvas();
 	}
+
+	////custom box
+	//__forceinline HRESULT SetCustomBox(std::string image_path) {
+	//	std::wstring ws(image_path.begin(), image_path.end());
+	//	return LoadBitmapFromFile(ws.c_str(), &boxBitmap, true);
+	//}
+	//
+	//__forceinline void DrawCustomBox(const Vector2& start, const Vector2& sz) {
+	//	if (!boxBitmap) return;
+	//	D2D1_SIZE_F size = boxBitmap->GetSize();
+	//	Canvas->DrawBitmap(boxBitmap, 
+	//		D2D1::RectF(start.x, start.y, start.x + sz.x, start.y + sz.y), 
+	//		1.0f, 
+	//		D2D1_BITMAP_INTERPOLATION_MODE_LINEAR, 
+	//		D2D1::RectF(0, 0, size.width, size.height));
+	//}
 
 	//line
 	__forceinline void Line(const Vector2& Start, const Vector2& End, const D2D1::ColorF& Clr, float Thick = 1.5f)
@@ -278,9 +337,9 @@ public:
 	}
 
 	//text
-	__forceinline Vector2 StringCenter(const Vector2& Start, const wchar_t* Str, const D2D1::ColorF& Clr = D2D1::ColorF(D2D1::ColorF::White), bool outline = true)
+	__forceinline Vector2 StringCenter(const Vector2& Start, const wchar_t* Str, const D2D1::ColorF& Clr = D2D1::ColorF(D2D1::ColorF::White), bool outline = true, float fontsize = 12.f)
 	{
-		if (vars->visual.text_background_box)
+		if (vars->visual.text_background_box && outline)
 		{
 			SolidColor->SetColor(D2D1::ColorF(D2D1::ColorF::Black));
 			IDWriteTextLayout* TextLayout;
@@ -288,6 +347,7 @@ public:
 			DWRITE_TEXT_METRICS TextInfo;
 			TextLayout->GetMetrics(&TextInfo);
 			Vector2 TextSize = { TextInfo.width, TextInfo.height };
+			TextLayout->SetFontSize(fontsize, { 20, (uint32_t)std::wstring(Str).size() });
 			Vector2 st = { Start.x - (TextSize.x / 2) - 3, Start.y - (TextSize.y / 2) - 1 };
 			TextSize.x += 5; TextSize.y += 2;
 			switch (vars->visual.text_background_box) {
@@ -302,6 +362,12 @@ public:
 				//RoundedRectangle({ st.x, st.y }, TextSize, { 0.21, 0.21, 0.21, 1 }, 4, 0.5f);
 				break;
 			}
+		}
+		if (outline) {
+			StringCenter({ Start.x - 1, Start.y }, Str, { 0, 0, 0, 1 }, false);
+			StringCenter({ Start.x + 1, Start.y }, Str, { 0, 0, 0, 1 }, false);
+			StringCenter({ Start.x, Start.y - 1 }, Str, { 0, 0, 0, 1 }, false);
+			StringCenter({ Start.x, Start.y + 1 }, Str, { 0, 0, 0, 1 }, false);
 		}
 
 		SolidColor->SetColor(Clr); IDWriteTextLayout* TextLayout; TextEngine->CreateTextLayout(Str, this->wcslen(Str), TextFormat, 200.f, 100.f, &TextLayout);

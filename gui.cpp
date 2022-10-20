@@ -832,7 +832,9 @@ namespace Gui
 			im::Combo(_("Hitboxes"), &vars->combat.hitbox,
 				_("Head\0Body\0Upperbody\0Penis\0Hands\0Legs\0Feet"));
 			im::Checkbox(_("Randomize hitboxes"), &vars->combat.randomize);
-			im::Checkbox(_("Manipulator"), &vars->combat.manipulator2);
+			im::Checkbox(_("Hitscan"), &vars->combat.HitScan);
+			//im::Checkbox(_("Manipulator"), &vars->combat.manipulator2);
+			im::Checkbox(_("Manipulator"), &vars->combat.manipulator);
 			//im::Checkbox(_("Manipulator2"), &vars->combat.manipulator);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(50, 15));
@@ -907,7 +909,8 @@ namespace Gui
 				_("None\0Full\0Rounded"));
 			im::Combo(_("Box type"), &vars->visual.boxtype,
 				_("None\0Full\0Corner\0Cube\0Box"));
-			//im::Checkbox(_("Full box"), &vars->visual.full_box);
+			//im::Checkbox(_("Custom box"), &vars->visual.custombox);
+			//im::InputTextWithHint(_("##File"), _("filename"), vars->visual.boxfilename, 32);
 			//im::Checkbox(_("Corner box"), &vars->visual.corner_box);
 			//im::Checkbox(_("3D Cube"), &vars->visual.cube);
 			im::Checkbox(_("Crosshair name"), &vars->visual.midhealth);
@@ -935,6 +938,7 @@ namespace Gui
 			im::SliderFloat(_("Stars"), &vars->visual.staramount, 1.f, 1000.f, _("%.0f"));
 			im::SliderFloat(_("Brightness"), &vars->visual.day, 0.0f, 10.0f, _("%.0f"), 1.f);
 			im::SliderFloat(_("Nightness"), &vars->visual.night, 0.0f, 10.0f, _("%.0f"), 1.f);
+			//im::Checkbox(_("Follow projectiles"), &vars->visual.followprojectiles);
 			im::Checkbox(_("Manipulator angles"), &vars->visual.angles);
 			im::EndChild();
 		}
@@ -946,11 +950,11 @@ namespace Gui
 			im::Separator();
 			im::Checkbox(_("Rainbow chams"), &vars->visual.rainbow_chams);
 			im::Combo(_("Players"), &vars->visual.shader,
-				_("None\0Normal\0Seethrough\0Wireframe\0Lit\0Galaxy"));
+				_("None\0Normal\0Seethrough\0Wireframe\0Lit\0Force field\0Distort rim\0Layered"));
 			im::Combo(_("Hands"), &vars->visual.hand_chams,
-				_("None\0Seethrough\0Normal\0Galaxy"));
+				_("None\0Seethrough\0Normal\0Force field\0Distort rim\0Layered"));
 			im::Combo(_("Rocks"), &vars->visual.rock_chams,
-				_("None\0Normal\0Seethrough\0Wireframe\0Lit\0Galaxy"));
+				_("None\0Seethrough\0Normal\0Layered\0Metallic\0Specular\0Transparent\0Fire"));
 			im::EndChild();
 		}
 	}

@@ -31,7 +31,7 @@ namespace unity {
 
 	//static auto LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), -1, _(""), _(""))));
 
-	static auto LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), 5, _(""), _(""))));
+	//static auto LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), 5, _(""), _(""))));
 	//static auto LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), -1, _(""), _(""))));
 
 	static auto LineOfSightInternal = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightInternal"), -1, _(""), _(""))));
@@ -93,7 +93,7 @@ namespace unity {
 
 		LineOfSight = reinterpret_cast<bool(*)(Vector3, Vector3, int, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSight"), -1, _(""), _(""))));
 
-		LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), 5, _(""), _(""))));
+		//LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), 5, _(""), _(""))));
 
 		//GetKey = reinterpret_cast<bool(*)(rust::classes::KeyCode)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("GetKeyInt"), 1, _(""), _("UnityEngine"))));
 
@@ -128,6 +128,7 @@ namespace unity {
 	}
 
 	uintptr_t bundle;
+	uintptr_t bundle2;
 	uintptr_t galaxy_bundle;
 	uintptr_t bundle_font;
 	uintptr_t chams_shader_normal;
@@ -152,17 +153,16 @@ namespace unity {
 		return il2cpp::type_object(space, name);
 	}
 
-	bool is_visible(Vector3 source, Vector3 destination, uintptr_t ent, float p1 = 0.18f) {
+	bool LineOfSightRadius(Vector3 source, Vector3 destination, uintptr_t ent, float p1 = 0.18f) {
 		auto layer = (int)rust::classes::Layers::ProjectileLineOfSightCheck | (int)rust::classes::Layers::Terrain | (int)rust::classes::Layers::z;
 		typedef bool (*AAA)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t);//real rust 0x50F790         //cracked 0x50ED80
 
-		//real rust 0x52D200
-		//alkad rust 0x52C6A0
+		return ((AAA)(mem::game_assembly_base + oLineOfSightRadius))(source, destination, (rust::classes::Layers)layer, p1, ent);
+	}
 
-		return ((AAA)(mem::game_assembly_base + oLineOfSightRadius))(source, destination, rust::classes::Layers(layer), p1, ent)
-			&& ((AAA)(mem::game_assembly_base + oLineOfSightRadius))(destination, source, rust::classes::Layers(layer), p1, ent);
-		//return LineOfSightRadius(source, destination, rust::classes::Layers(layer), p1, ent)
-		//	&& LineOfSightRadius(destination, source, rust::classes::Layers(layer), p1, ent);
+	bool is_visible(Vector3 source, Vector3 destination, uintptr_t ent, float p1 = 0.18f) {
+		return LineOfSightRadius(source, destination, ent, p1)
+			&& LineOfSightRadius(destination, source, ent, p1);
 	}
 
 	auto camera = unity::get_main_camera();
