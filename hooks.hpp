@@ -1163,53 +1163,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		PerformanceUI_Update(instance);
 	}
 
-	Object* hk_monobehaviour_coroutine(MonoBehaviour* a1, Object* un2)
-	{
-		if (vars->misc.fastloot) {
-			auto method = il2cpp::method(_("ItemIcon"), _("SetTimedLootAction"));
-			if (CALLED_BY(method, 0x656)) {
-				*reinterpret_cast<float*>(un2 + 0x28) = -0.2f;
-			}
-		}
-
-		auto coroutine = il2cpp::method(_("MonoBehaviour"), _("StartCoroutine"), 1, _(""), _("UnityEngine"));
-		return reinterpret_cast<Object * (*)(MonoBehaviour*, Object*)>(coroutine)(a1, un2);
-	}
-
-	bool hk_dohit(Projectile* p, HitTest* ht, Vector3 point, Vector3 n) {
-		if (p->authoritative())
-		{
-			if (vars->combat.pierce)
-			{
-				if (ht->HitEntity()) {
-					auto class_name = reinterpret_cast<BaseCombatEntity*>(ht->HitEntity())->get_class_name();
-					if (!strcmp(class_name, _("CargoShip"))
-						|| !strcmp(class_name, _("BaseOven"))
-						|| !strcmp(class_name, _("TreeEntity"))
-						|| !strcmp(class_name, _("OreResourceEntity"))
-						|| !strcmp(class_name, _("CH47HelicopterAIController"))
-						|| !strcmp(class_name, _("MiniCopter"))
-						|| !strcmp(class_name, _("BoxStorage"))
-						|| !strcmp(class_name, _("Workbench"))
-						|| !strcmp(class_name, _("VendingMachine"))
-						|| !strcmp(class_name, _("Barricade"))
-						|| !strcmp(class_name, _("BuildingPrivlidge"))
-						|| !strcmp(class_name, _("LootContainer"))
-						|| !strcmp(class_name, _("HackableLockedCrate"))
-						|| !strcmp(class_name, _("ResourceEntity"))
-						|| !strcmp(class_name, _("RidableHorse"))
-						|| !strcmp(class_name, _("MotorRowboat"))
-						|| !strcmp(class_name, _("ScrapTransportHelicopter"))
-						|| !strcmp(class_name, _("JunkPile"))
-						|| !strcmp(class_name, _("MiningQuarry"))
-						|| !strcmp(class_name, _("WaterCatcher")))
-						return false;
-				}
-			}
-		}
-		return ((hk_defs::dhit)(mem::game_assembly_base + 0x808C20))(p, ht, point, n);
-	}
-
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
 	{
 		//if(!do_fixed_update_ptr)
@@ -1527,7 +1480,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 			else misc::manipulate_vis = false;
 
-			if (vars->misc.speedhack || unity::GetKey(vars->keybinds.timescale)) {
+			if (vars->misc.speedhack && unity::GetKey(vars->keybinds.timescale)) {
 				set_timeScale(vars->misc.speedhackspeed);
 				is_speeding = true;
 			}
@@ -1670,7 +1623,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					};
 
 					if (target.ent
-						&& target.visible
 						&& vars->combat.aimbot
 						&& unity::GetKey(vars->keybinds.aimbot))
 					{
@@ -1854,7 +1806,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				{
 					//esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - sending RPC_Assist to player %s"), ((BasePlayer*)target.ent)->_displayName()));
 
-					if (!target.is_heli && target.distance <= 5 && target.ent->health() <= 4 && target.visible)
+					if (!target.is_heli && target.distance <= 5 && HasPlayerFlag((BasePlayer*)target.ent, rust::classes::PlayerFlags::Wounded) && unity::LineOfSightRadius(target.pos, baseplayer->eyes()->position(), (uintptr_t)esp::local_player))
 						target.ent->ServerRPC(_(L"RPC_Assist"));
 				}
 			}

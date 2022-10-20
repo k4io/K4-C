@@ -677,6 +677,17 @@ public:
 		auto bp = *reinterpret_cast<uintptr_t*>(this);
 		return (char*)*reinterpret_cast<uintptr_t*>(bp + 0x10);
 	}
+
+	template<typename T = uintptr_t>
+	T* GetComponent(uintptr_t type) {
+		if (!this || !type) return nullptr;
+		return (T*)get_component((uintptr_t)this, type);
+	}
+
+	System::list<uintptr_t>* GetComponentsInChildren(uintptr_t type) {
+		if (!this || !type) return nullptr;
+		return reinterpret_cast<System::list<uintptr_t>*>(get_components_in_children((uintptr_t)this, type));
+	}
 };
 
 class GameObject : public Object {

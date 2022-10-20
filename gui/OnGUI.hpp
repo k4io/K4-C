@@ -525,8 +525,8 @@ namespace gui {
 		skin = methods::get_skin();
 		label = mem::read<uintptr_t>(skin + 0x38);
 
-		unity::bundle = unity::LoadFromFile(_(L"rust.assets"));
-		unity::bundle2 = unity::LoadFromFile(_(L"sampleshaderbundle"));
+		unity::bundle = unity::LoadFromFile(_(L"RustClient_Data\\assets1.shared "));
+		unity::bundle2 = unity::LoadFromFile(_(L"RustClient_Data\\assets2.shared"));
 		//unity::galaxy_bundle = unity::LoadFromFile(_(L"galaxy.chams"));
 		//unity::bundle_font = unity::LoadFromFile(_(L"font.assets"));
 
@@ -1145,7 +1145,6 @@ namespace gui {
 		//gui::Label(rust::classes::Rect{ 12, 4, 80, 20 }, _(L"trap.sh"), gui::Color(1, 1, 1, 1), true, 12);
 
 		//esp
-		return;
 		if (event_type == rust::classes::EventType::Repaint) {
 			{
 				static int cases = 0;
@@ -2092,82 +2091,6 @@ namespace esp
 		}
 	}
 
-	void rock_chams(BaseEntity* ent) {
-		Shader* shader = 0;
-		if (vars->visual.rock_chams >= 1) {
-			switch (vars->visual.rock_chams)
-			{
-			case 1:
-				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
-				break;
-			case 2:
-				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"SeethroughShader"), unity::GetType(_("UnityEngine"), _("Shader")));
-				break;
-			case 3:
-				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"WireframeTransparent"), unity::GetType(_("UnityEngine"), _("Shader")));
-				break;
-			case 4:
-				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"chamslit"), unity::GetType(_("UnityEngine"), _("Shader")));
-				break;
-			case 5:
-				if (!unity::galaxy_material)
-					unity::galaxy_material = unity::LoadAsset(unity::galaxy_bundle, _(L"GalaxyMaterial_15"), unity::GetType(_("UnityEngine"), _("Material")));
-			}
-
-			auto renderers = ((Networkable*)ent)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
-
-			if (renderers)
-			{
-				auto sz = *reinterpret_cast<int*>(renderers + 0x18);
-
-				for (int i = 0; i < sz; i++) {
-					//if (sz == 2) i == 1; //skips front of weapon
-					auto renderer = *reinterpret_cast<Renderer**>(renderers + 0x20 + i * 0x8);
-
-					if (!renderer) continue;
-					Material* material = renderer->GetMaterial();
-					if (!material) continue;
-					auto viscolor = col(vars->colors.players.chams.visible[0], 
-						vars->colors.players.chams.visible[1], 
-						vars->colors.players.chams.visible[2], 1);
-					auto inviscolor = col(vars->colors.players.chams.invisible[0],
-						vars->colors.players.chams.invisible[1], 
-						vars->colors.players.chams.invisible[2], 1);
-
-					if (vars->visual.rock_chams == 5) {
-						if ((uintptr_t)material != unity::galaxy_material && unity::galaxy_material)
-							renderer->SetMaterial((Material*)unity::galaxy_material);
-						continue;
-					}
-
-					if (vars->visual.rainbow_chams)
-					{
-						viscolor = col(r, g, b, 1);
-						inviscolor = col(1.f - r, 1.f - g, 1.f - b, 1);
-					}
-
-					switch (vars->visual.rock_chams)
-					{
-					case 1:
-						material->SetColor(_(L"_ColorVisible"), viscolor);
-						material->SetColor(_(L"_ColorBehind"), inviscolor);
-						SetInt((uintptr_t)material, _(L"_ZTest"), 1);
-						break;
-					case 3:
-						material->SetColor(_(L"_WireColor"), viscolor);
-						SetInt((uintptr_t)material, _(L"_ZTest"), 1);
-						break;
-					case 4:
-						material->SetColor(_(L"_ColorVisible"), viscolor);
-						material->SetColor(_(L"_ColorBehind"), inviscolor);
-						SetInt((uintptr_t)material, _(L"_ZTest"), 1);
-						break;
-					}
-				}
-			}
-		}
-	}
-
 	void do_chams(BasePlayer* ent)
 	{
 		if (!local_player) return;
@@ -2213,10 +2136,10 @@ namespace esp
 			//{
 			//	if(!unity::galaxy_material)
 			//		unity::galaxy_material = unity::LoadAsset(unity::galaxy_bundle, _(L"GalaxyMaterial_15"), unity::GetType(_("UnityEngine"), _("Material")));
-			//}
+			//}	
 
 
-			if ((!shader && !mat) || (vars->visual.hand_chams < 1 && vars->visual.shader < 1)) return;
+			if ((!shader && !mat) && (vars->visual.hand_chams < 1 && vars->visual.shader < 1)) return;
 
 			//static int cases = 0;
 			//switch (cases) {
@@ -2276,7 +2199,6 @@ namespace esp
 						}
 					}
 				}
-				return;
 			}
 
 			switch (vars->visual.shader)

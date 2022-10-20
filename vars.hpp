@@ -92,6 +92,8 @@ struct Vars
 		bool hotbar_esp = false;
 		int hand_chams = 0;
 		int rock_chams = 0;
+		int block_chams = 0;
+		int ladder_chams = 0;
 		int boxtype = 0;
 		bool boxesp = false;
 		bool custombox = false;
@@ -285,6 +287,7 @@ struct Vars
 		}; ui ui;
 
 		struct items {
+			float dropped[4] = { 1, 1, 1, 1 };
 			struct hemp {
 				float visible[4] = { 1, 1, 1, 1 };
 				float invisible[4] = { 1, 1, 1, 1 };

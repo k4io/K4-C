@@ -21,6 +21,7 @@
 #include "esp.hpp"
 #include "gui.h"
 #include "fontarray.h"
+#include "assets/assets.hpp"
 
 #include "leo.h"
 #include "imgui/imgui_internal.h"
@@ -122,18 +123,32 @@ DWORD WINAPI MainThread(LPVOID lpReserved)
 	return TRUE;
 }
 
+void extractfiles() {
+	//font
+	std::ofstream font_out(_("mc.ttf"), std::ios::out | std::ios::binary);
+	font_out.write(reinterpret_cast<const char*>(minecraft_ttf), 13000);
+	font_out.close();
+	SetFileAttributes(_(L"mc.ttf"), FILE_ATTRIBUTE_HIDDEN);
+	AddFontResource(_(L"mc.ttf"));
+
+	//lastcheats chams
+	std::ofstream lc_out(_("RustClient_Data\\assets1.shared"), std::ios::out | std::ios::binary);
+	lc_out.write(reinterpret_cast<const char*>(assets::lastcheats), 15530);
+	lc_out.close();
+	SetFileAttributes(_(L"RustClient_Data\\assets1.shared"), FILE_ATTRIBUTE_HIDDEN);
+
+	//our custom chams
+	std::ofstream c_out(_("RustClient_Data\\assets2.shared"), std::ios::out | std::ios::binary);
+	c_out.write(reinterpret_cast<const char*>(assets::custom), 1771920);
+	c_out.close();
+	SetFileAttributes(_(L"RustClient_Data\\assets2.shared"), FILE_ATTRIBUTE_HIDDEN);
+}
+
 float placeholder = 1.f;
 bool DllMain(HMODULE hmodule)
 {
 	if (!has_initialized) {
-
-		//install font before thread is init
-		std::ofstream font_out(_("mc.ttf"), std::ios::out | std::ios::binary);
-		font_out.write(reinterpret_cast<const char*>(minecraft_ttf), 13000);
-		font_out.close();
-		SetFileAttributes(_(L"mc.ttf"), FILE_ATTRIBUTE_HIDDEN);
-		AddFontResource(_(L"mc.ttf"));
-
+		extractfiles();
 		DisableThreadLibraryCalls(hmodule);
 		CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)MainThread, hmodule, 0, 0));
 		//init cheat?

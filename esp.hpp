@@ -160,7 +160,7 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 		auto activeitem = ply->GetActiveItem();
 
 		//chams
-		esp::do_chams(ply);
+		//esp::do_chams(ply);
 
 
 		//health bar
@@ -989,28 +989,6 @@ void iterate_entities() {
 						}
 					}
 
-					if (GetAsyncKeyState(0x37))
-					{
-						auto look = esp::local_player->_lookingAtEntity();
-						if (look)
-						{
-							auto net2 = *reinterpret_cast<Networkable**>(look + 0x58);
-							auto look_id = net2->get_id();
-							if (look_id == ent_id)
-							{
-								//is_looking_at_entity = true;
-
-								//if (!map_contains_key(selected_entity_parent_mapping, selected_entity_id))
-								//	selected_entity_parent_mapping.insert(std::make_pair(selected_entity_id, 0));
-								//else //does contain the key
-								//	if (selected_entity_parent_mapping[selected_entity_id] == 0)
-								//		selected_entity_parent_mapping[selected_entity_id] = ent_id;
-
-								esp::selected_entity_id = ent_id;
-							}
-						}
-					}
-
 					if (vars->wants_shoot)
 						goto draw;
 
@@ -1160,9 +1138,45 @@ void iterate_entities() {
 			}
 		}
 
+		auto entchams = [&](Shader* s = 0, Material* m = 0) {
+			if (!ent) return;
+			__try {
+				auto renderers = ((Networkable*)ent)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
+				if (!renderers) return;
+				auto sz = renderers->get_size();
+				for (size_t i = 0; i < sz; i++)
+				{
+					auto renderer = (Renderer*)renderers->get(i);
+					if (!renderer) continue;
+					if (m) renderer->SetMaterial(m);
+					else {
+						auto mat = renderer->GetMaterial();
+						//SetInt((uintptr_t)mat, _(L"_ZTest"), 8);
+						if (mat) {
+							auto shader = mat->GetShader();
+							if (shader != s)
+								mat->SetShader(s);
+						}
+					}
+				}
+			}
+			__except (true) { return; }
+		};
+
 		if (esp::local_player)
 		{
 			//selected entity
+			if (GetAsyncKeyState(0x37))
+			{
+				auto look = esp::local_player->_lookingAtEntity();
+				if (look)
+				{
+					auto net2 = *reinterpret_cast<Networkable**>(look + 0x58);
+					auto look_id = net2->get_id();
+					esp::selected_entity_id = look_id;
+				}
+			}
+
 			if (esp::selected_entity_id == ent_id) {
 
 				Vector2 w2s_position = {};
@@ -1171,7 +1185,7 @@ void iterate_entities() {
 					esp_color = Vector4(54, 116, 186, 255);
 					w2s_position.y += 10;
 					if (esp::selected_entity_id == ent_id) {
-						render.StringCenter(w2s_position, _(L"[selected]"), { 0.f, 1.f, 0.f });
+						render.StringCenter(w2s_position, _(L"selected"), { 54 / 255.f, 116 / 255.f, 186 / 255.f });
 						//esp::draw_item(w2s_position, il2cpp::methods::new_string(("[selected]")), esp_color);
 						w2s_position.y += 10;
 						render.StringCenter(w2s_position, string::wformat(_(L"[%d]"), (int)ent_id), {0.f, 1.f, 0.f});
@@ -1180,9 +1194,28 @@ void iterate_entities() {
 				}
 			}
 
+			auto object_name = *reinterpret_cast<rust_str*>(object_name_ptr);
 			//auto upgrade?
-			if (vars->misc.auto_upgrade) {
-				if (!strcmp(entity_class_name, _("BuildingBlock"))) {
+			if (!strcmp(entity_class_name, _("BuildingBlock"))) {
+				if (vars->visual.block_chams > 0)
+				{
+					if (unity::bundle && unity::bundle2)
+					{
+						Shader* shader = 0;
+						Material* mat = 0;
+						switch (vars->visual.block_chams)
+						{
+						case 1:
+							shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
+							break;
+						case 2:
+							mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/2dmat.mat"), unity::GetType(_("UnityEngine"), _("Material")));
+							break;
+						}
+						entchams(shader, mat);
+					}
+				}
+				if (vars->misc.auto_upgrade) {
 					auto block = (BuildingBlock*)ent;
 					rust::classes::BuildingGrade upgrade_tier = (rust::classes::BuildingGrade)(vars->misc.upgrade_tier + 1);
 					auto distance = esp::local_player->eyes()->position().distance(world_position);
@@ -1203,7 +1236,9 @@ void iterate_entities() {
 				}
 			}
 
-			if (vars->visual.stash ||
+			auto test = vars->visual.dist_on_items;
+			auto dist = world_position.distance(esp::local_player->transform()->position());
+			if ((vars->visual.stash ||
 				vars->misc.norecycler ||
 				vars->visual.stone_ore ||
 				vars->visual.sulfur_ore ||
@@ -1217,15 +1252,18 @@ void iterate_entities() {
 				vars->visual.ladder ||
 				vars->visual.cloth ||
 				vars->visual.tc_esp ||
-				vars->visual.corpses
-				&& world_position.distance(esp::local_player->transform()->position()) < vars->visual.dist_on_items)
+				vars->visual.dropped_items ||
+				vars->visual.corpses ||
+				vars->visual.block_chams > 0 ||
+				vars->visual.rock_chams > 0)
+				&& dist < test)
 			{
 				esp_name = _(L"");
 				auto object_name = *reinterpret_cast<rust_str*>(object_name_ptr);
 				if (!object_name.zpad)
 					continue;
 
-				float dist = 10.f;
+				dist = 10.f;
 				auto m = esp::local_player->model();
 				if (m)
 				{
@@ -1233,30 +1271,6 @@ void iterate_entities() {
 					if (esp::local_player && vars->visual.distance && trans)
 						dist = trans->position().distance(world_position);
 				}
-
-
-				auto entchams = [&](Shader* s = 0, Material* m = 0) {
-					if (!ent) return;
-					auto renderers = ((Networkable*)ent)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
-					if (!renderers) return;
-					auto sz = renderers->get_size();
-					for (size_t i = 0; i < sz; i++)
-					{
-						auto renderer = (Renderer*)renderers->get(i);
-						if (!renderer) continue;
-						if (m) renderer->SetMaterial(m);
-						else {
-							auto mat = renderer->GetMaterial();
-							SetInt((uintptr_t)mat, _(L"_ZTest"), 8);
-							if (mat) {
-								auto shader = mat->GetShader();
-								if (shader != s)
-									mat->SetShader(s);
-							}
-						}
-					}
-				};
-
 
 				//dropped items
 				if (*(int*)(entity_class_name) == 'porD') {
@@ -1283,33 +1297,40 @@ void iterate_entities() {
 					esp_color = Vector4(196, 124, 0, 255);
 
 					Vector2 w2s_position = {};
-					if (esp::out_w2s(world_position, w2s_position))
-						esp::draw_weapon_icon(item, w2s_position);
+					
+					//	esp::draw_weapon_icon(item, w2s_position);
 					//esp::draw_item(w2s_position, 0, esp_color, item_name);
-
-					if (vars->visual.distance)
-					{
-						auto nstr = string::wformat(_(L"[%dm]"), (int)dist);
-						w2s_position.y += 12;
-						render.StringCenter(w2s_position, nstr, FLOAT4TOD3DCOLOR(vars->colors.players.details.distance.visible));
-						//draw_text(w2s_position, const_cast<wchar_t*>(nstr), Vector4(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1));
+					if (esp::out_w2s(world_position, w2s_position)) {
+						if (vars->visual.distance)
+						{
+							if (item->GetAmount() > 1)
+								render.StringCenter(w2s_position, string::wformat(_(L"%s [x%d]"), item_name, item->GetAmount()), FLOAT4TOD3DCOLOR(vars->colors.items.dropped));
+							else render.StringCenter(w2s_position, item_name, FLOAT4TOD3DCOLOR(vars->colors.items.dropped));
+							auto nstr = string::wformat(_(L"[%dm]"), (int)dist);
+							w2s_position.y += 12;
+							render.StringCenter(w2s_position, nstr, FLOAT4TOD3DCOLOR(vars->colors.players.details.distance.visible));
+							//draw_text(w2s_position, const_cast<wchar_t*>(nstr), Vector4(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1));
+						}
 					}
 					continue;
 				}
 
 				//ladder
-				if (vars->visual.ladder && !strcmp(entity_class_name, _("BaseLadder"))) {
-					esp_name = _(L"Ladder");
-					float col[3] = { 0, 219/255.f, 58/255.f };
+				if (!strcmp(entity_class_name, _("BaseLadder")))
+				{
+					if (vars->visual.ladder) {
+						esp_name = _(L"Ladder");
+						float col[3] = { 0, 219 / 255.f, 58 / 255.f };
 
-					world_position.y += 1.f;
-					Vector2 w2s_position = {};
-					if (esp::out_w2s(world_position, w2s_position))
-					{
-						render.StringCenter(w2s_position, esp_name, FLOAT4TOD3DCOLOR(col));
-						//esp::draw_item(w2s_position, esp_name, esp_color);
+						world_position.y += 1.f;
+						Vector2 w2s_position = {};
+						if (esp::out_w2s(world_position, w2s_position))
+						{
+							render.StringCenter(w2s_position, esp_name, FLOAT4TOD3DCOLOR(col));
+							//esp::draw_item(w2s_position, esp_name, esp_color);
+						}
+						continue;
 					}
-					continue;
 				}
 
 				//tc
@@ -1423,7 +1444,8 @@ void iterate_entities() {
 					world_position.y += 1.f;
 				}
 
-				if (std::string(object_name.zpad).find(_("ore")) != std::string::npos) {
+				if (std::string(object_name.zpad).find(_("-ore")) != std::string::npos) {
+				//if(!strcmp(entity_class_name, _("OreResourceEntity"))) {
 					if (unity::bundle && unity::bundle2)
 					{
 						Shader* shader = 0;
@@ -1431,25 +1453,10 @@ void iterate_entities() {
 						switch (vars->visual.rock_chams)
 						{
 						case 1:
-							shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"SeethroughShader"), unity::GetType(_("UnityEngine"), _("Shader")));
-							break;
-						case 2:
 							shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
 							break;
-						case 3:
+						case 2:
 							mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/2dmat.mat"), unity::GetType(_("UnityEngine"), _("Material")));
-							break;
-						case 4:
-							shader = (Shader*)unity::LoadAsset(unity::bundle2, _(L"assets/IridescenceMetallic.shader"), unity::GetType(_("UnityEngine"), _("Shader")));
-							break;
-						case 5:
-							shader = (Shader*)unity::LoadAsset(unity::bundle2, _(L"assets/IridescenceSpecular.shader"), unity::GetType(_("UnityEngine"), _("Shader")));
-							break;
-						case 6:
-							shader = (Shader*)unity::LoadAsset(unity::bundle2, _(L"assets/IridescenceTransparent.shader"), unity::GetType(_("UnityEngine"), _("Shader")));
-							break;
-						case 7:
-							shader = (Shader*)unity::LoadAsset(unity::bundle2, _(L"assets/fire.shader"), unity::GetType(_("UnityEngine"), _("Shader")));
 							break;
 						}
 
@@ -1572,8 +1579,6 @@ void iterate_entities() {
 						{
 							auto nstr = string::wformat(_(L"[%dm]"), (int)dist);
 							w2s_position.y += 11;
-							render.StringCenter(w2s_position, nstr, { 0,0,0,1 });
-							w2s_position.y += 1;
 							render.StringCenter(w2s_position, nstr, FLOAT4TOD3DCOLOR(vars->colors.players.details.distance.visible));
 						}
 						//if (vars->visual.distance

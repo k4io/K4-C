@@ -954,7 +954,9 @@ namespace Gui
 			im::Combo(_("Hands"), &vars->visual.hand_chams,
 				_("None\0Seethrough\0Normal\0Force field\0Distort rim\0Layered"));
 			im::Combo(_("Rocks"), &vars->visual.rock_chams,
-				_("None\0Seethrough\0Normal\0Layered\0Metallic\0Specular\0Transparent\0Fire"));
+				_("None\0Normal\0Layered"));
+			im::Combo(_("Buildings"), &vars->visual.block_chams,
+				_("None\0Normal\0Layered"));
 			im::EndChild();
 		}
 	}
@@ -988,7 +990,7 @@ namespace Gui
 			im::Checkbox(_("Animals"), &vars->visual.animal);
 			im::Checkbox(_("Traps"), &vars->visual.traps);
 			im::Checkbox(_("Tool cupboard"), &vars->visual.tc_esp);
-			im::Checkbox(_("Dropped item icons"), &vars->visual.dropped_items);
+			im::Checkbox(_("Dropped items"), &vars->visual.dropped_items);
 			im::EndChild();
 		}
 	}
@@ -1077,9 +1079,10 @@ namespace Gui
 			im::Checkbox(_("Timescale"), &vars->misc.speedhack);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("T"), &vars->keybinds.timescale, ImVec2(50, 14));
+			im::SliderFloat(_("Speed"), &vars->misc.speedhackspeed, 0.1f, 10.f, _("%.1f"), 0.1f);
 			im::Checkbox(_("Silent farm"), &vars->misc.silent_farm);
 			im::Checkbox(_("Console logs"), &vars->misc.logs);
-			im::Combo(_("Gesture spam"), &vars->misc.gesture_spam, _("None\x0000Clap\x0000Friendly\x00Thumbsdown\x00Thumbsup\x00Ok\x00Point\x00Shrug\x00Victory\x00Wave"));
+			im::Combo(_("Gesture spam"), &vars->misc.gesture_spam, _(" None\x00 Clap\x00 Friendly\x00 Thumbsdown\x00 Thumbsup\x00 Ok\x00 Point\x00 Shrug\x00 Victory\x00 Wave"));
 			im::EndChild();
 		}
 	}
@@ -1121,8 +1124,8 @@ namespace Gui
 			if (im::BeginChild(_("Player"), ImVec2(217, 90), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
 				im::Text(_("Player"));
 				im::Separator();
-				im::ColorEdit4(_("Visible"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Invisible"), vars->colors.players.boxes.invisible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Boxes"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
+				//im::ColorEdit4(_("Invisible"), vars->colors.players.boxes.invisible, ImGuiColorEditFlags_NoInputs);
 				im::ColorEdit4(_("Chams visible"), vars->colors.players.chams.visible, ImGuiColorEditFlags_NoInputs);
 				im::ColorEdit4(_("Chams invisible"), vars->colors.players.chams.invisible, ImGuiColorEditFlags_NoInputs);
 				im::EndChild();
@@ -1130,14 +1133,14 @@ namespace Gui
 			if (im::BeginChild(_("Details"), ImVec2(217, 200), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
 				im::Text(_("Details"));
 				im::Separator();
-				im::ColorEdit4(_("Name visible"), vars->colors.players.details.name.visible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Name invisible"), vars->colors.players.details.name.invisible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Distance visible"),	vars->colors.players.details.distance.visible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Distance invisible"), vars->colors.players.details.distance.invisible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Flags visible"), vars->colors.players.details.flags.visible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Flags invisible"), vars->colors.players.details.flags.invisible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Skeleton visible"),	vars->colors.players.details.skeleton.visible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Skeleton invisible"), vars->colors.players.details.skeleton.invisible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Name"), vars->colors.players.details.name.visible, ImGuiColorEditFlags_NoInputs);
+				//im::ColorEdit4(_("Name invisible"), vars->colors.players.details.name.invisible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Distance"),	vars->colors.players.details.distance.visible, ImGuiColorEditFlags_NoInputs);
+				//im::ColorEdit4(_("Distance invisible"), vars->colors.players.details.distance.invisible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Flags"), vars->colors.players.details.flags.visible, ImGuiColorEditFlags_NoInputs);
+				//im::ColorEdit4(_("Flags invisible"), vars->colors.players.details.flags.invisible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Skeleton"),	vars->colors.players.details.skeleton.visible, ImGuiColorEditFlags_NoInputs);
+				//im::ColorEdit4(_("Skeleton invisible"), vars->colors.players.details.skeleton.invisible, ImGuiColorEditFlags_NoInputs);
 				//im::ColorEdit4(_("Background box"), vars->colors.players.details.boxbackground, ImGuiColorEditFlags_NoInputs);
 				//im::ColorEdit4(_("Background outline"), vars->colors.players.details.backgroundoutline, ImGuiColorEditFlags_NoInputs);
 				im::EndChild();
@@ -1159,16 +1162,12 @@ namespace Gui
 		if (im::BeginChild(_("ESP Items"), ImVec2(235, 180), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
 			im::Text(_("ESP Items"));
 			im::Separator();
-			im::ColorEdit4(_("Hemp visible"),		vars->colors.items.hemp.visible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Hemp invisible"),		vars->colors.items.hemp.invisible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Stone visible"),		vars->colors.items.stone.visible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Stone invisible"),	vars->colors.items.stone.invisible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Sulfur visible"),		vars->colors.items.sulfur.visible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Sulfur invisible"),	vars->colors.items.sulfur.invisible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Metal visible"),		vars->colors.items.metal.visible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Metal invisible"),	vars->colors.items.metal.invisible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Hemp"),		vars->colors.items.hemp.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Stone"),		vars->colors.items.stone.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Sulfur"),		vars->colors.items.sulfur.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Metal"),		vars->colors.items.metal.visible, ImGuiColorEditFlags_NoInputs);
 			im::ColorEdit4(_("Stash (closed)"),		vars->colors.items.stash.closed, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Stash (open)"),		vars->colors.items.stash.open, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Dropped items"),		vars->colors.items.dropped, ImGuiColorEditFlags_NoInputs);
 			im::EndChild();
 		}
 	}
