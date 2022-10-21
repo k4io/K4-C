@@ -204,7 +204,7 @@ namespace esp {
 
 								aim_target target = esp::best_target;
 
-								attack_melee(target, (BaseMelee*)baseprojectile, true);
+								attack_melee(target, baseprojectile, esp::local_player, true);
 							}
 						}
 					}

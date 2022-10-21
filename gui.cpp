@@ -37,20 +37,15 @@ namespace Gui
 	sg::Snake mysnake;
 
 	void SnakeStuff() {
-		im::SetNextWindowSize({ 301, 400 });
+		im::SetNextWindowSize({ 301, 395 });
 		im::Begin(_("Snake game"), 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
 		{
 			if (im::BeginChild(_("Game"), { 285, 286 }, true))
 			{
-				//game already running?
-				//
-				//render grid
-				
 				auto cpos = im::GetCursorPos(); 
 				cpos.x += im::GetWindowPos().x;
 				cpos.y += im::GetWindowPos().y;
 
-				if (!mysnake.alive) mysnake = sg::Snake();
 				mysnake.DoInput();
 
 				for (size_t i = 0; i < sg::gridsize; i++) {
@@ -84,7 +79,6 @@ namespace Gui
 						}
 						if (drew) continue;
 						
-
 						im::GetForegroundDrawList()->AddRect({ (float)x - 4.f, (float)y - 4.f }, { x + 8.f, y + 8.f }, im::GetColorU32({ 0.34, 0.34, 0.34, 0.65 }), 1.f);
 					}
 				}
@@ -111,6 +105,12 @@ namespace Gui
 				if (GetAsyncKeyState(0x44)) //D
 					im::TextColored({ 0.1, 0.8, 0.1, 1 }, _("D"));
 				else im::Text(_("D"));
+
+				im::SetCursorPosX(im::GetCursorPosX() + 40);
+				if (!mysnake.alive)
+					if (im::Button(_("Start"), { 60, 20 }))
+						mysnake = sg::Snake();
+				
 
 				im::SetCursorPos({ im::GetCursorPosX() + 150, im::GetCursorPosY() - 40 });
 				im::LabelText(_("##score"), _("Score: %d"), sg::currentscore);
@@ -925,7 +925,7 @@ namespace Gui
 			im::Checkbox(_("Randomize hitboxes"), &vars->combat.randomize);
 			//im::Checkbox(_("Hitscan"), &vars->combat.HitScan);
 			//im::Checkbox(_("Manipulator"), &vars->combat.manipulator2);
-			im::Checkbox(_("Manipulator"), &vars->combat.manipulator);
+			im::Checkbox(_("Manipulator"), &vars->combat.manipulator2);
 			//im::Checkbox(_("Manipulator2"), &vars->combat.manipulator);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(50, 15));

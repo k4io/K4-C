@@ -8,7 +8,7 @@ namespace sg {
 	static int currentscore = 0;
 	static int highscore = 0;
 	static int gridsize = 20;
-	static int maxapples = 1;
+	static int maxapples = 2;
 
 	static std::chrono::milliseconds lastinputtime = std::chrono::milliseconds(0);
 
@@ -54,10 +54,8 @@ namespace sg {
 
 		void CheckAndGenerateApple() {
 			if (apples.size() > maxapples) return;
-			srand(time(0));
-			int x = rand() % gridsize;
-			srand(time(0));
-			int y = rand() % gridsize;
+			int x = 0 + (rand() % gridsize);
+			int y = 0 + (rand() % gridsize);
 			Vector2 v2(x, y);
 			for (auto v : sp)
 				if (v == v2)
@@ -107,6 +105,7 @@ namespace sg {
 					auto diff = spos - lpos;
 					auto npos = lpos - diff;
 					new_body.push_back(npos);
+					Beep(167, 50);
 					break;
 				}
 			}

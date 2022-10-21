@@ -1094,9 +1094,175 @@ namespace gui {
 			init();
 			b_init = true;
 		}
+
+		//esp
+		{
+			static int cases = 0;
+			switch (cases) {
+			case 0: { r -= 0.0015f; if (r <= 0) cases += 1; break; }
+			case 1: { g += 0.0015f; b -= 0.0015f; if (g >= 1) cases += 1; break; }
+			case 2: { r += 0.0015f; if (r >= 1) cases += 1; break; }
+			case 3: { b += 0.0015f; g -= 0.0015f; if (b >= 1) cases = 0; break; }
+			default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
+			}
+			const float ScreenWidth = vars->ScreenX;
+			const float ScreenHeight = vars->ScreenY;
+			const Vector2 screen_center = Vector2(ScreenWidth / 2, ScreenHeight / 2);
+
+			if (esp::local_player)
+			{
+				if ((esp::best_target.ent && esp::best_target.ent->is_alive())
+					&& vars->visual.snapline > 1)
+				{
+					Vector2 start = vars->visual.snapline == 1 ? Vector2(ScreenWidth / 2, 0) :
+						vars->visual.snapline == 2 ? Vector2(ScreenWidth / 2, ScreenHeight / 2) :
+						vars->visual.snapline == 3 ? Vector2(ScreenWidth / 2, ScreenHeight) :
+						Vector2(ScreenWidth / 2, 1080); // does not matter
+					Vector3 o = WorldToScreen(esp::best_target.pos);
+					if (o.x != 0 && o.y != 0)
+					{
+						if (esp::best_target.visible)
+							gui::line(start, Vector2(o.x, o.y), gui::Color(0, 0.9, 0.2, 1), 0.1f, true);
+						else
+							gui::line(start, Vector2(o.x, o.y), gui::Color(0.9, 0, 0.2, 1), 0.1f, true);
+					}
+				}
+				if (vars->visual.flyhack_indicator) {
+					if (settings::vert_flyhack >= 3.f) {
+						gui::Progbar({ screen_center.x - 300, screen_center.y - 500 },
+							{ 600, 5 },
+							settings::vert_flyhack,
+							settings::vert_flyhack);
+					}
+					else if (settings::vert_flyhack >= .1f) {
+						gui::Progbar({ screen_center.x - 300, screen_center.y - 500 },
+							{ 600, 5 },
+							settings::vert_flyhack,
+							3.f);
+					}
+
+					if (settings::hor_flyhack >= 6.5f) {
+						gui::Progbar({ screen_center.x - 300, screen_center.y - 470 },
+							{ 600, 5 },
+							settings::hor_flyhack,
+							settings::hor_flyhack);
+					}
+					else if (settings::hor_flyhack >= .1f) {
+						gui::Progbar({ screen_center.x - 300, screen_center.y - 470 },
+							{ 600, 5 },
+							settings::hor_flyhack,
+							6.5f);
+					}
+				}
+
+				esp::matrix = unity::get_view_matrix();
+
+				//int fff = 0;
+				for (auto p : player_map)
+					if (vars->visual.playeresp
+						&& p.second)
+					{
+						esp::do_chams(p.second);
+						//esp::local_player->console_echo(string::wformat(_(L"[trap]: OnGUI - Caching bones for: %d"), p->userID()));
+						//cache::CacheBones(p.second, esp::local_player);
+					}
+				//esp::start();
+
+				if (vars->misc.auto_upgrade)
+				{
+					auto block = (BuildingBlock*)esp::closest_building_block;
+
+					if (block) {
+						rust::classes::BuildingGrade upgrade_tier = (rust::classes::BuildingGrade)(vars->misc.upgrade_tier + 1);
+
+						auto tranny = block->transform();
+						if (tranny)
+						{
+							auto pos = tranny->position();
+							auto distance = esp::local_player->eyes()->position().distance(pos);
+
+							auto local_player = esp::local_player;
+
+							if (distance < 4.2f) {
+								if (get_fixedTime() > esp::time_last_upgrade + 0.35f)
+								{
+									auto grade = block->grade();
+									if ((int)upgrade_tier == 1) {
+
+										if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Wood, local_player)
+											&& block->CanChangeToGrade(rust::classes::BuildingGrade::Wood, local_player)
+											&& grade != rust::classes::BuildingGrade::Wood)
+										{
+											block->Upgrade(rust::classes::BuildingGrade::Wood, local_player);
+											esp::time_last_upgrade = get_fixedTime();
+										}
+									}
+									else if ((int)upgrade_tier == 2) {
+										if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Stone, local_player)
+											&& block->CanChangeToGrade(rust::classes::BuildingGrade::Stone, local_player)
+											&& grade != rust::classes::BuildingGrade::Stone)
+										{
+											block->Upgrade(rust::classes::BuildingGrade::Stone, local_player);
+											esp::time_last_upgrade = get_fixedTime();
+										}
+									}
+									else if ((int)upgrade_tier == 3) {
+										if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Metal, local_player)
+											&& block->CanChangeToGrade(rust::classes::BuildingGrade::Metal, local_player)
+											&& grade != rust::classes::BuildingGrade::Metal)
+										{
+											block->Upgrade(rust::classes::BuildingGrade::Metal, local_player);
+											esp::time_last_upgrade = get_fixedTime();
+										}
+									}
+									else if ((int)upgrade_tier == 4) {
+										if (block->CanAffordUpgrade(rust::classes::BuildingGrade::TopTier, local_player)
+											&& block->CanChangeToGrade(rust::classes::BuildingGrade::TopTier, local_player)
+											&& grade != rust::classes::BuildingGrade::TopTier)
+										{
+											block->Upgrade(rust::classes::BuildingGrade::TopTier, local_player);
+											esp::time_last_upgrade = get_fixedTime();
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				auto baseplayer = esp::local_player;
+
+				if (vars->misc.autorefill) {
+					auto inv = baseplayer->inventory();
+					if (inv)
+					{
+						auto main = inv->containerMain();
+						auto belt = inv->containerBelt();
+						if (main && belt)
+						{
+							auto mainitems = main->itemList();
+							auto beltitems = belt->itemList();
+							if (mainitems && beltitems)
+							{
+								auto size = beltitems->get_size();
+
+								beltitems->for_each([&](Item* item, int32_t idx) {
+									{
+										esp::local_player->console_echo(item->get_weapon_name());
+									} });
+								mainitems->for_each([&](Item* item, int32_t idx) {
+									{
+										esp::local_player->console_echo(item->get_weapon_name());
+									} });
+							}
+						}
+					}
+				}
+			}
+		}
+		return;
 		if (opacity < 255.0f)
 			opacity += 2.f;
-
+		
 		auto current = methods::get_current();
 		auto event_type = methods::get_type(current);
 		bool md = false;
@@ -1121,7 +1287,8 @@ namespace gui {
 			k = rust::classes::KeyCode::Mouse4;
 			md = true;
 		}
-
+		return;
+		
 		if (event_type == rust::classes::EventType::KeyDown || event_type == rust::classes::EventType::KeyUp
 			|| event_type == rust::classes::EventType::MouseDown || event_type == rust::classes::EventType::MouseUp
 			|| md) {
@@ -1132,184 +1299,17 @@ namespace gui {
 			else
 				OnKeyUp(cur);
 		}
-
+		
 		auto mouse = get_mousePosition();
 		auto height = unity::get_height();
-
+		
 		Vector2 pos, menu_pos = window_position, menu_size = { 500, 380 }, button_size = { 200, 0 }, mouse_pos = { mouse.x, height - mouse.y };
+		
+		fill_box(rust::classes::Rect{ 10, 6, 80, 16 }, rgba(14.f, 18.f, 24.f, 255));
+		outline_box({ 10, 6 }, { 80, 16 }, rgba(249.f, 130.f, 109.f, 255.f));
+		fill_box(rust::classes::Rect{ 10, 20, 81, 3 }, rgba(249.f, 130.f, 109.f, 255));
+		gui::Label(rust::classes::Rect{ 12, 4, 80, 20 }, _(L"trap.sh"), gui::Color(1, 1, 1, 1), true, 12);
 
-		//watermark
-		//fill_box(rust::classes::Rect{ 10, 6, 80, 16 }, rgba(14.f, 18.f, 24.f, 255));
-		//outline_box({ 10, 6 }, { 80, 16 }, rgba(249.f, 130.f, 109.f, 255.f));
-		//fill_box(rust::classes::Rect{ 10, 20, 81, 3 }, rgba(249.f, 130.f, 109.f, 255));
-		//gui::Label(rust::classes::Rect{ 12, 4, 80, 20 }, _(L"trap.sh"), gui::Color(1, 1, 1, 1), true, 12);
-
-		//esp
-		if (event_type == rust::classes::EventType::Repaint) {
-			{
-				static int cases = 0;
-				switch (cases) {
-				case 0: { r -= 0.0015f; if (r <= 0) cases += 1; break; }
-				case 1: { g += 0.0015f; b -= 0.0015f; if (g >= 1) cases += 1; break; }
-				case 2: { r += 0.0015f; if (r >= 1) cases += 1; break; }
-				case 3: { b += 0.0015f; g -= 0.0015f; if (b >= 1) cases = 0; break; }
-				default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
-				}
-				const float ScreenWidth = vars->ScreenX;
-				const float ScreenHeight = vars->ScreenY;
-				const Vector2 screen_center = Vector2(ScreenWidth / 2, ScreenHeight / 2);
-
-				if (esp::local_player)
-				{
-					if ((esp::best_target.ent && esp::best_target.ent->is_alive())
-						&& vars->visual.snapline > 1)
-					{
-						Vector2 start = vars->visual.snapline == 1 ? Vector2(ScreenWidth / 2, 0) :
-							vars->visual.snapline == 2 ? Vector2(ScreenWidth / 2, ScreenHeight / 2) :
-							vars->visual.snapline == 3 ? Vector2(ScreenWidth / 2, ScreenHeight) :
-							Vector2(ScreenWidth / 2, 1080); // does not matter
-						Vector3 o = WorldToScreen(esp::best_target.pos);
-						if (o.x != 0 && o.y != 0)
-						{
-							if (esp::best_target.visible)
-								gui::line(start, Vector2(o.x, o.y), gui::Color(0, 0.9, 0.2, 1), 0.1f, true);
-							else
-								gui::line(start, Vector2(o.x, o.y), gui::Color(0.9, 0, 0.2, 1), 0.1f, true);
-						}
-					}
-					if (vars->visual.flyhack_indicator) {
-						if (settings::vert_flyhack >= 3.f) {
-							gui::Progbar({ screen_center.x - 300, screen_center.y - 500 },
-								{ 600, 5 },
-								settings::vert_flyhack,
-								settings::vert_flyhack);
-						}
-						else if (settings::vert_flyhack >= .1f) {
-							gui::Progbar({ screen_center.x - 300, screen_center.y - 500 },
-								{ 600, 5 },
-								settings::vert_flyhack,
-								3.f);
-						}
-
-						if (settings::hor_flyhack >= 6.5f) {
-							gui::Progbar({ screen_center.x - 300, screen_center.y - 470 },
-								{ 600, 5 },
-								settings::hor_flyhack,
-								settings::hor_flyhack);
-						}
-						else if (settings::hor_flyhack >= .1f) {
-							gui::Progbar({ screen_center.x - 300, screen_center.y - 470 },
-								{ 600, 5 },
-								settings::hor_flyhack,
-								6.5f);
-						}
-					}
-
-					esp::matrix = unity::get_view_matrix();
-
-					//int fff = 0;
-					for (auto p : player_map)
-						if (vars->visual.playeresp
-							&& p.second)
-						{
-							esp::do_chams(p.second);
-							//esp::local_player->console_echo(string::wformat(_(L"[trap]: OnGUI - Caching bones for: %d"), p->userID()));
-							//cache::CacheBones(p.second, esp::local_player);
-						}
-					//esp::start();
-
-					if (vars->misc.auto_upgrade)
-					{
-						auto block = (BuildingBlock*)esp::closest_building_block;
-
-						if (block) {
-							rust::classes::BuildingGrade upgrade_tier = (rust::classes::BuildingGrade)(vars->misc.upgrade_tier + 1);
-
-							auto tranny = block->transform();
-							if (tranny)
-							{
-								auto pos = tranny->position();
-								auto distance = esp::local_player->eyes()->position().distance(pos);
-
-								auto local_player = esp::local_player;
-
-								if (distance < 4.2f) {
-									if (get_fixedTime() > esp::time_last_upgrade + 0.35f)
-									{
-										auto grade = block->grade();
-										if ((int)upgrade_tier == 1) {
-
-											if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Wood, local_player)
-												&& block->CanChangeToGrade(rust::classes::BuildingGrade::Wood, local_player)
-												&& grade != rust::classes::BuildingGrade::Wood)
-											{
-												block->Upgrade(rust::classes::BuildingGrade::Wood, local_player);
-												esp::time_last_upgrade = get_fixedTime();
-											}
-										}
-										else if ((int)upgrade_tier == 2) {
-											if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Stone, local_player)
-												&& block->CanChangeToGrade(rust::classes::BuildingGrade::Stone, local_player)
-												&& grade != rust::classes::BuildingGrade::Stone)
-											{
-												block->Upgrade(rust::classes::BuildingGrade::Stone, local_player);
-												esp::time_last_upgrade = get_fixedTime();
-											}
-										}
-										else if ((int)upgrade_tier == 3) {
-											if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Metal, local_player)
-												&& block->CanChangeToGrade(rust::classes::BuildingGrade::Metal, local_player)
-												&& grade != rust::classes::BuildingGrade::Metal)
-											{
-												block->Upgrade(rust::classes::BuildingGrade::Metal, local_player);
-												esp::time_last_upgrade = get_fixedTime();
-											}
-										}
-										else if ((int)upgrade_tier == 4) {
-											if (block->CanAffordUpgrade(rust::classes::BuildingGrade::TopTier, local_player)
-												&& block->CanChangeToGrade(rust::classes::BuildingGrade::TopTier, local_player)
-												&& grade != rust::classes::BuildingGrade::TopTier)
-											{
-												block->Upgrade(rust::classes::BuildingGrade::TopTier, local_player);
-												esp::time_last_upgrade = get_fixedTime();
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-					auto baseplayer = esp::local_player;
-
-					if (vars->misc.autorefill) {
-						auto inv = baseplayer->inventory();
-						if (inv)
-						{
-							auto main = inv->containerMain();
-							auto belt = inv->containerBelt();
-							if (main && belt)
-							{
-								auto mainitems = main->itemList();
-								auto beltitems = belt->itemList();
-								if (mainitems && beltitems)
-								{
-									auto size = beltitems->get_size();
-
-									beltitems->for_each([&](Item* item, int32_t idx) {
-										{
-											esp::local_player->console_echo(item->get_weapon_name());
-										} });
-									mainitems->for_each([&](Item* item, int32_t idx) {
-										{
-											esp::local_player->console_echo(item->get_weapon_name());
-										} });
-								}
-							}
-						}
-					}
-				}
-			}
-		}
 
 		if (false) {
 			{

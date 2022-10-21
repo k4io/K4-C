@@ -26,6 +26,8 @@
 #include "leo.h"
 #include "imgui/imgui_internal.h"
 
+#define consoleout
+
 bool has_initialized = false, init = false, menuopen = false;
 
 //extern DWORD D3DThread();
@@ -162,17 +164,14 @@ bool DllMain(HMODULE hmodule)
 		mem::game_assembly_base = LI_MODULE_SAFE_(_("GameAssembly.dll"));
 		mem::unity_player_base = LI_MODULE_SAFE_(_("UnityPlayer.dll"));
 
-		//AllocConsole();
-
+		AllocConsole();
 
 		il2cpp::init();
 
 		unity::init_unity();
 		gui::init_gui();
 		hooks::init_hooks();
-
 		init_bp();
-
 		init_projectile();
 
 		typedef System::list<uintptr_t>* (*AAA)();//real rust 36223520 ALKAD 36217232 "Name": ,"ConsoleSystem.Index$$get_All"

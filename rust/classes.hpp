@@ -357,7 +357,7 @@ static auto get_time = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*
 
 static auto ClosestPoint = reinterpret_cast<Vector3(*)(BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ClosestPoint"), 1, _("position"), _(""), 1)));
 
-static auto _InverseTransformPoint = reinterpret_cast<Vector3(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
+static auto _InverseTransformPoint = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
 
 static auto _InverseTransformDirection = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformDirection"), 1, _(""), _("UnityEngine"))));
 
@@ -465,6 +465,7 @@ static auto set_AtmosphereMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*
 static auto set_ClearMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_ClearMaterial"), 0, _(""), _(""))));
 static auto set_CloudMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_CloudMaterial"), 0, _(""), _(""))));
 
+static auto gettrans = reinterpret_cast<uintptr_t(*)(Component*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 #pragma endregion
 
 class col {
@@ -484,6 +485,7 @@ public:
 float current_time;
 
 void init_bp() {
+	gettrans = reinterpret_cast<uintptr_t(*)(Component*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 	transsetpos = reinterpret_cast<void(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 0, _(""), _("UnityEngine"))));
 	transgetpos = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
 	get_visplayerlist = reinterpret_cast<System::Array<BasePlayer*>*(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("get_VisiblePlayerList"), -1, _(""), _(""))));
@@ -654,7 +656,7 @@ void init_bp() {
 
 	StartAttackCooldown = reinterpret_cast<void(*)(AttackEntity*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AttackEntity"), _("StartAttackCooldown"), 1, _(""), _(""))));
 
-	_InverseTransformPoint = reinterpret_cast<Vector3(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
+	_InverseTransformPoint = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
 
 	ProcessAttack = reinterpret_cast<void(*)(BaseMelee*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("ProcessAttack"), 1, _(""), _(""))));
 
@@ -669,8 +671,7 @@ class Component : public Object {
 public:
 	Transform* transform() {
 		if (!this) return nullptr;
-		auto off = *reinterpret_cast<uintptr_t* (*)(Component*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
-		return (Transform*)off(this);
+		return (Transform*)gettrans(this);
 	}
 
 	char* get_class_name() {
@@ -771,7 +772,7 @@ public:
 
 	Vector3 InverseTransformPoint(Vector3 point) {
 		if (!this) return Vector3(0, 0, 0);
-		return _InverseTransformPoint((uintptr_t)(this), point);
+		return _InverseTransformPoint((this), point);
 	}
 
 	Vector3 InverseTransformDirection(Vector3 point) {
@@ -1085,6 +1086,9 @@ public:
 	FIELD(_("BaseMelee"), _("maxDistance"), maxDistance, float);
 	FIELD(_("BaseMelee"), _("attackRadius"), attackRadius, float);
 
+	uintptr_t get_damage_properties() {
+		return *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x288);
+	}
 
 	bool CanHit(HitTest* ht) {
 		if (!this) return false;
@@ -1165,6 +1169,10 @@ public:
 		if (!mag || mag < 0xFFFF) return 0;
 		const auto ammo = *reinterpret_cast<int*>(mag + 0x1C);
 		return ammo;
+	}
+
+	uintptr_t get_damage_properties() {
+		return *reinterpret_cast<uintptr_t*>((uintptr_t)this + damageProperties);
 	}
 
 	weapon_stats_t get_stats(int32_t weapon_id) {
@@ -1466,7 +1474,8 @@ public:
 	template<typename T = BaseEntity>
 	T* GetHeldEntity() {
 		if (!this) return nullptr;
-		return ((T*)this->heldEntity());
+		//return ((T*)this->heldEntity());
+		return *reinterpret_cast<T**>(this + 0xA0);
 	}
 };
 
@@ -1835,6 +1844,13 @@ public:
 	FIELD(_("PlayerInventory"), _("loot"), loot, PlayerLoot*);
 };
 
+class weapon {
+public:
+	BaseProjectile* get_base_projetile() {
+		return *reinterpret_cast<BaseProjectile**>((uintptr_t)this + heldEntity);
+	}
+};
+
 class BasePlayer : public BaseCombatEntity {
 public:
 	FIELD(_("BasePlayer"), _("playerModel"), playerModel, PlayerModel*);
@@ -2172,6 +2188,14 @@ public:
 		return best_ent;
 	}
 
+	Transform* get_bone_transform(int bone_id) {
+		uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x130); //public Model model; // 
+		uintptr_t bone_dict = *reinterpret_cast<uintptr_t*>(entity_model + 0x48);
+		Transform* BoneValue = *reinterpret_cast<Transform**>(bone_dict + 0x20 + bone_id * 0x8);
+
+		return BoneValue;
+	}
+
 	std::pair<aim_target, bool> resolve_closest_entity(float max_distance, bool get_code = true) {
 		aim_target closest_entity;
 		auto client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
@@ -2244,14 +2268,13 @@ public:
 
 			auto game_object = *reinterpret_cast<uintptr_t*>(object + 0x30);
 
-			auto Transform = *reinterpret_cast<uintptr_t*>(game_object + 0x8);
+			auto transform = *reinterpret_cast<uintptr_t*>(game_object + 0x8);
 
-			auto visual_state = *reinterpret_cast<uintptr_t*>(Transform + 0x38);
+			auto visual_state = *reinterpret_cast<uintptr_t*>(transform + 0x38);
 
 			auto world_position = *reinterpret_cast<Vector3*>(visual_state + 0x90);
 
-			//auto bone_pos = this->model()->boneTransforms()->get(48)->get_position();
-			auto bone_pos = this->transform()->position();
+			auto bone_pos = this->get_bone_transform(48)->position();
 
 			auto distance = bone_pos.get_3d_dist(world_position);
 			if (distance < closest_entity_distance && distance < max_distance) {
@@ -2267,7 +2290,7 @@ public:
 				if (!baseentity)
 					continue;
 
-				auto ent = reinterpret_cast<BaseEntity*>(baseentity);
+				auto player = reinterpret_cast<BasePlayer*>(baseentity);
 
 				aim_target new_target;
 
@@ -2276,7 +2299,7 @@ public:
 					continue;
 
 				new_target.pos = world_position;
-				new_target.ent = (BasePlayer*)ent;
+				new_target.ent = (BaseCombatEntity*)ent;
 				new_target.visible = /*unity::is_visible(bone_pos, world_position)*/true;
 				new_target.found = true;
 
@@ -2328,6 +2351,37 @@ public:
 		return 0;
 	}
 
+	weapon* get_active_weapon()
+	{
+		unsigned int ActUID = mem::read<unsigned int>((uintptr_t)this + 0x5D8);
+		if (!ActUID)
+			return 0;
+		weapon* ActWeapon;
+
+		uint64_t Inventory = mem::read<uint64_t>((uintptr_t)this + player_inventory);
+		uint64_t Belt = mem::read<uint64_t>(Inventory + 0x28);
+		uint64_t ItemList = mem::read<uint64_t>(Belt + 0x38);
+
+		auto items = mem::read<uint64_t>(ItemList + 0x10);
+		if (!items)
+			return 0;
+
+		for (int i = 0; i < 6; i++) //For each slot	
+		{
+			weapon* WeaponInfo = mem::read<weapon*>(items + 0x20 + (i * 0x8));;
+
+			unsigned int WeaponUID = mem::read<unsigned int>((uintptr_t)WeaponInfo + 0x28);
+			if (!WeaponUID)
+				return 0;
+			if (ActUID == WeaponUID)
+			{
+				ActWeapon = WeaponInfo;
+				return ActWeapon;
+			}
+		}
+		return 0;
+	}
+
 	bool is_local_player() {
 		if (!this)
 			return false;
@@ -2359,12 +2413,12 @@ public:
 		//auto s = string::wformat(_(L"trap [%d]: %s"), (int)get_fixedTime(), str);
 		if (vars->misc.logs)
 			console_msg((uintptr_t)this, str);
-		//else {
-		//	freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
-		//	freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
-		//	wcscat(const_cast<wchar_t*>(str), _(L"\n"));
-		//	wprintf(str);
-		//}
+		else {
+			freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
+			freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
+			wcscat(const_cast<wchar_t*>(str), _(L"\n"));
+			wprintf(str);
+		}
 	}
 };
 
@@ -2435,7 +2489,7 @@ public:
 		if (!this) return false;
 
 		typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7202688
-		return ((AAA)(mem::game_assembly_base + 0x6E60B0))((uintptr_t)this, (int)g, p);
+		return ((AAA)(mem::game_assembly_base + 0x6C5180))((uintptr_t)this, (int)g, p);
 		//return canaffordupgrade((uintptr_t)this, g, p);
 	}
 
@@ -2443,14 +2497,14 @@ public:
 		if (!this) return false;
 
 		typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7203152
-		return ((AAA)(mem::game_assembly_base + 0x6E6280))((uintptr_t)this, (int)g, p);
+		return ((AAA)(mem::game_assembly_base + 0x6C5350))((uintptr_t)this, (int)g, p);
 		//return canchangetograde((uintptr_t)this, g, p);
 	}
 
 	void Upgrade(rust::classes::BuildingGrade g, BasePlayer* p) {
 		if (!this) return;
 		typedef void (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7203152
-		return ((AAA)(mem::game_assembly_base + 0x6E98A0))((uintptr_t)this, (int)g, p);
+		return ((AAA)(mem::game_assembly_base + 0x6C8970))((uintptr_t)this, (int)g, p);
 		//return upgradetograde((uintptr_t)this, g, p);
 	}
 };
@@ -2710,7 +2764,76 @@ public:
 	}
 };
 
-void attack_melee(aim_target target, BaseMelee* melee, bool is_player = false) {
+
+class HitTest2 {
+public:
+	uintptr_t game_object() {
+		return *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x70);
+	}
+
+	GameObject* get_gameobject()
+	{
+		auto gameObject = game_object();
+		if (!gameObject)
+			return nullptr;
+
+		return *reinterpret_cast<GameObject**>(gameObject + 0x10);
+	}
+
+	void set_hit_transform(Transform* hit_transform) {
+		*reinterpret_cast<Transform**>((uintptr_t)this + 0xB0) = hit_transform;
+	}
+
+	void set_hit_type(rust::classes::HitTestType hit_type) {
+		*reinterpret_cast<int*>((uintptr_t)this + 0x10) = (int)hit_type;
+	}
+
+	void set_ignore_entity(BasePlayer* entity_to_ignore) {
+		*reinterpret_cast<BasePlayer**>((uintptr_t)this + 0x80) = entity_to_ignore;
+	}
+
+	void set_radius(float radius) {
+		*reinterpret_cast<float*>((uintptr_t)this + 0x2C) = radius;
+	}
+
+	void set_did_hit(bool did_hit) {
+		*reinterpret_cast<bool*>((uintptr_t)this + 0x66) = did_hit;
+	}
+
+	void set_attack_ray(Ray ray) {
+		*reinterpret_cast<Ray*>((uintptr_t)this + 0x14) = ray;
+	}
+
+	void set_best_hit(bool best_hit) {
+		*reinterpret_cast<bool*>((uintptr_t)this + 0x65) = best_hit;
+	}
+
+	void set_max_distance(float max_dist) {
+		*reinterpret_cast<float*>((uintptr_t)this + 0x34) = max_dist;
+	}
+
+	void set_hit_entity(BasePlayer* entity) {
+		*reinterpret_cast<BasePlayer**>((uintptr_t)this + 0x88) = entity;
+	}
+
+	BasePlayer*& get_hit_entity() {
+		return *reinterpret_cast<BasePlayer**>((uintptr_t)this + 0x88);
+	}
+
+	void set_hit_point(Vector3 hit_point) {
+		*reinterpret_cast<Vector3*>((uintptr_t)this + 0x90) = hit_point;
+	}
+
+	void set_hit_normal(Vector3 hit_nromal) {
+		*reinterpret_cast<Vector3*>((uintptr_t)this + 0x9C) = hit_nromal;
+	}
+	void set_damage_properties(uintptr_t damage_properties) {
+		*reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x68) = damage_properties;
+	}
+};
+
+
+void attack_melee(aim_target target, BaseProjectile* melee, BasePlayer* lp, bool is_player = false) {
 	if (!target.visible)
 		return;
 
@@ -2729,12 +2852,13 @@ void attack_melee(aim_target target, BaseMelee* melee, bool is_player = false) {
 	if (!hit_test_class)
 		return;
 
-	HitTest* hit_test = (HitTest*)il2cpp::methods::object_new(hit_test_class);
+	HitTest2* hit_test = (HitTest2*)il2cpp::methods::object_new(hit_test_class);
 		
 	Ray ray = Ray(local_position, (target.pos - local_position).Normalized());
 
-	auto get_transform = reinterpret_cast<Transform * (*)(BaseCombatEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
-	auto trans = is_player ? target.ent->model()->boneTransforms()->get(48) : get_transform(target.ent);
+	Transform* trans = is_player ? target.ent->model()->boneTransforms()->get(48) : target.ent->transform();
+
+	auto v = trans->InverseTransformPoint(target.pos);//_InverseTransformPoint(trans, target.pos);
 
 	if (!trans)
 		return;
@@ -2744,13 +2868,10 @@ void attack_melee(aim_target target, BaseMelee* melee, bool is_player = false) {
 	hit_test->set_attack_ray(ray);
 	hit_test->set_did_hit(true);
 	hit_test->set_hit_entity((BasePlayer*)target.ent);
-	hit_test->set_hit_point(_InverseTransformPoint((uintptr_t)trans, target.pos));
+	hit_test->set_hit_point(v);
 	hit_test->set_hit_normal(Vector3(0, 0, 0));
-	//hit_test->set_damage_properties((uintptr_t)melee->damageProperties());
-	hit_test->set_damage_properties(*reinterpret_cast<uintptr_t*>((uintptr_t)melee + 0x288));
+	hit_test->set_damage_properties(melee->get_damage_properties());
 	
-	//esp::local_player->console_echo(string::wformat(_(L"[trap]: attack_melee - point: (%d, %d, %d)"), (int)v.x, (int)v.y, (int)v.z));
-
 	//hit_test->MaxDistance() = 1000.f;
 	//hit_test->HitTransform() = trans;
 	//hit_test->AttackRay() = ray;
@@ -2762,8 +2883,7 @@ void attack_melee(aim_target target, BaseMelee* melee, bool is_player = false) {
 	
 	StartAttackCooldown(melee, melee->repeatDelay());
 
-	if(melee->CanHit(hit_test))
-		ProcessAttack(melee, hit_test);
+	ProcessAttack((BaseMelee*)melee, (HitTest*)hit_test);
 	return;
 }
 

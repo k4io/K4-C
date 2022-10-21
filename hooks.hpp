@@ -507,13 +507,12 @@ namespace hooks {
 				if (vars->combat.targetbehindwall)
 				{
 					((Projectile1*)p)->Launch1();
-				}			
-				misc::lastFiredProjectile = p;
+				}
 			}
 			if (vars->combat.targetbehindwall)
 			{
 				typedef void(*cclear)(uintptr_t);
-				((cclear)(mem::game_assembly_base + 15396864))((uintptr_t)baseprojectile + 0x370); //"System.Collections.Generic.List<Projectile>$$Clear",
+				((cclear)(mem::game_assembly_base + 15417936))((uintptr_t)baseprojectile + 0x370); //"System.Collections.Generic.List<Projectile>$$Clear",
 			}
 
 			if (misc::autoshot)
@@ -1294,6 +1293,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			auto held = wpn ? wpn->GetHeldEntity<BaseProjectile>() : nullptr;
 			float time = get_fixedTime();
 
+			auto item2 = baseplayer->get_active_weapon();
+
 			if (vars->misc.attack_on_mountables) {
 				auto mountable = baseplayer->mounted();
 				if (mountable)
@@ -1608,6 +1609,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					auto attack = [&](aim_target target, bool is_tree) {
 						auto gathering = ((BaseMelee*)baseprojectile)->gathering();
 
+						auto baseprojectile = item2->get_base_projetile();
+
 						if (is_tree) {
 							if (!(gathering->tree()->gatherDamage() > 1)) {
 								return;
@@ -1619,7 +1622,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							}
 						}
 						
-						attack_melee(target, (BaseMelee*)held);
+						attack_melee(target, baseprojectile, esp::local_player);
 					};
 
 					if (target.ent

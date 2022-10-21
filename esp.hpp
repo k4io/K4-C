@@ -1125,7 +1125,7 @@ void iterate_entities() {
 
 										target.visible = esp::local_player->is_visible(camera, local);
 
-										attack_melee(target, melee, true);
+										attack_melee(target, (BaseProjectile*)melee, esp::local_player, true);
 									}
 								}
 							}

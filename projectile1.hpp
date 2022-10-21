@@ -1,6 +1,6 @@
 #include "misc.hpp"
 
-uintptr_t pools_offset = 0x5A1CA0;
+uintptr_t pools_offset = 0xC0F330;
 /*
  /* GenericInstMethod :
 	|
@@ -29,7 +29,7 @@ uintptr_t pools_offset = 0x5A1CA0;
 	|-Pool.Get<PositionLerp>
 	|-Pool.Get<AIDesign>
 */
-uintptr_t Method$System_Collections_Generic_List_Projectile__Clear__ = 15396864; //Method$System.Collections.Generic.List<Projectile>.Clear() (METHOD ADDRESS)
+uintptr_t Method$System_Collections_Generic_List_Projectile__Clear__ = 15417936; //Method$System.Collections.Generic.List<Projectile>.Clear() (METHOD ADDRESS)
 
 class Projectile1;
 class Projectile1 : public BaseMonoBehaviour
@@ -313,33 +313,40 @@ public:
 			ht->set_hit_entity((BasePlayer*)at);
 
 			if (at) {
-				auto Transform = at->transform();
+				auto trans = at->transform();
 				//if (!memory::IsAddressValid(ht))
 				if (!ht)
 					return false;
 
 				//ht->HitTransform() = Transform;
-				ht->HitTransform() = Transform;
+				ht->set_hit_transform(trans);
 				//ht->HitPoint() = Transform->InverseTransformPoint(point);
-				ht->HitPoint() = Transform->InverseTransformPoint(point);
+				ht->set_hit_point(trans->InverseTransformPoint(point));
 				//ht->HitMaterial() = Il2CppString::create(_("flesh"));
 				ht->HitMaterial() = _(L"flesh");
 			}
 			else
-				ht->HitPoint() = point;
+				ht->set_hit_point(point);
 			//ht->HitPoint() = point;
 
 			//ht->AttackRay() = Ray(point, Vector3(0, 0, 0));
-			ht->AttackRay() = Ray(point, Vector3(0, 0, 0));
+			ht->set_attack_ray(Ray(point, { 0, 0, 0 }));
 
 			float real_travel_time = _this->traveledTime();
-			//_this->traveledTime() = travelTime;
+			//_this->traveledTime() = travelTime
 			_this->traveledTime(travelTime);
 
 			Vector3 vel = _this->currentVelocity();
 			_this->currentVelocity(Vector3(0, 0, 0));
+
+
+			//private bool DoHit(HitTest test, Vector3 point, Vector3 normal) { }
+			//0x7A9420
+			//typedef bool(*dh)(Projectile*, HitTest*, Vector3, Vector3);
+			//if (((dh)(mem::game_assembly_base + 0x7A9420))(_this, ht, point, Vector3())) {
+
 			//static auto DoHit = *reinterpret_cast<bool(**)(Projectile * _instance, HitTest * test, Vector3 point, Vector3 normal)>(Il2CppWrapper::GetClassFromName(_(""), _("Projectile"))->GetMethodFromName(_("DoHit")));
-			if (Do_Hit(_this, (uintptr_t)ht, point, Vector3())) {
+			if (Do_Hit(_this, (uintptr_t)ht, point, Vector3::Zero())) {
 				_this->currentVelocity(vel);
 				_this->traveledTime(real_travel_time);
 				return true;
@@ -417,13 +424,13 @@ public:
 	{
 		esp::local_player->console_echo(_(L"[trap]: CreatePlayerProjectileUpdate - Called"));
 		typedef uint64_t(__stdcall* PoolGet)(uint64_t);
-		uint64_t update = *reinterpret_cast<uint64_t*>(mem::game_assembly_base + 56383576); //"Method$Facepunch.Pool.Get<PlayerProjectileUpdate>()",
+		uint64_t update = *reinterpret_cast<uint64_t*>(mem::game_assembly_base + 56468784); //"Method$Facepunch.Pool.Get<PlayerProjectileUpdate>()",
 
 		if (!update)
 			return 0;
 
 		//public static T Get<T>() { }
-		uint64_t projectileShoot = ((PoolGet)(mem::game_assembly_base + 0x5A1CA0))(update);
+		uint64_t projectileShoot = ((PoolGet)(mem::game_assembly_base + pools_offset))(update);
 
 		if (!projectileShoot)
 			return 0;
@@ -437,14 +444,14 @@ public:
 			return;
 
 		typedef uintptr_t(*AAA)(); // Client get_cl() { }
-		auto cl = ((AAA)(mem::game_assembly_base + 0x12F99D0))();
+		auto cl = ((AAA)(mem::game_assembly_base + 0x13176E0))();
 		if (!cl)
 			return;
 		esp::local_player->console_echo(_(L"[trap]: SendPlayerProjectileUpdate - Called"));
 		
 		//public NetWrite get_write() { }
 		typedef uintptr_t(*AA)(uintptr_t);
-		auto write = ((AA)(mem::game_assembly_base + 0x5950C0))(cl);
+		auto write = ((AA)(mem::game_assembly_base + 0x595640))(cl);
 		//uint64_t tod_sky = mem::read<uint64_t>(p1 + 0x28);
 
 		//auto write = cl->write();
@@ -453,11 +460,12 @@ public:
 
 		typedef bool(*netwrite_start)(uintptr_t);
 
+		//public bool Start() { }
 		//if (write->Start()) {
-		if (((netwrite_start)(mem::game_assembly_base + 0x2473B20))(write)) {
+		if (((netwrite_start)(mem::game_assembly_base + 0x2485FE0))(write)) {
 
 			typedef void(*netwrite_packetid)(uintptr_t, UINT);
-			((netwrite_packetid)(mem::game_assembly_base + 0x2473750))(write, (UINT)MessageType::RPCMessage);
+			((netwrite_packetid)(mem::game_assembly_base + 0x2485C10))(write, (UINT)MessageType::RPCMessage);
 			//write->PacketID((UINT)MessageType::RPCMessage);
 
 			auto net = *reinterpret_cast<uintptr_t*>((uintptr_t)esp::local_player + 0x58);
@@ -471,14 +479,14 @@ public:
 
 			typedef void(*netwrite_uint32)(uintptr_t, UINT);
 
-			((netwrite_uint32)(mem::game_assembly_base + 0x2473E20))(write, id);
+			((netwrite_uint32)(mem::game_assembly_base + 0x24862E0))(write, id);
 			//write->UInt32(id);
 
-			((netwrite_uint32)(mem::game_assembly_base + 0x2473E20))(write, 2324190493); //projectile update id 2324190493
+			((netwrite_uint32)(mem::game_assembly_base + 0x24862E0))(write, 2324190493); //projectile update id 2324190493
 			//write->UInt32(2324190493); //projectile update
 
 			typedef void(*serialize)(uintptr_t, uint64_t);
-			((serialize)(mem::game_assembly_base + 0x22A0240))(write, update);
+			((serialize)(mem::game_assembly_base + 0x22AB8E0))(write, update);
 			//ProtoBuf::PlayerProjectileUpdate::Serialize(write, (ProtoBuf::PlayerProjectileUpdate*)update);
 
 			auto conn = *reinterpret_cast<uintptr_t*>(cl + 0x28);
@@ -508,7 +516,8 @@ public:
 			//sendInfo->connections() = 0;
 
 			typedef void(*netwrite_send)(uintptr_t, uintptr_t);
-			((netwrite_send)(mem::game_assembly_base + 0x2473A00))(write, si);
+			((netwrite_send)(mem::game_assembly_base + 0x2485EC0))(write, si);
+			esp::local_player->console_echo(_(L"[trap]: SendPlayerProjectileUpdate - Finished"));
 			//write->Send(sendInfo);
 		}
 	}
@@ -532,7 +541,7 @@ public:
 		Vector3 movPos = from;
 		Vector3 prevPos = movPos;
 
-		float time = get_fixedTime();//UnityEngine::Time::get_realtimeSinceStartup();
+		float time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
 		float maxTime = time - _this->launchTime();
 
 		if (maxTime >= 7.95f) {
@@ -685,7 +694,7 @@ public:
 		float travelTime = _this->previoustraveledTime();
 
 		bool flag = false;
-		float time = get_fixedTime();//UnityEngine::Time::get_realtimeSinceStartup();
+		float time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
 		float maxTime = time - _this->launchTime();
 
 		if (maxTime >= 7.95f)
@@ -788,7 +797,7 @@ public:
 
 				_this->currentPosition() = pos;
 
-				float time1 = get_fixedTime();//get_fixedTime();//UnityEngine::Time::get_realtimeSinceStartup();
+				float time1 = unity::get_realtimesincestartup();//unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
 				_this->launchTime(time1);
 				_this->sentTraveledTime(0.f);
 				_this->sentPosition(pos);
@@ -886,7 +895,7 @@ public:
 			float bulletUpdateRate = 1.01f;
 			if (_this->authoritative() && vars->combat.targetbehindwall) {
 				while (this->IsAlive()) {
-					float time = get_fixedTime();//get_fixedTime();//UnityEngine::Time::get_realtimeSinceStartup();
+					float time = unity::get_realtimesincestartup();//unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
 					esp::local_player->console_echo(_(L"[trap]: Update - updating"));
 					if (time - _this->launchTime() < _this->traveledTime() + bulletUpdateRate) {
 						//esp::local_player->console_echo(string::wformat(_(L"[trap]: Update - breaking, time: %d, launchTime: %d, traveled: %d"), (int)(time * 100), (int)(_this->launchTime() * 100), (int)(_this->traveledTime() * 100)));
@@ -914,7 +923,7 @@ public:
 		if (!LocalPlayerBase)
 			return 0.f;
 
-		float time = get_fixedTime();//get_fixedTime();//UnityEngine::Time::get_realtimeSinceStartup();
+		float time = unity::get_realtimesincestartup();//unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
 		float timeSinceLastTick = time - LocalPlayerBase->lastSentTickTime();
 		float timeSinceLastTickClamped = max(0.f, min(timeSinceLastTick, 1.f));
 

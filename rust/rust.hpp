@@ -332,6 +332,15 @@ namespace rust {
 			Count = 5
 		};
 
+		enum class HitTestType
+		{
+			Generic = 0,
+			ProjectileEffect = 1,
+			Projectile = 2,
+			MeleeAttack = 3,
+			Use = 4,
+		};
+
 		enum class Bone_List : int
 		{
 			// assets / prefabs / player / player_mod = 0,
