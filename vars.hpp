@@ -2,7 +2,7 @@
 #include "utils/xorstr.hpp"
 #include <string>
 #include <vector>
-#define GUI_NAME "Rust"
+#define GUI_NAME "Matrix"
 #define CUSTOM_ICONS FALSE
 
 #include <map>
@@ -15,9 +15,10 @@ struct Vars
 	std::map<int, wchar_t*> player_id_name = {};
 	std::vector<std::string> player_name_list{};
 	bool open = false;
-
+	float accent_color[4] = { 28 / 255.f, 232 / 255.f, 89 / 255.f, 1.f };
+	float accent_color_opaque[4] = { 28 / 255.f, 232 / 255.f, 89 / 255.f, 0.6f };
 	bool wants_shoot = false;
-
+	bool rainbow_accent = false;
 	struct combat {
 		bool aimbot = false;
 		bool psilent = false;
@@ -144,6 +145,10 @@ struct Vars
 		bool bottomhealth = false;
 		bool rainbowname = false;
 		bool rainbowbox = false;
+		bool rainbowhpbar = false;
+		bool rainbowskeleton = false;
+		bool rainbowflags = false;
+		bool rainbowdist = false;
 		int hpbar = 0;
 		int snapline = 0;
 		bool sidehealth = false;

@@ -1,6 +1,6 @@
 #include "misc.hpp"
 
-uintptr_t pools_offset = 0xC0F330;
+uintptr_t pools_offset = 0xC12560;
 /*
  /* GenericInstMethod :
 	|
@@ -29,7 +29,7 @@ uintptr_t pools_offset = 0xC0F330;
 	|-Pool.Get<PositionLerp>
 	|-Pool.Get<AIDesign>
 */
-uintptr_t Method$System_Collections_Generic_List_Projectile__Clear__ = 15417936; //Method$System.Collections.Generic.List<Projectile>.Clear() (METHOD ADDRESS)
+uintptr_t Method$System_Collections_Generic_List_Projectile__Clear__ = 15140672; //Method$System.Collections.Generic.List<Projectile>.Clear() (METHOD ADDRESS)
 
 class Projectile1;
 class Projectile1 : public BaseMonoBehaviour
@@ -87,7 +87,7 @@ public:
 		if (!_this)
 			return false;
 
-		esp::local_player->console_echo(string::wformat(_(L"[trap]: IsAlive - integrity: %d, traveledtime * 100: %d"), (int)(_this->integrity() * 100), (int)(_this->traveledTime() * 100)));
+		esp::local_player->console_echo(string::wformat(_(L"[matrix]: IsAlive - integrity: %d, traveledtime * 100: %d"), (int)(_this->integrity() * 100), (int)(_this->traveledTime() * 100)));
 		return (_this->integrity() > 0.f && _this->traveledTime() < 8.f);
 	}
 
@@ -300,12 +300,12 @@ public:
 		if (!_this)
 			return false;
 
-		auto ht = (HitTest*)_this->hitTest();
+		auto ht = (HitTest2*)_this->hitTest();
 		//if (!memory::IsAddressValid(ht))
 		if (!ht)
 			return false;
 
-		esp::local_player->console_echo(string::wformat(_(L"[trap]: DoHit - Called")));
+		esp::local_player->console_echo(string::wformat(_(L"[matrix]: DoHit - Called")));
 		if (ht && at) {
 			//ht->DidHit() = true;
 			ht->set_did_hit(true);
@@ -321,9 +321,14 @@ public:
 				//ht->HitTransform() = Transform;
 				ht->set_hit_transform(trans);
 				//ht->HitPoint() = Transform->InverseTransformPoint(point);
-				ht->set_hit_point(trans->InverseTransformPoint(point));
+				//auto v = trans->InverseTransformPoint(point);
+				auto v = _InverseTransformPoint(trans, point);
+				esp::local_player->console_echo(string::wformat(_(L"[matrix]: DoHit - Point: (%d, %d, %d)"), v.x, v.y, v.z));
+				ht->set_hit_point(v);
 				//ht->HitMaterial() = Il2CppString::create(_("flesh"));
-				ht->HitMaterial() = _(L"flesh");
+
+				ht->set_hit_material(System::string(_(L"flesh")));
+				//ht->HitMaterial() = _(L"flesh");
 			}
 			else
 				ht->set_hit_point(point);
@@ -422,9 +427,9 @@ public:
 
 	uint64_t CreatePlayerProjectileUpdate()
 	{
-		esp::local_player->console_echo(_(L"[trap]: CreatePlayerProjectileUpdate - Called"));
+		esp::local_player->console_echo(_(L"[matrix]: CreatePlayerProjectileUpdate - Called"));
 		typedef uint64_t(__stdcall* PoolGet)(uint64_t);
-		uint64_t update = *reinterpret_cast<uint64_t*>(mem::game_assembly_base + 56468784); //"Method$Facepunch.Pool.Get<PlayerProjectileUpdate>()",
+		uint64_t update = *reinterpret_cast<uint64_t*>(mem::game_assembly_base + 56511640); //"Method$Facepunch.Pool.Get<PlayerProjectileUpdate>()",
 
 		if (!update)
 			return 0;
@@ -444,14 +449,14 @@ public:
 			return;
 
 		typedef uintptr_t(*AAA)(); // Client get_cl() { }
-		auto cl = ((AAA)(mem::game_assembly_base + 0x13176E0))();
+		auto cl = ((AAA)(mem::game_assembly_base + 0x12F2230))();
 		if (!cl)
 			return;
-		esp::local_player->console_echo(_(L"[trap]: SendPlayerProjectileUpdate - Called"));
+		esp::local_player->console_echo(_(L"[matrix]: SendPlayerProjectileUpdate - Called"));
 		
 		//public NetWrite get_write() { }
 		typedef uintptr_t(*AA)(uintptr_t);
-		auto write = ((AA)(mem::game_assembly_base + 0x595640))(cl);
+		auto write = ((AA)(mem::game_assembly_base + 0x5980B0))(cl);
 		//uint64_t tod_sky = mem::read<uint64_t>(p1 + 0x28);
 
 		//auto write = cl->write();
@@ -462,10 +467,10 @@ public:
 
 		//public bool Start() { }
 		//if (write->Start()) {
-		if (((netwrite_start)(mem::game_assembly_base + 0x2485FE0))(write)) {
+		if (((netwrite_start)(mem::game_assembly_base + 0x2487B60))(write)) {
 
 			typedef void(*netwrite_packetid)(uintptr_t, UINT);
-			((netwrite_packetid)(mem::game_assembly_base + 0x2485C10))(write, (UINT)MessageType::RPCMessage);
+			((netwrite_packetid)(mem::game_assembly_base + 0x2487790))(write, (UINT)MessageType::RPCMessage);
 			//write->PacketID((UINT)MessageType::RPCMessage);
 
 			auto net = *reinterpret_cast<uintptr_t*>((uintptr_t)esp::local_player + 0x58);
@@ -479,14 +484,14 @@ public:
 
 			typedef void(*netwrite_uint32)(uintptr_t, UINT);
 
-			((netwrite_uint32)(mem::game_assembly_base + 0x24862E0))(write, id);
+			((netwrite_uint32)(mem::game_assembly_base + 0x2487E60))(write, id);
 			//write->UInt32(id);
 
-			((netwrite_uint32)(mem::game_assembly_base + 0x24862E0))(write, 2324190493); //projectile update id 2324190493
+			((netwrite_uint32)(mem::game_assembly_base + 0x2487E60))(write, 2324190493); //projectile update id 2324190493
 			//write->UInt32(2324190493); //projectile update
 
 			typedef void(*serialize)(uintptr_t, uint64_t);
-			((serialize)(mem::game_assembly_base + 0x22AB8E0))(write, update);
+			((serialize)(mem::game_assembly_base + 0x22BC8B0))(write, update);
 			//ProtoBuf::PlayerProjectileUpdate::Serialize(write, (ProtoBuf::PlayerProjectileUpdate*)update);
 
 			auto conn = *reinterpret_cast<uintptr_t*>(cl + 0x28);
@@ -516,15 +521,15 @@ public:
 			//sendInfo->connections() = 0;
 
 			typedef void(*netwrite_send)(uintptr_t, uintptr_t);
-			((netwrite_send)(mem::game_assembly_base + 0x2485EC0))(write, si);
-			esp::local_player->console_echo(_(L"[trap]: SendPlayerProjectileUpdate - Finished"));
+			((netwrite_send)(mem::game_assembly_base + 0x2487A40))(write, si);
+			esp::local_player->console_echo(_(L"[matrix]: SendPlayerProjectileUpdate - Finished"));
 			//write->Send(sendInfo);
 		}
 	}
 
 	bool SilentCat(TraceResult1& data, Vector3 LOSPoint)
 	{
-		esp::local_player->console_echo(_(L"[trap]: SilentCat - Called"));
+		esp::local_player->console_echo(_(L"[matrix]: SilentCat - Called"));
 		auto _this = (Projectile*)this;
 		float projectile_desync = vprojectile_desync1 - 0.05f;
 		Vector3 from = data.hitPosition;
@@ -666,7 +671,7 @@ public:
 
 	void DoRealMovement()
 	{
-		esp::local_player->console_echo(_(L"[trap]: DoRealMovement - Called"));
+		esp::local_player->console_echo(_(L"[matrix]: DoRealMovement - Called"));
 		auto _this = (Projectile*)this;
 		if (!this) return;
 		if (!_this) return;
@@ -699,7 +704,7 @@ public:
 
 		if (maxTime >= 7.95f)
 		{
-			esp::local_player->console_echo(string::wformat(_(L"[trap]: UpdateVelocity - MaxTime > 7.95f, Integrity: %d"), (int)(_this->integrity() * 100)));
+			esp::local_player->console_echo(string::wformat(_(L"[matrix]: UpdateVelocity - MaxTime > 7.95f, Integrity: %d"), (int)(_this->integrity() * 100)));
 			_this->integrity(0.f);
 			return;
 		}
@@ -710,7 +715,7 @@ public:
 		if (result.didHit)
 		{
 		HIT:
-			esp::local_player->console_echo(_(L"[trap]: DoRealMovement - didHit"));
+			esp::local_player->console_echo(_(L"[matrix]: DoRealMovement - didHit"));
 			_this->traveledDistance(result.hitDist);
 
 			result.hitPosition = result.hitEntity->model()->boneTransforms()->get(47)->position();
@@ -728,7 +733,7 @@ public:
 		else if (result.silentCat && result.hitEntity)
 		{
 			bool canHit = SilentCat(result, position);
-			esp::local_player->console_echo(string::wformat(_(L"[trap]: DoRealMovement - SilentCat: %d"), (int)canHit));
+			esp::local_player->console_echo(string::wformat(_(L"[matrix]: DoRealMovement - SilentCat: %d"), (int)canHit));
 			if (canHit && abs(result.hitTime - maxTime) <= projectile_desync) {
 				float maxTravelDst = _this->initialDistance() + startVelocityLen * min(result.hitTime, maxTime) * projectile_forgiviness;
 				if ((result.hitDist = startPosition.distance(result.hitPosition)) < maxTravelDst) {
@@ -742,7 +747,7 @@ public:
 		Vector3 vel = _this->previousVelocity();
 
 		Vector3 newPos = prev + vel * num;
-		esp::local_player->console_echo(string::wformat(_(L"[trap]: DoRealMovement - Pos: (%d, %d, %d), newPos: (%d, %d, %d)"),
+		esp::local_player->console_echo(string::wformat(_(L"[matrix]: DoRealMovement - Pos: (%d, %d, %d), newPos: (%d, %d, %d)"),
 			(int)position.x,
 			(int)position.y,
 			(int)position.z,
@@ -761,7 +766,7 @@ public:
 		_this->currentVelocity(_this->previousVelocity());
 
 		if (flag && !(hitPosition.x == hitPosition.y && hitPosition.x == hitPosition.z && hitPosition.x == -1)) {
-			esp::local_player->console_echo(_(L"[trap]: DoRealMovement - Hit 1"));
+			esp::local_player->console_echo(_(L"[matrix]: DoRealMovement - Hit 1"));
 			_this->currentPosition(hitPosition);
 		}
 		else {
@@ -769,14 +774,14 @@ public:
 		}
 
 		if (flag) {
-			esp::local_player->console_echo(_(L"[trap]: DoRealMovement - Hit 2"));
+			esp::local_player->console_echo(_(L"[matrix]: DoRealMovement - Hit 2"));
 			_this->integrity(0.f);
 		}
 	}
 
 	void UpdateVelocity()
 	{
-		esp::local_player->console_echo(_(L"[trap]: UpdateVelocity - Called"));
+		esp::local_player->console_echo(_(L"[matrix]: UpdateVelocity - Called"));
 		auto _this = (Projectile*)this;
 		auto Transform = _this->transform();
 
@@ -855,14 +860,14 @@ public:
 
 		if (!_this->authoritative())
 			return _this->Launch();
-		LocalPlayer->console_echo(_(L"[trap]: Launch1 - Called"));
+		LocalPlayer->console_echo(_(L"[matrix]: Launch1 - Called"));
 		if (vars->combat.targetbehindwall) {
 			while (_this->IsAlive() && (_this->traveledDistance() < _this->initialDistance() || _this->traveledTime() < 0.1f))
 			{
 				//do we update here? what happens? fuck.
 				this->UpdateVelocity();
 			}
-			LocalPlayer->console_echo(_(L"[trap]: Launch1 - Finished launch"));
+			LocalPlayer->console_echo(_(L"[matrix]: Launch1 - Finished launch"));
 		}
 		else {	
 			_this->ricochetChance(0.f);
@@ -873,7 +878,7 @@ public:
 	void Update() {
 		do
 		{
-			esp::local_player->console_echo(_(L"[trap]: Update - Called"));
+			esp::local_player->console_echo(_(L"[matrix]: Update - Called"));
 			auto _this = (Projectile*)this;
 			if (!_this)
 				break;
@@ -896,14 +901,14 @@ public:
 			if (_this->authoritative() && vars->combat.targetbehindwall) {
 				while (this->IsAlive()) {
 					float time = unity::get_realtimesincestartup();//unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
-					esp::local_player->console_echo(_(L"[trap]: Update - updating"));
+					esp::local_player->console_echo(_(L"[matrix]: Update - updating"));
 					if (time - _this->launchTime() < _this->traveledTime() + bulletUpdateRate) {
-						//esp::local_player->console_echo(string::wformat(_(L"[trap]: Update - breaking, time: %d, launchTime: %d, traveled: %d"), (int)(time * 100), (int)(_this->launchTime() * 100), (int)(_this->traveledTime() * 100)));
+						//esp::local_player->console_echo(string::wformat(_(L"[matrix]: Update - breaking, time: %d, launchTime: %d, traveled: %d"), (int)(time * 100), (int)(_this->launchTime() * 100), (int)(_this->traveledTime() * 100)));
 						break;
 					}
 					UpdateVelocity();
 				}
-				esp::local_player->console_echo(string::wformat(_(L"[trap]: Update - Not alive, integrity: %d"), (int)_this->integrity()));
+				esp::local_player->console_echo(string::wformat(_(L"[matrix]: Update - Not alive, integrity: %d"), (int)_this->integrity()));
 			}
 			else
 				return _update((Projectile*)this);
@@ -911,7 +916,7 @@ public:
 
 		} while (0);
 
-		esp::local_player->console_echo(_(L"[trap]: Update - Sending normal update"));
+		esp::local_player->console_echo(_(L"[matrix]: Update - Sending normal update"));
 		return _update((Projectile*)this);//hooks::orig::_update((Projectile*)this);//Hooks::ProjectileUpdateHk.get_original<decltype(&Hooks::_Update)>()(this);
 	}
 

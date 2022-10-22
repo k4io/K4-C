@@ -119,7 +119,7 @@ namespace esp {
 		uintptr_t esp_name;
 
 		//if (local_player)
-		//	local_player->console_echo(string::wformat(_(L"[trap]: OnGui - clientEntities size: %d"), size));
+		//	local_player->console_echo(string::wformat(_(L"[matrix]: OnGui - clientEntities size: %d"), size));
 
 		for (int i = 0; i <= size; i++) {
 			auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));

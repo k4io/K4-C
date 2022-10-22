@@ -389,7 +389,7 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 
 		if (LastLocalEye != ManipulationPosition)
 		{
-			esp::local_player->console_echo(string::wformat(_(L"[trap]: CanManipulate - RealGangstaShit: (%d, %d, %d), FatHitPosition: (%d, %d, %d), distance: %d"),
+			esp::local_player->console_echo(string::wformat(_(L"[matrix]: CanManipulate - RealGangstaShit: (%d, %d, %d), FatHitPosition: (%d, %d, %d), distance: %d"),
 				(int)ManipulationPosition.x,
 				(int)ManipulationPosition.y,
 				(int)ManipulationPosition.z,

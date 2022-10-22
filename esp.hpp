@@ -4,14 +4,13 @@
 
 #include "rust/features/player_esp.hpp"
 //#include "rust/classes.hpp"
+float r = 1.00f, g = 0.00f, b = 1.00f;
 
 struct hit {
 	Vector3 position;
 	float time;
 };
 std::vector<hit> hitpoints = {};
-
-float r = 1.00f, g = 0.00f, b = 1.00f;
 
 std::vector<BasePlayer*> player_list = {};
 std::map<int32_t, BasePlayer*> player_map = {};
@@ -142,9 +141,6 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 		return true;
 	};
 	
-	//if () {
-	//bounds = ply->bones()->bounds;
-	//if (!bounds.empty()) {
 	if (get_bounds(bounds, 4)) {
 		//is_visible = unity::is_visible(camera_position, bones[48].world_position, (uintptr_t)esp::local_player);
 		//for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
@@ -159,9 +155,7 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 		auto name = ply->_displayName()->str;
 		auto activeitem = ply->GetActiveItem();
 
-		//chams
-		//esp::do_chams(ply);
-
+		const auto rainbowcolor = D2D1::ColorF(r, g, b, 1);
 
 		//health bar
 		const auto cur_health = ply->health();
@@ -331,7 +325,7 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 				auto spine3 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine3)->position();
 				auto spine4 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine4)->position();
 				auto eyepos = spine3.midPoint(spine4);
-				Vector3 mp = Vector3(eyepos.x, eyepos.y - 1.2f, eyepos.z);//lfootp.midPoint(rfootp);
+				Vector3 mp = Vector3(eyepos.x, eyepos.y - 1.25f, eyepos.z);//lfootp.midPoint(rfootp);
 
 				if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked)) {
 					//auto midpoint = ent->FindBone(_(L""))
@@ -344,7 +338,7 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 						cbounds.extents = Vector3(0.9f, 0.2f, 0.4f);
 					}
 					else {
-						cbounds.center = mp + Vector3(0.0f, 0.85f, 0.0f);
+						cbounds.center = mp + Vector3(0.0f, 0.8f, 0.0f);
 						cbounds.extents = Vector3(0.4f, 0.9f, 0.4f);
 					}
 				}
@@ -413,42 +407,17 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 		{
 		case 1:
 			render.FillRectangle({ bounds.left - 7, bounds.top - 1 }, { 4, box_height + 3 }, { 0,0,0,1 });
-			render.FillRectangle({ bounds.left - 6, bounds.bottom }, { 2, -h - 1 }, health_color);
+			render.FillRectangle({ bounds.left - 6, bounds.bottom }, { 2, -h - 1 }, vars->visual.rainbowhpbar ? rainbowcolor : health_color);
 			break;
 		case 2:
 			render.FillRectangle({ bounds.left, bounds.bottom + 6 }, { box_width + 1, 4 }, { 0,0,0,1 });
-			render.FillRectangle({ bounds.left + 1, bounds.bottom + 7 }, { ((box_width / max_health) * cur_health) - 1, 2 }, health_color);
+			render.FillRectangle({ bounds.left + 1, bounds.bottom + 7 }, { ((box_width / max_health) * cur_health) - 1, 2 }, vars->visual.rainbowhpbar ? rainbowcolor : health_color);
 			break;
 		}
-
 
 		//skeleton
 		if (vars->visual.skeleton)
 		{
-			//jaw -> spine4
-			//spine4 -- l_upperarm -> l_lowerarm -> l_hand -> (make hands)
-			//spine4 -- r_upperarm -> r_lowerarm -> r_hand -> (make hands)
-			//spine4 -> spine3
-			//spine3 -> pelvis
-			//pelvis -- l_knee -> l_ankle_scale -> l_foot
-			//pelvis -- r_knee -> r_ankle_scale -> r_foot
-			/*
-			for (size_t i = 0; i < 17; i++)
-			{
-				int id = skeleton_boneids[i++];
-				auto transform = player->model()->boneTransforms()->get(id);
-				Vector3 world_position = transform->get_bone_position();
-				Vector3 v1 = WorldToScreen(world_position);
-				if (id > 17) break;
-				transform = player->model()->boneTransforms()->get(id);
-				world_position = transform->get_bone_position();
-				Vector3 v2 = WorldToScreen(world_position);
-				if (v1.y >= 1080 || v1.x >= 1920 || v1.x <= 0 || v1.y <= 0) continue;
-				if (v2.y >= 1080 || v2.x >= 1920 || v2.x <= 0 || v2.y <= 0) continue;
-				gui::line(Vector2(v1.x, v1.y), Vector2(v2.x, v2.y), health_color);
-			}
-			*/
-
 			//jaw
 			auto Transform = ply->model()->boneTransforms()->get(48);
 			if (!Transform) return;
@@ -576,20 +545,20 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			pelvis.y += 0.2;
 			l_hip.y += 0.2;
 
-			render.Line(Vector2(jaw.x, jaw.y), Vector2(spine4.x, spine4.y), health_color);
-			render.Line(Vector2(spine4.x, spine4.y), Vector2(spine3.x, spine3.y), health_color);
-			render.Line(Vector2(spine4.x, spine4.y), Vector2(l_upperarm.x, l_upperarm.y), health_color);
-			render.Line(Vector2(spine4.x, spine4.y), Vector2(r_upperarm.x, r_upperarm.y), health_color);
-			render.Line(Vector2(l_upperarm.x, l_upperarm.y), Vector2(l_forearm.x, l_forearm.y), health_color);
-			render.Line(Vector2(r_upperarm.x, r_upperarm.y), Vector2(r_forearm.x, r_forearm.y), health_color);
-			render.Line(Vector2(l_forearm.x, l_forearm.y), Vector2(l_hand.x, l_hand.y), health_color);
-			render.Line(Vector2(r_forearm.x, r_forearm.y), Vector2(r_hand.x, r_hand.y), health_color);
-			render.Line(Vector2(spine3.x, spine3.y), Vector2(pelvis.x, pelvis.y), health_color);
-			render.Line(Vector2(l_hip.x, l_hip.y), Vector2(l_knee.x, l_knee.y), health_color);
-			render.Line(Vector2(pelvis.x, pelvis.y), Vector2(r_knee.x, r_knee.y), health_color);
-			render.Line(Vector2(l_knee.x, l_knee.y), Vector2(l_ankle_scale.x, l_ankle_scale.y), health_color);
-			render.Line(Vector2(r_knee.x, r_knee.y), Vector2(r_ankle_scale.x, r_ankle_scale.y), health_color);
-			render.Line(Vector2(r_ankle_scale.x, r_ankle_scale.y), Vector2(r_foot.x, r_foot.y), health_color);
+			render.Line(Vector2(jaw.x, jaw.y), Vector2(spine4.x, spine4.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
+			render.Line(Vector2(spine4.x, spine4.y), Vector2(spine3.x, spine3.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
+			render.Line(Vector2(spine4.x, spine4.y), Vector2(l_upperarm.x, l_upperarm.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
+			render.Line(Vector2(spine4.x, spine4.y), Vector2(r_upperarm.x, r_upperarm.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
+			render.Line(Vector2(l_upperarm.x, l_upperarm.y), Vector2(l_forearm.x, l_forearm.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
+			render.Line(Vector2(r_upperarm.x, r_upperarm.y), Vector2(r_forearm.x, r_forearm.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
+			render.Line(Vector2(l_forearm.x, l_forearm.y), Vector2(l_hand.x, l_hand.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
+			render.Line(Vector2(r_forearm.x, r_forearm.y), Vector2(r_hand.x, r_hand.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
+			render.Line(Vector2(spine3.x, spine3.y), Vector2(pelvis.x, pelvis.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
+			render.Line(Vector2(l_hip.x, l_hip.y), Vector2(l_knee.x, l_knee.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
+			render.Line(Vector2(pelvis.x, pelvis.y), Vector2(r_knee.x, r_knee.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
+			render.Line(Vector2(l_knee.x, l_knee.y), Vector2(l_ankle_scale.x, l_ankle_scale.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
+			render.Line(Vector2(r_knee.x, r_knee.y), Vector2(r_ankle_scale.x, r_ankle_scale.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
+			render.Line(Vector2(r_ankle_scale.x, r_ankle_scale.y), Vector2(r_foot.x, r_foot.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
 
 			//HANDS??
 		}
@@ -603,27 +572,20 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			auto position = Transform->position();
 
 			auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().distance(position);
-			//const char* new_name = ;
-			// PLAYER NAME
 
 			auto name_color = is_visible ? vars->colors.players.details.name.visible : vars->colors.players.details.name.invisible;
 			auto half = (bounds.right - bounds.left) / 2;
 
-			//selected flag for automation following
-			//std::wstring ws(name);
-			//std::string s(ws.begin(), ws.end());
-			//if (!vars->misc.playerselected)
-			//	vars->misc.playerselected = _("~");
-			//if (!strcmp(vars->misc.playerselected, s.c_str()))
-			//{
-			//	render.String({ bounds.right + 5, bounds.top }, _(L"[Selected]"), { 0, 0, 0, 1 });
-			//	render.String({ bounds.right + 5, bounds.top + 1 }, _(L"[Selected]"), FLOAT4TOD3DCOLOR(name_color));
-			//}
-			//wounded
+			if (vars->visual.weaponesp) {
+				auto player_weapon = ply->GetActiveItem();
+				if(player_weapon)
+					render.StringCenter({ bounds.center, bounds.bottom + 19 }, player_weapon->get_weapon_name(), vars->visual.rainbowflags ? rainbowcolor : FLOAT4TOD3DCOLOR(vars->colors.players.details.flags.visible));
+			}
+
 			if (vars->visual.woundedflag) {
 				if (HasPlayerFlag(ply, rust::classes::PlayerFlags::Wounded)) {
 					render.String({ bounds.right + 5, bounds.top }, _(L"[Wounded]"), { 0, 0, 0, 1 });
-					render.String({ bounds.right + 5, bounds.top + 1 }, _(L"[Wounded]"), FLOAT4TOD3DCOLOR(name_color));
+					render.String({ bounds.right + 5, bounds.top + 1 }, _(L"[Wounded]"), vars->visual.rainbowflags ? rainbowcolor : FLOAT4TOD3DCOLOR(vars->colors.players.details.flags.visible));
 				}
 			}
 
@@ -632,27 +594,14 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			{
 				auto dist_color = is_visible ? vars->colors.players.details.distance.visible : vars->colors.players.details.distance.invisible;
 				auto nstr = string::wformat(_(L"[%dm]"), (int)distance);
-				//render.StringCenter({ bounds.center - 1, bounds.bottom + 10 }, nstr, { 0, 0, 0, 1 });
-				//render.StringCenter({ bounds.center + 1, bounds.bottom + 10 }, nstr, { 0, 0, 0, 1 });
-				//render.StringCenter({ bounds.center - 1, bounds.bottom + 8 }, nstr, { 0, 0, 0, 1 });
-				//render.StringCenter({ bounds.center + 1, bounds.bottom + 8 }, nstr, { 0, 0, 0, 1 });
-				render.StringCenter({ bounds.center, bounds.bottom + 9 }, nstr, FLOAT4TOD3DCOLOR(dist_color));
-				//gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.bottom + 1.f, 79.f + half * 2 + 80.f , 30 }, nstr, gui::Color(0, 0, 0, 120), true, 10.5);
-				//gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.bottom, 80.f + half * 2 + 80.f , 30 }, nstr, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
+				render.StringCenter({ bounds.center, bounds.bottom + 9 }, nstr, vars->visual.rainbowdist ? rainbowcolor : FLOAT4TOD3DCOLOR(dist_color));
 			}
 
 
 
 			//name
 			if (vars->visual.nameesp) {
-
-				//render.StringCenter({ bounds.center - 1, bounds.top - 9 }, name, { 0, 0, 0, 1 });
-				//render.StringCenter({ bounds.center + 1, bounds.top - 9 }, name, { 0, 0, 0, 1 });
-				//render.StringCenter({ bounds.center - 1, bounds.top - 7 }, name, { 0, 0, 0, 1 });
-				//render.StringCenter({ bounds.center + 1, bounds.top - 7 }, name, { 0, 0, 0, 1 });
 				render.StringCenter({ bounds.center, bounds.top - 8 }, name, vars->visual.rainbowname ? D2D1::ColorF{ r, g, b, 1 } : FLOAT4TOD3DCOLOR(name_color));
-				//gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.top - 23.f, 79.f + half * 2 + 80.f , 30 }, name, gui::Color(0, 0, 0, 120), true, 10.5);
-				//gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.top - 24.f, 80.f + half * 2 + 80.f , 30 }, name, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
 			}
 			// PLAYER NAME
 		}
@@ -1619,13 +1568,13 @@ int indicators_on_screen = 0;
 void IndicatorDesync() {
 	float x = vars->ScreenX / 2, y = vars->ScreenY / 2;
 	if (vars->desyncTime < 0) return;
-	render.StringCenter({ 100.f, y }, _(L"Desync"), {204 / 255.f, 39 / 255.f, 42 / 255.f, 1}, true, 20.f);
+	render.StringCenter({ 100.f, y }, _(L"Desync"), FLOAT4TOD3DCOLOR(vars->accent_color), true, 20.f);
 	render.ProgressBar({ 40, y + 10.f }, { 120, 8 }, vars->desyncTime, 1.0f);
 }
 void IndicatorReload() {
 	float x = vars->ScreenX / 2, y = vars->ScreenY / 2;
 	if (vars->time_since_last_shot < vars->reload) {
-		render.StringCenter({ 100.f, (y - 30.f) }, _(L"Reload"), { 204 / 255.f, 39 / 255.f, 42 / 255.f, 1 }, true, 20.f);
+		render.StringCenter({ 100.f, (y - 30.f) }, _(L"Reload"), FLOAT4TOD3DCOLOR(vars->accent_color), true, 20.f);
 		render.ProgressBar({ 40, y - 20.f }, { 120, 8 }, vars->time_since_last_shot, (vars->reload - 0.2f));
 	}
 }
@@ -1636,7 +1585,7 @@ void IndicatorFlyhack() {
 void IndicatorSpeedhack() {
 	float x = vars->ScreenX / 2, y = vars->ScreenY / 2;
 	if (vars->speedhack <= 0) return;
-	render.StringCenter({ 100.f, (y - 60.f) }, _(L"Speedhack"), { 204 / 255.f, 39 / 255.f, 42 / 255.f, 1 }, true, 20.f);
+	render.StringCenter({ 100.f, (y - 60.f) }, _(L"Speedhack"), FLOAT4TOD3DCOLOR(vars->accent_color), true, 20.f);
 	render.ProgressBar({ 40, y - 50.f }, { 120, 8 }, vars->speedhack, 1.0f);
 }
 void IndicatorTp() {
@@ -1657,10 +1606,10 @@ void DrawFov() {
 }
 
 void Watermark() {
-	render.FillRectangle(Vector2(7, 7), Vector2(60, 16), D2D1::ColorF(249.f / 255.f, 130.f / 255.f, 109.f / 255.f));
-	render.FillRectangle(Vector2(6, 6), Vector2(62, 18), D2D1::ColorF(0.11f, 0.11f, 0.11f));
-	render.FillRectangle(Vector2(7, 21), Vector2(60, 2), D2D1::ColorF(249.f / 255.f, 130.f / 255.f, 109.f / 255.f));
-	render.String({ 14,7 }, _(L"rust"), D2D1::ColorF(249.f / 255.f, 130.f / 255.f, 109.f / 255.f));
+	render.FillRectangle(Vector2(7, 7), Vector2(40, 16), FLOAT4TOD3DCOLOR(vars->accent_color_opaque));
+	render.FillRectangle(Vector2(6, 6), Vector2(42, 18), D2D1::ColorF(0.11f, 0.11f, 0.11f, 0.6));
+	render.FillRectangle(Vector2(7, 21), Vector2(40, 2), FLOAT4TOD3DCOLOR(vars->accent_color_opaque));
+	render.String({ 14,7 }, _(L"Matrix"), FLOAT4TOD3DCOLOR(vars->accent_color));
 }
 
 void new_frame() {

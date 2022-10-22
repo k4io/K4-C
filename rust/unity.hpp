@@ -155,8 +155,8 @@ namespace unity {
 
 	bool LineOfSightRadius(Vector3 source, Vector3 destination, uintptr_t ent, float p1 = 0.18f) {
 		auto layer = (int)rust::classes::Layers::ProjectileLineOfSightCheck | (int)rust::classes::Layers::Terrain | (int)rust::classes::Layers::z;
-		typedef bool (*AAA)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t);//real rust 0x50F790         //cracked 0x50ED80
-
+		typedef bool (*AAA)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t);
+		if (destination.is_empty() || source.is_empty()) return false;
 		return ((AAA)(mem::game_assembly_base + oLineOfSightRadius))(source, destination, (rust::classes::Layers)layer, p1, ent);
 	}
 

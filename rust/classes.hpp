@@ -750,10 +750,13 @@ public:
 	}
 
 	Vector3 position() {
-		if (!(uintptr_t)this)
-			return {};
-		//auto off = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
-		return transgetpos(this);
+		__try {
+			if (!(uintptr_t)this)
+				return {};
+			//auto off = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
+			return transgetpos(this);
+		}
+		__except (true) { return Vector3::Zero(); }
 	}
 
 	void setposition(Vector3 pos) {
@@ -896,7 +899,11 @@ public:
 
 class BaseEntity : public BaseNetworkable {
 public:
-	FIELD(_("BaseEntity"), _("model"), model, Model*);
+	//FIELD(_("BaseEntity"), _("model"), model, Model*);
+
+	Model* model() {
+		return *reinterpret_cast<Model**>((uintptr_t)this + 0x130);
+	}
 
 	Vector3 GetWorldVelocity() {
 		__try {
@@ -925,7 +932,7 @@ public:
 		return off(this, bone);
 	}
 	bool is_visible(Vector3 source, Vector3 destination, float p1 = 0.18f) {
-		return unity::is_visible(source, destination, (uintptr_t)this, p1);
+		return unity::is_visible(source, destination, 0, p1);
 	}
 };
 
@@ -1408,7 +1415,7 @@ public:
 	}
 };
 
-class Item {
+class Item : public Component {
 public:
 	FIELD(_("Item"), _("heldEntity"), heldEntity, HeldEntity*);
 	FIELD(_("Item"), _("info"), info, ItemDefinition*);
@@ -1851,6 +1858,14 @@ public:
 	}
 };
 
+class PlayerBelt {
+public:
+	void SetSelectedSlot(int slot) {
+		uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerBelt_TypeInfo);//il2cpp::type_object(_(""), _("PlayerBelt"));
+		*reinterpret_cast<int*>(*reinterpret_cast<uintptr_t*>(kl + 0xB8)) = slot;
+	}
+};
+
 class BasePlayer : public BaseCombatEntity {
 public:
 	FIELD(_("BasePlayer"), _("playerModel"), playerModel, PlayerModel*);
@@ -1868,6 +1883,7 @@ public:
 	FIELD(_("BasePlayer"), _("mounted"), mounted, BaseMountable*);
 	FIELD(_("BasePlayer"), _("inventory"), inventory, PlayerInventory*);
 	FIELD(_("BasePlayer"), _("ClientCurrentMapNote"), ClientCurrentMapNote, MapNote*);
+	FIELD(_("BasePlayer"), _("Belt"), Belt, PlayerBelt*);
 
 	bool isCached() {
 		if (!this) return false;
@@ -2489,7 +2505,7 @@ public:
 		if (!this) return false;
 
 		typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7202688
-		return ((AAA)(mem::game_assembly_base + 0x6C5180))((uintptr_t)this, (int)g, p);
+		return ((AAA)(mem::game_assembly_base + 0x6D3260))((uintptr_t)this, (int)g, p);
 		//return canaffordupgrade((uintptr_t)this, g, p);
 	}
 
@@ -2497,14 +2513,14 @@ public:
 		if (!this) return false;
 
 		typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7203152
-		return ((AAA)(mem::game_assembly_base + 0x6C5350))((uintptr_t)this, (int)g, p);
+		return ((AAA)(mem::game_assembly_base + 0x6D3430))((uintptr_t)this, (int)g, p);
 		//return canchangetograde((uintptr_t)this, g, p);
 	}
 
 	void Upgrade(rust::classes::BuildingGrade g, BasePlayer* p) {
 		if (!this) return;
 		typedef void (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7203152
-		return ((AAA)(mem::game_assembly_base + 0x6C8970))((uintptr_t)this, (int)g, p);
+		return ((AAA)(mem::game_assembly_base + 0x6D6A50))((uintptr_t)this, (int)g, p);
 		//return upgradetograde((uintptr_t)this, g, p);
 	}
 };
@@ -2784,6 +2800,10 @@ public:
 		*reinterpret_cast<Transform**>((uintptr_t)this + 0xB0) = hit_transform;
 	}
 
+	void set_hit_material(System::string material) {
+		*reinterpret_cast<System::string*>((uintptr_t)this + 0xC0) = material;
+	}
+
 	void set_hit_type(rust::classes::HitTestType hit_type) {
 		*reinterpret_cast<int*>((uintptr_t)this + 0x10) = (int)hit_type;
 	}
@@ -3009,7 +3029,7 @@ namespace cache {
 					bones->forward = fwd;
 
 				//dont need nanohacks 'target' as it doesn't make sense and is only local? lol
-				//lp->console_echo(string::wformat(_(L"[trap]: BoneCache - Finished caching for %d"), lp->userID()));
+				//lp->console_echo(string::wformat(_(L"[matrix]: BoneCache - Finished caching for %d"), lp->userID()));
 				bones->eye_rot = player->eyes()->rotation();
 			}
 

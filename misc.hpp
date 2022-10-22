@@ -328,7 +328,7 @@ namespace misc
 		{
 			if (!vars->misc.logs) return;
 			ply->console_echo(string::wformat(
-				_(L"[trap] Anti-AntiHack - Added violation [%s] of %d in frame %d (now has %d)"),
+				_(L"[matrix] Anti-AntiHack - Added violation [%s] of %d in frame %d (now has %d)"),
 				(type == antihacktype::AttackHack ? _(L"AttackHack") :
 					type == antihacktype::CooldownHack ? _(L"CooldownHack") :
 					type == antihacktype::EyeHack ? _(L"EyeHack") :
@@ -407,21 +407,21 @@ namespace misc
 		//LOS from eyes.center to eyes.position on server, i think eyes.position is lastSentTick.pos
 		//if(loco->is_visible(, pos))
 		
-		if (unity::LineOfSightRadius(cLastTickPos, eyepos, (uintptr_t)esp::local_player))
+		if (!unity::LineOfSightRadius(cLastTickPos, eyepos, (uintptr_t)esp::local_player, .2f))
 			flag = false;
 		//if (!loco->is_visible(cLastTickPos, eyepos, 0.18f)) {
-		//	esp::local_player->console_echo(_(L"[trap]: ValidateEyePos - eye_los caught"));
+		//	esp::local_player->console_echo(_(L"[matrix]: ValidateEyePos - eye_los caught"));
 		//	flag = true;
 		//}
 
 		if (loco_position.distance(loco->eyes()->position()) > 0.06f
-			&& TestNoClipping(loco, cLastTickPos, loco_position, .29f))
+			&& TestNoClipping(loco, cLastTickPos, loco_position, .3f))
 			//&& TestNoClipping(loco, cLastTickEyePos, position2))
 		{
 			flag = false;
 		}
-		else if (loco_position.distance(loco->eyes()->position()) > 0.02f
-			&& TestNoClipping(loco, actual_eye_pos, eyepos)) {
+		else if (loco_position.distance(loco->eyes()->position()) > 0.01f
+			&& TestNoClipping(loco, actual_eye_pos, eyepos, 0.02f)) {
 			flag = false;
 		}
 
@@ -441,7 +441,7 @@ namespace misc
 
 	bool can_manipulate(BasePlayer* ply,
 		Vector3 pos,
-		float mm_eye = 7.f) //7m only check rn
+		float mm_eye = 10.f) //7m only check rn
 	{
 		Vector3 v = *reinterpret_cast<Vector3*>((uintptr_t)ply + eyes);
 		Vector3 re_p = ply->model()->boneTransforms()->get(47)->position() + ply->model()->boneTransforms()->get(47)->up() * (ply->eyes()->get_view_offset().y + v.y);
@@ -496,7 +496,8 @@ namespace misc
 		auto do_check = [&](Vector3 a) {
 			Vector3 p = re_p + a;
 
-			if (!ply->is_visible(p, re_p))
+			//check between manip pos and eye pos
+			if (!ply->is_visible(p, re_p, .2f))
 				return false;
 
 			//if (!ply->is_visible(p - Vector3(0, 0.3, 0), re_p)) //double check not too low as likes to shoot from just under the ground
@@ -505,7 +506,8 @@ namespace misc
 			if (vars->visual.angles)
 				Sphere(p, 0.05f, col(10, 30, 90, 1), 0.01f, 10);
 
-			if (!ply->is_visible(p, pos))
+			//check between manip pos and player pos
+			if (!ply->is_visible(p, pos, .2f))
 			{
 				if (!vars->combat.thick_bullet || !vars->combat.targetbehindwall) return false;
 				bool t = false;
@@ -540,18 +542,40 @@ namespace misc
 				if (!t) return false;
 			}
 
-			if (ValidateEyePos(p))
+			//fuck you
+			if (!ValidateEyePos(p))
 				return false;
 
 			if (vars->visual.angles)
 				Line(p, pos, { r * 100, g * 100, b * 100, 1 }, (vars->desyncTime * 5.f), true, true);
 
-			misc::best_lean = a;
+			misc::best_lean = p;
 			return true;
 		};
 
-		for (float y = 1.5f; y > -1.5f; y -= vars->combat.targetbehindwall ? 0.2f : 0.1f) {
-			int points = vars->combat.thick_bullet ? 7 : 20;
+		int points = vars->combat.thick_bullet ? 7 : 20;
+		for (float y = 0; y < 1.5f; y += vars->combat.targetbehindwall ? 0.3f : 0.1f) {
+			float step = (M_PI_2) / points;
+			float x, z, current = 0;
+			for (size_t i = 0; i < points; i++)
+			{
+				x = Vector3::my_sin(current) * mm_eye;
+				z = Vector3::my_cos(current) * mm_eye;
+
+				Vector3 p1 = Vector3(x, y, z);
+				Vector3 p2 = Vector3(-x, y, z);
+				Vector3 p3 = Vector3(x, y, -z);
+				Vector3 p4 = Vector3(-x, y, -z);
+
+				if (do_check(p1)) return true;
+				if (do_check(p2)) return true;
+				if (do_check(p3)) return true;
+				if (do_check(p4)) return true;
+
+				current += step;
+			}
+		}
+		for (float y = 0; y > -1.5f; y -= vars->combat.targetbehindwall ? 0.3f : 0.1f) {
 			float step = (M_PI_2) / points;
 			float x, z, current = 0;
 			for (size_t i = 0; i < points; i++)
@@ -699,7 +723,7 @@ namespace misc
 			speedhackDistance = std::clamp(speedhackDistance, -num5, num5);
 			speedhackDistance = std::clamp(speedhackDistance - num2, -num5, num5);
 
-			//esp::local_player->console_echo(string::wformat(_(L"[trap]: IsSpeeding - speedhackDistance: %d, num4: %d, speedhackPauseTime: %d"),(int)((speedhackDistance + 4) * 100), (int)(num4 * 100), (int)(speedhackPauseTime * 100)));
+			//esp::local_player->console_echo(string::wformat(_(L"[matrix]: IsSpeeding - speedhackDistance: %d, num4: %d, speedhackPauseTime: %d"),(int)((speedhackDistance + 4) * 100), (int)(num4 * 100), (int)(speedhackPauseTime * 100)));
 
 			if (speedhackDistance > num4) {
 				result = true;
@@ -945,6 +969,56 @@ namespace misc
 		}
 	}
 
+	std::pair<int, bool> FindFromHotbar(BasePlayer* lp, bool findtool = true) {
+		System::list<Item*>* belt = lp->get_belt_items();
+		int id = -1;
+		int ied = -2;
+		int h_id = -3;
+		auto h = lp->GetActiveItem();
+		if (h) 
+			h_id = h->get_item_definition_id();
+		if (belt) {
+			//hotbar esp
+			auto checkitem = [&](Item* item, int idx) {
+				if (!item) return;
+				auto name = item->get_weapon_name();
+				if (!name) return;
+
+				if (findtool &&
+					(std::wstring(name).find(_(L"Jackhammer")) != std::wstring::npos
+						|| std::wstring(name).find(_(L"Chainsaw")) != std::wstring::npos
+						|| std::wstring(name).find(_(L"ickaxe")) != std::wstring::npos
+						|| std::wstring(name).find(_(L"cepick")) != std::wstring::npos
+						|| std::wstring(name).find(_(L"Rock")) != std::wstring::npos
+						|| std::wstring(name).find(_(L"atchet")) != std::wstring::npos))
+				{
+					ied = item->get_item_definition_id();
+					id = idx;
+					return;
+				}
+				else if (!findtool &&
+					(std::wstring(name).find(_(L"Rifle")) != std::wstring::npos
+						|| std::wstring(name).find(_(L"Pistol")) != std::wstring::npos
+						|| std::wstring(name).find(_(L"SMG")) != std::wstring::npos
+						|| std::wstring(name).find(_(L"gun")) != std::wstring::npos
+						|| std::wstring(name).find(_(L"M249")) != std::wstring::npos
+						|| std::wstring(name).find(_(L"Bow")) != std::wstring::npos
+						|| std::wstring(name).find(_(L"Crossbow")) != std::wstring::npos
+						|| std::wstring(name).find(_(L"MP5")) != std::wstring::npos
+						|| std::wstring(name).find(_(L"Thompson")) != std::wstring::npos
+						|| std::wstring(name).find(_(L"Revolver")) != std::wstring::npos))
+				{
+					ied = item->get_item_definition_id();
+					id = idx;
+					return;
+				}
+			};
+			for (size_t i = 0; i < 5; i++)
+				checkitem(belt->get(i), i);
+		}
+		return std::make_pair(id, ied == h_id);
+	}
+
 	namespace autobot {
 		bool needs_to_jump = false;
 		bool wants_shoot = false;
@@ -1000,13 +1074,13 @@ namespace misc
 
 				if (esp::local_player->is_visible(point, new_point, 1.0f))
 				{
-					esp::local_player->console_echo(string::wformat(_(L"[trap]: CreatePath - visibility straight ahead (%d)"), path.size()));
+					esp::local_player->console_echo(string::wformat(_(L"[matrix]: CreatePath - visibility straight ahead (%d)"), path.size()));
 					old_point = point;
 					point = lowest_pos(new_point);
 				}
 				else
 				{
-					esp::local_player->console_echo(string::wformat(_(L"[trap]: CreatePath - no visibility straight ahead, creating sphere (%d)"), path.size()));
+					esp::local_player->console_echo(string::wformat(_(L"[matrix]: CreatePath - no visibility straight ahead, creating sphere (%d)"), path.size()));
 
 					std::vector<Vector3> ps = {};
 
@@ -1020,17 +1094,17 @@ namespace misc
 
 					Vector3 best = Vector3(0, 0, 0);
 					if (ps.size() == 0) {
-						esp::local_player->console_echo(string::wformat(_(L"[trap]: CreatePath could not create another node, path size: %i"), path.size()));
+						esp::local_player->console_echo(string::wformat(_(L"[matrix]: CreatePath could not create another node, path size: %i"), path.size()));
 						break;
 					}
 
-					esp::local_player->console_echo(string::wformat(_(L"[trap]: CreatePath - potentials: %d"), ps.size()));
+					esp::local_player->console_echo(string::wformat(_(L"[matrix]: CreatePath - potentials: %d"), ps.size()));
 
 					for (auto e : ps)
 						if (e.distance(node.pos) < best.distance(node.pos)
 							&& dist_from_ground(e) < 1.6f)
 							best = e;
-					esp::local_player->console_echo(string::wformat(_(L"[trap]: CreatePath - closest (best chosen) (%d, %d, %d) (%d)"), (int)best.x, (int)best.y, (int)best.z, path.size()));
+					esp::local_player->console_echo(string::wformat(_(L"[matrix]: CreatePath - closest (best chosen) (%d, %d, %d) (%d)"), (int)best.x, (int)best.y, (int)best.z, path.size()));
 					old_point = point;
 					point = best;
 				}
@@ -1069,138 +1143,143 @@ namespace misc
 		}
 
 		void checkandshoot(PlayerWalkMovement* pwm) {
-			auto lp = esp::local_player;
-			if (!pwm || !lp) return;
-			std::vector<BasePlayer*> internal_playerlist = {};
-			auto lppos = lp->model()->boneTransforms()->get(48)->position();
-			//maybe check for manipulator
-			for (auto p : player_map)
-				if (p.second && (p.second->is_alive() && (!p.second->is_sleeping())))
-				{
-					auto model = p.second->model();
-					if (model) {
-						//auto trans = model->boneTransforms()->get(48);
-						auto bonetransforms = *reinterpret_cast<System::Array<Transform*>**>(model + 0x48);
-						if (bonetransforms)
-						{
-							auto trans = bonetransforms->get(48);
-							if (trans) {
-								auto pos = trans->position();
-								auto visible = lp->is_visible(pos, lppos);
-								if (visible
-									&& pos.distance(lppos) < vars->misc.autoattackdist
-									&& !p.second->is_local_player())
-									internal_playerlist.push_back(p.second);
+			__try {
+				auto lp = esp::local_player;
+				if (!pwm || !lp) return;
+				std::vector<BasePlayer*> internal_playerlist = {};
+				auto lppos = lp->model()->boneTransforms()->get(48)->position();
+				//maybe check for manipulator
+				for (auto p : player_map)
+					if (p.second && (p.second->is_alive() && (!p.second->is_sleeping())))
+					{
+						auto model = p.second->model();
+						if (model) {
+							//auto trans = model->boneTransforms()->get(48);
+							auto bonetransforms = *reinterpret_cast<System::Array<Transform*>**>(model + 0x48);
+							if (bonetransforms)
+							{
+								auto trans = bonetransforms->get(48);
+								if (trans) {
+									auto pos = trans->position();
+									auto visible = lp->is_visible(pos, lppos);
+									if (visible
+										&& pos.distance(lppos) < vars->misc.autoattackdist
+										&& !p.second->is_local_player())
+										internal_playerlist.push_back(p.second);
+								}
 							}
 						}
 					}
-				}
-			BasePlayer* ply = nullptr;
-			for (auto p : internal_playerlist)
-			{
-				auto pos = p->transform()->position();
-				switch (vars->misc.targetting_mode)
+				BasePlayer* ply = nullptr;
+				for (auto p : internal_playerlist)
 				{
-				case 0: //closest
-				{
-					if (!ply) {
-						ply = p;
-						continue;
-					}
-					if (ply->transform()->position().distance(lppos) > pos.distance(lppos))
+					auto pos = p->transform()->position();
+					switch (vars->misc.targetting_mode)
 					{
-						ply = p;
-						continue;
+					case 0: //closest
+					{
+						if (!ply) {
+							ply = p;
+							continue;
+						}
+						if (ply->transform()->position().distance(lppos) > pos.distance(lppos))
+						{
+							ply = p;
+							continue;
+						}
+						break;
 					}
+					case 1: //lowest hp
+					{
+						if (!ply) {
+							ply = p;
+							continue;
+						}
+						if (ply->health() > p->health())
+						{
+							ply = p;
+							continue;
+						}
+						break;
+					}
+					}
+				}
+				auto target = aim_target();
+
+				if (ply == nullptr)
+				{
+					vars->wants_shoot = false;
+					wants_shoot = false;
+					return;
+				}
+
+				switch (vars->combat.aimbone)
+				{
+				case 0: //Head
+					target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::head)->position();
+					break;
+				case 1: //Spine 4
+					target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine4)->position();
+					break;
+				case 2: //Pelvis
+					target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
+					break;
+				case 3: //R arm
+					target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_forearm)->position();
+					break;
+				case 4: //L arm
+					target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_forearm)->position();
+					break;
+				case 5: //R leg
+					target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_knee)->position();
+					break;
+				case 6: //L leg
+					target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_knee)->position();
 					break;
 				}
-				case 1: //lowest hp
+				//Sphere(target.pos, 1.f, { 1, 1, 1, 1 }, 20.f, 100.f);
+				auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos); //crashes bc non game thread
+				target.distance = distance;
+				auto fov = unity::get_fov(target.pos);
+				target.fov = fov;
+				target.ent = (BaseCombatEntity*)ply;
+				target.network_id = ply->userID();
+				target.avg_vel = ply->GetWorldVelocity();
+				//only shoots at visible players anyway
+				auto visible = true;
+
+				esp::best_target = target;
+
+				auto item = lp->GetActiveItem();
+				if (item)
 				{
-					if (!ply) {
-						ply = p;
-						continue;
-					}
-					if (ply->health() > p->health())
+					auto held = item->GetHeldEntity<BaseProjectile>();
+					if (held)
 					{
-						ply = p;
-						continue;
+						auto mag_ammo = held->ammo_left();
+						float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
+						if (get_fixedTime() > nextshot
+							&& held->timeSinceDeploy() > held->deployDelay()
+							&& mag_ammo > 0)
+						{
+							wants_shoot = true;
+							vars->wants_shoot = true;
+							autoshot = true;
+						}
+						else
+						{
+							//updateammodisplay((uintptr_t)held);
+							//shot_fired((uintptr_t)held);
+							//did_attack_client_side((uintptr_t)held);
+						}
 					}
-					break;
-				}
+					else {
+						//switch to weapon
+					}
 				}
 			}
-			auto target = aim_target();
-
-			if (ply == nullptr)
-			{
-				vars->wants_shoot = false;
-				wants_shoot = false;
+			__except (true) {
 				return;
-			}
-
-			switch (vars->combat.aimbone)
-			{
-			case 0: //Head
-				target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::head)->position();
-				break;
-			case 1: //Spine 4
-				target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine4)->position();
-				break;
-			case 2: //Pelvis
-				target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
-				break;
-			case 3: //R arm
-				target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_forearm)->position();
-				break;
-			case 4: //L arm
-				target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_forearm)->position();
-				break;
-			case 5: //R leg
-				target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_knee)->position();
-				break;
-			case 6: //L leg
-				target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_knee)->position();
-				break;
-			}
-			//Sphere(target.pos, 1.f, { 1, 1, 1, 1 }, 20.f, 100.f);
-			auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos); //crashes bc non game thread
-			target.distance = distance;
-			auto fov = unity::get_fov(target.pos);
-			target.fov = fov;
-			target.ent = (BaseCombatEntity*)ply;
-			target.network_id = ply->userID();
-			target.avg_vel = ply->GetWorldVelocity();
-			//only shoots at visible players anyway
-			auto visible = true;
-
-			esp::best_target = target;
-
-			auto item = lp->GetActiveItem();
-			if (item)
-			{
-				auto held = item->GetHeldEntity<BaseProjectile>();
-				if (held)
-				{
-					auto mag_ammo = held->ammo_left();
-					float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
-					if (get_fixedTime() > nextshot
-						&& held->timeSinceDeploy() > held->deployDelay()
-						&& mag_ammo > 0)
-					{
-						wants_shoot = true;
-						vars->wants_shoot = true;
-						autoshot = true;
-					}
-					else
-					{
-						//updateammodisplay((uintptr_t)held);
-						//shot_fired((uintptr_t)held);
-						//did_attack_client_side((uintptr_t)held);
-					}
-				}
-				else {
-					//switch to weapon
-				}
 			}
 		}
 
@@ -1273,8 +1352,6 @@ namespace misc
 				vel = { (dir.x / dir.length() * 5.5f), vel.y, (dir.z / dir.length() * 5.5f) };
 				pwm->set_TargetMovement(vel);
 
-				last_pos = eyepos;
-				last_pos_time = get_fixedTime();
 
 				if (node.path[node.steps].y - eyepos.y > 1.4f)
 				{
@@ -1286,10 +1363,12 @@ namespace misc
 					&& eyepos.distance(last_pos_until_jump) <= 1.f)
 				{
 					needs_to_jump = true;
-					pwm->set_TargetMovement({ vel.x, vel.y += 3, vel.z });
+					pwm->set_TargetMovement({ vel.x, vel.y += 5, vel.z });
+					last_pos_until_jump = last_pos;
 				}
 				else
 					time_within_1m = get_fixedTime();
+
 			}
 		}
 
@@ -1307,7 +1386,9 @@ namespace misc
 			std::string name) {
 			auto lp = esp::local_player;
 			if (!lp || !pwm) return;
-			misc::node.ent = (BaseEntity*)lp->find_closest((Networkable*)lp, 200.f, _("OreResourceEntity"), name.c_str());
+
+			if(!misc::node.ent)
+				misc::node.ent = (BaseEntity*)lp->find_closest((Networkable*)lp, 200.f, _("OreResourceEntity"), name.c_str());
 
 			Vector3 vel = pwm->get_TargetMovement();
 			vel = Vector3(vel.x / vel.length() * 5.5f, vel.y, vel.z / vel.length() * 5.5f);
@@ -1318,6 +1399,16 @@ namespace misc
 			if (Transform && hp > 60 && time_at_node < 7.f) {
 				auto marker_pos = Transform->position();
 				node.pos = marker_pos;
+				if (node.pos.distance(eyepos) < 5.f) { //equip tool
+					auto toolslot = FindFromHotbar(lp);
+					if (!toolslot.second && toolslot.first > -1)
+						lp->Belt()->SetSelectedSlot(toolslot.first);
+				}
+				else { //equip weapon
+					auto toolslot = FindFromHotbar(lp, false);
+					if (!toolslot.second && toolslot.first > -1)
+						lp->Belt()->SetSelectedSlot(toolslot.first);
+				}
 				pathfind(pwm, marker_pos);
 			}
 			else
@@ -1527,7 +1618,7 @@ namespace misc
 				(float)sinf(pitchRad),
 				(float)(cosf(yRad) * cosf(pitchRad))
 			};
-			esp::local_player->console_echo(string::wformat(_(L"[trap]: Lower velocities - pitch: %d"), (int)pitch));
+			esp::local_player->console_echo(string::wformat(_(L"[matrix]: Lower velocities - pitch: %d"), (int)pitch));
 			float heightDiff = target_pos.y - target_pos.y;
 			float dist2D = target_pos.distancexz(rpc_position);
 

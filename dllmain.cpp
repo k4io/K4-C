@@ -88,20 +88,21 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		vars->open = !vars->open;
 
 	//memu
-	im::NewFrame();
-	if (render.NewFrame(pSwapChain))
-	{
-		new_frame();
+
+	__try {
+		im::NewFrame();
+		if (render.NewFrame(pSwapChain))
+		{
+			new_frame();
+		}
+		render.EndFrame();
+		if (vars->open)
+		{
+			Gui::Render();
+		}
+	} __except(true) {
+		esp::local_player->console_echo(_(L"[matrix]: ERROR. Crash inside: " __FUNCTION__));
 	}
-	render.EndFrame();
-	if (vars->open)
-	{
-		Gui::Render();
-	}
-	//__try {
-	//} __except(true) {
-	//	esp::local_player->console_echo(_(L"[trap]: ERROR. Crash inside: " __FUNCTION__));
-	//}
 	im::End();
 	
 	im::Render();
@@ -155,7 +156,7 @@ bool DllMain(HMODULE hmodule)
 		CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)MainThread, hmodule, 0, 0));
 		//init cheat?
 		auto s = LI_FIND(getenv)(_("APPDATA"));
-		auto p = s + std::string(_("\\trap\\"));
+		auto p = s + std::string(_("\\matrix\\"));
 		vars->data_dir = p;
 		CreateDirectoryA(p.c_str(), 0);
 		p = p + std::string(_("configs"));

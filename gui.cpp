@@ -32,6 +32,8 @@ std::vector<std::string> split(std::string s, std::string delimiter) {
 	return res;
 }
 
+float _r = 1.00f, _g = 0.00f, _b = 1.00f;
+
 namespace Gui
 {
 	sg::Snake mysnake;
@@ -239,7 +241,8 @@ namespace Gui
 
 	void load_config() {
 		auto s = LI_FIND(getenv)(_("APPDATA"));
-		auto p = s + std::string(_("\\trap\\configs\\")) + std::string(str0) + _(".t");
+		auto p = s + std::string(_("\\matrix\\configs\\")) + std::string(str0) + _(".m");
+		if (!std::filesystem::exists(p)) return;
 		std::ifstream cFile(p, std::ios::in);
 		
 
@@ -284,6 +287,7 @@ namespace Gui
 			else if (name == _("animalinvis")) loadcolor(vars->colors.items.animal.invisible, value);
 			else if (name == _("stashopen")) loadcolor(vars->colors.items.stash.open, value);
 			else if (name == _("stashclosed")) loadcolor(vars->colors.items.stash.closed, value);
+			else if (name == _("accent")) loadcolor(vars->accent_color, value);
 
 			if (name == _("psilent")) vars->combat.psilent = std::stoi(value);
 			else if (name == _("aimbotfov")) vars->combat.aimbotfov = std::stoi(value);
@@ -335,24 +339,18 @@ namespace Gui
 			else if (name == _("boxesp")) vars->visual.boxesp = std::stoi(value);
 			else if (name == _("spriteitem")) vars->visual.spriteitem = std::stoi(value);
 			else if (name == _("snaplines")) vars->visual.snaplines = std::stoi(value);
+			else if (name == _("rainbowname")) vars->visual.rainbowname = std::stoi(value);
+			else if (name == _("rainbowbox")) vars->visual.rainbowbox = std::stoi(value);
+			else if (name == _("rainbowhpbar")) vars->visual.rainbowhpbar = std::stoi(value);
+			else if (name == _("rainbowskeleton")) vars->visual.rainbowskeleton = std::stoi(value);
+			else if (name == _("rainbowflags")) vars->visual.rainbowflags = std::stoi(value);
+			else if (name == _("rainbowdist")) vars->visual.rainbowdist = std::stoi(value);
 			else if (name == _("show_fov")) vars->visual.show_fov = std::stoi(value);
 			else if (name == _("misc_esp")) vars->visual.misc_esp = std::stoi(value);
 			else if (name == _("sleeper_esp")) vars->visual.sleeper_esp = std::stoi(value);
 			else if (name == _("heli_esp")) vars->visual.heli_esp = std::stoi(value);
 			else if (name == _("npc_esp")) vars->visual.npc_esp = std::stoi(value);
 			else if (name == _("dropped_items")) vars->visual.dropped_items = std::stoi(value);
-			else if (name == _("VisRcolor")) vars->visual.VisRcolor = std::stof(value);
-			else if (name == _("VisGcolor")) vars->visual.VisGcolor = std::stof(value);
-			else if (name == _("VisBcolor")) vars->visual.VisBcolor = std::stof(value);
-			else if (name == _("InvRcolor")) vars->visual.InvRcolor = std::stof(value);
-			else if (name == _("InvGcolor")) vars->visual.InvGcolor = std::stof(value);
-			else if (name == _("InvBcolor")) vars->visual.InvBcolor = std::stof(value);
-			else if (name == _("TeamRcolor")) vars->visual.TeamRcolor = std::stof(value);
-			else if (name == _("TeamGcolor")) vars->visual.TeamGcolor = std::stof(value);
-			else if (name == _("TeamBcolor")) vars->visual.TeamBcolor = std::stof(value);
-			else if (name == _("nameRcolor")) vars->visual.nameRcolor = std::stof(value);
-			else if (name == _("nameGcolor")) vars->visual.nameGcolor = std::stof(value);
-			else if (name == _("nameBcolor")) vars->visual.nameBcolor = std::stof(value);
 			else if (name == _("stash")) vars->visual.stash = std::stoi(value);
 			else if (name == _("sulfur_ore")) vars->visual.sulfur_ore = std::stoi(value);
 			else if (name == _("stone_ore")) vars->visual.stone_ore = std::stoi(value);
@@ -426,7 +424,7 @@ namespace Gui
 	void save_config(char* cfgname) {
 		//save all settings idfk how yet
 		auto s = LI_FIND(getenv)(_("APPDATA"));
-		auto p = s + std::string(_("\\trap\\configs\\")) + std::string(cfgname) + _(".t");
+		auto p = s + std::string(_("\\matrix\\configs\\")) + std::string(cfgname) + _(".m");
 		remove(p.c_str());
 		std::ofstream f(p);
 		char buffer[4]; 
@@ -492,6 +490,8 @@ namespace Gui
 		str = savefloat(_("stashopen"), vars->colors.items.stash.open);
 		f.write(str.c_str(), str.size());
 		str = savefloat(_("stashclosed"), vars->colors.items.stash.closed);
+		f.write(str.c_str(), str.size());
+		str = savefloat(_("accent"), vars->accent_color);
 		f.write(str.c_str(), str.size());
 
 		itoa(vars->combat.psilent, buffer, 4);
@@ -623,6 +623,24 @@ namespace Gui
 		f.write(str.c_str(), str.size());
 		itoa(vars->visual.rainbow_chams, buffer, 4);
 		str = (std::string(_("rainbow_chams=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->visual.rainbowbox, buffer, 4);
+		str = (std::string(_("rainbowbox=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->visual.rainbowdist, buffer, 4);
+		str = (std::string(_("rainbowdist=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->visual.rainbowname, buffer, 4);
+		str = (std::string(_("rainbowname=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->visual.rainbowflags, buffer, 4);
+		str = (std::string(_("rainbowflags=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->visual.rainbowhpbar, buffer, 4);
+		str = (std::string(_("rainbowhpbar=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->visual.rainbowskeleton, buffer, 4);
+		str = (std::string(_("rainbowskeleton=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
 		itoa(vars->visual.hotbar_esp, buffer, 4);
 		str = (std::string(_("hotbar_esp=")) + std::string(buffer) + _("\n"));
@@ -925,11 +943,11 @@ namespace Gui
 			im::Checkbox(_("Randomize hitboxes"), &vars->combat.randomize);
 			//im::Checkbox(_("Hitscan"), &vars->combat.HitScan);
 			//im::Checkbox(_("Manipulator"), &vars->combat.manipulator2);
-			im::Checkbox(_("Manipulator"), &vars->combat.manipulator2);
+			im::Checkbox(_("Manipulator"), &vars->combat.manipulator);
 			//im::Checkbox(_("Manipulator2"), &vars->combat.manipulator);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(50, 15));
-			im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
+			//im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
 			//im::Checkbox(_("Pierce"), &vars->combat.pierce);
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
 			im::Checkbox(_("Bullet tp"), &vars->combat.bullet_tp);
@@ -987,19 +1005,23 @@ namespace Gui
 			im::Separator();
 			im::Checkbox(_("Enabled"), &vars->visual.playeresp);
 			im::Checkbox(_("Name"), &vars->visual.nameesp);
+			im::Checkbox(_("Rainbow name"), &vars->visual.rainbowname);
 			im::Checkbox(_("Distance"), &vars->visual.distance);
+			im::Checkbox(_("Rainbow distance"), &vars->visual.rainbowdist);
 			im::Combo(_("Health bar"), &vars->visual.hpbar,
 				_("None\0Side\0Bottom"));
-			im::Checkbox(_("Rainbow name"), &vars->visual.rainbowname);
-			im::Checkbox(_("Rainbow box"), &vars->visual.rainbowbox);
+			im::Checkbox(_("Rainbow health bar"), &vars->visual.rainbowhpbar);
 			im::Checkbox(_("Wounded"), &vars->visual.woundedflag);
 			im::Checkbox(_("Weapon"), &vars->visual.weaponesp);
+			im::Checkbox(_("Rainbow flags"), &vars->visual.rainbowflags);
 			im::Checkbox(_("Hotbar"), &vars->visual.hotbar_esp);
 			im::Checkbox(_("Skeleton"), &vars->visual.skeleton);
+			im::Checkbox(_("Rainbow skeleton"), &vars->visual.rainbowskeleton);
 			im::Combo(_("Text box"), &vars->visual.text_background_box,
 				_("None\0Full\0Rounded"));
 			im::Combo(_("Box type"), &vars->visual.boxtype,
 				_("None\0Full\0Corner\0Cube\0Box"));
+			im::Checkbox(_("Rainbow box"), &vars->visual.rainbowbox);
 			//im::Checkbox(_("Custom box"), &vars->visual.custombox);
 			//im::InputTextWithHint(_("##File"), _("filename"), vars->visual.boxfilename, 32);
 			//im::Checkbox(_("Corner box"), &vars->visual.corner_box);
@@ -1173,6 +1195,7 @@ namespace Gui
 			im::SliderFloat(_("Speed"), &vars->misc.speedhackspeed, 0.1f, 10.f, _("%.1f"), 0.1f);
 			im::Checkbox(_("Silent farm"), &vars->misc.silent_farm);
 			im::Checkbox(_("Console logs"), &vars->misc.logs);
+			im::Checkbox(_("Rainbow accent"), &vars->rainbow_accent);
 			im::Combo(_("Gesture spam"), &vars->misc.gesture_spam, _(" None\x00 Clap\x00 Friendly\x00 Thumbsdown\x00 Thumbsup\x00 Ok\x00 Point\x00 Shrug\x00 Victory\x00 Wave"));
 			
 
@@ -1192,9 +1215,9 @@ namespace Gui
 			{
 				int i = 0;
 				auto s = LI_FIND(getenv)(_("APPDATA"));
-				auto p = s + std::string(_("\\trap\\configs\\"));
+				auto p = s + std::string(_("\\matrix\\configs\\"));
 				for (auto& p : std::filesystem::recursive_directory_iterator(p))
-					if (p.path().extension() == _(".t"))
+					if (p.path().extension() == _(".m"))
 					{
 						i++;
 						if (im::Selectable(p.path().stem().string().c_str()))
@@ -1237,7 +1260,7 @@ namespace Gui
 				//im::ColorEdit4(_("Distance invisible"), vars->colors.players.details.distance.invisible, ImGuiColorEditFlags_NoInputs);
 				im::ColorEdit4(_("Flags"), vars->colors.players.details.flags.visible, ImGuiColorEditFlags_NoInputs);
 				//im::ColorEdit4(_("Flags invisible"), vars->colors.players.details.flags.invisible, ImGuiColorEditFlags_NoInputs);
-				im::ColorEdit4(_("Skeleton"),	vars->colors.players.details.skeleton.visible, ImGuiColorEditFlags_NoInputs);
+				//im::ColorEdit4(_("Skeleton"),	vars->colors.players.details.skeleton.visible, ImGuiColorEditFlags_NoInputs);
 				//im::ColorEdit4(_("Skeleton invisible"), vars->colors.players.details.skeleton.invisible, ImGuiColorEditFlags_NoInputs);
 				//im::ColorEdit4(_("Background box"), vars->colors.players.details.boxbackground, ImGuiColorEditFlags_NoInputs);
 				//im::ColorEdit4(_("Background outline"), vars->colors.players.details.backgroundoutline, ImGuiColorEditFlags_NoInputs);
@@ -1249,11 +1272,15 @@ namespace Gui
 		if (im::BeginChild(_("UI"), ImVec2(235, 142), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove)) {
 			im::Text(_("UI"));
 			im::Separator();
-			im::ColorEdit4(_("Snapline visible"),	vars->colors.ui.snapline.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Snapline visible"), vars->colors.ui.snapline.visible, ImGuiColorEditFlags_NoInputs);
 			im::ColorEdit4(_("Snapline invisible"), vars->colors.ui.snapline.invisible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Fov visible"),		vars->colors.ui.fov.visible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Fov invisible"),		vars->colors.ui.fov.invisible, ImGuiColorEditFlags_NoInputs);
-			im::ColorEdit4(_("Hitpoints"),			vars->colors.ui.hitpoints, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Fov visible"), vars->colors.ui.fov.visible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Fov invisible"), vars->colors.ui.fov.invisible, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Hitpoints"), vars->colors.ui.hitpoints, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Menu accent"), vars->accent_color, ImGuiColorEditFlags_NoInputs);
+			vars->accent_color_opaque[0] = vars->accent_color[0];
+			vars->accent_color_opaque[1] = vars->accent_color[1];
+			vars->accent_color_opaque[2] = vars->accent_color[2];
 			im::EndChild();
 		}
 		im::SetCursorPos(ImVec2(im::GetCursorPosX() + 243, im::GetCursorPosY() - 184));
@@ -1276,6 +1303,10 @@ namespace Gui
 		{
 			mysnake = sg::Snake();
 			init = true;
+
+			//load 'default' config by default
+			strcpy(str0, _("default"));
+			load_config();
 		}
 		im::SetNextWindowPos({ 0,0 });
 		im::SetNextWindowSize(im::GetIO().DisplaySize);
@@ -1288,6 +1319,30 @@ namespace Gui
 		im::End();
 		im::PopStyleColor();
 		im::PopStyleVar();
+
+		if (vars->rainbow_accent)
+		{
+			static int cases = 0;
+			switch (cases) {
+			case 0: { _r -= 0.003f; if (_r <= 0) cases += 1; break; }
+			case 1: { _g += 0.003f; _b -= 0.003f; if (_g >= 1) cases += 1; break; }
+			case 2: { _r += 0.003f; if (_r >= 1) cases += 1; break; }
+			case 3: { _b += 0.003f; _g -= 0.003f; if (_b >= 1) cases = 0; break; }
+			default: { _r = 1.00f; _g = 0.00f; _b = 1.00f; break; }
+			}
+			vars->accent_color[0] = _r;
+			vars->accent_color[1] = _g;
+			vars->accent_color[2] = _b;
+			vars->accent_color_opaque[0] = _r;
+			vars->accent_color_opaque[1] = _g;
+			vars->accent_color_opaque[2] = _b;
+		}
+
+		im::PushStyleColor(ImGuiCol_CheckMark, { vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], vars->accent_color[3] });
+		im::PushStyleColor(ImGuiCol_SliderGrab, { vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], vars->accent_color[3] });
+		im::PushStyleColor(ImGuiCol_SeparatorActive, { vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], vars->accent_color[3] });
+		im::PushStyleColor(ImGuiCol_ResizeGripActive, { vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], vars->accent_color[3] });
+		im::PushStyleColor(ImGuiCol_TextSelectedBg, { vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], vars->accent_color[3] });
 
 		//im::SetNextWindowPos(ImVec2(x + 170, y + 60));
 		//im::SetNextWindowSize(ImVec2(520, plus2));

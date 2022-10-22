@@ -407,7 +407,8 @@ public:
 		if ((a / b) > 1)
 			a = b;
 
-		FillRectangle({ start.x + 1, start.y + 1 }, { (size.x * (a/b)) - 2, size.y - 2}, perc_col(a / b));
+		//FillRectangle({ start.x + 1, start.y + 1 }, { (size.x * (a/b)) - 2, size.y - 2}, perc_col(a / b));
+		FillRectangle({ start.x + 1, start.y + 1 }, { (size.x * (a/b)) - 2, size.y - 2}, FLOAT4TOD3DCOLOR(vars->accent_color));
 	}
 
 	Vector2 RenderString(const Vector2& pos, const wchar_t* text, bool center = false, const D2D1::ColorF& color = D2D1::ColorF(D2D1::ColorF::White), bool outline = false, bool Big = false)

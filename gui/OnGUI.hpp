@@ -1163,7 +1163,7 @@ namespace gui {
 						&& p.second)
 					{
 						esp::do_chams(p.second);
-						//esp::local_player->console_echo(string::wformat(_(L"[trap]: OnGUI - Caching bones for: %d"), p->userID()));
+						//esp::local_player->console_echo(string::wformat(_(L"[matrix]: OnGUI - Caching bones for: %d"), p->userID()));
 						//cache::CacheBones(p.second, esp::local_player);
 					}
 				//esp::start();
@@ -1260,6 +1260,9 @@ namespace gui {
 			}
 		}
 		return;
+
+
+
 		if (opacity < 255.0f)
 			opacity += 2.f;
 		

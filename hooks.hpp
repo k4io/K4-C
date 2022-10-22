@@ -373,7 +373,10 @@ namespace hooks {
 					if (misc::best_lean != Vector3(0, 0, 0))
 					{
 						// rpc_position += misc::manipulate(esp::local_player, target.pos);
-						rpc_position += (misc::best_lean);
+						//rpc_position += (misc::best_lean);
+						rpc_position = misc::best_lean;
+						if (vars->visual.angles)
+							Sphere(rpc_position, 0.05f, { 0, 1, 0, 1 }, 10.f, 100.f);
 						if (rpc_position != b)
 						{
 							manipulated = true;
@@ -442,7 +445,7 @@ namespace hooks {
 					}
 					else p->SetInitialDistance(0);
 
-					esp::local_player->console_echo(string::wformat(_(L"[trap]: ProjectileShoot (bullet tp) spawned bullet at distance %d"), (int)p->initialDistance()));
+					esp::local_player->console_echo(string::wformat(_(L"[matrix]: ProjectileShoot (bullet tp) spawned bullet at distance %d"), (int)p->initialDistance()));
 				}
 
 				if (vars->combat.psilent || unity::GetKey(vars->keybinds.psilent)) {
@@ -512,14 +515,14 @@ namespace hooks {
 			if (vars->combat.targetbehindwall)
 			{
 				typedef void(*cclear)(uintptr_t);
-				((cclear)(mem::game_assembly_base + 15417936))((uintptr_t)baseprojectile + 0x370); //"System.Collections.Generic.List<Projectile>$$Clear",
+				((cclear)(mem::game_assembly_base + 15140672))((uintptr_t)baseprojectile + 0x370); //"System.Collections.Generic.List<Projectile>$$Clear",
 			}
 
 			if (misc::autoshot)
 				misc::autoshot = false;
 		} while (0);
 
-		esp::local_player->console_echo(string::wformat(_(L"[trap]: ProjectileShoot (prediction) simulated %i times before hit!"), simulations));
+		esp::local_player->console_echo(string::wformat(_(L"[matrix]: ProjectileShoot (prediction) simulated %i times before hit!"), simulations));
 		reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(hooks::orig::serverrpc_projectileshoot)(rcx, rdx, r9, projectileShoot, arg5);
 		
 		//calls base.serverrpc<projectileshoot>("clproject", x) ^^
@@ -838,7 +841,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				*reinterpret_cast<Vector3*>(_ppa + 0x20) = ((Transform*)tranny)->InverseTransformPoint(position);
 				*reinterpret_cast<Vector3*>(_ppa + 0x2C) = ((Transform*)tranny)->InverseTransformDirection(normal);
 
-				esp::local_player->console_echo(string::wformat(_(L"[trap] DoPlace - Spoofed %d to %d with position (%d, %d, %d)"), 
+				esp::local_player->console_echo(string::wformat(_(L"[matrix] DoPlace - Spoofed %d to %d with position (%d, %d, %d)"), 
 					(int)ogid,
 					(int)esp::selected_entity_id,
 					(int)position.x,
@@ -976,7 +979,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					if (misc::just_shot && (misc::time_since_last_shot > 0.2f))
 					{
 						held->ServerRPC(_(L"StartReload"));
-						esp::local_player->console_echo(_(L"[trap]: ClientInput - starting reload"));
+						esp::local_player->console_echo(_(L"[matrix]: ClientInput - starting reload"));
 						//esp::local_player->SendSignalBroadcast(rust::classes::Signal::Reload); //does this cause animation? YES
 						misc::just_shot = false;
 					}
@@ -986,7 +989,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					if (misc::time_since_last_shot > reloadtime //-10% for faster reloads than normal >:)
 						&& !misc::did_reload)
 					{
-						esp::local_player->console_echo(_(L"[trap]: ClientInput - finishing reload"));
+						esp::local_player->console_echo(_(L"[matrix]: ClientInput - finishing reload"));
 						held->ServerRPC(_(L"Reload"));
 						misc::did_reload = true;
 						misc::time_since_last_shot = 0;
@@ -1115,7 +1118,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			int r = vars->desyncTime / m;
 			if (r > 1)
 			{
-				esp::local_player->console_echo(string::wformat(_(L"[trap]: Launching %d projectiles!"), r));
+				esp::local_player->console_echo(string::wformat(_(L"[matrix]: Launching %d projectiles!"), r));
 				for (size_t i = 0; i < r; i++)
 				{
 					orig::baseprojectile_launchprojectile((uintptr_t)p);
@@ -1321,13 +1324,13 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					{
 						auto v = planner->rotationoffset();
 						planner->rotationoffset(Vector3(v.x, v.y += 10, v.z));
-						esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - rotate building right (%d, %d, %d)"), (int)v.x, (int)v.y, (int)v.z));
+						esp::local_player->console_echo(string::wformat(_(L"[matrix]: ClientInput - rotate building right (%d, %d, %d)"), (int)v.x, (int)v.y, (int)v.z));
 					}
 					else if (unity::GetKeyDown(rust::classes::KeyCode::LeftArrow))
 					{
 						auto v = planner->rotationoffset();
 						planner->rotationoffset(Vector3(v.x, v.y -= 10, v.z));
-						esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - rotate building left (%d, %d, %d)"), (int)v.x, (int)v.y, (int)v.z));
+						esp::local_player->console_echo(string::wformat(_(L"[matrix]: ClientInput - rotate building left (%d, %d, %d)"), (int)v.x, (int)v.y, (int)v.z));
 					}
 				}
 			}
@@ -1417,7 +1420,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							&& mag_ammo > 0)
 						{
 							auto v = esp::local_player->eyes()->position() + misc::best_lean;
-							esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - manipulator attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(vars->desyncTime * 100.f)));
+							esp::local_player->console_echo(string::wformat(_(L"[matrix]: ClientInput - manipulator attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(vars->desyncTime * 100.f)));
 
 							misc::manual = true;
 							hk_projectile_launchprojectile(held);
@@ -1441,7 +1444,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								&& held->ammo_left() > 0)
 							{
 								auto v = settings::RealGangstaShit;//esp::local_player->eyes()->get_position() + misc::best_lean;
-								esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - manipulator attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(vars->desyncTime * 100.f)));
+								esp::local_player->console_echo(string::wformat(_(L"[matrix]: ClientInput - manipulator attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(vars->desyncTime * 100.f)));
 
 								misc::manual = true;
 								hooks::hk_projectile_launchprojectile(held);
@@ -1576,7 +1579,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 											Ray r(get_position((uintptr_t)get_transform((base_player*)projectile)), newpos);
 											safe_write(ht + 0x14, r, Ray);
 					
-											esp::local_player->console_echo(string::wformat(_(L"[trap]: Fat bullet - Called with distance: %dm"), (int)dist));
+											esp::local_player->console_echo(string::wformat(_(L"[matrix]: Fat bullet - Called with distance: %dm"), (int)dist));
 											DoHit(projectile, ht, newpos, HitNormalWorld((uintptr_t)ht));
 										}
 									}*/
@@ -1663,7 +1666,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							return Vector2(RAD2DEG(Vector3::my_asin(d.y / d.length())), RAD2DEG(-Vector3::my_atan2(d.x, -d.z)));
 						};
 						auto normalize = [&](float& yaw, float& pitch) {
-							//esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - yaw: %d, pitch: %d"), (int)yaw, (int)pitch));
+							//esp::local_player->console_echo(string::wformat(_(L"[matrix]: ClientInput - yaw: %d, pitch: %d"), (int)yaw, (int)pitch));
 							if (pitch < -270) pitch = -270;
 							else if (pitch > 180) pitch = 180;
 							if (yaw < -360) yaw = -360;
@@ -1807,7 +1810,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 				if (target.ent)
 				{
-					//esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - sending RPC_Assist to player %s"), ((BasePlayer*)target.ent)->_displayName()));
+					//esp::local_player->console_echo(string::wformat(_(L"[matrix]: ClientInput - sending RPC_Assist to player %s"), ((BasePlayer*)target.ent)->_displayName()));
 
 					if (!target.is_heli && target.distance <= 5 && HasPlayerFlag((BasePlayer*)target.ent, rust::classes::PlayerFlags::Wounded) && unity::LineOfSightRadius(target.pos, baseplayer->eyes()->position(), (uintptr_t)esp::local_player))
 						target.ent->ServerRPC(_(L"RPC_Assist"));
