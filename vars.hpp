@@ -36,6 +36,7 @@ struct Vars
 		bool targetfriends = false;
 		int aimbone = 0;
 		bool bodyaim = false;
+		float movementpred = 0.8f;
 		float aimbotfov = 500.f;
 		float aimbot_smooth = 0.5f;
 		bool hitbox_override = false;

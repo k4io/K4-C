@@ -1529,7 +1529,7 @@ namespace misc
 				if (target.is_heli)
 					wv = target.ent->GetWorldVelocity();
 
-				Vector3 player_velocity = Vector3(wv.x, 0, wv.z) * (target.is_heli ? 0.75f : 0.9f);
+				Vector3 player_velocity = Vector3(wv.x, 0, wv.z) * (target.is_heli ? 0.75f : vars->combat.movementpred);
 
 				Vector3 final_vel = player_velocity * travel_t;
 				Vector3 actual = target_pos += final_vel;

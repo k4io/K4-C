@@ -1039,7 +1039,7 @@ void iterate_entities() {
 						{
 							//new frame, record velocity, record frame
 							esp::best_target.last_frame = get_fixedTime();
-							if (esp::best_target.velocity_list.size() < 90) //0.03125 * 30 = 0.9 seconds
+							if (esp::best_target.velocity_list.size() < 30) //0.03125 * 30 = 0.9 seconds
 								esp::best_target.velocity_list.push_back(vel);
 							else
 							{
@@ -1397,7 +1397,7 @@ void iterate_entities() {
 						esp_color = Vector4(vars->colors.items.collectibles[0],
 							vars->colors.items.collectibles[1],
 							vars->colors.items.collectibles[2],
-							vars->colors.items.collectibles[3]);
+							1);
 					}
 				}
 

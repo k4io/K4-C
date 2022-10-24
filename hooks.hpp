@@ -420,6 +420,7 @@ namespace hooks {
 				auto projectile = *(uintptr_t*)(shoot_list + 0x20 + i * 0x8);
 				if (target.ent && (target.visible || manipulated || misc::autoshot) && !target.teammate) {
 					*reinterpret_cast<Vector3*>(projectile + 0x24) = aimbot_velocity; //startvel
+					Sphere(target_pos, 0.05f, { r, g, b, 1 }, 5.f, 100.f);
 				}
 			}
 

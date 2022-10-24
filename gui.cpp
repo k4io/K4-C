@@ -967,13 +967,14 @@ namespace Gui
 			im::Separator();
 
 			im::Checkbox(_("PSilent"), &vars->combat.psilent);
+			im::SliderFloat(_("Movement pred"), &vars->combat.movementpred, 0.1f, 1.0f, _("%.2f"), 1.f);
 			im::Combo(_("Aim bone"), &vars->combat.aimbone, _("Head\0Spine 4\0Pelvis\0Right arm\0Left arm\0Right leg\0Left leg"));
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
 			im::Hotkey(_("P"), &vars->keybinds.psilent, ImVec2(50, 15));
 			im::Checkbox(_("Memory aimbot"), &vars->combat.aimbot);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
 			im::Hotkey(_("A"), &vars->keybinds.aimbot, ImVec2(50, 15));
-			im::SliderFloat(_("Smoothing"), &vars->combat.aimbot_smooth, .1f, .99f, _("%.0f"), 0.01f);
+			im::SliderFloat(_("Smoothing"), &vars->combat.aimbot_smooth, .1f, .99f, _("%.2f"), 1.f);
 
 
 			im::SliderFloat(_("Target fov"), &vars->combat.aimbotfov, 1.f, 900.f, _("%.0f"));
@@ -1030,7 +1031,7 @@ namespace Gui
 			im::Checkbox(_("Silent melee"), &vars->combat.silent_melee);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("S"), &vars->keybinds.silentmelee, ImVec2(50, 14));
-			im::SliderFloat(_("Range"), &vars->combat.melee_range, 1.f, 4.f, _("%.2f"), 0.1f);
+			im::SliderFloat(_("Range"), &vars->combat.melee_range, 1.f, 4.f, _("%.2f"), 1.f);
 			im::EndChild();
 		}
 
@@ -1106,8 +1107,8 @@ namespace Gui
 			im::Hotkey(_("Z"), &vars->keybinds.zoom, ImVec2(50, 14));
 			im::SliderFloat(_("Zoom fov"), &vars->visual.zoomfov, 1.f, 100.f, _("%.1f"));
 			im::SliderFloat(_("Stars"), &vars->visual.staramount, 1.f, 1000.f, _("%.0f"));
-			im::SliderFloat(_("Brightness"), &vars->visual.day, 0.0f, 10.0f, _("%.0f"), 1.f);
-			im::SliderFloat(_("Nightness"), &vars->visual.night, 0.0f, 10.0f, _("%.0f"), 1.f);
+			im::SliderFloat(_("Brightness"), &vars->visual.day, 0.0f, 10.0f, _("%.0f"));
+			im::SliderFloat(_("Nightness"), &vars->visual.night, 0.0f, 10.0f, _("%.0f"));
 			//im::Checkbox(_("Follow projectiles"), &vars->visual.followprojectiles);
 			im::Checkbox(_("Manipulator angles"), &vars->visual.angles);
 			im::EndChild();
@@ -1142,7 +1143,7 @@ namespace Gui
 			im::Checkbox(_("Barrels"), &vars->visual.barrels);
 			im::Checkbox(_("Cloth"), &vars->visual.cloth);
 			im::Checkbox(_("Collectibles"), &vars->visual.collectibles);
-			im::SliderFloat(_("Distance"), &vars->visual.dist_on_items, 1.f, 400.f, _("%.0f"), 0.1f);
+			im::SliderFloat(_("Distance"), &vars->visual.dist_on_items, 1.f, 400.f, _("%.0f"));
 			im::EndChild();
 		}
 		im::SameLine();
@@ -1196,7 +1197,7 @@ namespace Gui
 
 			im::Checkbox(_("Auto-farm"), &vars->misc.silent_farm);
 			im::Checkbox(_("Auto-attack"), &vars->misc.autoattack);
-			im::SliderFloat(_("Max dist"), &vars->misc.autoattackdist, 0.1f, 400.f, _("%.0f"), 10.f);
+			im::SliderFloat(_("Max dist"), &vars->misc.autoattackdist, 0.1f, 400.f, _("%.0f"));
 			im::Combo(_("Targetting mode"), &vars->misc.targetting_mode, 
 				_("Closest (distance)\0Lowest hp"));
 			//vars->playersnamesstr.clear();
@@ -1220,7 +1221,7 @@ namespace Gui
 			im::Checkbox(_("Longneck"), &vars->misc.eyeoffset);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("L"), &vars->keybinds.neck, ImVec2(50, 14));
-			im::SliderFloat(_("Size"), &vars->misc.PlayerEyes, 1.f, 1.5f, _("%.2f"), 0.1f);
+			im::SliderFloat(_("Size"), &vars->misc.PlayerEyes, 1.f, 1.5f, _("%.2f"));
 			im::Checkbox(_("Auto upgrade"), &vars->misc.auto_upgrade);
 			im::Combo(_("Upgrade tier"), &vars->misc.upgrade_tier,
 				_("Wood\0Stone\0Metal\0Armored"));
@@ -1233,7 +1234,7 @@ namespace Gui
 			im::Checkbox(_("Timescale"), &vars->misc.speedhack);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("T"), &vars->keybinds.timescale, ImVec2(50, 14));
-			im::SliderFloat(_("Speed"), &vars->misc.speedhackspeed, 0.1f, 10.f, _("%.1f"), 0.1f);
+			im::SliderFloat(_("Speed"), &vars->misc.speedhackspeed, 0.1f, 10.f, _("%.1f"));
 			im::Checkbox(_("Console logs"), &vars->misc.logs);
 			im::Checkbox(_("Rainbow accent"), &vars->rainbow_accent);
 			im::Combo(_("Gesture spam"), &vars->misc.gesture_spam, _(" None\x00 Clap\x00 Friendly\x00 Thumbsdown\x00 Thumbsup\x00 Ok\x00 Point\x00 Shrug\x00 Victory\x00 Wave"));
@@ -1338,6 +1339,7 @@ namespace Gui
 			im::ColorEdit4(_("Metal"),		vars->colors.items.metal.visible, ImGuiColorEditFlags_NoInputs);
 			im::ColorEdit4(_("Stash (closed)"),		vars->colors.items.stash.closed, ImGuiColorEditFlags_NoInputs);
 			im::ColorEdit4(_("Dropped items"),		vars->colors.items.dropped, ImGuiColorEditFlags_NoInputs);
+			im::ColorEdit4(_("Collectible"),		vars->colors.items.collectibles, ImGuiColorEditFlags_NoInputs);
 			im::EndChild();
 		}
 	}
