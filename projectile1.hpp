@@ -31,6 +31,8 @@ uintptr_t pools_offset = 0xC12560;
 */
 uintptr_t Method$System_Collections_Generic_List_Projectile__Clear__ = 15140672; //Method$System.Collections.Generic.List<Projectile>.Clear() (METHOD ADDRESS)
 
+static auto _DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
+
 class Projectile1;
 class Projectile1 : public BaseMonoBehaviour
 {
@@ -119,6 +121,7 @@ public:
 		if (maxTime >= 7.95f || travelTime >= 7.95f) {
 			return result;
 		}
+
 
 		bool canHit = false;
 
@@ -351,7 +354,8 @@ public:
 			//if (((dh)(mem::game_assembly_base + 0x7A9420))(_this, ht, point, Vector3())) {
 
 			//static auto DoHit = *reinterpret_cast<bool(**)(Projectile * _instance, HitTest * test, Vector3 point, Vector3 normal)>(Il2CppWrapper::GetClassFromName(_(""), _("Projectile"))->GetMethodFromName(_("DoHit")));
-			if (Do_Hit(_this, (uintptr_t)ht, point, Vector3::Zero())) {
+			if(_DoHit(_this, (HitTest*)ht, point, _this->currentVelocity())) {
+			//if (Do_Hit(_this, (uintptr_t)ht, point, Vector3::Zero())) {
 				_this->currentVelocity(vel);
 				_this->traveledTime(real_travel_time);
 				return true;

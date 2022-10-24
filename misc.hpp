@@ -1149,27 +1149,33 @@ namespace misc
 				std::vector<BasePlayer*> internal_playerlist = {};
 				auto lppos = lp->model()->boneTransforms()->get(48)->position();
 				//maybe check for manipulator
-				for (auto p : player_map)
-					if (p.second && (p.second->is_alive() && (!p.second->is_sleeping())))
-					{
-						auto model = p.second->model();
-						if (model) {
-							//auto trans = model->boneTransforms()->get(48);
-							auto bonetransforms = *reinterpret_cast<System::Array<Transform*>**>(model + 0x48);
-							if (bonetransforms)
-							{
-								auto trans = bonetransforms->get(48);
-								if (trans) {
-									auto pos = trans->position();
-									auto visible = lp->is_visible(pos, lppos);
-									if (visible
-										&& pos.distance(lppos) < vars->misc.autoattackdist
-										&& !p.second->is_local_player())
-										internal_playerlist.push_back(p.second);
+				for (auto p : player_map) {
+					__try {
+						if (p.second && (p.second->is_alive() && (!p.second->is_sleeping())))
+						{
+							auto model = p.second->model();
+							if (model) {
+								//auto trans = model->boneTransforms()->get(48);
+								auto bonetransforms = *reinterpret_cast<System::Array<Transform*>**>(model + 0x48);
+								if (bonetransforms)
+								{
+									auto trans = bonetransforms->get(48);
+									if (trans) {
+										auto pos = trans->position();
+										auto visible = lp->is_visible(pos, lppos);
+										if (visible
+											&& pos.distance(lppos) < vars->misc.autoattackdist
+											&& !p.second->is_local_player())
+											internal_playerlist.push_back(p.second);
+									}
 								}
 							}
 						}
 					}
+					__except (true) {
+						//player_map.erase(std::remove(player_map.begin(), player_map.end(), p), player_map.end());
+					}
+				}
 				BasePlayer* ply = nullptr;
 				for (auto p : internal_playerlist)
 				{
@@ -1292,8 +1298,10 @@ namespace misc
 			if (vars->misc.autoattack)
 				checkandshoot(pwm);
 
+			auto threshold = vars->misc.walkto == 5 ? 0.1f : 1.f;
+
 			if (node.steps > 0
-				&& eyepos.distance(node.pos) < 1.f)
+				&& eyepos.distance(node.pos) < threshold)
 			{
 				node.path.clear();
 				node.pos = Vector3(0, 0, 0);
@@ -1302,7 +1310,7 @@ namespace misc
 				time_at_node += get_deltaTime();
 			}
 
-			if (eyepos.distance(node.pos) >= 1.f)
+			if (eyepos.distance(node.pos) >= threshold)
 			{
 				if (node.path.empty() || ((node.pos.is_empty() || node.pos == Vector3(0, 0, 0))
 					&& eyepos.distance(node.pos)) > 1.f
@@ -1315,7 +1323,7 @@ namespace misc
 				Vector3 current_step = node.path[node.steps];
 
 				psteps = node.steps;
-				if (current_step.distance(node.pos) <= 0.5f)
+				if (current_step.distance(node.pos) <= threshold / 2.f)
 				{
 					vel = Vector3(0, 0, 0);
 					node.path.clear();
@@ -1376,8 +1384,14 @@ namespace misc
 			char* selected) {
 			auto lp = esp::local_player;
 			BasePlayer* ply = (BasePlayer*)esp::best_target.ent;
+			bool block = false;
+			for (auto p : player_map)
+				if (p.second->userID() == vars->follow_player_id)
+					ply = p.second;
 			if (!ply) return;
 			auto position = ply->transform()->position();
+			if (vars->gui_player_map[ply->userID()]->block)
+				position += (ply->eyes()->body_forward() * .5f);
 			node.pos = position;
 			pathfind(pwm, position);
 		}
@@ -1396,7 +1410,7 @@ namespace misc
 
 			auto Transform = node.ent->transform();
 			auto hp = *reinterpret_cast<float*>(node.ent + 0x178); //detect if broken with this fuck knows why
-			if (Transform && hp > 60 && time_at_node < 7.f) {
+			if (Transform && hp > 60 && time_at_node < 5.f) {
 				auto marker_pos = Transform->position();
 				node.pos = marker_pos;
 				if (node.pos.distance(eyepos) < 5.f) { //equip tool

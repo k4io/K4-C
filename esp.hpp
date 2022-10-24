@@ -582,10 +582,21 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 					render.StringCenter({ bounds.center, bounds.bottom + 19 }, player_weapon->get_weapon_name(), vars->visual.rainbowflags ? rainbowcolor : FLOAT4TOD3DCOLOR(vars->colors.players.details.flags.visible));
 			}
 
+
+			if (vars->visual.friendflag) {
+				if (map_contains_key(vars->gui_player_map, ply->userID()))
+				{
+					auto gp = vars->gui_player_map[ply->userID()];
+					if (gp->is_friend)
+					{
+						render.String({ bounds.right + 9, bounds.bottom - 5 }, _(L"[Friend]"), vars->visual.rainbowflags ? rainbowcolor : FLOAT4TOD3DCOLOR(vars->colors.players.details.flags.visible));
+					}
+				}
+			}
+
 			if (vars->visual.woundedflag) {
 				if (HasPlayerFlag(ply, rust::classes::PlayerFlags::Wounded)) {
-					render.String({ bounds.right + 5, bounds.top }, _(L"[Wounded]"), { 0, 0, 0, 1 });
-					render.String({ bounds.right + 5, bounds.top + 1 }, _(L"[Wounded]"), vars->visual.rainbowflags ? rainbowcolor : FLOAT4TOD3DCOLOR(vars->colors.players.details.flags.visible));
+					render.String({ bounds.right + 9, bounds.top + 5 }, _(L"[Wounded]"), vars->visual.rainbowflags ? rainbowcolor : FLOAT4TOD3DCOLOR(vars->colors.players.details.flags.visible));
 				}
 			}
 
@@ -745,6 +756,31 @@ void DrawPlayerHotbar(aim_target target) {
 	}
 }
 
+void entchams(BaseEntity* ent, Shader* s = 0, Material* m = 0) {
+	if (!ent) return;
+	__try {
+		auto renderers = ((Networkable*)ent)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
+		if (!renderers) return;
+		auto sz = renderers->get_size();
+		for (size_t i = 0; i < sz; i++)
+		{
+			auto renderer = (Renderer*)renderers->get(i);
+			if (!renderer) continue;
+			if (m) renderer->SetMaterial(m);
+			else {
+				auto mat = renderer->GetMaterial();
+				//SetInt((uintptr_t)mat, _(L"_ZTest"), 8);
+				if (mat) {
+					auto shader = mat->GetShader();
+					if (shader != s)
+						mat->SetShader(s);
+				}
+			}
+		}
+	}
+	__except (true) { return; }
+}
+
 void iterate_entities() {
 	auto get_client_entities = [&]() {
 		esp::client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
@@ -791,6 +827,7 @@ void iterate_entities() {
 
 	vars->player_name_list.clear();
 	bool flp = false;
+	
 	for (int i = 0; i <= size; i++) {
 		auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
 		if (!current_object || current_object <= 100000)
@@ -849,36 +886,20 @@ void iterate_entities() {
 		if (tag == 6)
 		{
 			auto entity = (BasePlayer*)ent;
-			if (!map_contains_key(player_map, ent_id))
+
+			if (!map_contains_key(player_map, ent_id)) {
 				player_map.insert(std::make_pair(ent_id, entity));
-			//cache::CacheBones(entity, esp::local_player);
-			//bool exists_in_list = false;
-			//auto fff = 0;
-			//auto sizebefore = player_list.size();
-			//for (BasePlayer* p : player_list)
-			//{
-			//	if (!p->is_alive()
-			//		|| (entity->is_sleeping() && !vars->visual.sleeper_esp)
-			//		|| !p)
-			//	{
-			//		//vars->player_id_name.erase(fff);
-			//		player_list.erase(std::remove(player_list.begin(), player_list.end(), p), player_list.end());
-			//	}
-			//	if (entity->userID() == p->userID())
-			//		exists_in_list = true;
-			//}
-			//	//std::wstring ws(entity->get_player_name());
-				//std::string s(ws.begin(), ws.end());
-				//vars->player_name_list.push_back(s);
-				//if(!map_contains_key(vars->player_id_name, fff))
-				//	vars->player_id_name.insert(std::make_pair(fff, entity->get_player_name()));
-			//	fff++;
-			//}
-			//if (!exists_in_list)
-			//{
-			//	player_list.push_back(entity);
-			//}
-			//hit player for silent melee, but not here as may crash due to not being run from a game thread
+
+				gplayer* p = new gplayer(entity->get_player_name(), entity->userID(), 0, 0, 0, 0);
+				vars->gui_player_map.insert(std::make_pair(entity->userID(), p));
+			}
+
+			bool is_friend = false, follow = false, block = false;
+			if (map_contains_key(vars->gui_player_map, entity->userID())) {
+				is_friend = vars->gui_player_map[entity->userID()]->is_friend;
+				follow = vars->gui_player_map[entity->userID()]->follow;
+				block = vars->gui_player_map[entity->userID()]->block;
+			}
 
 			//check valid
 			if (!entity->is_alive()
@@ -939,6 +960,9 @@ void iterate_entities() {
 					}
 
 					if (vars->wants_shoot)
+						goto draw;
+
+					if (!vars->combat.targetfriends && is_friend)
 						goto draw;
 
 					auto target = aim_target();
@@ -1087,47 +1111,11 @@ void iterate_entities() {
 			}
 		}
 
-		auto entchams = [&](Shader* s = 0, Material* m = 0) {
-			if (!ent) return;
-			__try {
-				auto renderers = ((Networkable*)ent)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
-				if (!renderers) return;
-				auto sz = renderers->get_size();
-				for (size_t i = 0; i < sz; i++)
-				{
-					auto renderer = (Renderer*)renderers->get(i);
-					if (!renderer) continue;
-					if (m) renderer->SetMaterial(m);
-					else {
-						auto mat = renderer->GetMaterial();
-						//SetInt((uintptr_t)mat, _(L"_ZTest"), 8);
-						if (mat) {
-							auto shader = mat->GetShader();
-							if (shader != s)
-								mat->SetShader(s);
-						}
-					}
-				}
-			}
-			__except (true) { return; }
-		};
-
 		if (esp::local_player)
 		{
-			//selected entity
-			if (GetAsyncKeyState(0x37))
-			{
-				auto look = esp::local_player->_lookingAtEntity();
-				if (look)
-				{
-					auto net2 = *reinterpret_cast<Networkable**>(look + 0x58);
-					auto look_id = net2->get_id();
-					esp::selected_entity_id = look_id;
-				}
-			}
-
+			//select entity			
 			if (esp::selected_entity_id == ent_id) {
-
+			
 				Vector2 w2s_position = {};
 				if (esp::out_w2s(world_position, w2s_position))
 				{
@@ -1137,17 +1125,17 @@ void iterate_entities() {
 						render.StringCenter(w2s_position, _(L"selected"), { 54 / 255.f, 116 / 255.f, 186 / 255.f });
 						//esp::draw_item(w2s_position, il2cpp::methods::new_string(("[selected]")), esp_color);
 						w2s_position.y += 10;
-						render.StringCenter(w2s_position, string::wformat(_(L"[%d]"), (int)ent_id), {0.f, 1.f, 0.f});
+						render.StringCenter(w2s_position, string::wformat(_(L"[%d]"), (int)ent_id), { 0.f, 1.f, 0.f });
 						//esp::draw_item(w2s_position, il2cpp::methods::new_string(string::format(_("[%d]"), (int)ent_id)), esp_color);
 					}
 				}
 			}
 
 			auto object_name = *reinterpret_cast<rust_str*>(object_name_ptr);
-			//auto upgrade?
-			if (!strcmp(entity_class_name, _("BuildingBlock"))) {
-				if (vars->visual.block_chams > 0)
-				{
+			
+			//buildingblock stuff
+			if (vars->visual.block_chams > 0 || vars->misc.auto_upgrade) {
+				if (!strcmp(entity_class_name, _("BuildingBlock"))) {
 					if (unity::bundle && unity::bundle2)
 					{
 						Shader* shader = 0;
@@ -1161,33 +1149,42 @@ void iterate_entities() {
 							mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/2dmat.mat"), unity::GetType(_("UnityEngine"), _("Material")));
 							break;
 						}
-						entchams(shader, mat);
+						entchams(ent, shader, mat);
 					}
-				}
-				if (vars->misc.auto_upgrade) {
-					auto block = (BuildingBlock*)ent;
-					rust::classes::BuildingGrade upgrade_tier = (rust::classes::BuildingGrade)(vars->misc.upgrade_tier + 1);
-					auto distance = esp::local_player->eyes()->position().distance(world_position);
-					if (distance < 4.2f) {
-						if (!esp::closest_building_block)
-							esp::closest_building_block = (uintptr_t)block;
-						else
-						{
-							if (block->grade() != upgrade_tier) {
-								auto tranny = ((BuildingBlock*)esp::closest_building_block)->transform();
-								auto pos = tranny->position();
-								auto lastdist = esp::local_player->eyes()->position().distance(pos);
-								if (lastdist > distance)
-									esp::closest_building_block = (uintptr_t)block;
+
+					if (vars->misc.auto_upgrade) {
+						auto block = (BuildingBlock*)ent;
+						rust::classes::BuildingGrade upgrade_tier = (rust::classes::BuildingGrade)(vars->misc.upgrade_tier + 1);
+						auto distance = esp::local_player->eyes()->position().distance(world_position);
+						if (distance < 4.2f) {
+							if (!esp::closest_building_block)
+								esp::closest_building_block = (uintptr_t)block;
+							else
+							{
+								if (block->grade() != upgrade_tier) {
+									auto tranny = ((BuildingBlock*)esp::closest_building_block)->transform();
+									auto pos = tranny->position();
+									auto lastdist = esp::local_player->eyes()->position().distance(pos);
+									if (lastdist > distance)
+										esp::closest_building_block = (uintptr_t)block;
+								}
 							}
 						}
 					}
 				}
 			}
 
-			auto test = vars->visual.dist_on_items;
-			auto dist = world_position.distance(esp::local_player->transform()->position());
-			if ((vars->visual.stash ||
+			//collectibleitem stuff
+			if (vars->misc.pickup_collectibles) {
+				if (!strcmp(entity_class_name, _("CollectibleEntity"))) {
+					auto dist = world_position.distance(esp::local_player->transform()->position());
+					if (dist < 4.f)
+						ent->ServerRPC(_(L"Pickup"));
+				}
+			}
+
+			//misc esp
+			if (vars->visual.stash ||
 				vars->misc.norecycler ||
 				vars->visual.stone_ore ||
 				vars->visual.sulfur_ore ||
@@ -1201,18 +1198,19 @@ void iterate_entities() {
 				vars->visual.ladder ||
 				vars->visual.cloth ||
 				vars->visual.tc_esp ||
+				vars->visual.collectibles ||
 				vars->visual.dropped_items ||
 				vars->visual.corpses ||
 				vars->visual.block_chams > 0 ||
 				vars->visual.rock_chams > 0)
-				&& dist < test)
 			{
+				auto dist = world_position.distance(esp::local_player->transform()->position());
+				if (vars->visual.dist_on_items < dist) continue;
 				esp_name = _(L"");
 				auto object_name = *reinterpret_cast<rust_str*>(object_name_ptr);
 				if (!object_name.zpad)
 					continue;
 
-				dist = 10.f;
 				auto m = esp::local_player->model();
 				if (m)
 				{
@@ -1381,6 +1379,28 @@ void iterate_entities() {
 					esp_name = _(L"Stash");
 				}
 
+				//vars->visual.collectibles
+				if (vars->visual.collectibles) {
+					if (!strcmp(entity_class_name, _("CollectibleEntity"))) {
+						if (std::string(object_name.zpad).find(_("wood")) != std::string::npos)
+							esp_name = _(L"Wood [collectible]");
+						else if (std::string(object_name.zpad).find(_("stone")) != std::string::npos)
+							esp_name = _(L"Stone [collectible]");
+						else if (std::string(object_name.zpad).find(_("metal")) != std::string::npos)
+							esp_name = _(L"Metal [collectible]");
+						else if (std::string(object_name.zpad).find(_("sulfur")) != std::string::npos)
+							esp_name = _(L"Sulfur [collectible]");
+						else if (std::string(object_name.zpad).find(_("shroom")) != std::string::npos)
+							esp_name = _(L"Mushroom [collectible]");
+						else if (std::string(object_name.zpad).find(_("cloth")) != std::string::npos && !vars->visual.cloth)
+							esp_name = _(L"Cloth [collectible]");
+						esp_color = Vector4(vars->colors.items.collectibles[0],
+							vars->colors.items.collectibles[1],
+							vars->colors.items.collectibles[2],
+							vars->colors.items.collectibles[3]);
+					}
+				}
+
 				//recycler
 				else if (vars->misc.norecycler && *(int*)(entity_class_name) == 'yceR' && get_fixedTime() > esp::last_recycler + 0.35f) {
 					esp_name = _(L"Recycler");
@@ -1411,7 +1431,7 @@ void iterate_entities() {
 
 						if (vars->visual.rock_chams > 0)
 						{
-							entchams(shader, mat);
+							entchams(ent, shader, mat);
 						}
 					}
 				}
@@ -1648,7 +1668,6 @@ void new_frame() {
 
 	//Draw watermark
 	Watermark();
-
 	if (esp::local_player) {
 		int rindex = -1;
 		for (size_t i = 0; i < hitpoints.size(); i++)

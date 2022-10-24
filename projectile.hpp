@@ -127,6 +127,7 @@ public:
 	float gravityModifier() { return safe_read(this + O::Projectile::gravityModifier, float); }
 	void integrity(float f) { if (!this) return; safe_write(this + O::Projectile::integrity, f, float); }
 	float integrity() { return safe_read(this + O::Projectile::integrity, float); }
+	float penetrationPower() { return safe_read(this + O::Projectile::penetrationPower, float); }
 	float maxDistance() { return safe_read(this + O::Projectile::maxDistance, float); }
 	Vector3 currentPosition() { return safe_read(this + O::Projectile::currentPosition, Vector3); }
 	void currentPosition(Vector3 d) { if (!this) return; safe_write(this + O::Projectile::currentPosition, d, Vector3); }
@@ -166,6 +167,7 @@ public:
 	DWORD64 damageProperties() { return safe_read(this + O::Projectile::damageProperties, DWORD64); }
 
 	int projectileID() { return safe_read(this + O::Projectile::projectileID, int); }
+	void projectileID(int a) { safe_write(this + O::Projectile::projectileID, a, int); }
 
 	BasePlayer* owner() { return (BasePlayer*)safe_read(this + O::Projectile::owner, DWORD64); }
 	DWORD64 sourceWeaponPrefab() { return safe_read(this + O::Projectile::sourceWeaponPrefab, DWORD64); }

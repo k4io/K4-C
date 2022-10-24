@@ -88,21 +88,22 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		vars->open = !vars->open;
 
 	//memu
-
-	__try {
-		im::NewFrame();
-		if (render.NewFrame(pSwapChain))
-		{
-			new_frame();
-		}
-		render.EndFrame();
-		if (vars->open)
-		{
-			Gui::Render();
-		}
-	} __except(true) {
-		esp::local_player->console_echo(_(L"[matrix]: ERROR. Crash inside: " __FUNCTION__));
+	im::NewFrame();
+	if (render.NewFrame(pSwapChain))
+	{
+		new_frame();
 	}
+	render.EndFrame();
+	if (vars->open)
+	{
+		Gui::Render();
+	}
+
+	//__try {
+	//
+	//} __except(true) {
+	//	esp::local_player->console_echo(_(L"[matrix]: ERROR. Crash inside: " __FUNCTION__));
+	//}
 	im::End();
 	
 	im::Render();
@@ -165,7 +166,7 @@ bool DllMain(HMODULE hmodule)
 		mem::game_assembly_base = LI_MODULE_SAFE_(_("GameAssembly.dll"));
 		mem::unity_player_base = LI_MODULE_SAFE_(_("UnityPlayer.dll"));
 
-		AllocConsole();
+		//AllocConsole();
 
 		il2cpp::init();
 

@@ -23,7 +23,6 @@ namespace offsets {
 */
 
 
-#define oLineOfSightRadius 0x7F48E0
 #define oSphereCast 0x251A8B0
 #define oConsoleSystem_GetAll 39005120 //"ConsoleSystem.Index$$get_All"
 #define oConvar 56756472
@@ -47,7 +46,6 @@ namespace offsets {
 
 /*
 //ALKAD
-#define oLineOfSightRadius 0x7DE0C0
 #define oSphereCast 0x24FFD00
 #define oConsoleSystem_GetAll 38895632 //"ConsoleSystem.Index$$get_All"
 #define oConvar 56626808

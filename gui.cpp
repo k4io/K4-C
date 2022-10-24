@@ -37,6 +37,7 @@ float _r = 1.00f, _g = 0.00f, _b = 1.00f;
 namespace Gui
 {
 	sg::Snake mysnake;
+	gplayer* selected_player = nullptr;
 
 	void SnakeStuff() {
 		im::SetNextWindowSize({ 301, 395 });
@@ -119,6 +120,53 @@ namespace Gui
 				im::SetCursorPosX(im::GetCursorPosX() + 150);
 				im::SetCursorPosY(im::GetCursorPosY() - 10);
 				im::LabelText(_("##highscore"), _("Highscore: %d"), sg::highscore);
+				im::EndChild();
+			}
+		}
+		im::End();
+	}
+
+	void PlayersListWindow() {
+		im::SetNextWindowSize({ 495, 206 });
+		im::Begin(_("Players"), 0, ImGuiWindowFlags_NoCollapse);
+		{
+			if (im::BeginChild(_("List"), { 285, 166 }, true))
+			{
+				im::Text(_("Players"));
+				im::Separator();
+				if (im::ListBoxHeader(_("##PlayerList"), ImVec2(270, 128)))
+				{
+					for (auto pair : vars->gui_player_map)
+					{
+						auto name = pair.second->name;
+						if (im::Selectable(std::string(name.begin(), name.end()).c_str()))
+						{
+							for (auto g : vars->gui_player_map)
+								if (g.second->name == name)
+									selected_player = g.second;
+						}
+						if (pair.second->follow)
+							vars->follow_player_id = pair.second->userid;
+					}
+					im::ListBoxFooter();
+				}
+				im::EndChild();
+			}
+			im::SameLine();
+			if (im::BeginChild(_("Controls"), { 185, 166 }, true))
+			{
+				if (selected_player) {
+					im::Text(_("Options for %s"), std::string(selected_player->name.begin(), selected_player->name.end()).c_str());
+					im::Separator();
+					im::Text(_("SteamId3: %d"), selected_player->userid);
+					im::Checkbox(_("Friend"), &selected_player->is_friend);
+					//im::Checkbox(_("Target priority"), &selected_player->priority_target);
+					im::Checkbox(_("Follow player"), &selected_player->follow);
+					im::Checkbox(_("Block player"), &selected_player->block);
+				}
+				else {
+					im::Text(_("Choose player"));
+				}
 				im::EndChild();
 			}
 		}
@@ -380,6 +428,9 @@ namespace Gui
 			else if (name == _("flyhack_indicator")) vars->visual.flyhack_indicator = std::stoi(value);
 			else if (name == _("shader")) vars->visual.shader = std::stoi(value);
 
+			else if (name == _("day")) vars->visual.day = std::stof(value);
+			else if (name == _("night")) vars->visual.night = std::stof(value);
+
 			else if (name == _("auto_upgrade")) vars->misc.auto_upgrade = std::stoi(value);
 			else if (name == _("flywall")) vars->misc.flywall = std::stoi(value);
 			else if (name == _("force_privlidge")) vars->misc.force_privlidge = std::stoi(value);
@@ -567,8 +618,8 @@ namespace Gui
 		itoa(vars->visual.playeresp, buffer, 4);
 		str = (std::string(_("playeresp=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
-		itoa(vars->visual.boxtype, buffer, 4);
-		str = (std::string(_("boxtype=")) + std::string(buffer) + _("\n"));
+		//itoa(vars->visual.boxtype, buffer, 4);
+		str = (std::string(_("boxtype=")) + std::to_string(vars->visual.boxtype) + _("\n"));
 		f.write(str.c_str(), str.size());
 		itoa(vars->visual.hitpoint, buffer, 4);
 		str = (std::string(_("hitpoint=")) + std::string(buffer) + _("\n"));
@@ -799,6 +850,11 @@ namespace Gui
 		str = (std::string(_("shader=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
 
+		str = (std::string(_("day=")) + std::to_string(vars->visual.day) + _("\n"));
+		f.write(str.c_str(), str.size());
+		str = (std::string(_("night=")) + std::to_string(vars->visual.night) + _("\n"));
+		f.write(str.c_str(), str.size());
+
 		itoa(vars->misc.auto_upgrade, buffer, 4);
 		str = (std::string(_("auto_upgrade=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
@@ -930,6 +986,7 @@ namespace Gui
 			im::Checkbox(_("Lock target"), &vars->combat.locktarget);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
 			im::Hotkey(_("L"), &vars->keybinds.locktarget, ImVec2(50, 15));
+			im::Checkbox(_("Target friends"), &vars->combat.targetfriends);
 			im::EndChild();
 		}
 		im::SameLine();;
@@ -942,11 +999,10 @@ namespace Gui
 				_("Head\0Body\0Upperbody\0Penis\0Hands\0Legs\0Feet"));
 			im::Checkbox(_("Randomize hitboxes"), &vars->combat.randomize);
 			//im::Checkbox(_("Hitscan"), &vars->combat.HitScan);
-			//im::Checkbox(_("Manipulator"), &vars->combat.manipulator2);
 			im::Checkbox(_("Manipulator"), &vars->combat.manipulator);
-			//im::Checkbox(_("Manipulator2"), &vars->combat.manipulator);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(50, 15));
+			//im::Checkbox(_("STW (Ladder)"), &vars->combat.throughladder);
 			//im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
 			//im::Checkbox(_("Pierce"), &vars->combat.pierce);
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
@@ -1011,8 +1067,9 @@ namespace Gui
 			im::Combo(_("Health bar"), &vars->visual.hpbar,
 				_("None\0Side\0Bottom"));
 			im::Checkbox(_("Rainbow health bar"), &vars->visual.rainbowhpbar);
-			im::Checkbox(_("Wounded"), &vars->visual.woundedflag);
-			im::Checkbox(_("Weapon"), &vars->visual.weaponesp);
+			im::Checkbox(_("Friend flag"), &vars->visual.friendflag);
+			im::Checkbox(_("Wounded flag"), &vars->visual.woundedflag);
+			im::Checkbox(_("Held item flag"), &vars->visual.weaponesp);
 			im::Checkbox(_("Rainbow flags"), &vars->visual.rainbowflags);
 			im::Checkbox(_("Hotbar"), &vars->visual.hotbar_esp);
 			im::Checkbox(_("Skeleton"), &vars->visual.skeleton);
@@ -1084,6 +1141,7 @@ namespace Gui
 			im::Checkbox(_("Food"), &vars->visual.food);
 			im::Checkbox(_("Barrels"), &vars->visual.barrels);
 			im::Checkbox(_("Cloth"), &vars->visual.cloth);
+			im::Checkbox(_("Collectibles"), &vars->visual.collectibles);
 			im::SliderFloat(_("Distance"), &vars->visual.dist_on_items, 1.f, 400.f, _("%.0f"), 0.1f);
 			im::EndChild();
 		}
@@ -1135,26 +1193,8 @@ namespace Gui
 			im::Separator();
 			im::Combo(_("Walk to"), &vars->misc.walkto,
 				_("None\0Map Marker\0Stone ore\0Sulfur ore\0Metal ore\0Player"));
-			//im::Combo(_("Players"), &vars->misc.playerselected, vars->playersnamesstr);
-			
-			//if (!vars->misc.playerselected
-			//	|| vars->player_name_list.empty())
-			//	vars->misc.playerselected = _("~");
-			//if (im::BeginCombo("Players", vars->misc.playerselected)) // The second parameter is the label previewed before opening the combo.
-			//{
-			//	std::sort(vars->player_name_list.begin(), vars->player_name_list.end());
-			//	vars->player_name_list.erase(std::unique(vars->player_name_list.begin(), vars->player_name_list.end()), vars->player_name_list.end());
-			//	for (auto p : vars->player_name_list)
-			//	{
-			//		bool is_selected = (!strcmp(vars->misc.playerselected, p.c_str())); // You can store your selection however you want, outside or inside your objects
-			//		if (im::Selectable(p.c_str(), is_selected))
-			//			strcpy(vars->misc.playerselected, p.c_str());
-			//		if (is_selected)
-			//			im::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
-			//	}
-			//	im::EndCombo();
-			//}
 
+			im::Checkbox(_("Auto-farm"), &vars->misc.silent_farm);
 			im::Checkbox(_("Auto-attack"), &vars->misc.autoattack);
 			im::SliderFloat(_("Max dist"), &vars->misc.autoattackdist, 0.1f, 400.f, _("%.0f"), 10.f);
 			im::Combo(_("Targetting mode"), &vars->misc.targetting_mode, 
@@ -1170,6 +1210,7 @@ namespace Gui
 			im::Text(_("Gameplay"));
 			im::Separator();
 			im::Checkbox(_("Anti-recycler"), &vars->misc.norecycler);
+			im::Checkbox(_("Pickup collectibles"), &vars->misc.pickup_collectibles);
 			im::Checkbox(_("Interactive debug"), &vars->misc.interactive_debug);
 			im::Checkbox(_("Instant med"), &vars->misc.instant_med);
 			im::Checkbox(_("Instant revive"), &vars->misc.instant_revive);
@@ -1193,12 +1234,16 @@ namespace Gui
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("T"), &vars->keybinds.timescale, ImVec2(50, 14));
 			im::SliderFloat(_("Speed"), &vars->misc.speedhackspeed, 0.1f, 10.f, _("%.1f"), 0.1f);
-			im::Checkbox(_("Silent farm"), &vars->misc.silent_farm);
 			im::Checkbox(_("Console logs"), &vars->misc.logs);
 			im::Checkbox(_("Rainbow accent"), &vars->rainbow_accent);
 			im::Combo(_("Gesture spam"), &vars->misc.gesture_spam, _(" None\x00 Clap\x00 Friendly\x00 Thumbsdown\x00 Thumbsup\x00 Ok\x00 Point\x00 Shrug\x00 Victory\x00 Wave"));
 			
-
+			im::Checkbox(_("Player list"), &vars->misc.playerlist);
+			if(vars->misc.playerlist)
+			{
+				PlayersListWindow();
+			}
+			
 			im::Checkbox(_("Snake"), &vars->misc.snake);
 			if(vars->misc.snake)
 			{
@@ -1308,6 +1353,8 @@ namespace Gui
 			strcpy(str0, _("default"));
 			load_config();
 		}
+
+#ifdef DOTS
 		im::SetNextWindowPos({ 0,0 });
 		im::SetNextWindowSize(im::GetIO().DisplaySize);
 		im::PushStyleColor(ImGuiCol_WindowBg, { 0,0,0,0 });
@@ -1319,7 +1366,7 @@ namespace Gui
 		im::End();
 		im::PopStyleColor();
 		im::PopStyleVar();
-
+#endif
 		if (vars->rainbow_accent)
 		{
 			static int cases = 0;
@@ -1343,6 +1390,7 @@ namespace Gui
 		im::PushStyleColor(ImGuiCol_SeparatorActive, { vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], vars->accent_color[3] });
 		im::PushStyleColor(ImGuiCol_ResizeGripActive, { vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], vars->accent_color[3] });
 		im::PushStyleColor(ImGuiCol_TextSelectedBg, { vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], vars->accent_color[3] });
+		im::PushStyleColor(ImGuiCol_Separator, { 0.43f, 0.43f, 0.50f, 0.65f });
 
 		//im::SetNextWindowPos(ImVec2(x + 170, y + 60));
 		//im::SetNextWindowSize(ImVec2(520, plus2));
@@ -1358,6 +1406,7 @@ namespace Gui
 			if (im::Button(_("Configs"), ImVec2(73, 20))) { selected_tab = 4; }  im::SameLine();
 			if (im::Button(_("Colors"), ImVec2(73, 20))) { selected_tab = 5; }
 			im::Separator();
+			im::PushStyleColor(ImGuiCol_Separator, { vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], vars->accent_color[3] });
 			switch (selected_tab)
 			{
 			case 0:

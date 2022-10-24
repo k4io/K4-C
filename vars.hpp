@@ -7,13 +7,24 @@
 
 #include <map>
 
+struct gplayer {
+	std::wstring name;
+	ULONG userid;
+	bool is_friend, priority_target, follow, block;
+	gplayer(std::wstring n, ULONG i, bool f, bool p, bool f2, bool b) : 
+		name(n), userid(i), is_friend(f), priority_target(p), follow(f2), block(b) { }
+};
+
 struct Vars
 {
 	std::string data_dir = _("");
 	std::string customboxpath = _("");
-	char* playersnamesstr;
-	std::map<int, wchar_t*> player_id_name = {};
-	std::vector<std::string> player_name_list{};
+	std::vector<std::wstring> player_name_list{};
+
+	std::map<ULONG, gplayer*> gui_player_map{};
+
+	int follow_player_id = -1;
+
 	bool open = false;
 	float accent_color[4] = { 28 / 255.f, 232 / 255.f, 89 / 255.f, 1.f };
 	float accent_color_opaque[4] = { 28 / 255.f, 232 / 255.f, 89 / 255.f, 0.6f };
@@ -22,6 +33,7 @@ struct Vars
 	struct combat {
 		bool aimbot = false;
 		bool psilent = false;
+		bool targetfriends = false;
 		int aimbone = 0;
 		bool bodyaim = false;
 		float aimbotfov = 500.f;
@@ -51,6 +63,7 @@ struct Vars
 		bool instaeoka = false;
 		bool pierce = false;
 		bool fastbow = false;
+		bool throughladder = false;
 		bool weakspots = false;
 		bool targetbehindwall = false;
 		float recoilx = 1.f;
@@ -122,6 +135,7 @@ struct Vars
 		float nameGcolor = 130.f / 255.f;
 		float nameBcolor = 109.f / 255.f;
 		bool stash = false;
+		bool collectibles = false;
 		bool ladder = false;
 		bool sulfur_ore = false;
 		bool stone_ore = false;
@@ -157,6 +171,7 @@ struct Vars
 		bool woundedflag = false;
 		bool distance = false;
 		bool weaponesp = false;
+		bool friendflag = false;
 		bool desync_indicator = false;
 		bool speedhack_indicator = false;
 		bool hitpoint = false;
@@ -194,6 +209,8 @@ struct Vars
 		float tpcamdist = 5.f;
 		float tpcamfov = 70.f;
 
+		bool pickup_collectibles = false;
+
 		bool TakeFallDamage = false;
 		bool silent_farm = false;
 		bool auto_lock = false;
@@ -222,6 +239,7 @@ struct Vars
 		bool autorefill = false;
 		bool logs = false;
 		bool snake = false;
+		bool playerlist = false;
 		bool interactive_debug = false;
 
 		int gesture_spam = 0;
@@ -322,6 +340,7 @@ struct Vars
 				float visible[4] = { 1, 1, 1, 1 };
 				float invisible[4] = { 1, 1, 1, 1 };
 			}; animal animal;
+			float collectibles[4] = { 1, 1, 1, 1 };
 		}; items items;
 	}; colors colors;
 

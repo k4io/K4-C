@@ -461,7 +461,7 @@ public:
 		return { 0,0 };
 	}
 
-	__forceinline void String(const Vector2& Start, const wchar_t* Str, const D2D1::ColorF& Clr = D2D1::ColorF(D2D1::ColorF::White))
+	__forceinline void String(const Vector2& Start, const wchar_t* Str, const D2D1::ColorF& Clr = D2D1::ColorF(D2D1::ColorF::White), bool outline = true)
 	{
 		if (vars->visual.text_background_box)
 		{
@@ -488,6 +488,14 @@ public:
 				break;
 			}
 		}
+
+		if (outline) {
+			String({ Start.x - 1, Start.y }, Str, { 0, 0, 0, 1 }, false);
+			String({ Start.x + 1, Start.y }, Str, { 0, 0, 0, 1 }, false);
+			String({ Start.x, Start.y - 1 }, Str, { 0, 0, 0, 1 }, false);
+			String({ Start.x, Start.y + 1 }, Str, { 0, 0, 0, 1 }, false);
+		}
+
 		SolidColor->SetColor(Clr); 
 		Canvas->DrawTextW(Str, this->wcslen(Str), TextFormat, { Start.x, Start.y, FLT_MAX, FLT_MAX }, SolidColor);
 	}
