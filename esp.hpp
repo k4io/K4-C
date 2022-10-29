@@ -887,6 +887,15 @@ void iterate_entities() {
 		{
 			auto entity = (BasePlayer*)ent;
 
+			//check valid
+			if (!entity->is_alive()
+				|| (entity->is_sleeping() && !vars->visual.sleeper_esp))
+				continue;
+
+			bool npc = entity->playerModel()->isnpc();
+			//check npc
+			if (npc && !vars->visual.npc_esp) continue;
+
 			if (!map_contains_key(player_map, ent_id)) {
 				player_map.insert(std::make_pair(ent_id, entity));
 
@@ -900,15 +909,6 @@ void iterate_entities() {
 				follow = vars->gui_player_map[entity->userID()]->follow;
 				block = vars->gui_player_map[entity->userID()]->block;
 			}
-
-			//check valid
-			if (!entity->is_alive()
-				|| (entity->is_sleeping() && !vars->visual.sleeper_esp))
-				continue;
-
-			bool npc = entity->playerModel()->isnpc();
-			//check npc
-			if (npc && !vars->visual.npc_esp) continue;
 
 			//local player chams, player average velocity
 			if (entity->is_local_player()) {
@@ -1381,22 +1381,25 @@ void iterate_entities() {
 
 				//vars->visual.collectibles
 				if (vars->visual.collectibles) {
-					if (!strcmp(entity_class_name, _("CollectibleEntity"))) {
+					if (!strcmp(entity_class_name, _("CollectibleEntity"))
+						|| std::string(object_name.zpad).find(_("collectablecandy")) != std::string::npos) {
 						if (std::string(object_name.zpad).find(_("wood")) != std::string::npos)
 							esp_name = _(L"Wood [collectible]");
-						else if (std::string(object_name.zpad).find(_("stone")) != std::string::npos)
-							esp_name = _(L"Stone [collectible]");
 						else if (std::string(object_name.zpad).find(_("metal")) != std::string::npos)
 							esp_name = _(L"Metal [collectible]");
 						else if (std::string(object_name.zpad).find(_("sulfur")) != std::string::npos)
 							esp_name = _(L"Sulfur [collectible]");
+						else if (std::string(object_name.zpad).find(_("stone")) != std::string::npos)
+							esp_name = _(L"Stone [collectible]");
 						else if (std::string(object_name.zpad).find(_("shroom")) != std::string::npos)
 							esp_name = _(L"Mushroom [collectible]");
+						else if (std::string(object_name.zpad).find(_("collectablecandy")) != std::string::npos)
+							esp_name = _(L"Halloween Candy");
 						else if (std::string(object_name.zpad).find(_("cloth")) != std::string::npos && !vars->visual.cloth)
 							esp_name = _(L"Cloth [collectible]");
-						esp_color = Vector4(vars->colors.items.collectibles[0],
-							vars->colors.items.collectibles[1],
-							vars->colors.items.collectibles[2],
+						esp_color = Vector4(vars->colors.items.collectibles[0] * 255.f,
+							vars->colors.items.collectibles[1] * 255.f,
+							vars->colors.items.collectibles[2] * 255.f,
 							1);
 					}
 				}

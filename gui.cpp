@@ -34,6 +34,7 @@ std::vector<std::string> split(std::string s, std::string delimiter) {
 
 float _r = 1.00f, _g = 0.00f, _b = 1.00f;
 
+
 namespace Gui
 {
 	sg::Snake mysnake;
@@ -128,7 +129,7 @@ namespace Gui
 
 	void PlayersListWindow() {
 		im::SetNextWindowSize({ 495, 206 });
-		im::Begin(_("Players"), 0, ImGuiWindowFlags_NoCollapse);
+		im::Begin(_("##Players"), 0, ImGuiWindowFlags_NoCollapse);
 		{
 			if (im::BeginChild(_("List"), { 285, 166 }, true))
 			{
@@ -166,6 +167,29 @@ namespace Gui
 				}
 				else {
 					im::Text(_("Choose player"));
+				}
+				im::EndChild();
+			}
+		}
+		im::End();
+	}
+
+	void SkinChanger() {
+		im::SetNextWindowSize({ 495, 206 });
+		im::Begin(_("##Items"), 0, ImGuiWindowFlags_NoCollapse);
+		{
+			if (im::BeginChild(_("List"), { 285, 166 }, true))
+			{
+				im::Text(_("Items"));
+				im::Separator();
+				if (im::ListBoxHeader(_("##ItemsList"), ImVec2(270, 128)))
+				{
+					//for (auto s : weapon_names_list) {
+					//	if (im::Selectable(s.c_str())) {
+					//
+					//	}
+					//}
+					im::ListBoxFooter();
 				}
 				im::EndChild();
 			}
@@ -1000,11 +1024,11 @@ namespace Gui
 				_("Head\0Body\0Upperbody\0Penis\0Hands\0Legs\0Feet"));
 			im::Checkbox(_("Randomize hitboxes"), &vars->combat.randomize);
 			//im::Checkbox(_("Hitscan"), &vars->combat.HitScan);
-			im::Checkbox(_("Manipulator"), &vars->combat.manipulator);
+			im::Checkbox(_("Manipulator"), &vars->combat.manipulator2);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(50, 15));
-			//im::Checkbox(_("STW (Ladder)"), &vars->combat.throughladder);
 			//im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
+			//im::Checkbox(_("STW (Ladder)"), &vars->combat.throughladder);
 			//im::Checkbox(_("Pierce"), &vars->combat.pierce);
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
 			im::Checkbox(_("Bullet tp"), &vars->combat.bullet_tp);
@@ -1215,6 +1239,9 @@ namespace Gui
 			im::Checkbox(_("Interactive debug"), &vars->misc.interactive_debug);
 			im::Checkbox(_("Instant med"), &vars->misc.instant_med);
 			im::Checkbox(_("Instant revive"), &vars->misc.instant_revive);
+			im::Checkbox(_("Third-person"), &vars->misc.thirdperson);
+			im::Checkbox(_("Debug camera"), &vars->misc.debugcam);
+			im::Checkbox(_("Culling"), &vars->misc.debugcam);
 			im::Checkbox(_("Suicide"), &vars->misc.TakeFallDamage);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("S"), &vars->keybinds.suicide, ImVec2(50, 14));
@@ -1239,17 +1266,14 @@ namespace Gui
 			im::Checkbox(_("Rainbow accent"), &vars->rainbow_accent);
 			im::Combo(_("Gesture spam"), &vars->misc.gesture_spam, _(" None\x00 Clap\x00 Friendly\x00 Thumbsdown\x00 Thumbsup\x00 Ok\x00 Point\x00 Shrug\x00 Victory\x00 Wave"));
 			
+			//im::Checkbox(_("Skin changer"), &vars->misc.skinchanger);
+			//if(vars->misc.skinchanger)
+			//{
+			//	SkinChanger();
+			//}
+
 			im::Checkbox(_("Player list"), &vars->misc.playerlist);
-			if(vars->misc.playerlist)
-			{
-				PlayersListWindow();
-			}
-			
 			im::Checkbox(_("Snake"), &vars->misc.snake);
-			if(vars->misc.snake)
-			{
-				SnakeStuff();
-			}
 			im::EndChild();
 		}
 	}
@@ -1432,5 +1456,10 @@ namespace Gui
 			}
 		}
 		im::End();
+
+		if (vars->misc.playerlist)
+			PlayersListWindow();
+		if (vars->misc.snake)
+			SnakeStuff();
 	}
 }

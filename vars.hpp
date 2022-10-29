@@ -20,7 +20,9 @@ struct Vars
 	std::string data_dir = _("");
 	std::string customboxpath = _("");
 	std::vector<std::wstring> player_name_list{};
-
+	
+	std::map<std::string, int> weaponskin_map;
+	std::map<int, std::string> allskins_map;
 	std::map<ULONG, gplayer*> gui_player_map{};
 
 	int follow_player_id = -1;
@@ -30,6 +32,9 @@ struct Vars
 	float accent_color_opaque[4] = { 28 / 255.f, 232 / 255.f, 89 / 255.f, 0.6f };
 	bool wants_shoot = false;
 	bool rainbow_accent = false;
+
+	float last_refill_time = 0.f;
+
 	struct combat {
 		bool aimbot = false;
 		bool psilent = false;
@@ -216,6 +221,9 @@ struct Vars
 		bool silent_farm = false;
 		bool auto_lock = false;
 		bool always_sprint = false;
+		bool debugcam = false;
+		bool thirdperson = false;
+		bool culling = false;
 		bool gravity = true;
 		bool infinite_jump = false;
 		bool fake_lag = false;

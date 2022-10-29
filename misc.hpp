@@ -1314,13 +1314,16 @@ namespace misc
 			{
 				if (node.path.empty() || ((node.pos.is_empty() || node.pos == Vector3(0, 0, 0))
 					&& eyepos.distance(node.pos)) > 1.f
-					|| last_player_follow_update + 10.f < get_fixedTime())
+					|| last_player_follow_update + 5.f < get_fixedTime())
 				{
 					CreatePath(marker_pos, eyepos);
 					last_player_follow_update = get_fixedTime();
 				}
 
 				Vector3 current_step = node.path[node.steps];
+
+				if (current_step.is_empty())
+					CreatePath(marker_pos, eyepos);
 
 				psteps = node.steps;
 				if (current_step.distance(node.pos) <= threshold / 2.f)
@@ -1358,7 +1361,8 @@ namespace misc
 
 				Vector3 dir = ((Vector3(current_step.x, current_step.y - dist_from_ground(current_step) + 0.1f, current_step.z)) - eyepos).Normalized();
 				vel = { (dir.x / dir.length() * 5.5f), vel.y, (dir.z / dir.length() * 5.5f) };
-				pwm->set_TargetMovement(vel);
+				if(!node.pos.is_empty())
+					pwm->set_TargetMovement(vel);
 
 
 				if (node.path[node.steps].y - eyepos.y > 1.4f)
@@ -1394,6 +1398,7 @@ namespace misc
 				position += (ply->eyes()->body_forward() * .5f);
 			node.pos = position;
 			pathfind(pwm, position);
+			if(node.pos.is_empty()) node.pos = position;
 		}
 
 		void auto_farm(PlayerWalkMovement* pwm,
