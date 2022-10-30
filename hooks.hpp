@@ -1475,15 +1475,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						float step = M_PI_2 / points;
 						float x, z, c = 0;
 						lp = Vector3::Zero();
-						for (size_t i = 0; i < points; i++)
-						{
-							x = Vector3::my_sin(c) * 1.f;
-							z = Vector3::my_cos(c) * 1.f;
-							auto cu = Vector3(x, p.y + 0.1f, z);
-							if (!lp.is_empty())
-								Line(p + cu, p + lp, { r, g, b, 1 }, 0.01f, false, false);
-							lp = cu;
-						}
+						Sphere(p, 0.5f, { r, g, b, 1 }, 0.01f, false);
 
 						for (auto pair : grenade_map) {
 							auto current = pair.second;
@@ -1495,19 +1487,35 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								}
 
 								p = current->endposition;
-								for (size_t i = 0; i < points; i++)
-								{
-									x = Vector3::my_sin(c) * 1.f;
-									z = Vector3::my_cos(c) * 1.f;
-									auto cu = Vector3(x, p.y + 0.1f, z);
-									if (!lp.is_empty())
-										Line(p + cu, p + lp, { r, g, b, 1 }, 0.01f, false, false);
-									lp = cu;
-								}
+								Sphere(p, 0.5f, { r, g, b, 1 }, 0.01f, false);
 							}
 						}
 					}
+					if (vars->visual.rocketprediction) {
+						if (!strcmp(held->get_class_name(), _("BaseLauncher"))) {
+							auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)held + 0x2C0); //public BaseProjectile.Magazine primaryMagazine; // 0x2C0
+							auto ammo = *reinterpret_cast<uintptr_t*>((uintptr_t)mag + 0x20); //public ItemDefinition ammoType; // 0x20
+							auto mod = ((Networkable*)ammo)->GetComponent(unity::GetType(_(""), _("ItemModProjectile")));
+							auto projectile = (Projectile*)((Networkable*)mod)->GetComponent(unity::GetType(_(""), _("Projectile")));
 
+							auto normalized = baseplayer->eyes()->body_forward().normalize();
+
+							Vector3 position = baseplayer->eyes()->position(), lastposition = position, velCheck = normalized * ((ItemModProjectile*)mod)->projectileVelocity();
+
+							auto stats = held->get_stats(wpn->get_item_definition_id());
+							for (float travelTime = 0.f; travelTime < 8.f; travelTime += 0.03125f)
+							{
+								position += velCheck * 0.03125f;
+								if (!unity::is_visible(position, lastposition, 0))
+									break;
+								Line(position, lastposition, { r, g, b, 1 }, 0.02f, false, false);
+								velCheck.y -= 9.81f * stats.gravity_modifier * 0.03125f;
+								velCheck -= velCheck * stats.drag * 0.03125f;
+								lastposition = position;
+							}
+							Sphere(position, 0.5f, { r, g, b, 1 }, 0.01f, false);
+						}
+					}
 					if (vars->combat.silent_melee || unity::GetKey(vars->keybinds.silentmelee)
 						&& esp::best_target.distance < vars->combat.melee_range)
 					{

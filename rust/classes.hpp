@@ -1256,6 +1256,20 @@ public:
 			if (ammo_id)
 			{
 				switch (ammo_id) {
+				case rocket_basic:
+					drag = xf(0.1f);
+					gravity_modifier = xf(10.f);
+					break;
+				case rocket_hv:
+					drag = xf(0.f);
+					gravity_modifier = xf(0.f);
+					break;
+					break;
+				case rocket_incen:
+					drag = xf(0.1f);
+					gravity_modifier = xf(10.f);
+					break;
+					break;
 				case shotgun:
 					velocity = xf(225);
 					drag = xf(1);

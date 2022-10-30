@@ -18,6 +18,7 @@ private:
 
 		if (!std::filesystem::exists(p)) {
 			CloseHandle(CreateFileA(p.c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0));
+			return false;
 		}
 		std::ifstream cFile(p, std::ios::in);
 		std::string line;
@@ -120,6 +121,7 @@ struct Vars
 	struct visual {
 		bool playeresp = false;
 		bool grenadeprediction = false;
+		bool rocketprediction = false;
 		bool crosshair1 = false;
 		bool crosshair2 = false;
 		bool crosshair3 = false;

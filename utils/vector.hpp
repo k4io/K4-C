@@ -87,16 +87,17 @@ enum ammo_types : int32_t {
 	arrow_fire = 14241751,
 	arrow_bone = 215754713,
 
-	nailgun_nails = -2097376851
+	nailgun_nails = -2097376851,
+
+	rocket_hv = -1841918730,
+	rocket_incen = 1638322904,
+	rocket_basic = -742865266
 };
 
 enum weapon_types : int32_t {
 	spear_stone = 1602646136,
 	spear_wooden = 1540934679
 };
-
-
-
 
 class Vector3
 {
