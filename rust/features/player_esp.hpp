@@ -196,7 +196,7 @@ namespace esp {
 							auto class_name = baseprojectile->get_class_name();
 							if (*(int*)(class_name + 4) == 'eleM' || *(int*)(class_name + 4) == 'mmah') {
 								auto world_position = ent->model()->boneTransforms()->get(48)->position();
-								auto local = ClosestPoint(esp::local_player, world_position);
+								auto local = esp::local_player->ClosestPoint(world_position);
 								auto camera = esp::local_player->model()->boneTransforms()->get(48)->position();
 
 								if (camera.get_3d_dist(world_position) >= 4.2f)

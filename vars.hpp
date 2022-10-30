@@ -2,17 +2,38 @@
 #include "utils/xorstr.hpp"
 #include <string>
 #include <vector>
+#include <fstream>
+#include <filesystem>
+#include <Windows.h>
 #define GUI_NAME "Matrix"
 #define CUSTOM_ICONS FALSE
 
 #include <map>
 
-struct gplayer {
+class gplayer {
+private:
+	bool CheckFriend(int uid) {
+		auto s = getenv(_("APPDATA"));
+		auto p = s + std::string(_("\\matrix\\friends.lst"));
+
+		if (!std::filesystem::exists(p)) {
+			CloseHandle(CreateFileA(p.c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0));
+		}
+		std::ifstream cFile(p, std::ios::in);
+		std::string line;
+		bool exists = false;
+		while (getline(cFile, line))
+			if (line.find(std::to_string(uid)) != std::string::npos)
+				exists = true;
+		cFile.close();
+		return exists;
+	}
+public:
 	std::wstring name;
 	ULONG userid;
 	bool is_friend, priority_target, follow, block;
 	gplayer(std::wstring n, ULONG i, bool f, bool p, bool f2, bool b) : 
-		name(n), userid(i), is_friend(f), priority_target(p), follow(f2), block(b) { }
+		name(n), userid(i), is_friend(CheckFriend(i)), priority_target(p), follow(f2), block(b) { }
 };
 
 struct Vars
@@ -42,6 +63,7 @@ struct Vars
 
 	struct combat {
 		bool aimbot = false;
+		bool vischeck = false;
 		float firerate = 0.133f;
 		float tpmultiplier = 0.75f;
 		bool psilent = false;
@@ -209,7 +231,9 @@ struct Vars
 		int upgrade_tier = 2;
 		bool flyhack_stop = false;
 		bool tp = false;
+		bool revivefriendsonly = false;
 		bool antispeed = false;
+		bool autofarmbarrel = false;
 		float    m_idebugcam_speed = 1.f;
 		float code_lock_code = 1000;
 		bool playerfovtoggle = false;

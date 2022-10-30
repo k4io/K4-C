@@ -179,7 +179,7 @@ namespace hooks {
 	uintptr_t client_entities;
 
 	bool flying = false, is_speeding = false, is_lagging = false, has_intialized_methods = false, wake = true;
-	float nextActionTime = 0, period = 1.4721, last_gesture_rpc = 0.f;;
+	float nextActionTime = 0, period = 1.4721, last_gesture_rpc = 0.f, last_revive_rpc = 0.f;
 	Vector3 m_debugcam_toggle_pos, m_debugcam_pos;
 	uintptr_t do_fixed_update_ptr, client_input_ptr, bodylean_ptr, mounteyepos_ptr, isdown_ptr, __go;
 	
@@ -483,7 +483,7 @@ namespace hooks {
 
 				if (vars->combat.psilent || unity::GetKey(vars->keybinds.psilent)) {
 					if (target.ent && target.ent->health() > 0 && !target.teammate) {
-						if (target.visible || vis_fat)
+						if (vars->combat.vischeck ? (target.visible || vis_fat) : true)
 						{
 							projectile->set_current_velocity(aimbot_velocity);
 							original_vel = aimbot_velocity;
@@ -1068,16 +1068,19 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						break;
 					}
 					case 2: //Stone
-						misc::autobot::auto_farm(player_walk_movement, _("stone"));
+						misc::autobot::auto_farm(player_walk_movement, _("OreResourceEntity"), _("stone"));
 						break;
 					case 3: //Sulfur
-						misc::autobot::auto_farm(player_walk_movement, _("sulfur"));
+						misc::autobot::auto_farm(player_walk_movement, _("OreResourceEntity"), _("sulfur"));
 						break;
 					case 4: //Metal
-						misc::autobot::auto_farm(player_walk_movement, _("metal"));
+						misc::autobot::auto_farm(player_walk_movement, _("OreResourceEntity"), _("metal"));
 						break;
 					case 5: //Player
 						misc::autobot::walktoplayer(player_walk_movement, vars->misc.playerselected);
+						break;
+					case 6: //Barrels
+						misc::autobot::auto_farm(player_walk_movement, _(""), _("barrel"));
 						break;
 					}
 				}
@@ -1261,10 +1264,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			wake = false;
 		}
 		PerformanceUI_Update(instance);
-	}
-
-	GameObject* hk_effectlibrary_createffect(System::string strPrefab, Effect* effect) {
-		return orig::createeffect(strPrefab, effect);
 	}
 
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
@@ -1522,7 +1521,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 										aim_target target = esp::best_target;
 										if (target.ent) {
 											auto world_position = target.ent->model()->boneTransforms()->get(48)->position();
-											auto local = ClosestPoint(esp::local_player, world_position);
+											auto local = esp::local_player->ClosestPoint(world_position);
 											auto camera = esp::local_player->model()->boneTransforms()->get(48)->position();
 
 											if (camera.get_3d_dist(world_position) >= 4.2f)
@@ -1624,12 +1623,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						movement->set_jump_time(0);
 						movement->set_ground_time(100000);
 					}
-
+				
 					if (vars->misc.gravity)
 						movement->set_gravity_multiplier(1.75f);
 					else
 						movement->set_gravity_multiplier(2.35f);
-
+				
 					if (vars->combat.always_shoot) {
 						if (auto ModelState = baseplayer->modelState()) {
 							ModelState->set_flag(rust::classes::ModelState_Flag::OnGround);
@@ -1652,15 +1651,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				if (esp::best_target.ent && held && wpn)
 				{
-					//auto mag = *reinterpret_cast<uintptr_t*>(held + 0x2C0);
-					Vector3 target = esp::best_target.pos;
-					auto mag_ammo = held->ammo_left();
-
-
 					//old manip
 					if (vars->combat.manipulator && ((unity::GetKey(vars->keybinds.manipulator))
 						|| misc::manipulate_vis))
 					{
+						Vector3 target = esp::best_target.pos;
+						auto mag_ammo = held->ammo_left();
 						float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
 						if (misc::can_manipulate(baseplayer, target, mm_eye))
 							if (nextshot < time
@@ -1684,6 +1680,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						&& !(!GetAsyncKeyState(vars->keybinds.manipulator)))
 						|| misc::manipulate_vis)
 					{
+						Vector3 target = esp::best_target.pos;
+						auto mag_ammo = held->ammo_left();
 						if (wpn && held && esp::best_target.ent) {
 							float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
 							if (CanManipulate(held, (BasePlayer*)esp::best_target.ent, baseplayer->input()->state()))
@@ -1708,6 +1706,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						&& esp::best_target.ent->is_alive())
 						|| vars->wants_shoot)
 					{
+						Vector3 target = esp::best_target.pos;
+						auto mag_ammo = held->ammo_left();
 						float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
 						if ((baseplayer->is_visible(target, baseplayer->model()->boneTransforms()->get(48)->position())
 							&& get_fixedTime() > nextshot
@@ -1974,9 +1974,20 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						}
 
 						if (vars->misc.silent_farm) {
-							auto entity = baseplayer->resolve_closest_entity(3, false);
+							auto entity = baseplayer->resolve_closest_entity(4, false);
 							if (entity.first.found && entity.first.ent) {
 								if (*(int*)(wep_class_name + 4) == 'eleM' || *(int*)(wep_class_name + 4) == 'mmah') {
+									attack(entity.first, entity.second);
+								}
+							}
+						}
+
+						if (vars->misc.autofarmbarrel) {
+							auto entity = baseplayer->resolve_closest_entity(2, false);
+							if (entity.first.ent) {
+								if (*(int*)(wep_class_name + 4) == 'eleM' || *(int*)(wep_class_name + 4) == 'mmah'
+									&& entity.first.distance < 1.f) {
+									//entity.first.pos = entity.first.ent->ClosestPoint(baseplayer->eyes()->position());
 									attack(entity.first, entity.second);
 								}
 							}
@@ -2061,14 +2072,19 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 				//baseplayer->console_echo(string::wformat(_(L"echocount %d after item"), echocount++));
 				if (vars->misc.instant_revive) {
-					if (target.ent)
+					auto Target = baseplayer->resolve_closest_player(5);
+					if (Target.ent)
 					{
-						if (map_contains_key(vars->gui_player_map, ((BasePlayer*)target.ent)->userID()))
+						if (vars->misc.revivefriendsonly ? ((BasePlayer*)Target.ent)->isFriend() : true)
 						{
-							if (vars->gui_player_map[((BasePlayer*)target.ent)->userID()]->is_friend)
+							//Line(baseplayer->eyes()->position(), Target.pos, { 1, 1, 1, 1 }, 0.01f, false, false);
+							if (!Target.is_heli 
+								&& Target.distance <= 5 
+								&& HasPlayerFlag((BasePlayer*)Target.ent, rust::classes::PlayerFlags::Wounded)
+								&& get_fixedTime() > last_revive_rpc + .5f)
 							{
-								if (!target.is_heli && target.distance <= 5 && HasPlayerFlag((BasePlayer*)target.ent, rust::classes::PlayerFlags::Wounded) && unity::LineOfSightRadius(target.pos, baseplayer->eyes()->position(), (uintptr_t)esp::local_player))
-									target.ent->ServerRPC(_(L"RPC_Assist"));
+								Target.ent->ServerRPC(_(L"RPC_Assist"));
+								last_revive_rpc = get_fixedTime();
 							}
 						}
 					}
@@ -2291,7 +2307,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		}
 		__except (true) {
 			//baseplayer->console_echo(string::wformat(_(L"echocount %d __except return"), echocount++));
-			return orig::baseplayer_client_input(baseplayer, state);
+			return;
 		}
 	}
 }

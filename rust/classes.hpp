@@ -213,6 +213,7 @@ class BaseMonoBehaviour;
 class MonoBehaviour;
 class GameObject;
 class Transform;
+class BaseEntity;
 class Item;
 class AttackEntity;
 class BaseMelee;
@@ -250,6 +251,8 @@ typedef struct Str
 //static auto ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
 
 //static auto setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
+
+static auto closestpoint = reinterpret_cast<Vector3(*)(BaseEntity*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ClosestPoint"), 1, _(""), _(""))));
 
 static auto thrownwpn_inheritedvel = reinterpret_cast<Vector3(*)(AttackEntity*, BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ThrownWeapon"), _("GetInheritedVelocity"), 2, _(""), _(""))));
 
@@ -330,8 +333,6 @@ static auto get_fixedTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintp
 static auto get_IsNpc = reinterpret_cast<bool(*)(uintptr_t player_model)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerModel"), _("get_IsNpc"), -1, _(""), _(""))));
 
 static auto get_time = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_time"), 0, _(""), _("UnityEngine"))));
-
-static auto ClosestPoint = reinterpret_cast<Vector3(*)(BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ClosestPoint"), 1, _("position"), _(""), 1)));
 
 static auto _InverseTransformPoint = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
 
@@ -463,6 +464,7 @@ float current_time;
 void init_bp() {
 	//setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
 	//ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
+	closestpoint = reinterpret_cast<Vector3(*)(BaseEntity*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ClosestPoint"), 1, _(""), _(""))));
 	thrownwpn_inheritedvel = reinterpret_cast<Vector3(*)(AttackEntity*, BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ThrownWeapon"), _("GetInheritedVelocity"), 2, _(""), _(""))));
 	forceposto = reinterpret_cast<void(*)(BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ForcePositionTo"), 1, _(""), _(""))));
 	getignore = reinterpret_cast<bool(*)(TerrainCollision*, Vector3, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainCollision"), _("GetIgnore"), 2, _(""), _(""))));
@@ -634,8 +636,6 @@ void init_bp() {
 	get_time = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_time"), 0, _(""), _("UnityEngine"))));
 
 	GetProjectileVelocityScale = reinterpret_cast<float(*)(BaseProjectile*, bool max)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("GetProjectileVelocityScale"), 1, _("getMax"), _(""), 1)));
-
-	ClosestPoint = reinterpret_cast<Vector3(*)(BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ClosestPoint"), 1, _("position"), _(""), 1)));
 
 	StartAttackCooldown = reinterpret_cast<void(*)(AttackEntity*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AttackEntity"), _("StartAttackCooldown"), 1, _(""), _(""))));
 
@@ -952,6 +952,10 @@ public:
 		return *reinterpret_cast<Model**>((uintptr_t)this + 0x130);
 	}
 
+	Vector3 ClosestPoint(Vector3 point) {
+		if (!this) return Vector3::Zero();
+		return closestpoint(this, point);
+	}
 	Vector3 GetWorldVelocity() {
 		__try {
 			if (!this) return Vector3(0, 0, 0);
@@ -1951,6 +1955,13 @@ public:
 		forceposto(this, worldPos);
 	}
 
+	bool isFriend() {
+		if (!this) return false;
+		if (map_contains_key(vars->gui_player_map, this->userID()))
+			return vars->gui_player_map[this->userID()]->is_friend;
+		return false;
+	}
+
 	bool isCached() {
 		if (!this) return false;
 		return (map_contains_key(cachedBones, this->userID()));
@@ -2334,7 +2345,17 @@ public:
 					continue;
 			}
 			else {
-				if (name != 'eerT' && name != 'HerO')
+
+				uintptr_t object_name_ptr = mem::read<uintptr_t>(object + 0x60);
+				if (!object_name_ptr)
+					continue;
+				auto obj_name = *reinterpret_cast<rust_str*>(object_name_ptr);
+				auto n = obj_name.zpad;
+
+				if (name != 'eerT' && 
+					name != 'HerO' && 
+					std::string(n).find(_("barrel")) == std::string::npos &&
+					strcmp(entity_class_name, _("TreeMarker")))
 					continue;
 
 				if (name == 'HerO')
@@ -2376,12 +2397,13 @@ public:
 
 				aim_target new_target;
 
-				auto local = ClosestPoint(this, world_position);
+				auto local = this->ClosestPoint(world_position);
 				if (local.get_3d_dist(world_position) >= max_distance)
 					continue;
 
-				new_target.pos = world_position;
+				new_target.pos = this->ClosestPoint(world_position);
 				new_target.ent = (BaseCombatEntity*)ent;
+				new_target.distance = distance;
 				new_target.visible = /*unity::is_visible(bone_pos, world_position)*/true;
 				new_target.found = true;
 
@@ -2391,6 +2413,98 @@ public:
 		}
 
 		return { closest_entity , is_code_lock };
+	}
+
+	aim_target resolve_closest_player(float max_distance) {
+		aim_target closest_entity;
+		auto client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
+		if (!client_entities)
+			return closest_entity;
+
+		rust::classes::list* entity_list = (rust::classes::list*)client_entities;
+
+		auto list_value = entity_list->get_value<uintptr_t>();
+		if (!list_value)
+			return closest_entity;
+
+		auto size = entity_list->get_size();
+		if (!size)
+			return closest_entity;
+
+		auto buffer = entity_list->get_buffer<uintptr_t>();
+		if (!buffer)
+			return closest_entity;
+
+		auto closest_entity_distance = 9999;
+
+		for (int i = 0; i <= size; i++) {
+			auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
+			if (!current_object)
+				continue;
+
+			auto base_object = *reinterpret_cast<uintptr_t*>(current_object + 0x10);
+			if (!base_object)
+				continue;
+
+			auto object = *reinterpret_cast<uintptr_t*>(base_object + 0x30);
+			if (!object)
+				continue;
+
+			auto ent = *reinterpret_cast<uintptr_t*>(base_object + 0x28);
+			auto ent_class = *reinterpret_cast<uintptr_t*>(ent);
+			auto entity_class_name = (char*)*reinterpret_cast<uintptr_t*>(ent_class + 0x10);
+
+			auto name = *(int*)(entity_class_name);
+
+			if (strcmp(entity_class_name, _("BasePlayer")))
+				continue;
+			if (((BasePlayer*)ent)->is_local_player())
+				continue;
+
+			auto game_object = *reinterpret_cast<uintptr_t*>(object + 0x30);
+
+			auto transform = *reinterpret_cast<uintptr_t*>(game_object + 0x8);
+
+			auto visual_state = *reinterpret_cast<uintptr_t*>(transform + 0x38);
+
+			auto world_position = *reinterpret_cast<Vector3*>(visual_state + 0x90);
+
+			auto bone_pos = this->get_bone_transform(48)->position();
+
+			auto distance = bone_pos.get_3d_dist(world_position);
+			if (distance < closest_entity_distance && distance < max_distance) {
+				auto object_class = *reinterpret_cast<uintptr_t*>(object + 0x30);
+				if (!object_class)
+					continue;
+
+				auto entity = *reinterpret_cast<uintptr_t*>(object_class + 0x18);
+				if (!entity)
+					continue;
+
+				auto baseentity = *reinterpret_cast<uintptr_t*>(entity + 0x28);
+				if (!baseentity)
+					continue;
+
+				auto player = reinterpret_cast<BasePlayer*>(baseentity);
+
+				aim_target new_target;
+
+				auto local = this->ClosestPoint(world_position);
+				if (local.get_3d_dist(world_position) >= max_distance)
+					continue;
+
+				new_target.pos = this->ClosestPoint(world_position);
+				new_target.ent = (BaseCombatEntity*)ent;
+				new_target.distance = distance;
+				new_target.visible = /*unity::is_visible(bone_pos, world_position)*/true;
+				new_target.found = true;
+
+				closest_entity_distance = distance;
+				closest_entity = new_target;
+			}
+		}
+
+		return { closest_entity };
 	}
 
 	bool is_sleeping()

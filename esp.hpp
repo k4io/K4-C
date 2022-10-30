@@ -143,15 +143,17 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 	
 	if (get_bounds(bounds, 4)) {
 		//is_visible = unity::is_visible(camera_position, bones[48].world_position, (uintptr_t)esp::local_player);
-		//__try {
-		//	for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
-		//		if (is_visible) break;
-		//		is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
-		//	}
-		//}
-		//__except (true) { is_visible = false; }
 		//is_visible = ply->visible();
 		is_visible = true;
+		if (vars->combat.vischeck) {
+			__try {
+				for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
+					if (is_visible) break;
+					is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
+				}
+			}
+			__except (true) {  }
+		}
 
 		float box_width = bounds.right - bounds.left;
 		float box_height = bounds.bottom - bounds.top;

@@ -1464,12 +1464,13 @@ namespace misc
 		}
 
 		void auto_farm(PlayerWalkMovement* pwm,
+			std::string classname,
 			std::string name) {
 			auto lp = esp::local_player;
 			if (!lp || !pwm) return;
 
 			if(!misc::node.ent)
-				misc::node.ent = (BaseEntity*)lp->find_closest((Networkable*)lp, 200.f, _("OreResourceEntity"), name.c_str());
+				misc::node.ent = (BaseEntity*)lp->find_closest((Networkable*)lp, 200.f, classname.c_str(), name.c_str());
 
 			Vector3 vel = pwm->get_TargetMovement();
 			vel = Vector3(vel.x / vel.length() * 5.5f, vel.y, vel.z / vel.length() * 5.5f);
@@ -1494,7 +1495,7 @@ namespace misc
 			}
 			else
 			{
-				misc::node.ent = (BaseEntity*)lp->find_closest((Networkable*)lp, 200.f, _("OreResourceEntity"), name.c_str());
+				misc::node.ent = (BaseEntity*)lp->find_closest((Networkable*)lp, 200.f, classname.c_str(), name.c_str());
 				time_at_node = 0.f;
 				misc::node.path.clear();
 				misc::node.pos = Vector3(0, 0, 0);

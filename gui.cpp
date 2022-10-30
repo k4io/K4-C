@@ -160,9 +160,51 @@ namespace Gui
 					im::Text(_("Options for %s"), std::string(selected_player->name.begin(), selected_player->name.end()).c_str());
 					im::Separator();
 					im::Text(_("SteamId3: %d"), selected_player->userid);
+					auto before = selected_player->is_friend;
 					im::Checkbox(_("Friend"), &selected_player->is_friend);
 					if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 						im::SetTooltip(_("Adds player to cheat friends list"));
+					}
+					if (before != selected_player->is_friend) {
+						//save to file
+						auto s = LI_FIND(getenv)(_("APPDATA"));
+						auto p = s + std::string(_("\\matrix\\friends.lst"));
+
+						if (!std::filesystem::exists(p)) {
+							CloseHandle(CreateFileA(p.c_str(), GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0));
+						}
+
+						bool exists = false;
+
+						std::ifstream cFile(p, std::ios::in);
+						std::string line;
+						while (getline(cFile, line))
+							if (line.find(std::to_string(selected_player->userid)) != std::string::npos)
+								exists = true;
+						cFile.close();
+						if (exists) {
+							//remove from list if changed
+							if (!selected_player->is_friend) {
+								std::ifstream fr;
+								fr.open(p.c_str());
+								std::ofstream tmp;
+								tmp.open(_("temporaryfile"));
+								std::string tmpline;
+								while (getline(fr, tmpline))
+									if (tmpline.find(std::to_string(selected_player->userid)) == std::string::npos)
+										tmp << tmpline << std::endl;
+								fr.close();
+								tmp.close();
+								remove(p.c_str());
+								rename(_("temporaryfile"), p.c_str());
+							}
+						}
+						//add to list if changed
+						else if (selected_player->is_friend) {
+							std::ofstream fr(p.c_str(), std::ios_base::app | std::ios_base::out);
+							fr << std::to_string(selected_player->userid) << std::endl;
+							fr.close();
+						}
 					}
 					//im::Checkbox(_("Target priority"), &selected_player->priority_target);
 					im::Checkbox(_("Follow player"), &selected_player->follow);
@@ -501,6 +543,33 @@ namespace Gui
 			else if (name == _("silentwalk")) vars->misc.silentwalk = std::stoi(value);
 			else if (name == _("autofarm")) vars->misc.autofarm = std::stoi(value);
 			else if (name == _("interactive_debug")) vars->misc.interactive_debug = std::stoi(value);
+
+			else if (name == _("revivefriendsonly")) vars->misc.revivefriendsonly = std::stoi(value);
+			else if (name == _("friendflag")) vars->visual.friendflag = std::stoi(value);
+			else if (name == _("grenadeprediction")) vars->visual.grenadeprediction = std::stoi(value);
+			else if (name == _("antideathbarrier")) vars->misc.antideathbarrier = std::stoi(value);
+			else if (name == _("targetfriends")) vars->combat.targetfriends = std::stoi(value);
+			else if (name == _("rayleigh")) vars->visual.rayleigh = std::stof(value);
+			else if (name == _("movementpred")) vars->combat.movementpred = std::stof(value);
+			else if (name == _("tpmultiplier")) vars->combat.tpmultiplier = std::stof(value);
+			else if (name == _("firerate")) vars->combat.firerate = std::stof(value);
+
+			if (name == _("keypsilent")) vars->keybinds.psilent = std::stoi(value);
+			else if (name == _("keyaimbot")) vars->keybinds.aimbot = std::stoi(value);
+			else if (name == _("keyflywall")) vars->keybinds.flywall = std::stoi(value);
+			else if (name == _("keysilentmelee")) vars->keybinds.silentmelee = std::stoi(value);
+			else if (name == _("keyautoshoot")) vars->keybinds.autoshoot = std::stoi(value);
+			else if (name == _("keymanipulator")) vars->keybinds.manipulator = std::stoi(value);
+			else if (name == _("keydesync_ok")) vars->keybinds.desync_ok = std::stoi(value);
+			else if (name == _("keytimescale")) vars->keybinds.timescale = std::stoi(value);
+			else if (name == _("keysilentwalk")) vars->keybinds.silentwalk = std::stoi(value);
+			else if (name == _("keysuicide")) vars->keybinds.suicide = std::stoi(value);
+			else if (name == _("keyneck")) vars->keybinds.neck = std::stoi(value);
+			else if (name == _("keyzoom")) vars->keybinds.zoom = std::stoi(value);
+			else if (name == _("keybullettp")) vars->keybinds.bullettp = std::stoi(value);
+			else if (name == _("keyfakelag")) vars->keybinds.fakelag = std::stoi(value);
+			else if (name == _("keytp")) vars->keybinds.tp = std::stoi(value);
+			else if (name == _("keylocktarget")) vars->keybinds.locktarget = std::stoi(value);
 			//else if (name == _("gesture_spam")) vars->misc.gesture_spam = std::stoi(value);
 		}
 	}
@@ -990,6 +1059,85 @@ namespace Gui
 		itoa(vars->misc.gesture_spam, buffer, 4);
 		str = (std::string(_("gesture_spam=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
+
+		itoa(vars->misc.revivefriendsonly, buffer, 4);
+		str = (std::string(_("revivefriendsonly=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->visual.friendflag, buffer, 4);
+		str = (std::string(_("friendflag=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->visual.grenadeprediction, buffer, 4);
+		str = (std::string(_("grenadeprediction=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->misc.antideathbarrier, buffer, 4);
+		str = (std::string(_("antideathbarrier=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->combat.targetfriends, buffer, 4);
+		str = (std::string(_("targetfriends=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+
+		sprintf(buffer, _("%.2f"), vars->visual.rayleigh);
+		str = (std::string(_("rayleigh=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		sprintf(buffer, _("%.2f"), vars->combat.movementpred);
+		str = (std::string(_("movementpred=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		sprintf(buffer, _("%.2f"), vars->combat.tpmultiplier);
+		str = (std::string(_("tpmultiplier=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		sprintf(buffer, _("%.2f"), vars->combat.firerate);
+		str = (std::string(_("firerate=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+
+		itoa(vars->keybinds.psilent, buffer, 4);
+		str = (std::string(_("keypsilent")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->keybinds.aimbot, buffer, 4);
+		str = (std::string(_("keyaimbot")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->keybinds.flywall, buffer, 4);
+		str = (std::string(_("keyflywall")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->keybinds.silentmelee, buffer, 4);
+		str = (std::string(_("keysilentmelee")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->keybinds.autoshoot, buffer, 4);
+		str = (std::string(_("keyautoshoot")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->keybinds.manipulator, buffer, 4);
+		str = (std::string(_("keymanipulator")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->keybinds.desync_ok, buffer, 4);
+		str = (std::string(_("keydesync_ok")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->keybinds.timescale, buffer, 4);
+		str = (std::string(_("keytimescale")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->keybinds.silentwalk, buffer, 4);
+		str = (std::string(_("keysilentwalk")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->keybinds.suicide, buffer, 4);
+		str = (std::string(_("keysuicide")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->keybinds.neck, buffer, 4);
+		str = (std::string(_("keyneck")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->keybinds.zoom, buffer, 4);
+		str = (std::string(_("keyzoom")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->keybinds.bullettp, buffer, 4);
+		str = (std::string(_("keybullettp")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->keybinds.fakelag, buffer, 4);
+		str = (std::string(_("keyfakelag")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->keybinds.tp, buffer, 4);
+		str = (std::string(_("keytp")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->keybinds.locktarget, buffer, 4);
+		str = (std::string(_("keylocktarget")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+
 		f.close();
 	}
 
@@ -1000,6 +1148,7 @@ namespace Gui
 			im::Separator();
 
 			im::Checkbox(_("PSilent"), &vars->combat.psilent);
+			im::Checkbox(_("Vis check"), &vars->combat.vischeck);
 			im::SliderFloat(_("Movement pred"), &vars->combat.movementpred, 0.1f, 1.0f, _("%.2f"), 1.f);
 			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Percent of average velocity to add to position when predicting."));
@@ -1286,13 +1435,17 @@ namespace Gui
 			im::Text(_("Automation"));
 			im::Separator();
 			im::Combo(_("Walk to"), &vars->misc.walkto,
-				_("None\0Map Marker\0Stone ore\0Sulfur ore\0Metal ore\0Player"));
+				_("None\0Map Marker\0Stone ore\0Sulfur ore\0Metal ore\0Player\0Barrels"));
 			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Pathfinds to map marker, ores, players from player list in misc"));
 			}
 			im::Checkbox(_("Auto-farm"), &vars->misc.silent_farm);
 			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Essentially silent farm, works well with walk to ores"));
+			}
+			im::Checkbox(_("Auto-farm barrels"), &vars->misc.autofarmbarrel);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Auto-farm but for barrels"));
 			}
 			im::Checkbox(_("Auto-attack"), &vars->misc.autoattack);
 			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
@@ -1326,6 +1479,7 @@ namespace Gui
 			im::Checkbox(_("Interactive debug"), &vars->misc.interactive_debug);
 			im::Checkbox(_("Instant med"), &vars->misc.instant_med);
 			im::Checkbox(_("Instant revive"), &vars->misc.instant_revive);
+			im::Checkbox(_("Revive friends only"), &vars->misc.revivefriendsonly);
 			//im::Checkbox(_("Third-person"), &vars->misc.thirdperson);
 			//im::Checkbox(_("Debug camera"), &vars->misc.debugcam);
 			//im::Checkbox(_("Culling"), &vars->misc.culling);
@@ -1406,7 +1560,7 @@ namespace Gui
 				im::Text(_("Player"));
 				im::Separator();
 				im::ColorEdit4(_("Boxes"), vars->colors.players.boxes.visible, ImGuiColorEditFlags_NoInputs);
-				//im::ColorEdit4(_("Invisible"), vars->colors.players.boxes.invisible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Invisible"), vars->colors.players.boxes.invisible, ImGuiColorEditFlags_NoInputs);
 				im::ColorEdit4(_("Chams visible"), vars->colors.players.chams.visible, ImGuiColorEditFlags_NoInputs);
 				im::ColorEdit4(_("Chams invisible"), vars->colors.players.chams.invisible, ImGuiColorEditFlags_NoInputs);
 				im::EndChild();
@@ -1415,11 +1569,11 @@ namespace Gui
 				im::Text(_("Details"));
 				im::Separator();
 				im::ColorEdit4(_("Name"), vars->colors.players.details.name.visible, ImGuiColorEditFlags_NoInputs);
-				//im::ColorEdit4(_("Name invisible"), vars->colors.players.details.name.invisible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Name invisible"), vars->colors.players.details.name.invisible, ImGuiColorEditFlags_NoInputs);
 				im::ColorEdit4(_("Distance"),	vars->colors.players.details.distance.visible, ImGuiColorEditFlags_NoInputs);
-				//im::ColorEdit4(_("Distance invisible"), vars->colors.players.details.distance.invisible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Distance invisible"), vars->colors.players.details.distance.invisible, ImGuiColorEditFlags_NoInputs);
 				im::ColorEdit4(_("Flags"), vars->colors.players.details.flags.visible, ImGuiColorEditFlags_NoInputs);
-				//im::ColorEdit4(_("Flags invisible"), vars->colors.players.details.flags.invisible, ImGuiColorEditFlags_NoInputs);
+				im::ColorEdit4(_("Flags invisible"), vars->colors.players.details.flags.invisible, ImGuiColorEditFlags_NoInputs);
 				//im::ColorEdit4(_("Skeleton"),	vars->colors.players.details.skeleton.visible, ImGuiColorEditFlags_NoInputs);
 				//im::ColorEdit4(_("Skeleton invisible"), vars->colors.players.details.skeleton.invisible, ImGuiColorEditFlags_NoInputs);
 				//im::ColorEdit4(_("Background box"), vars->colors.players.details.boxbackground, ImGuiColorEditFlags_NoInputs);
