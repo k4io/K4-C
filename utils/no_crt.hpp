@@ -5,12 +5,11 @@ int _purecall(void);
 
 namespace std
 {
-
-	[[noreturn]] inline void __cdecl _Xbad_function_call() { __ud2(); }
-	[[noreturn]] inline void __cdecl _Xbad_alloc() { __ud2(); }
-	[[noreturn]] inline void __cdecl _Xlength_error(char const*) { __ud2(); }
-	[[noreturn]] inline void __cdecl _Xout_of_range(char const*) { __ud2(); }
-	[[noreturn]] inline void __cdecl  __security_check_cookie() { __ud2(); }
+	//[[noreturn]] inline void __cdecl _Xbad_function_call() { __ud2(); }
+	//[[noreturn]] inline void __cdecl _Xbad_alloc() { __ud2(); }
+	//[[noreturn]] inline void __cdecl _Xlength_error(char const*) { __ud2(); }
+	//[[noreturn]] inline void __cdecl _Xout_of_range(char const*) { __ud2(); }
+	//[[noreturn]] inline void __cdecl  __security_check_cookie() { __ud2(); }
 } // namespace std
 
 //#ifndef _DEBUG

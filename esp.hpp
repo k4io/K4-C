@@ -143,10 +143,13 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 	
 	if (get_bounds(bounds, 4)) {
 		//is_visible = unity::is_visible(camera_position, bones[48].world_position, (uintptr_t)esp::local_player);
-		//for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
-		//	if (is_visible) break;
-		//	is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
+		//__try {
+		//	for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
+		//		if (is_visible) break;
+		//		is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
+		//	}
 		//}
+		//__except (true) { is_visible = false; }
 		//is_visible = ply->visible();
 		is_visible = true;
 
@@ -758,6 +761,7 @@ void DrawPlayerHotbar(aim_target target) {
 
 void entchams(BaseEntity* ent, Shader* s = 0, Material* m = 0) {
 	if (!ent) return;
+	if (!m && !s) return;
 	__try {
 		auto renderers = ((Networkable*)ent)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
 		if (!renderers) return;
@@ -766,10 +770,16 @@ void entchams(BaseEntity* ent, Shader* s = 0, Material* m = 0) {
 		{
 			auto renderer = (Renderer*)renderers->get(i);
 			if (!renderer) continue;
-			if (m) renderer->SetMaterial(m);
-			else {
+			if (m) {
+				auto cm = renderer->GetMaterial();
+				auto shader1 = cm->GetShader();
+				auto shader2 = m->GetShader();
+				SetInt((uintptr_t)m, _(L"_ZTest"), 8);
+				if(shader1 != shader2)
+					renderer->SetMaterial(m);
+			} else {
 				auto mat = renderer->GetMaterial();
-				//SetInt((uintptr_t)mat, _(L"_ZTest"), 8);
+				SetInt((uintptr_t)mat, _(L"_ZTest"), 8);
 				if (mat) {
 					auto shader = mat->GetShader();
 					if (shader != s)
@@ -901,6 +911,8 @@ void iterate_entities() {
 
 				gplayer* p = new gplayer(entity->get_player_name(), entity->userID(), 0, 0, 0, 0);
 				vars->gui_player_map.insert(std::make_pair(entity->userID(), p));
+				vars->chams_player_map.insert(std::make_pair(entity->userID(), 0));
+				vars->handchams_player_map.insert(std::make_pair(entity->userID(), 0));
 			}
 
 			bool is_friend = false, follow = false, block = false;
@@ -933,6 +945,7 @@ void iterate_entities() {
 						if (dist < r)
 						{
 							auto ws = string::wformat(_(L"%s is looking at you!"), ((BasePlayer*)ent)->get_player_name());
+							vars->targetted = true;
 							//render.StringCenter({ vars->ScreenX / 2 + 1, (vars->ScreenY / 2) - 30 }, ws, { 0, 0, 0, 1 });
 							//render.StringCenter({ vars->ScreenX / 2 - 1, (vars->ScreenY / 2) - 30 }, ws, { 0, 0, 0, 1 });
 							//render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 30 + 1 }, ws, { 0, 0, 0, 1 });
@@ -955,6 +968,44 @@ void iterate_entities() {
 								float travel = 0.f;
 								float partialtime = 0.f;
 								//float drag = held->get_item_mod_projectile()
+							}
+						}
+					}
+
+					if (vars->visual.grenadeprediction) {
+						auto item = entity->GetActiveItem();
+						if (item) {
+							auto h = item->GetHeldEntity<ThrownWeapon>();
+							if (h) {
+								GrenadePath* temp = new GrenadePath(entity, h);
+								if (!strcmp(h->get_class_name(), _("GrenadeWeapon"))
+									|| !strcmp(h->get_class_name(), _("MolotovCocktail"))
+									|| !strcmp(h->get_class_name(), _("ThrownWeapon"))
+									|| !strcmp(h->get_class_name(), _("SmokeGrenade"))
+									|| !strcmp(h->get_class_name(), _("TimedExplosive"))) {
+									if (!map_contains_key(grenade_map, entity->userID()))
+										grenade_map.insert(std::make_pair(entity->userID(), temp));
+									else
+										grenade_map[entity->userID()] = temp;
+								}
+								else {
+									if (map_contains_key(grenade_map, entity->userID()))
+										grenade_map[entity->userID()] = new GrenadePath();
+								}
+
+
+								if (map_contains_key(grenade_map, entity->userID())) {
+									auto current = grenade_map[entity->userID()];
+									if (current->ply
+										&& current->weapon
+										&& !current->endposition.is_empty()) {
+										if (current->endposition.distance(esp::local_player->transform()->position()) < 4.f) {
+											//std::string on();
+											auto ws = string::wformat(_(L"Grenade from %s"), entity->get_player_name());
+											render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 50 }, ws, { 227 / 255.f, 32 / 255.f, 61 / 255.f, 1 });
+										}
+									}
+								}
 							}
 						}
 					}
@@ -1076,35 +1127,6 @@ void iterate_entities() {
 				if (vars->visual.playeresp && esp::local_player)
 				{
 					DrawPlayer(entity, npc);
-
-					if (vars->combat.silent_melee || unity::GetKey(vars->keybinds.silentmelee)
-						&& esp::best_target.distance < vars->combat.melee_range)
-					{
-						auto hit_player = [&]() {
-							auto Item = esp::local_player->GetActiveItem();
-							if (Item) {
-								auto melee = Item->GetHeldEntity<BaseMelee>();
-								if (melee) {
-									auto class_name = melee->get_class_name();
-									if (*(int*)(class_name + 4) == 'eleM' || *(int*)(class_name + 4) == 'mmah') {
-										auto world_position = ent->model()->boneTransforms()->get(48)->position();
-										auto local = ClosestPoint(esp::local_player, world_position);
-										auto camera = esp::local_player->model()->boneTransforms()->get(48)->position();
-
-										if (camera.get_3d_dist(world_position) >= 4.2f)
-											return;
-
-										aim_target target = esp::best_target;
-
-										target.visible = esp::local_player->is_visible(camera, local);
-
-										attack_melee(target, (BaseProjectile*)melee, esp::local_player, true);
-									}
-								}
-							}
-						};
-						hit_player();
-					}
 					//offscreen indicator?
 					//silent melee?
 				}
@@ -1136,22 +1158,26 @@ void iterate_entities() {
 			//buildingblock stuff
 			if (vars->visual.block_chams > 0 || vars->misc.auto_upgrade) {
 				if (!strcmp(entity_class_name, _("BuildingBlock"))) {
-					if (unity::bundle && unity::bundle2)
-					{
-						Shader* shader = 0;
-						Material* mat = 0;
-						switch (vars->visual.block_chams)
+					if (vars->visual.block_chams > 0) {
+						if (unity::bundle && unity::bundle2)
 						{
-						case 1:
-							shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
-							break;
-						case 2:
-							mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/2dmat.mat"), unity::GetType(_("UnityEngine"), _("Material")));
-							break;
+							Shader* shader = 0;
+							Material* mat = 0;
+							switch (vars->visual.block_chams)
+							{
+							case 1:
+								shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
+								break;
+							case 2:
+								mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/2dmat.mat"), unity::GetType(_("UnityEngine"), _("Material")));
+								break;
+							case 3:
+								mat = (Material*)unity::LoadAsset(unity::galaxy_bundle, string::wformat(vars->visual.galaxymatblock < 10 ? _(L"GalaxyMaterial_0%d") : _(L"GalaxyMaterial_%d"), vars->visual.galaxymatblock), unity::GetType(_("UnityEngine"), _("Material")));
+								break;
+							}
+							entchams(ent, shader, mat);
 						}
-						entchams(ent, shader, mat);
 					}
-
 					if (vars->misc.auto_upgrade) {
 						auto block = (BuildingBlock*)ent;
 						rust::classes::BuildingGrade upgrade_tier = (rust::classes::BuildingGrade)(vars->misc.upgrade_tier + 1);
@@ -1429,6 +1455,9 @@ void iterate_entities() {
 							break;
 						case 2:
 							mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/2dmat.mat"), unity::GetType(_("UnityEngine"), _("Material")));
+							break;
+						case 3:
+							mat = (Material*)unity::LoadAsset(unity::galaxy_bundle, string::wformat(vars->visual.galaxymatrock < 10 ? _(L"GalaxyMaterial_0%d") : _(L"GalaxyMaterial_%d"), vars->visual.galaxymatrock), unity::GetType(_("UnityEngine"), _("Material")));
 							break;
 						}
 

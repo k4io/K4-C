@@ -93,9 +93,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="assets\assets.hpp">
-      <Filter>assets</Filter>
-    </ClInclude>
     <ClInclude Include="gui\OnGUI.hpp">
       <Filter>gui</Filter>
     </ClInclude>

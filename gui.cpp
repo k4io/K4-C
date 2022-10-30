@@ -161,9 +161,18 @@ namespace Gui
 					im::Separator();
 					im::Text(_("SteamId3: %d"), selected_player->userid);
 					im::Checkbox(_("Friend"), &selected_player->is_friend);
+					if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+						im::SetTooltip(_("Adds player to cheat friends list"));
+					}
 					//im::Checkbox(_("Target priority"), &selected_player->priority_target);
 					im::Checkbox(_("Follow player"), &selected_player->follow);
+					if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+						im::SetTooltip(_("When walk to has player selected the last player followed in player list is chosen, then target"));
+					}
 					im::Checkbox(_("Block player"), &selected_player->block);
+					if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+						im::SetTooltip(_("Walks in front of player"));
+					}
 				}
 				else {
 					im::Text(_("Choose player"));
@@ -992,6 +1001,9 @@ namespace Gui
 
 			im::Checkbox(_("PSilent"), &vars->combat.psilent);
 			im::SliderFloat(_("Movement pred"), &vars->combat.movementpred, 0.1f, 1.0f, _("%.2f"), 1.f);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Percent of average velocity to add to position when predicting."));
+			}
 			im::Combo(_("Aim bone"), &vars->combat.aimbone, _("Head\0Spine 4\0Pelvis\0Right arm\0Left arm\0Right leg\0Left leg"));
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
 			im::Hotkey(_("P"), &vars->keybinds.psilent, ImVec2(50, 15));
@@ -1007,11 +1019,20 @@ namespace Gui
 
 			im::Checkbox(_("No spread (quick ban)"), &vars->combat.nospread);
 			im::Checkbox(_("Remove shoot restrictions"), &vars->combat.always_shoot);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Allows things like shooting while jumping"));
+			}
 
 			im::Checkbox(_("Lock target"), &vars->combat.locktarget);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Keep target within fov locked even if other targets are closer to crosshair"));
+			}
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
 			im::Hotkey(_("L"), &vars->keybinds.locktarget, ImVec2(50, 15));
 			im::Checkbox(_("Target friends"), &vars->combat.targetfriends);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Add friends with the player list in misc"));
+			}
 			im::EndChild();
 		}
 		im::SameLine();;
@@ -1024,14 +1045,24 @@ namespace Gui
 				_("Head\0Body\0Upperbody\0Penis\0Hands\0Legs\0Feet"));
 			im::Checkbox(_("Randomize hitboxes"), &vars->combat.randomize);
 			//im::Checkbox(_("Hitscan"), &vars->combat.HitScan);
-			im::Checkbox(_("Manipulator"), &vars->combat.manipulator2);
+			im::Checkbox(_("Manipulator"), &vars->combat.manipulator);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Abuses desync (0s-1s) and eye forgiveness to spawn bullets up to 10m away"));
+			}
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(50, 15));
 			//im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
 			//im::Checkbox(_("STW (Ladder)"), &vars->combat.throughladder);
 			//im::Checkbox(_("Pierce"), &vars->combat.pierce);
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Shoots up to 9 bullets at once"));
+			}
 			im::Checkbox(_("Bullet tp"), &vars->combat.bullet_tp);
+			im::SliderFloat(_("Tp multiplier"), &vars->combat.tpmultiplier, .1f, 1.f, _("%.2f"), 1.f);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Multiplier for distance to teleport the bullet within desync time"));
+			}
 			//im::Checkbox(_("Lower velocities"), &vars->combat.lower_vel);
 			im::Checkbox(_("Fast bullets"), &vars->combat.fast_bullet);
 			im::Checkbox(_("Instant eoka"), &vars->combat.instaeoka);
@@ -1040,11 +1071,18 @@ namespace Gui
 			im::Checkbox(_("Thick bullets"), &vars->combat.thick_bullet);
 			im::SliderFloat(_("Thickness"), &vars->combat.thickness, 0.1f, 2.2f, _("%.2f"), 1.f);
 			im::Checkbox(_("Autoshoot"), &vars->combat.autoshoot);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Will automatically shoot players, works with manipulator"));
+			}
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("A"), &vars->keybinds.autoshoot, ImVec2(50, 14));
 			im::Checkbox(_("Rapid-fire"), &vars->combat.rapidfire);
+			im::SliderFloat(_("Fire rate"), &vars->combat.firerate, .01f, .2f, _("%.2f"), 1.f);
 			im::Checkbox(_("Automatic"), &vars->combat.automatic);
 			im::Checkbox(_("Auto-reload"), &vars->combat.always_reload);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Will silently reload your weapon as soon as you stop firing"));
+			}
 			im::EndChild();
 		}
 		im::SetCursorPosY(im::GetCursorPosY() - 126);
@@ -1072,7 +1110,11 @@ namespace Gui
 			im::Combo(_("Snapline"), &vars->visual.snapline,
 				_("None\0Top\0Center\0Bottom"));
 			im::Checkbox(_("Show target fov"), &vars->visual.show_fov);
+			im::Checkbox(_("Grenade prediction"), &vars->visual.grenadeprediction);
 			im::Checkbox(_("Targetted indicator"), &vars->visual.targetted);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Displays indicator above crosshair to show if you are being looked at"));
+			}
 			im::Checkbox(_("Hitpoints"), &vars->visual.hitpoint);
 			//ImGui::Checkbox(_("Target snapline"), &vars->visual.offscreen_indicator);
 			im::EndChild();
@@ -1133,8 +1175,15 @@ namespace Gui
 			im::SliderFloat(_("Stars"), &vars->visual.staramount, 1.f, 1000.f, _("%.0f"));
 			im::SliderFloat(_("Brightness"), &vars->visual.day, 0.0f, 10.0f, _("%.0f"));
 			im::SliderFloat(_("Nightness"), &vars->visual.night, 0.0f, 10.0f, _("%.0f"));
+			im::SliderFloat(_("Rayleigh"), &vars->visual.rayleigh, 0.0f, 30.0f, _("%.1f"));
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Changes color of skybox"));
+			}
 			//im::Checkbox(_("Follow projectiles"), &vars->visual.followprojectiles);
 			im::Checkbox(_("Manipulator angles"), &vars->visual.angles);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Visualizes the positions the manipulator will check to see if it can shoot from"));
+			}
 			im::EndChild();
 		}
 		im::SetCursorPosY(im::GetCursorPosY() - 155);
@@ -1145,13 +1194,24 @@ namespace Gui
 			im::Separator();
 			im::Checkbox(_("Rainbow chams"), &vars->visual.rainbow_chams);
 			im::Combo(_("Players"), &vars->visual.shader,
-				_("None\0Normal\0Seethrough\0Wireframe\0Lit\0Force field\0Distort rim\0Layered"));
+				_("None\0Normal\0Seethrough\0Wireframe\0Lit\0Force field\0Distort rim\0Layered\0Galaxy"));
+			if (vars->visual.shader == 8)
+				im::SliderInt(_("Material"), &vars->visual.galaxymat, 1, 16);
 			im::Combo(_("Hands"), &vars->visual.hand_chams,
-				_("None\0Seethrough\0Normal\0Force field\0Distort rim\0Layered"));
+				_("None\0Seethrough\0Normal\0Force field\0Distort rim\0Layered\0Galaxy"));
+			if (vars->visual.hand_chams == 6)
+				im::SliderInt(_("Hand Material"), &vars->visual.galaxymathand, 1, 16);
 			im::Combo(_("Rocks"), &vars->visual.rock_chams,
-				_("None\0Normal\0Layered"));
+				_("None\0Normal\0Layered\0Galaxy"));
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("You must pick the chams on players before anything else, known crash unless done on players first"));
+			}
+			if (vars->visual.rock_chams == 3)
+				im::SliderInt(_("Rock Material"), &vars->visual.galaxymatrock, 1, 16);
 			im::Combo(_("Buildings"), &vars->visual.block_chams,
-				_("None\0Normal\0Layered"));
+				_("None\0Normal\0Layered\0Galaxy"));
+			if (vars->visual.block_chams == 3)
+				im::SliderInt(_("Block Material"), &vars->visual.galaxymatblock, 1, 16);
 			im::EndChild();
 		}
 	}
@@ -1196,7 +1256,14 @@ namespace Gui
 			im::Text(_("Movement"));
 			im::Separator();
 			im::Checkbox(_("Anti-flyhack"), &vars->misc.flyhack_stop);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Stops player before they get kicked for flyhacking"));
+			}
 			im::Checkbox(_("Anti-speedhack"), &vars->misc.antispeed);
+			im::Checkbox(_("Anti-deathbarrier"), &vars->misc.antideathbarrier);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Automatic cooldown and multiplier that enables you to move 2x faster"));
+			}
 			im::Checkbox(_("Omnisprint"), &vars->misc.always_sprint);
 			im::Checkbox(_("Spiderman"), &vars->misc.spiderman);
 			im::Checkbox(_("Big jump"), &vars->misc.gravity);
@@ -1205,10 +1272,12 @@ namespace Gui
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("F"), &vars->keybinds.flywall, ImVec2(50, 14));
 			im::Checkbox(_("No collisions"), &vars->misc.no_playercollision);
-			im::Checkbox(_("Spinbot"), &vars->misc.spinbot);
+			im::Combo(_("Anti-aim"), &vars->misc.antiaim,
+				_("none\0 backwards\0 backwards (down)\0 backwards (up)\0 left\0 left (down)\0 left (up)\0 right\0 right (down)\0 right (up)\0 jitter\0 jitter (down)\0 jitter (up)\0 spin\0 spin (down)\0 spin (up)\0 random"));
 			//im::Checkbox(_("Teleport (5m)"), &vars->misc.tp);
 			//im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
 			//im::Hotkey(_("T"), &vars->keybinds.tp, ImVec2(50, 15));
+			im::SliderFloat(_("Spin speed"), &vars->misc.spinspeed, 1.f, 50.f, _("%.0f"));
 			im::EndChild();
 		}
 		im::SetCursorPosY(im::GetCursorPosY() + 2);
@@ -1218,10 +1287,25 @@ namespace Gui
 			im::Separator();
 			im::Combo(_("Walk to"), &vars->misc.walkto,
 				_("None\0Map Marker\0Stone ore\0Sulfur ore\0Metal ore\0Player"));
-
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Pathfinds to map marker, ores, players from player list in misc"));
+			}
 			im::Checkbox(_("Auto-farm"), &vars->misc.silent_farm);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Essentially silent farm, works well with walk to ores"));
+			}
 			im::Checkbox(_("Auto-attack"), &vars->misc.autoattack);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Auto switch held item to weapon/tool when walking/farming and shoot at all visible players"));
+			}
 			im::SliderFloat(_("Max dist"), &vars->misc.autoattackdist, 0.1f, 400.f, _("%.0f"));
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Distance player has to be to get shot"));
+			}
+			im::Checkbox(_("Auto-med"), &vars->misc.automed);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Auto switch held item to med/bandage based off hp"));
+			}
 			im::Combo(_("Targetting mode"), &vars->misc.targetting_mode, 
 				_("Closest (distance)\0Lowest hp"));
 			//vars->playersnamesstr.clear();
@@ -1235,13 +1319,16 @@ namespace Gui
 			im::Text(_("Gameplay"));
 			im::Separator();
 			im::Checkbox(_("Anti-recycler"), &vars->misc.norecycler);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Turn off recyclers"));
+			}
 			im::Checkbox(_("Pickup collectibles"), &vars->misc.pickup_collectibles);
 			im::Checkbox(_("Interactive debug"), &vars->misc.interactive_debug);
 			im::Checkbox(_("Instant med"), &vars->misc.instant_med);
 			im::Checkbox(_("Instant revive"), &vars->misc.instant_revive);
-			im::Checkbox(_("Third-person"), &vars->misc.thirdperson);
-			im::Checkbox(_("Debug camera"), &vars->misc.debugcam);
-			im::Checkbox(_("Culling"), &vars->misc.debugcam);
+			//im::Checkbox(_("Third-person"), &vars->misc.thirdperson);
+			//im::Checkbox(_("Debug camera"), &vars->misc.debugcam);
+			//im::Checkbox(_("Culling"), &vars->misc.culling);
 			im::Checkbox(_("Suicide"), &vars->misc.TakeFallDamage);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("S"), &vars->keybinds.suicide, ImVec2(50, 14));
@@ -1252,7 +1339,7 @@ namespace Gui
 			im::Checkbox(_("Auto upgrade"), &vars->misc.auto_upgrade);
 			im::Combo(_("Upgrade tier"), &vars->misc.upgrade_tier,
 				_("Wood\0Stone\0Metal\0Armored"));
-			im::Checkbox(_("Auto refill"), &vars->misc.autorefill);
+			//im::Checkbox(_("Auto refill"), &vars->misc.autorefill);
 			im::Checkbox(_("Fakelag"), &vars->misc.fake_lag);
 			im::Checkbox(_("Desync on key"), &vars->misc.desync);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
@@ -1262,6 +1349,9 @@ namespace Gui
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("T"), &vars->keybinds.timescale, ImVec2(50, 14));
 			im::SliderFloat(_("Speed"), &vars->misc.speedhackspeed, 0.1f, 10.f, _("%.1f"));
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Set timescale key as hover loot key and set to 10.f for fast loot"));
+			}
 			im::Checkbox(_("Console logs"), &vars->misc.logs);
 			im::Checkbox(_("Rainbow accent"), &vars->rainbow_accent);
 			im::Combo(_("Gesture spam"), &vars->misc.gesture_spam, _(" None\x00 Clap\x00 Friendly\x00 Thumbsdown\x00 Thumbsup\x00 Ok\x00 Point\x00 Shrug\x00 Victory\x00 Wave"));
@@ -1290,7 +1380,7 @@ namespace Gui
 					if (p.path().extension() == _(".m"))
 					{
 						i++;
-						if (im::Selectable(p.path().stem().string().c_str()))
+						if (im::Selectable(p.path().stem().string().c_str(), ImGuiSelectableFlags_AllowDoubleClick))
 						{
 							selected_cfg = i;
 							LI_FIND(strcpy)(str0, const_cast<char*>(p.path().stem().string().c_str()));
@@ -1348,6 +1438,8 @@ namespace Gui
 			im::ColorEdit4(_("Fov invisible"), vars->colors.ui.fov.invisible, ImGuiColorEditFlags_NoInputs);
 			im::ColorEdit4(_("Hitpoints"), vars->colors.ui.hitpoints, ImGuiColorEditFlags_NoInputs);
 			im::ColorEdit4(_("Menu accent"), vars->accent_color, ImGuiColorEditFlags_NoInputs);
+			//im::ColorEdit4(_("Sun"), vars->colors.sun, ImGuiColorEditFlags_NoInputs);
+			//im::ColorEdit4(_("Moon"), vars->colors.moon, ImGuiColorEditFlags_NoInputs);
 			vars->accent_color_opaque[0] = vars->accent_color[0];
 			vars->accent_color_opaque[1] = vars->accent_color[1];
 			vars->accent_color_opaque[2] = vars->accent_color[2];

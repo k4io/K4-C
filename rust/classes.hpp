@@ -64,52 +64,6 @@ struct BulletDropPredictionData
 };
 BulletDropPredictionData bulletDropData[11];
 
-Vector3 GetEndPointForTrajectory(float speed, float angle, float drag, float gravityMod)
-{
-	float pitchRad = DEG2RAD(angle);
-
-	Vector3 dir = {
-		(float)(sinf(90.f) * cosf(pitchRad)),
-		(float)sinf(pitchRad),
-		(float)(cosf(90.f) * cosf(pitchRad))
-	};
-
-	Vector3 position = Vector3();
-	Vector3 velCheck = dir * speed;
-
-	const float stepSize = 0.03125f;
-
-	for (float travelTime = 0.f; travelTime < 8.f; travelTime += stepSize)
-	{
-		position += velCheck * stepSize;
-		velCheck.y -= 9.81f * gravityMod * stepSize;
-		velCheck -= velCheck * drag * stepSize;
-	}
-
-	return position;
-}
-
-Vector2 CalcAngle(const Vector3& src, const Vector3& dst) {
-	Vector3 d = src - dst;
-	return Vector2(RAD2DEG(Vector3::my_asin(d.y / d.length())), RAD2DEG(-Vector3::my_atan2(d.x, -d.z)));
-};
-
-void GenerateBuilletDropPredictionData(float drag, float gravityMod)
-{
-	int currentIndex = 0;
-	for (float angle = 35.f; angle <= 85.f; angle += 5.f)
-	{
-		BulletDropPredictionData& predData = bulletDropData[currentIndex++];
-
-		Vector3 a1 = GetEndPointForTrajectory(30.f, angle, drag, gravityMod);
-		Vector3 a2 = GetEndPointForTrajectory(50.f, angle, drag, gravityMod);
-
-		predData.distCoeff = a2.length_2d() / 50.f;
-		predData.startY = a1.y;
-		predData.yCoeff = (a2.y - a1.y) / 20.f;
-	}
-}
-
 struct rust_str
 {
 	char zpad[128];
@@ -270,6 +224,11 @@ class Model;
 class ModelState;
 class BasePlayer;
 class HitTest;
+class PlayerBelt;
+class Terrain;
+class TerrainHeightMap;
+class TerrainCollision;
+class TerrainMeta;
 class col;
 
 std::map<uint64_t, BoneCache*> cachedBones = std::map<uint64_t, BoneCache*>();
@@ -286,12 +245,29 @@ typedef struct Str
 	wchar_t str[1];
 } *str;
 
+
 #pragma region il2func
+//static auto ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
+
+//static auto setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
+
+static auto thrownwpn_inheritedvel = reinterpret_cast<Vector3(*)(AttackEntity*, BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ThrownWeapon"), _("GetInheritedVelocity"), 2, _(""), _(""))));
+
+static auto forceposto = reinterpret_cast<void(*)(BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ForcePositionTo"), 1, _(""), _(""))));
+
+static auto getignore = reinterpret_cast<bool(*)(TerrainCollision*, Vector3, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainCollision"), _("GetIgnore"), 2, _(""), _(""))));
+
+static auto sampleheight = reinterpret_cast<float(*)(Terrain*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Terrain"), _("SampleHeight"), 1, _(""), _("UnityEngine"))));
+
+static auto thmgetheight = reinterpret_cast<float(*)(TerrainHeightMap*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetHeight"), 1, _(""), _(""))));
+
 static auto transgetpos = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
 
 static auto transsetpos = reinterpret_cast<void(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 0, _(""), _("UnityEngine"))));
 
 static auto Sphere = reinterpret_cast<void (*)(Vector3 vPos, float fRadius, col color, float fDuration, bool distanceFade)>(0);
+
+static auto Capsule = reinterpret_cast<void (*)(Vector3, Vector4, float, float, col, float, bool)>(0);
 
 static auto GetNormal = reinterpret_cast<Vector3 (*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetNormal"), 1, _(""), _(""))));
 
@@ -464,7 +440,7 @@ static auto set_MoonMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinte
 static auto set_AtmosphereMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_AtmosphereMaterial"), 0, _(""), _(""))));
 static auto set_ClearMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_ClearMaterial"), 0, _(""), _(""))));
 static auto set_CloudMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_CloudMaterial"), 0, _(""), _(""))));
-
+static auto getiteminslot = reinterpret_cast<uintptr_t(*)(PlayerBelt*, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerBelt"), _("GetItemInSlot"), 0, _(""), _(""))));
 static auto gettrans = reinterpret_cast<uintptr_t(*)(Component*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 #pragma endregion
 
@@ -485,8 +461,15 @@ public:
 float current_time;
 
 void init_bp() {
-	gettrans = reinterpret_cast<uintptr_t(*)(Component*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
+	//setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
+	//ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
+	thrownwpn_inheritedvel = reinterpret_cast<Vector3(*)(AttackEntity*, BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ThrownWeapon"), _("GetInheritedVelocity"), 2, _(""), _(""))));
+	forceposto = reinterpret_cast<void(*)(BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ForcePositionTo"), 1, _(""), _(""))));
+	getignore = reinterpret_cast<bool(*)(TerrainCollision*, Vector3, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainCollision"), _("GetIgnore"), 2, _(""), _(""))));
+	sampleheight = reinterpret_cast<float(*)(Terrain*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Terrain"), _("SampleHeight"), 1, _(""), _("UnityEngine"))));
+	thmgetheight = reinterpret_cast<float(*)(TerrainHeightMap*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetHeight"), 1, _(""), _(""))));
 	transsetpos = reinterpret_cast<void(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 0, _(""), _("UnityEngine"))));
+	getiteminslot = reinterpret_cast<uintptr_t(*)(PlayerBelt*, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerBelt"), _("GetItemInSlot"), 0, _(""), _(""))));
 	transgetpos = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
 	get_visplayerlist = reinterpret_cast<System::Array<BasePlayer*>*(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("get_VisiblePlayerList"), -1, _(""), _(""))));
 	damageProperties = il2cpp::value(_("BaseMelee"), _("damageProperties"));
@@ -663,6 +646,59 @@ void init_bp() {
 #pragma endregion
 }
 
+
+Vector3 GetEndPointForTrajectory(float speed, float angle, float drag, float gravityMod, bool draw = false, Vector3 addto = Vector3::Zero())
+{
+	float pitchRad = DEG2RAD(angle);
+
+	Vector3 dir = {
+		(float)(sinf(90.f) * cosf(pitchRad)),
+		(float)sinf(pitchRad),
+		(float)(cosf(90.f) * cosf(pitchRad))
+	};
+
+	Vector3 position = Vector3();
+	Vector3 lastposition = position;
+	Vector3 velCheck = dir * speed;
+
+	const float stepSize = 0.03125f;
+
+	for (float travelTime = 0.f; travelTime < 8.f; travelTime += stepSize)
+	{
+		position += velCheck * stepSize;
+		if (!unity::is_visible(position, lastposition, 0) && draw)
+			return lastposition;
+		if (draw)
+			Line(addto + position, addto + lastposition, { 1, 1, 1, 1 }, 0.02f, false, false);
+		velCheck.y -= 9.81f * gravityMod * stepSize;
+		velCheck -= velCheck * drag * stepSize;
+		lastposition = position;
+	}
+
+	return position;
+}
+
+Vector2 CalcAngle(const Vector3& src, const Vector3& dst) {
+	Vector3 d = src - dst;
+	return Vector2(RAD2DEG(Vector3::my_asin(d.y / d.length())), RAD2DEG(-Vector3::my_atan2(d.x, -d.z)));
+};
+
+void GenerateBuilletDropPredictionData(float drag, float gravityMod)
+{
+	int currentIndex = 0;
+	for (float angle = 35.f; angle <= 85.f; angle += 5.f)
+	{
+		BulletDropPredictionData& predData = bulletDropData[currentIndex++];
+
+		Vector3 a1 = GetEndPointForTrajectory(30.f, angle, drag, gravityMod);
+		Vector3 a2 = GetEndPointForTrajectory(50.f, angle, drag, gravityMod);
+
+		predData.distCoeff = a2.length_2d() / 50.f;
+		predData.startY = a1.y;
+		predData.yCoeff = (a2.y - a1.y) / 20.f;
+	}
+}
+
 class Object {
 
 };
@@ -670,13 +706,24 @@ class Object {
 class Component : public Object {
 public:
 	Transform* transform() {
-		if (!this) return nullptr;
-		return (Transform*)gettrans(this);
+		__try {
+			if (!this) return nullptr;
+			return (Transform*)gettrans(this);
+		} __except (true) {
+			return nullptr;
+		}
 	}
 
 	char* get_class_name() {
 		auto bp = *reinterpret_cast<uintptr_t*>(this);
+		if (!this) return _("");
 		return (char*)*reinterpret_cast<uintptr_t*>(bp + 0x10);
+	}
+
+	rust_str get_object_name() {
+		auto obj = *reinterpret_cast<uintptr_t*>(this + 0x8);
+		auto nameptr = mem::read<uintptr_t>(obj + 0x60);
+		return *reinterpret_cast<rust_str*>(nameptr);
 	}
 
 	template<typename T = uintptr_t>
@@ -1063,6 +1110,7 @@ public:
 class ItemDefinition : public MonoBehaviour {
 public:
 	FIELD(_("ItemDefinition"), _("displayName"), _displayName, System::string*);
+	FIELD(_("ItemDefinition"), _("shortname"), shortname, System::string*);
 	member(int, itemid, 0x18);
 	//FIELD(_("ItemDefinition"), _("itemid"), itemid, int);
 };
@@ -1420,7 +1468,7 @@ public:
 	FIELD(_("Item"), _("heldEntity"), heldEntity, HeldEntity*);
 	FIELD(_("Item"), _("info"), info, ItemDefinition*);
 	FIELD(_("Item"), _("name"), name, System::string*);
-	//FIELD(_("Item"), _("name"), name, str);
+	FIELD(_("Item"), _("uid"), uid, unsigned int);
 
 	uintptr_t get_icon_sprite() {
 		const auto item_definition = this->info();
@@ -1731,10 +1779,15 @@ class InputState {
 public:
 	void set_aim_angles(Vector3 aim_angle) {
 		auto current = mem::read<uintptr_t>((uintptr_t)this + 0x10);
-
+		if (!current) return;
 		*reinterpret_cast<Vector3*>(current + 0x18) = aim_angle;
 	}
 
+	Vector3 get_aim_angles() {
+		auto current = mem::read<uintptr_t>((uintptr_t)this + 0x10);
+		if (!current) return Vector3::Zero();
+		return *reinterpret_cast<Vector3*>(current + 0x18);
+	}
 };
 
 class BaseMountable : public BaseCombatEntity {
@@ -1864,6 +1917,14 @@ public:
 		uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerBelt_TypeInfo);//il2cpp::type_object(_(""), _("PlayerBelt"));
 		*reinterpret_cast<int*>(*reinterpret_cast<uintptr_t*>(kl + 0xB8)) = slot;
 	}
+	int GetSelectedSlot() {
+		uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerBelt_TypeInfo);//il2cpp::type_object(_(""), _("PlayerBelt"));
+		return *reinterpret_cast<int*>(*reinterpret_cast<uintptr_t*>(kl + 0xB8));
+	}
+	Item* GetItemInSlot(int slot) {
+		if (!this) return nullptr;
+		return (Item*)getiteminslot(this, slot);
+	}
 };
 
 class BasePlayer : public BaseCombatEntity {
@@ -1884,6 +1945,11 @@ public:
 	FIELD(_("BasePlayer"), _("inventory"), inventory, PlayerInventory*);
 	FIELD(_("BasePlayer"), _("ClientCurrentMapNote"), ClientCurrentMapNote, MapNote*);
 	FIELD(_("BasePlayer"), _("Belt"), Belt, PlayerBelt*);
+
+	void ForcePositionTo(Vector3 worldPos) {
+		if (!this) return;
+		forceposto(this, worldPos);
+	}
 
 	bool isCached() {
 		if (!this) return false;
@@ -2532,6 +2598,13 @@ public:
 
 class ThrownWeapon : public AttackEntity {
 public:
+	FIELD(_("ThrownWeapon"), _("maxThrowVelocity"), maxThrowVelocity, float);
+	FIELD(_("ThrownWeapon"), _("tumbleVelocity"), tumbleVelocity, float);
+	FIELD(_("ThrownWeapon"), _("overrideAngle"), overrideAngle, Vector3);
+	Vector3 GetInheritedVelocity(BasePlayer* ply, Vector3 dir) {
+		if (!this || !ply) return Vector3::Zero();
+		return thrownwpn_inheritedvel(this, ply, dir);
+	}
 };
 
 class GrenadeWeapon : public AttackEntity {
@@ -2540,6 +2613,10 @@ public:
 
 class MolotovCocktail : public AttackEntity {
 public:
+};
+
+class Effect {
+
 };
 
 namespace ConVar {
@@ -2551,6 +2628,73 @@ namespace ConVar {
 		}
 	};
 }
+
+class CheaterCache {
+public:
+	struct Look {
+		float f_Duration;
+		float f_Start;
+	};
+	struct Idle {
+		float f_Duration;
+		float f_Start;
+	};
+
+	BasePlayer* self;
+	bool b_PotentialCheater;
+	bool b_Cheater;
+	bool b_Idle;
+	float f_FlyhackDistanceX;
+	float f_FlyhackDistanceY;
+	Vector3 currentAngles;
+	std::vector<uintptr_t> v_firedProjectiles;
+	std::vector<Look> v_Throughwalls;
+	std::vector<Idle> v_Idles;
+	std::vector<Vector3> v_Angles;
+	Idle currentIdle;
+
+	CheaterCache(BasePlayer* s) : self(s) {
+		b_PotentialCheater = 0;
+		b_Cheater = 0;
+		b_Idle = 1;
+		f_FlyhackDistanceX = 0;
+		f_FlyhackDistanceY = 0;
+		v_firedProjectiles = {};
+		v_Throughwalls = {};
+		v_Idles = {};
+		currentIdle = { 0, 0 };
+		currentAngles = Vector3::Zero();
+	}
+
+	bool CheckIdle(float deltaTime) {
+		if (b_Idle) {
+			if (!self->GetWorldVelocity().is_empty()) {
+				//has started moving
+				b_Idle = false;
+				if (currentIdle.f_Duration > .1f
+					&& currentIdle.f_Duration < 1.f) {
+					v_Idles.push_back(currentIdle);
+					currentIdle = { 0, get_fixedTime() };
+				}
+			}
+
+			currentIdle.f_Duration += deltaTime;
+		}
+		else { //Check
+			if (self->GetWorldVelocity().is_empty()) {
+				//has turned to idle
+				b_Idle = true;
+
+			}
+		}
+	}
+
+	void RecordFrame(float deltaTime) {
+		if (CheckIdle(deltaTime)) {
+
+		}
+	}
+};
 
 struct OBB {
 public:
@@ -2852,6 +2996,33 @@ public:
 	}
 };
 
+class Terrain {
+public:
+	float SampleHeight(Vector3 worldPos) {
+		if (!this) return 0.f;
+		return sampleheight(this, worldPos);
+	}
+};
+
+class TerrainHeightMap {
+public:
+	float GetHeight(Vector3 worldPos) {
+		if (!this) return 0.f;
+		return thmgetheight(this, worldPos);
+	}
+};
+
+class TerrainCollision {
+public:
+	bool GetIgnore(Vector3 worldPos, float radius = 0.01f) {
+		if (!this) return false;
+		return getignore(this, worldPos, radius);
+	}
+};
+
+class TerrainMeta {
+
+};
 
 void attack_melee(aim_target target, BaseProjectile* melee, BasePlayer* lp, bool is_player = false) {
 	if (!target.visible)
@@ -2872,39 +3043,64 @@ void attack_melee(aim_target target, BaseProjectile* melee, BasePlayer* lp, bool
 	if (!hit_test_class)
 		return;
 
-	HitTest2* hit_test = (HitTest2*)il2cpp::methods::object_new(hit_test_class);
-		
-	Ray ray = Ray(local_position, (target.pos - local_position).Normalized());
+	if (!is_player) {
+		HitTest2* hit_test = (HitTest2*)il2cpp::methods::object_new(hit_test_class);
 
-	Transform* trans = is_player ? target.ent->model()->boneTransforms()->get(48) : target.ent->transform();
+		Ray ray = Ray(local_position, (target.pos - local_position).Normalized());
 
-	auto v = trans->InverseTransformPoint(target.pos);//_InverseTransformPoint(trans, target.pos);
+		Transform* trans = is_player ? target.ent->model()->boneTransforms()->get(48) : target.ent->transform();
 
-	if (!trans)
-		return;
+		auto v = trans->InverseTransformPoint(target.pos);//_InverseTransformPoint(trans, target.pos);
 
-	hit_test->set_max_distance(1000);
-	hit_test->set_hit_transform(trans);
-	hit_test->set_attack_ray(ray);
-	hit_test->set_did_hit(true);
-	hit_test->set_hit_entity((BasePlayer*)target.ent);
-	hit_test->set_hit_point(v);
-	hit_test->set_hit_normal(Vector3(0, 0, 0));
-	hit_test->set_damage_properties(melee->get_damage_properties());
-	
-	//hit_test->MaxDistance() = 1000.f;
-	//hit_test->HitTransform() = trans;
-	//hit_test->AttackRay() = ray;
-	//hit_test->DidHit() = true;
-	//hit_test->HitEntity() = target.ent;
-	//hit_test->HitPoint() = _InverseTransformPoint(trans, target.pos);
-	//hit_test->HitNormal() = Vector3(0, 0, 0);
-	//hit_test->damageProperties() = (DamageProperties*)*reinterpret_cast<uintptr_t*>((uintptr_t)melee + damageProperties); //basemelee + damageproperties
-	
-	StartAttackCooldown(melee, melee->repeatDelay());
+		if (!trans)
+			return;
 
-	ProcessAttack((BaseMelee*)melee, (HitTest*)hit_test);
-	return;
+		hit_test->set_max_distance(1000);
+		hit_test->set_hit_transform(trans);
+		hit_test->set_attack_ray(ray);
+		hit_test->set_did_hit(true);
+		hit_test->set_hit_entity((BasePlayer*)target.ent);
+		hit_test->set_hit_point(v);
+		hit_test->set_hit_normal(Vector3(0, 0, 0));
+		hit_test->set_damage_properties(melee->get_damage_properties());
+
+		//hit_test->MaxDistance() = 1000.f;
+		//hit_test->HitTransform() = trans;
+		//hit_test->AttackRay() = ray;
+		//hit_test->DidHit() = true;
+		//hit_test->HitEntity() = target.ent;
+		//hit_test->HitPoint() = _InverseTransformPoint(trans, target.pos);
+		//hit_test->HitNormal() = Vector3(0, 0, 0);
+		//hit_test->damageProperties() = (DamageProperties*)*reinterpret_cast<uintptr_t*>((uintptr_t)melee + damageProperties); //basemelee + damageproperties
+
+		StartAttackCooldown(melee, melee->repeatDelay());
+
+		ProcessAttack((BaseMelee*)melee, (HitTest*)hit_test);
+	}
+	else {
+		HitTest* hit_test = (HitTest*)il2cpp::methods::object_new(hit_test_class);
+
+		Ray ray = Ray(local_position, (target.pos - local_position).Normalized());
+
+		auto trans = is_player ? target.ent->model()->boneTransforms()->get(48) : target.ent->transform();
+
+		if (!trans)
+			return;
+
+		hit_test->set_max_distance(1000);
+		hit_test->set_hit_transform(trans);
+		hit_test->set_attack_ray(ray);
+		hit_test->set_did_hit(true);
+		hit_test->set_hit_entity((BasePlayer*)target.ent);
+		hit_test->set_hit_point(trans->InverseTransformPoint(target.pos));
+		hit_test->set_hit_normal(Vector3(0, 0, 0));
+		hit_test->set_damage_properties(melee->get_damage_properties());
+
+		StartAttackCooldown((BaseMelee*)melee, melee->repeatDelay());
+
+		ProcessAttack((BaseMelee*)melee, hit_test);
+	}
+	return;	
 }
 
 Vector3 WorldToScreen(Vector3 position)
@@ -2936,6 +3132,78 @@ Vector3 WorldToScreen(Vector3 position)
 
 	return out;
 }
+
+float GetFuseLength(ThrownWeapon* w) {
+	if (std::string(w->get_object_name().zpad).find(_("F1")) != std::string::npos) {
+		return 3.0f;
+	}
+}
+
+Vector3 GrenadeTracer(float speed,
+	float angle,
+	float drag,
+	float gravityMod,
+	float maxtime = 8.f,
+	bool draw = false, Vector3 addto = Vector3::Zero(), BasePlayer* pl = nullptr)
+{
+	float pitchRad = DEG2RAD(angle);
+
+	Vector3 dir = pl->input()->state()->get_aim_angles();
+
+	Vector3 position = Vector3();
+	Vector3 lastposition = position;
+	Vector3 velCheck = dir * speed;
+
+	const float stepSize = 0.03125f;
+
+	for (float travelTime = 0.f; travelTime < maxtime; travelTime += stepSize)
+	{
+		position += velCheck * stepSize;
+		if (!unity::is_visible(position, lastposition, 0) && draw)
+			return lastposition;
+		if (draw)
+			Line(addto + position, addto + lastposition, { 1, 1, 1, 1 }, 0.02f, false, false);
+		velCheck.y -= 9.81f * gravityMod * stepSize;
+		velCheck -= velCheck * drag * stepSize;
+		lastposition = position;
+	}
+
+	return position;
+}
+
+class GrenadePath {
+public:
+	BasePlayer* ply;
+	ThrownWeapon* weapon;
+	std::vector<Vector3> positions;
+	Vector3 endposition;
+
+	GrenadePath() : ply(nullptr), weapon(nullptr), positions({}), endposition({}) { }
+
+	GrenadePath(BasePlayer* p, ThrownWeapon* t) : ply(p), weapon(t) {
+		auto eyepos = p->eyes()->position();
+		auto dir = p->eyes()->body_forward().normalize();
+		auto d = 1.f;
+		auto velocity = t->GetInheritedVelocity(p, dir) + dir * t->maxThrowVelocity() * d + p->GetWorldVelocity() * .5f;
+		Vector3 pos = eyepos;
+		Vector3 lp = pos;
+		Vector3 vel = velocity;
+		for (float travelTime = 0.f; travelTime < 8.f; travelTime += 0.03125f)
+		{
+			pos += vel * 0.03125f;
+			if (!unity::is_visible(pos, lp, 0))
+				break;
+			vel.y -= 9.81f * 1.f * 0.03125f;
+			vel -= vel * 0.1f * 0.03125f;
+			lp = pos;
+			positions.push_back(pos);
+		}
+		endposition = pos;
+		return;
+	}
+};
+
+std::map<int32_t, GrenadePath*> grenade_map = {};
 
 namespace cache {
 	std::array<int, 20> boneids = {

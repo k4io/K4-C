@@ -24,6 +24,10 @@ struct Vars
 	std::map<std::string, int> weaponskin_map;
 	std::map<int, std::string> allskins_map;
 	std::map<ULONG, gplayer*> gui_player_map{};
+	std::map<ULONG, int> chams_player_map{};
+	std::map<ULONG, int> handchams_player_map{};
+
+
 
 	int follow_player_id = -1;
 
@@ -32,11 +36,14 @@ struct Vars
 	float accent_color_opaque[4] = { 28 / 255.f, 232 / 255.f, 89 / 255.f, 0.6f };
 	bool wants_shoot = false;
 	bool rainbow_accent = false;
+	bool targetted = false;
 
 	float last_refill_time = 0.f;
 
 	struct combat {
 		bool aimbot = false;
+		float firerate = 0.133f;
+		float tpmultiplier = 0.75f;
 		bool psilent = false;
 		bool targetfriends = false;
 		int aimbone = 0;
@@ -90,6 +97,7 @@ struct Vars
 
 	struct visual {
 		bool playeresp = false;
+		bool grenadeprediction = false;
 		bool crosshair1 = false;
 		bool crosshair2 = false;
 		bool crosshair3 = false;
@@ -98,6 +106,7 @@ struct Vars
 		float night = 1.f;
 		float dist_on_items = 100.f;
 		float playerfov = 90.f;
+		float rayleigh = 1.f;
 		bool zoomtoggle = false;
 		float staramount = 350;
 		bool always_day = true;
@@ -174,6 +183,10 @@ struct Vars
 		bool sidehealth = false;
 		bool skeleton = false;
 		bool nameesp = false;
+		int galaxymat = 15;
+		int galaxymathand = 15;
+		int galaxymatrock = 15;
+		int galaxymatblock = 15;
 		bool woundedflag = false;
 		bool distance = false;
 		bool weaponesp = false;
@@ -188,6 +201,7 @@ struct Vars
 	}; visual visual;
 
 	struct misc {
+		bool antideathbarrier = false;
 		bool auto_upgrade = false;
 		bool emulate_p = false;
 		bool flywall = false;
@@ -216,7 +230,7 @@ struct Vars
 		float tpcamfov = 70.f;
 
 		bool pickup_collectibles = false;
-
+		float spinspeed = 50.f;
 		bool TakeFallDamage = false;
 		bool silent_farm = false;
 		bool auto_lock = false;
@@ -224,6 +238,7 @@ struct Vars
 		bool debugcam = false;
 		bool thirdperson = false;
 		bool culling = false;
+		int antiaim = 0;
 		bool gravity = true;
 		bool infinite_jump = false;
 		bool fake_lag = false;
@@ -243,6 +258,7 @@ struct Vars
 		int walkto = 0;
 		bool autofarm = false;
 		bool autoattack = false;
+		bool automed = false;
 		float autoattackdist = 0.f;
 		int targetting_mode = 0;
 		bool autorefill = false;
@@ -351,6 +367,9 @@ struct Vars
 			}; animal animal;
 			float collectibles[4] = { 1, 1, 1, 1 };
 		}; items items;
+
+		float sun[4] = { 1, 1, 1, 1 };
+		float moon[4] = { 1, 1, 1, 1 };
 	}; colors colors;
 
 	int tab = 0;

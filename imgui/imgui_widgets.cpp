@@ -1533,7 +1533,7 @@ bool im::BeginCombo(const char* label, const char* preview_value, ImGuiComboFlag
     if (has_window_size_constraint)
     {
         g.NextWindowData.Flags |= ImGuiNextWindowDataFlags_HasSizeConstraint;
-        g.NextWindowData.SizeConstraintRect.Min.x = ImMax(g.NextWindowData.SizeConstraintRect.Min.x, w);
+        g.NextWindowData.SizeConstraintRect.Min.x = ImMax(g.NextWindowData.SizeConstraintRect.Min.x - 10.f, w);
     }
     else
     {
@@ -1567,6 +1567,7 @@ bool im::BeginCombo(const char* label, const char* preview_value, ImGuiComboFlag
 
     // Horizontally align ourselves with the framed text
     PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(style.FramePadding.x, style.WindowPadding.y));
+    //SetNextWindowSize()
     bool ret = Begin(name, NULL, window_flags);
     PopStyleVar();
     if (!ret)
@@ -2628,8 +2629,10 @@ bool im::SliderScalar(const char* label, ImGuiDataType data_type, void* p_data, 
         MarkItemEdited(id);
 
     // Render grab
-    if (grab_bb.Max.x > grab_bb.Min.x)
+    if (grab_bb.Max.x > grab_bb.Min.x) {
         window->DrawList->AddRectFilled(grab_bb.Min, grab_bb.Max, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
+        window->DrawList->AddRectFilled(ImVec2(frame_bb.Min.x + 2, grab_bb.Min.y), grab_bb.Max, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
+    }
 
     // Display value using user-provided display format so user can add prefix/suffix/decorations to the value.
     char value_buf[64];
@@ -5561,6 +5564,7 @@ bool im::CollapsingHeader(const char* label, bool* p_open, ImGuiTreeNodeFlags fl
 // But you need to make sure the ID is unique, e.g. enclose calls in PushID/PopID or use ##unique_id.
 bool im::Selectable(const char* label, bool selected, ImGuiSelectableFlags flags, const ImVec2& size_arg)
 {
+    im::SetWindowSize({ im::GetWindowSize().x + 8.f, im::GetWindowSize().y });
     ImGuiWindow* window = GetCurrentWindow();
     if (window->SkipItems)
         return false;
@@ -5573,26 +5577,29 @@ bool im::Selectable(const char* label, bool selected, ImGuiSelectableFlags flags
 
     ImGuiID id = window->GetID(label);
     ImVec2 label_size = CalcTextSize(label, NULL, true);
-    ImVec2 size(size_arg.x != 0.0f ? size_arg.x : label_size.x, size_arg.y != 0.0f ? size_arg.y : label_size.y);
+    ImVec2 size(size_arg.x != 0.0f ? size_arg.x : label_size.x, size_arg.y != 0.0f ? size_arg.y - 3 : label_size.y - 3);
     ImVec2 pos = window->DC.CursorPos;
     pos.y += window->DC.CurrLineTextBaseOffset;
     ImRect bb_inner(pos, pos + size);
     ItemSize(size, 0.0f);
 
     // Fill horizontal space.
-    ImVec2 window_padding = window->WindowPadding;
+    //ImVec2 window_padding = window->WindowPadding;
+    ImVec2 window_padding = ImVec2(0, 0);
     float max_x = (flags & ImGuiSelectableFlags_SpanAllColumns) ? GetWindowContentRegionMax().x : GetContentRegionMax().x;
     float w_draw = ImMax(label_size.x, window->Pos.x + max_x - window_padding.x - pos.x);
     ImVec2 size_draw((size_arg.x != 0 && !(flags & ImGuiSelectableFlags_DrawFillAvailWidth)) ? size_arg.x : w_draw, size_arg.y != 0.0f ? size_arg.y : size.y);
     ImRect bb(pos, pos + size_draw);
-    if (size_arg.x == 0.0f || (flags & ImGuiSelectableFlags_DrawFillAvailWidth))
-        bb.Max.x += window_padding.x;
+    //if (size_arg.x == 0.0f || (flags & ImGuiSelectableFlags_DrawFillAvailWidth))
+    //    bb.Max.x += window_padding.x;
 
     // Selectables are tightly packed together so we extend the box to cover spacing between selectable.
     const float spacing_x = style.ItemSpacing.x;
     const float spacing_y = style.ItemSpacing.y;
     const float spacing_L = IM_FLOOR(spacing_x * 0.50f);
     const float spacing_U = IM_FLOOR(spacing_y * 0.50f);
+
+    //highlight box around hovered/selected
     bb.Min.x -= spacing_L;
     bb.Min.y -= spacing_U;
     bb.Max.x += (spacing_x - spacing_L);
@@ -5651,6 +5658,9 @@ bool im::Selectable(const char* label, bool selected, ImGuiSelectableFlags flags
     // In this branch, Selectable() cannot toggle the selection so this will never trigger.
     if (selected != was_selected) //-V547
         window->DC.LastItemStatusFlags |= ImGuiItemStatusFlags_ToggledSelection;
+
+    bb.Min.x -= 4;
+    bb.Max.x += 4;
 
     // Render
     if (held && (flags & ImGuiSelectableFlags_DrawHoveredWhenHeld))

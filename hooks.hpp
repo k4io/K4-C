@@ -23,6 +23,8 @@ void dhook(void* func, void** og, void* dtr) {
 }
 
 int fp = 0;
+int spin = 0;
+int jitter = 0;
 
 namespace hooks {
 	namespace orig {
@@ -46,6 +48,8 @@ namespace hooks {
 		static auto attackent_addpunch = reinterpret_cast<void(*)(uintptr_t, Vector3, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("HeldEntity"), _("AddPunch"), 0, _(""), _(""))));
 		static auto baseprojectile_createprojectile = reinterpret_cast<uintptr_t(*)(BaseProjectile*, System::string, Vector3, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("CreateProjectile"), 0, _(""), _(""))));
 		static auto DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
+		
+		static auto createeffect = reinterpret_cast<GameObject* (*)(System::string, Effect*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("EffectLibrary"), _("CreateEffect"), 2, _(""), _(""))));
 
 		static auto _update = reinterpret_cast<void (*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Update"), 0, _(""), _(""))));
 
@@ -82,11 +86,15 @@ namespace hooks {
 
 	static auto ServerRPC_int = reinterpret_cast<void (*)(BaseProjectile*, System::string funcName, unsigned int arg1, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uint_);
 	
+	static auto ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string funcName, unsigned int arg1, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
+	
 	//static auto get_resourcePath = reinterpret_cast<System::string (*)(uintptr_t)>(mem::game_assembly_base + offsets::Method$ResourceRef_method);
 
 	static auto PerformanceUI_Update = reinterpret_cast<void (*)(void*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PerformanceUI"), _("Update"), -1, _(""), _("Facepunch"))));
 
 	void init_hooks() {
+		orig::createeffect = reinterpret_cast<GameObject * (*)(System::string, Effect*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("EffectLibrary"), _("CreateEffect"), 2, _(""), _(""))));
+		ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string funcName, unsigned int arg1, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
 		dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
 		create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
 		add_component = reinterpret_cast<Component*(*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_AddComponentWithType"), 0, _(""), _("UnityEngine"))));
@@ -211,13 +219,34 @@ namespace hooks {
 						const auto TOD_Day = *reinterpret_cast<uintptr_t*>(tod_sky + 0x50);
 						const auto TOD_Night = *reinterpret_cast<uintptr_t*>(tod_sky + 0x58);
 						const auto TOD_Stars = *reinterpret_cast<uintptr_t*>(tod_sky + 0x70);
-						if (vars->visual.always_day) {
-							*(float*)(TOD_Night + 0x50) = vars->visual.night;
-							*(float*)(TOD_Night + 0x54) = vars->visual.night;
-							*(float*)(TOD_Day + 0x50) = vars->visual.day;
-							*(float*)(TOD_Day + 0x54) = vars->visual.day;
-							*(float*)(TOD_Stars + 0x14) = vars->visual.staramount;
-						}
+
+						const auto tod_component = *reinterpret_cast<uintptr_t*>(tod_sky + 0xA8);
+
+						Vector4 sun_color = Vector4(vars->colors.sun[0], 
+							vars->colors.sun[1], 
+							vars->colors.sun[2], 
+							vars->colors.sun[3]);
+						Vector4 moon_color = Vector4(vars->colors.moon[0], 
+							vars->colors.moon[1], 
+							vars->colors.moon[2], 
+							vars->colors.moon[3]);
+
+						//*(Vector4**)(mem::read<uintptr_t>(TOD_Day + 0x10) + 0x10) = &sun_color;
+						//*(Vector4**)(mem::read<uintptr_t>(TOD_Day + 0x18) + 0x10) = &sun_color;
+						//*(Vector4**)(mem::read<uintptr_t>(TOD_Day + 0x20) + 0x10) = &sun_color;
+						//*(Vector4**)(mem::read<uintptr_t>(TOD_Day + 0x28) + 0x10) = &sun_color;
+
+						//*(Vector4**)(mem::read<uintptr_t>(TOD_Night + 0x10) + 0x10) = &moon_color;
+						//*(Vector4**)(mem::read<uintptr_t>(TOD_Night + 0x18) + 0x10) = &moon_color;
+						//*(Vector4**)(mem::read<uintptr_t>(TOD_Night + 0x20) + 0x10) = &moon_color;
+						//*(Vector4**)(mem::read<uintptr_t>(TOD_Night + 0x28) + 0x10) = &moon_color;
+
+						*(float*)(TOD_Night + 0x50) = vars->visual.night;
+						*(float*)(TOD_Night + 0x54) = vars->visual.night;
+						*(float*)(TOD_Day + 0x50) = vars->visual.day;
+						*(float*)(TOD_Day + 0x54) = vars->visual.day;
+						*(float*)(TOD_Stars + 0x14) = vars->visual.staramount;
+
 
 
 						m_skydome = mem::read<uintptr_t>(current_tagged_obj + 0x18);
@@ -407,7 +436,7 @@ namespace hooks {
 				Vector3 u = {};
 				if (vars->combat.lower_vel)
 					misc::lower_velocity(target, rpc_position, target_pos, original_vel, stats.initial_velocity, aimbot_velocity, a, travel_t, p, u);
-				else misc::get_prediction(target, rpc_position, target_pos, original_vel, aimbot_velocity, a, tt, pt, dr, gr, u);
+				else misc::get_prediction(target, rpc_position, target_pos, original_vel, aimbot_velocity, a, travel_t, pt, dr, gr, u);
 
 				if (vars->combat.thick_bullet)
 					*reinterpret_cast<float*>(projectile + 0x2C) = vars->combat.thickness > 1.f ? 1.f : vars->combat.thickness;
@@ -434,18 +463,22 @@ namespace hooks {
 				if (vars->combat.bullet_tp)
 				{
 					//check traveltime
-					if (vars->desyncTime > travel_t)
-						p->SetInitialDistance(target.distance);
+					if ((vars->desyncTime * vars->combat.tpmultiplier) > travel_t) {
+						p->traveledTime(travel_t);
+						p->SetInitialDistance(target.distance - 1);
+					}
 					else if (vars->desyncTime > 0.f)
 					{ 
 						Vector3 r = rpc_position;
 						Vector3 v = aimbot_velocity;
-						Vector3 n = rpc_position + (aimbot_velocity * vars->desyncTime);
-						p->SetInitialDistance(r.distance(n));
+						Vector3 n = rpc_position + (aimbot_velocity * (vars->desyncTime * vars->combat.tpmultiplier));
+						Sphere(n, 0.1f, { 1, 1, 1, 1 }, 10.f, false);
+						p->traveledTime(vars->desyncTime);
+						p->SetInitialDistance(r.distance(n) - 1);
 					}
 					else p->SetInitialDistance(0);
 
-					esp::local_player->console_echo(string::wformat(_(L"[matrix]: ProjectileShoot (bullet tp) spawned bullet at distance %d"), (int)p->initialDistance()));
+					esp::local_player->console_echo(string::wformat(_(L"[matrix]: ProjectileShoot (bullet tp) spawned bullet at distance %dm"), (int)p->initialDistance()));
 				}
 
 				if (vars->combat.psilent || unity::GetKey(vars->keybinds.psilent)) {
@@ -854,7 +887,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 	}
 
 	void hk_playerwalkmovement_ClientInput(PlayerWalkMovement* player_walk_movement, uintptr_t inputstate, ModelState* model_state) {
-
+		//if (esp::local_player) esp::local_player->console_echo(_(L"PWM clientinput start"));
 		if (player_walk_movement && inputstate && model_state) {
 			orig::playerwalkmovement_client_input(player_walk_movement, inputstate, model_state);
 			Vector3 vel = player_walk_movement->get_TargetMovement();
@@ -1056,16 +1089,16 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 					float mul = misc::speedhackDistance + 4;
 
-					if (mul > .3f && misc::speedhackCooldownEnd < get_fixedTime())//start cooldown
+					if (mul > .1f && misc::speedhackCooldownEnd < get_fixedTime())//start cooldown
 					{
 						misc::lastSpeedhackReset = get_fixedTime();
-						misc::speedhackCooldownEnd = get_fixedTime() + 10.f;
+						misc::speedhackCooldownEnd = get_fixedTime() + 20.f;
 					}
 					else //still on cooldown
 					{
 						auto timeleft = misc::speedhackCooldownEnd - get_fixedTime(); //will be 10
 						//auto remainder = (timeleft - 10.f) < 0 ? 0 : (timeleft - 10.f);
-						auto remainder = timeleft > 10 ? 10 : (timeleft < 0 ? 0 : timeleft);
+						auto remainder = timeleft > 20 ? 20 : (timeleft < 0 ? 0 : timeleft);
 						Vector3 new_vel = current_velocity;
 						float fslowdown = (mul / 1.f);
 						if (mul > .3f)
@@ -1075,7 +1108,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							std::clamp(fslowdown, 0.f, 1.f);
 							Vector3 new_vel = Vector3(current_velocity.x * (2.f - fslowdown), current_velocity.y, current_velocity.z * (2.f - fslowdown));
 						}
-						else new_vel = Vector3(current_velocity.x * (2.f - (remainder / 10.f)), current_velocity.y, current_velocity.z * (2.f - (remainder / 10.f)));
+						else new_vel = Vector3(current_velocity.x * (2.f - (remainder / 20.f)), current_velocity.y, current_velocity.z * (2.f - (remainder / 20.f)));
 
 						player_walk_movement->set_TargetMovement(new_vel);
 					}
@@ -1102,6 +1135,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						set_onLadder(model_state, false);
 					}
 				}
+				//if (esp::local_player) esp::local_player->console_echo(_(L"PWM flywall end"));
 			}
 		}
 		else return orig::playerwalkmovement_client_input(player_walk_movement, inputstate, model_state);
@@ -1229,12 +1263,18 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		PerformanceUI_Update(instance);
 	}
 
+	GameObject* hk_effectlibrary_createffect(System::string strPrefab, Effect* effect) {
+		return orig::createeffect(strPrefab, effect);
+	}
+
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
 	{
+		int echocount = 0;
 		__try {
 			//if(!do_fixed_update_ptr)
 			//do_fixed_update_ptr = mem::hook_virtual_function(_("PlayerWalkMovement"), _("DoFixedUpdate"), &hk_dofixedupdate);
 
+			//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 			if (!client_input_ptr)
 				client_input_ptr = mem::hook_virtual_function(_("PlayerWalkMovement"), _("ClientInput"), &hk_playerwalkmovement_ClientInput);
 
@@ -1279,6 +1319,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			//	}
 			//}
 
+			//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 			if (!has_intialized_methods) {
 				auto il2cpp_codegen_initialize_method = reinterpret_cast<void (*)(unsigned int)>(il2cpp::methods::intialize_method);
 				//56229 for real rust or 56204 for cracked rust
@@ -1295,43 +1336,44 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				for (size_t i = 0; i < 32; i++)
 					misc::fired_projectiles[i] = placeholder;
 			}
+			//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 
 #pragma region static_method_hooks
 			static uintptr_t* serverrpc_projecshoot;
 			if (!serverrpc_projecshoot) {
 				//auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot);
 				auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileShoot___);
-
+			
 				if (method_serverrpc_projecshoot) {
 					serverrpc_projecshoot = **(uintptr_t***)(method_serverrpc_projecshoot + 0x30);
-
+			
 					hooks::orig::serverrpc_projectileshoot = *serverrpc_projecshoot;
-
+			
 					*serverrpc_projecshoot = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_projectileshoot);
 				}
 			}
-
+			
 			static uintptr_t* serverrpc_playerprojectileattack;
 			if (!serverrpc_playerprojectileattack) {
 				auto method_serverrpc_playerprojectileattack = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileAttack___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
-
+			
 				if (method_serverrpc_playerprojectileattack) {
 					serverrpc_playerprojectileattack = **(uintptr_t***)(method_serverrpc_playerprojectileattack + 0x30);
-
+			
 					hooks::orig::playerprojectileattack = *serverrpc_playerprojectileattack;
-
+			
 					*serverrpc_playerprojectileattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
 				}
 			}
 			static uintptr_t* serverrpc_createbuilding;
 			if (!serverrpc_createbuilding) {
 				auto method_serverrpc_createbuilding = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_CreateBuilding___);
-
+			
 				if (method_serverrpc_createbuilding) {
 					serverrpc_createbuilding = **(uintptr_t***)(method_serverrpc_createbuilding + 0x30);
-
+			
 					hooks::orig::createbuilding = *serverrpc_createbuilding;
-
+			
 					*serverrpc_createbuilding = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_doplace);
 				}
 			}
@@ -1340,14 +1382,16 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			auto loco = esp::local_player;
 			if (baseplayer && loco) {
 				get_skydome();
-
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				auto fixed_time = get_fixedTime();
 				auto tick_time = baseplayer->lastSentTickTime();
 				vars->desyncTime = (unity::get_realtimesincestartup() - tick_time) - 0.03125 * 3;
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 
 				auto wpn = baseplayer->GetActiveItem();
 				auto held = wpn ? wpn->GetHeldEntity<BaseProjectile>() : nullptr;
 				float time = get_fixedTime();
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 
 				auto item2 = baseplayer->get_active_weapon();
 
@@ -1357,6 +1401,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						mountable->canwielditem() = true;
 				}
 
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				if (unity::GetKey(0x37))//(GetAsyncKeyState(0x37))
 				{
 					auto look = baseplayer->_lookingAtEntity();
@@ -1370,16 +1415,23 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 				bool kyslol = false;
 
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				if (vars->misc.TakeFallDamage && unity::GetKey(vars->keybinds.suicide)) {
 
 					OnLand(baseplayer, -8.0001f - 100);
 				}
 
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				if (vars->misc.admin_mode)
 					baseplayer->set_admin_flag(rust::classes::PlayerFlags::IsAdmin);
 
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				baseplayer->fov();
 
+				typedef void(*_set_rayleigh)(float);
+				((_set_rayleigh)(mem::game_assembly_base + oSetRayleigh))(vars->visual.rayleigh);
+
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				if (held) {
 					if (!LI_FIND(strcmp)(held->get_class_name(), _("Planner"))) {
 						auto planner = reinterpret_cast<Planner*>(held);
@@ -1396,7 +1448,138 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							esp::local_player->console_echo(string::wformat(_(L"[matrix]: ClientInput - rotate building left (%d, %d, %d)"), (int)v.x, (int)v.y, (int)v.z));
 						}
 					}
+					if (vars->visual.grenadeprediction) {
+						auto w = ((ThrownWeapon*)held);
+						auto eyepos = baseplayer->eyes()->position();
+						auto normalized = baseplayer->eyes()->body_forward().normalize();
+						auto d = 1.f;
+						auto velocity = w->GetInheritedVelocity(baseplayer, normalized) + normalized * w->maxThrowVelocity() * d + baseplayer->GetWorldVelocity() * 0.5f;
+
+						Vector3 p = eyepos;
+						Vector3 lp = p;
+						Vector3 vel = velocity; 
+
+						for (float travelTime = 0.f; travelTime < 8.f; travelTime += 0.03125f)
+						{
+							p += vel * 0.03125f;
+							if (!unity::is_visible(p, lp, 0))
+							{
+								break;
+								//bounce?
+							}
+							Line(p, lp, { r, g, b, 1 }, 0.01f, false, false);
+							vel.y -= 9.81f * 1.f * 0.03125f;
+							vel -= vel * 0.1f * 0.03125f;
+							lp = p;
+						}
+						auto points = 36;
+						float step = M_PI_2 / points;
+						float x, z, c = 0;
+						lp = Vector3::Zero();
+						for (size_t i = 0; i < points; i++)
+						{
+							x = Vector3::my_sin(c) * 1.f;
+							z = Vector3::my_cos(c) * 1.f;
+							auto cu = Vector3(x, p.y + 0.1f, z);
+							if (!lp.is_empty())
+								Line(p + cu, p + lp, { r, g, b, 1 }, 0.01f, false, false);
+							lp = cu;
+						}
+
+						for (auto pair : grenade_map) {
+							auto current = pair.second;
+							if (!current->positions.empty() && !current->endposition.is_empty() && !current->ply->is_sleeping()) {
+								Vector3 lastpos = current->positions[0];
+								for (auto v : current->positions) {
+									Line(lastpos, v, { r, g, b, 1 }, 0.01f, false, false);
+									lastpos = v;
+								}
+
+								p = current->endposition;
+								for (size_t i = 0; i < points; i++)
+								{
+									x = Vector3::my_sin(c) * 1.f;
+									z = Vector3::my_cos(c) * 1.f;
+									auto cu = Vector3(x, p.y + 0.1f, z);
+									if (!lp.is_empty())
+										Line(p + cu, p + lp, { r, g, b, 1 }, 0.01f, false, false);
+									lp = cu;
+								}
+							}
+						}
+					}
+
+					if (vars->combat.silent_melee || unity::GetKey(vars->keybinds.silentmelee)
+						&& esp::best_target.distance < vars->combat.melee_range)
+					{
+						auto hit_player = [&]() {
+							auto Item = esp::local_player->GetActiveItem();
+							if (Item) {
+								auto melee = Item->GetHeldEntity<BaseMelee>();
+								if (melee) {
+									auto class_name = melee->get_class_name();
+									if (*(int*)(class_name + 4) == 'eleM' || *(int*)(class_name + 4) == 'mmah') {
+										aim_target target = esp::best_target;
+										if (target.ent) {
+											auto world_position = target.ent->model()->boneTransforms()->get(48)->position();
+											auto local = ClosestPoint(esp::local_player, world_position);
+											auto camera = esp::local_player->model()->boneTransforms()->get(48)->position();
+
+											if (camera.get_3d_dist(world_position) >= 4.2f)
+												return;
+
+
+											target.visible = esp::local_player->is_visible(camera, local);
+
+											attack_melee(target, (BaseProjectile*)melee, esp::local_player, true);
+										}
+									}
+								}
+							}
+						};
+						hit_player();
+					}
+					//if (!wcscmp(wpn->get_weapon_name(), _(L"Jackhammer"))) {
+					//	auto method = mem::read<uintptr_t>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_uintstring);
+					//	if(method)
+					//		ServerRPC_intstring(baseplayer, _(L"itemcmd"), wpn->uid(), _(L"refill"), method);
+					//}
 				}
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
+				if (vars->misc.automed) {
+					auto hpleft = 100 - baseplayer->health();
+					if (hpleft > 20) { //use syringe/medkit
+						auto s = misc::FindFromHotbar(baseplayer, _(L"Med"));
+						if (s < 0)
+							s = misc::FindFromHotbar(baseplayer, _(L"Bandage"));
+						if (s >= 0)
+						{
+							auto cs = baseplayer->Belt()->GetSelectedSlot();
+							if (s != cs)
+								baseplayer->Belt()->SetSelectedSlot(s);
+							if (held->timeSinceDeploy() > held->deployDelay()
+								&& held->nextAttackTime() < get_fixedTime()) {
+								held->ServerRPC(_(L"UseSelf"));
+							}
+						}
+					}
+					else if (hpleft < 20 && hpleft > 1) { //use bandage
+						auto s = misc::FindFromHotbar(baseplayer, _(L"Bandage"));
+						if (s < 0)
+							s = misc::FindFromHotbar(baseplayer, _(L"Med"));
+						if (s >= 0)
+						{
+							auto cs = baseplayer->Belt()->GetSelectedSlot();
+							if (s != cs)
+								baseplayer->Belt()->SetSelectedSlot(s);
+							if (held->timeSinceDeploy() > held->deployDelay()
+								&& held->nextAttackTime() < get_fixedTime()) {
+								held->ServerRPC(_(L"UseSelf"));
+							}
+						}
+					}
+				}
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 
 
 				//desync on key
@@ -1408,6 +1591,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				else if (!is_lagging && !is_speeding)
 					baseplayer->clientTickInterval() = 0.05f;
 
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 
 				if (!vars->misc.fake_lag || unity::GetKey(vars->keybinds.fakelag)) {
 					if (!is_lagging && !flying && vars->misc.fake_lag && !is_speeding) {
@@ -1424,11 +1608,13 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					is_lagging = false;
 				}
 
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				if (vars->misc.eyeoffset || unity::GetKey(vars->keybinds.neck))
 				{
 					baseplayer->eyes()->set_view_offset(Vector3(0, vars->misc.PlayerEyes, 0));
 				}
 
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				if (auto movement = baseplayer->movement()) {
 					if (vars->misc.spiderman) {
 						movement->set_ground_angles_new(-1);
@@ -1453,6 +1639,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				}
 				auto item = baseplayer->GetActiveItem();
 
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				//float mm_eye = ((0.01f + ((vars->desyncTime + 2.f / 60.f + 0.125f) * baseplayer->max_velocity())));
 				bool IsMounted = esp::local_player->modelState()->has_flag(rust::classes::ModelState_Flag::Mounted);
 				float maxVelocity = get_maxspeed(esp::local_player);
@@ -1462,6 +1649,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				float timeSinceLastTickClamped = max(0.f, min(_timeSinceLastTick, 1.f));
 				float mm_eye = 0.1f + (timeSinceLastTickClamped + 2.f / 60.f) * 1.5f * maxVelocity;
 
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				if (esp::best_target.ent && held && wpn)
 				{
 					//auto mag = *reinterpret_cast<uintptr_t*>(held + 0x2C0);
@@ -1547,6 +1735,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				}
 				else misc::manipulate_vis = false;
 
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				if (vars->misc.speedhack && unity::GetKey(vars->keybinds.timescale)) {
 					set_timeScale(vars->misc.speedhackspeed);
 					is_speeding = true;
@@ -1557,6 +1746,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					is_speeding = false;
 				}
 
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d before item"), echocount++));
 				auto target = esp::best_target; //baseplayer->get_aimbot_target(unity::get_camera_pos());
 				if (item) {
 					auto baseprojectile = *reinterpret_cast<BaseProjectile**>((uintptr_t)item + heldEntity);//item->GetHeldEntity<BaseProjectile>();
@@ -1849,13 +2039,13 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 									}
 									else {
 										if (vars->combat.rapidfire)
-											baseprojectile->repeatDelay() = 0.05f;
+											baseprojectile->repeatDelay() = vars->combat.firerate;
 										if (vars->combat.automatic)
 											baseprojectile->automatic() = true;
 									}
 
 									if (vars->combat.fast_bullet)
-										baseprojectile->projectileVelocityScale() = 1.49f;
+										baseprojectile->projectileVelocityScale() = 1.48f;
 									if (vars->combat.nospread)
 										baseprojectile->set_no_spread();
 									baseprojectile->set_recoil();
@@ -1869,6 +2059,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					}
 				}
 
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d after item"), echocount++));
 				if (vars->misc.instant_revive) {
 					if (target.ent)
 					{
@@ -1883,6 +2074,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					}
 				}
 
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				if (vars->misc.gesture_spam > 1
 					&& get_fixedTime() > last_gesture_rpc + 0.35f)
 				{
@@ -1926,15 +2118,18 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					last_gesture_rpc = get_fixedTime();
 				}
 
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::Water, !vars->misc.no_playercollision);
 				unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::Tree, vars->misc.no_playercollision);
 				unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::AI, vars->misc.no_playercollision);
 
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				draw_get();
 				if (tick_time > vars->tick_time_when_called + 10) {
 					unity::camera = unity::get_main_camera();
 					vars->tick_time_when_called = tick_time;
 				}
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 
 				if (vars->misc.autofarm
 					|| vars->misc.walktomarker) {
@@ -1944,23 +2139,158 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						state->set_aim_angles(dir);
 					}
 				}
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d end of main if"), echocount++));
 			}
 			else vars->visual.snapline = 0;
 
 
+			//baseplayer->console_echo(string::wformat(_(L"echocount %d execute original"), echocount++));
 			orig::baseplayer_client_input(baseplayer, state);
 
+			//baseplayer->console_echo(string::wformat(_(L"echocount %d before spinbot"), echocount++));
 			if (baseplayer)
 			{
 				if (baseplayer->is_sleeping()) return;
 				auto model_state = baseplayer->modelState();
 
-				if (vars->misc.spinbot) {
-					state->set_aim_angles(Vector3(100, my_rand() % 999 + -999, 100));
+				Vector3 real_angles = safe_read(state + 0x18, Vector3);
+				Vector3 spin_angles = Vector3::Zero();
+				bool targeted = vars->targetted;
+				int jitter_speed = 10;
+				int spin_speed = vars->misc.spinspeed;
+				switch (vars->misc.antiaim)
+				{
+				case 0: //x = yaw (up/down), y = pitch (spin), z = roll?????;
+					//if (targeted)
+					//	spin_angles = Vector3(-999.f, (rand() % 999 + -999), (rand() % 999 + -999));
+					break;
+				case 1: //backwards
+					spin_angles.y = real_angles.y + (targeted ? (rand() % -180 + 1) : 180.f);
+					break;
+				case 2: //backwards (down)
+					spin_angles.x = (targeted ? 999.f : -999.f);
+					spin_angles.z = 0.f;
+					spin_angles.y = real_angles.y + 180.f;
+					break;
+				case 3: //backwards (up)
+					spin_angles.x = (targeted ? -999.f : 999.f);
+					spin_angles.z = (targeted ? -999.f : 999.f);
+					spin_angles.y = real_angles.y + 180.f;
+					break;
+				case 4: //left
+					spin_angles.y = real_angles.y + (targeted ? (rand() % -90 + 1) : 90.f);
+					break;
+				case 5: //left (down)
+					spin_angles.x = (targeted ? 999.f : -999.f);
+					spin_angles.z = 0.f;
+					spin_angles.y = real_angles.y + (targeted ? (rand() % -90 + 1) : 90.f);
+					break;
+				case 6: //left (up)
+					spin_angles.x = (targeted ? -999.f : 999.f);
+					spin_angles.z = (targeted ? -999.f : 999.f);
+					spin_angles.y = real_angles.y + (targeted ? (rand() % -90 + 1) : 90.f);
+					break;
+				case 7: //right
+					spin_angles.y = real_angles.y + (targeted ? (rand() % 90 + 1) : -90.f);
+					break;
+				case 8: //right (down)
+					spin_angles.x = (targeted ? 999.f : -999.f);
+					spin_angles.z = 0.f;
+					spin_angles.y = real_angles.y + (targeted ? (rand() % 90 + 1) : -90.f);
+					break;
+				case 9: //right (up)
+					spin_angles.x = (targeted ? -999.f : 999.f);
+					spin_angles.z = (targeted ? -999.f : 999.f);
+					spin_angles.y = real_angles.y + (targeted ? (rand() % 90 + 1) : -90.f);
+					break;
+				case 10: //jitter
+					if (jitter <= jitter_speed * 1)
+					{
+						spin_angles.y = real_angles.y + (targeted ? (rand() % 45 + 1) : -45.f);
+					}
+					else if (jitter <= jitter_speed * 2)
+					{
+						spin_angles.y = real_angles.y + (targeted ? (rand() % 45 + 1) : 45.f);
+					}
+					else if (jitter <= jitter_speed * 3)
+					{
+						spin_angles.y = real_angles.y + (targeted ? (rand() % 180 + 1) : -180.f);
+						jitter = 1;
+					}
+					jitter = jitter + 1;
+					spin_angles.y = real_angles.y;
+					break;
+				case 11: //jitter (down)
+					if (jitter <= jitter_speed * 1)
+					{
+						spin_angles.y = real_angles.y + (targeted ? (rand() % 45 + 1) : -45.f);
+					}
+					else if (jitter <= jitter_speed * 2)
+					{
+						spin_angles.y = real_angles.y + (targeted ? (rand() % -45 + 1) : 45.f);
+					}
+					else if (jitter <= jitter_speed * 3)
+					{
+						spin_angles.y = real_angles.y + (targeted ? (rand() % -180 + 1) : 180.f);
+						jitter = 1;
+					}
+					jitter = jitter + 1;
+					spin_angles.x = (targeted ? (rand() % 999 + 1) : -999.f);
+					spin_angles.z = 0.f;
+					spin_angles.y = real_angles.y;
+					break;
+				case 12: //jitter (up)
+					if (jitter <= jitter_speed * 1)
+					{
+						spin_angles.y = real_angles.y + (targeted ? (rand() % -45 + 1) : 45.f);
+					}
+					else if (jitter <= jitter_speed * 2)
+					{
+						spin_angles.y = real_angles.y + (targeted ? (rand() % 45 + 1) : -45.f);
+					}
+					else if (jitter <= jitter_speed * 3)
+					{
+						spin_angles.y = real_angles.y + (targeted ? (rand() % 180 + 1) : -180.f);
+						jitter = 1;
+					}
+					jitter = jitter + 1;
+					spin_angles.x = (targeted ? -999.f : 999.f);
+					spin_angles.z = (targeted ? -999.f : 999.f);
+					spin_angles.y = real_angles.y;
+					break;
+				case 13: //spin
+					spin_angles.y = targeted ? -(real_angles.y + (spin_speed * spin++)) : real_angles.y + (spin_speed * spin++);
+					if (spin > (360 / spin_speed))
+						spin = 1;
+					break;
+				case 14: //spin (down)
+					spin_angles.x = (targeted ? 999.f : -999.f);
+					spin_angles.z = 0.f;
+					spin_angles.y = targeted ? -(real_angles.y + (spin_speed * spin++)) : real_angles.y + (spin_speed * spin++);
+					if (spin > (360 / spin_speed))
+						spin = 1;
+					break;
+				case 15: //spin (up)
+					spin_angles.x = (targeted ? -999.f : 999.f);
+					spin_angles.y = targeted ? -(real_angles.y + (spin_speed * spin++)) : real_angles.y + (spin_speed * spin++);
+					spin_angles.z = (targeted ? -999.f : 999.f);
+					if (spin > (360 / spin_speed))
+						spin = 1;
+					break;
+				case 16: //random
+					spin_angles = Vector3((rand() % 999 + -999), (rand() % 999 + -999), (rand() % 999 + -999));
+					break;
 				}
+
+				if (spin_angles != Vector3::Zero())
+					state->set_aim_angles(spin_angles);
+				vars->targetted = false;
 			}
+
+			//baseplayer->console_echo(string::wformat(_(L"echocount %d returning"), echocount++));
 		}
 		__except (true) {
+			//baseplayer->console_echo(string::wformat(_(L"echocount %d __except return"), echocount++));
 			return orig::baseplayer_client_input(baseplayer, state);
 		}
 	}

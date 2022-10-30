@@ -25,12 +25,13 @@ namespace offsets {
 
 #define oLineOfSightRadius 0x7F48E0
 #define oSphereCast 0x251A8B0
+#define oGetWorldVelocity 0x8523D0
+#define oSetRayleigh 0x468AB0
 #define oConsoleSystem_GetAll 39005120 //"ConsoleSystem.Index$$get_All"
 #define oConvar 56756472
 #define oTerrainMeta_TypeInfo 56756848
 #define oPlayerEyes_TypeInfo 56641736
 #define oPlayerBelt_TypeInfo 56741408
-#define oGetWorldVelocity 0x8523D0
 //REAL RUST
 namespace offsets {
     constexpr auto Method_BaseEntity_ServerRPC_string_bool_address = 56987048;// address "Name": "Method$BaseEntity.ServerRPC<string, bool>()",
@@ -43,6 +44,9 @@ namespace offsets {
     constexpr auto Method$Facepunch_Pool_GetList_TraceInfo_MethodAddress = 6785184;// method address
     constexpr auto Method$BaseEntity_ServerRPC_uint = 56985960;// "Address":,"Method$BaseEntity.ServerRPC<uint>()" //both addresses
     constexpr auto BaseEntity$$ServerRPC_uint_ = 17888096;// method address
+
+    constexpr auto Method$BaseEntity_ServerRPC_uintstring = 56986088;// "Address":,"Method$BaseEntity.ServerRPC<uint>()" //both addresses
+    constexpr auto BaseEntity$$ServerRPC_uintstring_ = 17886768;// method address
 }
 
 /*

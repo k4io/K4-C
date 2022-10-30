@@ -353,6 +353,35 @@ namespace misc
 		}
 	}
 
+	bool TestInsideTerrain(Vector3 pos) {
+		uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTerrainMeta_TypeInfo); //52690304 alkad
+		uintptr_t fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+
+
+		auto terrain = *reinterpret_cast<Terrain**>(fieldz + 0x8);
+		if (!terrain) return false;
+		auto collision = *reinterpret_cast<TerrainCollision**>(fieldz + 0x70);
+		if (!collision) return false;
+		auto heightmap = *reinterpret_cast<TerrainHeightMap**>(fieldz + 0xB0);
+		if (!heightmap) return false;
+		auto position = *reinterpret_cast<Vector3*>(fieldz + 0x18);
+		if (position.is_empty()) return false;
+
+		float height = heightmap->GetHeight(pos);
+		
+		if (pos.y > height - .3f)
+			return false;
+		float f = position.x + terrain->SampleHeight(pos);
+		return pos.y <= f - .3f && collision->GetIgnore(pos, .01f);
+	}
+
+	bool IsInsideTerrain(BasePlayer* ply, bool prevent = false) {
+		bool result = TestInsideTerrain(ply->transform()->position());
+		if (prevent && result)
+			ply->ForcePositionTo(cLastTickPos);
+		return result;
+	}
+
 	bool TestNoClipping(BasePlayer* ply = esp::local_player,
 		Vector3 oldPos = Vector3(0, 0, 0),
 		Vector3 newPos = Vector3(0, 0, 0),
@@ -363,15 +392,14 @@ namespace misc
 		Vector3 vector = oldPos - normalized * backtracking;
 		float magnitude = (newPos - vector).Length();
 		Ray z = Ray(vector, normalized);
-		bool flag = unity::Raycast(z, magnitude + radius, 429990145);
+		
+		bool flag = false; //unity::Raycast(z, magnitude + radius, 429990145);
 
-		if (!flag)
-		{
-			typedef bool (*AAA)(Ray, float, float, int);
-			//real rust 0x2298A50
-			//alkad rust 0x2271FB0
-			flag = ((AAA)(mem::game_assembly_base + oSphereCast))(z, radius, magnitude, 429990145);
-		}
+
+		typedef bool (*AAA)(Ray, float, float, int);
+		//real rust 0x2298A50
+		//alkad rust 0x2271FB0
+		flag = ((AAA)(mem::game_assembly_base + oSphereCast))(z, radius, magnitude, 429990145);
 		return flag;
 	}
 
@@ -399,6 +427,9 @@ namespace misc
 		{
 			flag = false;
 		}
+
+		Vector3 v = *reinterpret_cast<Vector3*>((uintptr_t)loco + eyes);
+		Vector3 re_p = loco->model()->boneTransforms()->get(47)->position() + loco->model()->boneTransforms()->get(47)->up() * (loco->eyes()->get_view_offset().y + v.y);
 
 		auto t = loco->transform();
 		Vector3 loco_position = t->position();
@@ -445,6 +476,7 @@ namespace misc
 	{
 		Vector3 v = *reinterpret_cast<Vector3*>((uintptr_t)ply + eyes);
 		Vector3 re_p = ply->model()->boneTransforms()->get(47)->position() + ply->model()->boneTransforms()->get(47)->up() * (ply->eyes()->get_view_offset().y + v.y);
+		//Vector3 re_p = ply->transform()->position() + ply->transform()->up() * (ply->eyes()->get_view_offset().y + v.y);
 
 		if (ply->is_visible(re_p, pos)) {
 			misc::best_lean = Vector3(0, 0, 0);
@@ -497,7 +529,7 @@ namespace misc
 			Vector3 p = re_p + a;
 
 			//check between manip pos and eye pos
-			if (!ply->is_visible(p, re_p, .2f))
+			if (!ply->is_visible(p, re_p, 0.18f))
 				return false;
 
 			//if (!ply->is_visible(p - Vector3(0, 0.3, 0), re_p)) //double check not too low as likes to shoot from just under the ground
@@ -507,7 +539,7 @@ namespace misc
 				Sphere(p, 0.05f, col(10, 30, 90, 1), 0.01f, 10);
 
 			//check between manip pos and player pos
-			if (!ply->is_visible(p, pos, .2f))
+			if (!ply->is_visible(p, pos, 0.18f))
 			{
 				if (!vars->combat.thick_bullet || !vars->combat.targetbehindwall) return false;
 				bool t = false;
@@ -845,6 +877,11 @@ namespace misc
 				//}
 				//bad
 			}
+			
+			if (IsInsideTerrain(lp, vars->misc.antideathbarrier)) {
+				//do sumn
+			}
+
 			settings::vert_flyhack = flyhackDistanceVertical;
 			settings::hor_flyhack = flyhackDistanceHorizontal;
 			//settings::speedhack = speedhackDistance + 4.0f;
@@ -969,8 +1006,28 @@ namespace misc
 		}
 	}
 
-	std::pair<int, bool> FindFromHotbar(BasePlayer* lp, bool findtool = true) {
+	int FindFromHotbar(BasePlayer* lp, std::wstring shortname) {
 		System::list<Item*>* belt = lp->get_belt_items();
+		auto Belt = lp->Belt();
+		int id = -1;
+		if (belt) {
+			auto checkitem = [&](Item* item, int idx) {
+				if (!item) return false;
+				if (std::wstring(item->get_weapon_name()).find(shortname.c_str()) != std::wstring::npos)
+					return true;
+				return false;
+			};
+
+			for (size_t i = 0; i < 5; i++)
+				if(checkitem(Belt->GetItemInSlot(i), i))
+					id = i;
+		}
+		return id;
+	}
+
+	std::pair<int, bool> FindToolFromHotbar(BasePlayer* lp, bool findtool = true) {
+		System::list<Item*>* belt = lp->get_belt_items();
+		auto Belt = lp->Belt();
 		int id = -1;
 		int ied = -2;
 		int h_id = -3;
@@ -1014,10 +1071,15 @@ namespace misc
 				}
 			};
 			for (size_t i = 0; i < 5; i++)
-				checkitem(belt->get(i), i);
+				checkitem(Belt->GetItemInSlot(i), i);
+				//checkitem(belt->get(i), i);
 		}
 		return std::make_pair(id, ied == h_id);
 	}
+
+	namespace anticheater {
+
+	};
 
 	namespace autobot {
 		bool needs_to_jump = false;
@@ -1419,12 +1481,12 @@ namespace misc
 				auto marker_pos = Transform->position();
 				node.pos = marker_pos;
 				if (node.pos.distance(eyepos) < 5.f) { //equip tool
-					auto toolslot = FindFromHotbar(lp);
+					auto toolslot = FindToolFromHotbar(lp);
 					if (!toolslot.second && toolslot.first > -1)
 						lp->Belt()->SetSelectedSlot(toolslot.first);
 				}
 				else { //equip weapon
-					auto toolslot = FindFromHotbar(lp, false);
+					auto toolslot = FindToolFromHotbar(lp, false);
 					if (!toolslot.second && toolslot.first > -1)
 						lp->Belt()->SetSelectedSlot(toolslot.first);
 				}
@@ -1528,13 +1590,19 @@ namespace misc
 			if (target.ent) {
 				auto wv = target.avg_vel;
 
+				auto worldvel = target.ent->GetWorldVelocity();
+
 				if (wv.is_empty() || wv.is_nan())
-					wv = target.ent->GetWorldVelocity();
+					wv = worldvel;
 
 				if (target.is_heli)
-					wv = target.ent->GetWorldVelocity();
+					wv = worldvel;
+
+				if (worldvel.is_empty()) //player has stopped moving so override average velocity
+					wv = Vector3(0, 0, 0);
 
 				Vector3 player_velocity = Vector3(wv.x, 0, wv.z) * (target.is_heli ? 0.75f : vars->combat.movementpred);
+
 
 				Vector3 final_vel = player_velocity * travel_t;
 				Vector3 actual = target_pos += final_vel;

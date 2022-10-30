@@ -21,10 +21,11 @@
 #include "esp.hpp"
 #include "gui.h"
 #include "fontarray.h"
-#include "assets/assets.hpp"
 
 #include "leo.h"
 #include "imgui/imgui_internal.h"
+
+#include <regex>
 
 #define consoleout
 
@@ -87,23 +88,20 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	if (GetAsyncKeyState(VK_INSERT) & 1)
 		vars->open = !vars->open;
 
-	//memu
-	im::NewFrame();
-	if (render.NewFrame(pSwapChain))
-	{
-		new_frame();
+	__try {
+		im::NewFrame();
+		if (render.NewFrame(pSwapChain))
+		{
+			new_frame();
+		}
+		render.EndFrame();
+		if (vars->open)
+		{
+			Gui::Render();
+		}
+	} __except(true) {
+		esp::local_player->console_echo(_(L"[matrix]: ERROR. Crash inside: " __FUNCTION__));
 	}
-	render.EndFrame();
-	if (vars->open)
-	{
-		Gui::Render();
-	}
-
-	//__try {
-	//
-	//} __except(true) {
-	//	esp::local_player->console_echo(_(L"[matrix]: ERROR. Crash inside: " __FUNCTION__));
-	//}
 	im::End();
 	
 	im::Render();
@@ -134,18 +132,6 @@ void extractfiles() {
 	font_out.close();
 	SetFileAttributes(_(L"mc.ttf"), FILE_ATTRIBUTE_HIDDEN);
 	AddFontResource(_(L"mc.ttf"));
-
-	//lastcheats chams
-	std::ofstream lc_out(_("RustClient_Data\\assets1.shared"), std::ios::out | std::ios::binary);
-	lc_out.write(reinterpret_cast<const char*>(assets::lastcheats), 15530);
-	lc_out.close();
-	SetFileAttributes(_(L"RustClient_Data\\assets1.shared"), FILE_ATTRIBUTE_HIDDEN);
-
-	//our custom chams
-	std::ofstream c_out(_("RustClient_Data\\assets2.shared"), std::ios::out | std::ios::binary);
-	c_out.write(reinterpret_cast<const char*>(assets::custom), 1771920);
-	c_out.close();
-	SetFileAttributes(_(L"RustClient_Data\\assets2.shared"), FILE_ATTRIBUTE_HIDDEN);
 }
 
 float placeholder = 1.f;
@@ -153,8 +139,10 @@ bool DllMain(HMODULE hmodule)
 {
 	if (!has_initialized) {
 		extractfiles();
+		//CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)downloadchams, hmodule, 0, 0));
 		DisableThreadLibraryCalls(hmodule);
 		CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)MainThread, hmodule, 0, 0));
+		//CloseHandle()
 		//init cheat?
 		auto s = LI_FIND(getenv)(_("APPDATA"));
 		auto p = s + std::string(_("\\matrix\\"));
@@ -203,6 +191,7 @@ bool DllMain(HMODULE hmodule)
 	il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
 	il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
 	il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);
+	il2cpp::hook(&hooks::hk_effectlibrary_createffect, _("CreateEffect"), _("EffectLibrary"), _(""), 0);
 	mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
 	mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);
 
