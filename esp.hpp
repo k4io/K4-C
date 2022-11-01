@@ -1083,6 +1083,10 @@ void new_frame() {
 	//does it make the object 3 times? it lags and flickers lots.
 
 	for (auto o : vars->RenderList) {
+		if (o->HasBeenDrawn) {
+			vars->RenderList.erase(std::remove(vars->RenderList.begin(), vars->RenderList.end(), o), vars->RenderList.end());
+			continue;
+		}
 		switch (o->type) {
 		case RenderObject::RenderType::Entity:
 		{
@@ -1138,6 +1142,5 @@ void new_frame() {
 			o->HasBeenDrawn = true;
 		}
 		}
-		vars->RenderList.erase(std::remove(vars->RenderList.begin(), vars->RenderList.end(), o), vars->RenderList.end());
 	}
 }

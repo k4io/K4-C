@@ -46,6 +46,7 @@ D2D1::ColorF HSVD(float h, float s, float v, float a = 1.0f)
 
 std::vector<BasePlayer*> player_list = {};
 std::map<int32_t, BasePlayer*> player_map = {};
+std::vector<RenderObject*> tempRenderList{};
 
 struct hit {
 	Vector3 position;
@@ -727,7 +728,8 @@ namespace esp {
 			}
 
 			en->IsPlayer = true;
-			vars->RenderList.push_back(en);
+			//vars->RenderList.push_back(en);
+			tempRenderList.push_back(en);
 		}
 	}
 
@@ -1553,7 +1555,8 @@ namespace esp {
 							en->NameColor = ncol;
 							en->NamePos = w2s_position;
 
-							vars->RenderList.push_back(en);
+							//vars->RenderList.push_back(en);
+							tempRenderList.push_back(en);
 							//float color[3] = { esp_color.x / 255.f, esp_color.w / 255.f, esp_color.z / 255.f };
 							//render->StringCenter(w2s_position, esp_name, FLOAT4TOD3DCOLOR(color));
 							//esp::draw_item(w2s_position, esp_name, esp_color);
@@ -2237,6 +2240,8 @@ namespace esp {
 		
 		//draw_teammates();
 		//iterate_players();
+		tempRenderList.clear();
 		iterate_players_new();
+		vars->RenderList = tempRenderList;
 	}
 }
