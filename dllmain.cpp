@@ -88,7 +88,7 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	if (GetAsyncKeyState(VK_INSERT) & 1)
 		vars->open = !vars->open;
 
-	__try {
+	//__try {
 		im::NewFrame();
 		if (render.NewFrame(pSwapChain))
 		{
@@ -99,9 +99,9 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		{
 			Gui::Render();
 		}
-	} __except(true) {
-		esp::local_player->console_echo(_(L"[matrix]: ERROR. Crash inside: " __FUNCTION__));
-	}
+	//} __except(true) {
+	//	esp::local_player->console_echo(_(L"[matrix]: ERROR. Crash inside: " __FUNCTION__));
+	//}
 	im::End();
 	
 	im::Render();
@@ -114,6 +114,8 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 DWORD WINAPI MainThread(LPVOID lpReserved)
 {
 	bool init_hook = false;
+	//render = new RenderClass();
+	
 	do
 	{
 		if (kiero::init(kiero::RenderType::D3D11) == kiero::Status::Success)
@@ -188,8 +190,8 @@ bool DllMain(HMODULE hmodule)
 		has_initialized = true;
 	}
 
-	//il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
-	//il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
+	il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
+	il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
 	il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);
 	mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
 	mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);

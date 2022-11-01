@@ -1177,7 +1177,7 @@ namespace Gui
 			im::Combo(_("Hitboxes"), &vars->combat.hitbox,
 				_("Head\0Body\0Upperbody\0Penis\0Hands\0Legs\0Feet"));
 			im::Checkbox(_("Randomize hitboxes"), &vars->combat.randomize);
-			//im::Checkbox(_("Hitscan"), &vars->combat.HitScan);
+			im::Checkbox(_("Hitscan"), &vars->combat.HitScan);
 			im::Checkbox(_("Manipulator"), &vars->combat.manipulator);
 			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Abuses desync (0s-1s) and eye forgiveness to spawn bullets up to 10m away"));
@@ -1480,6 +1480,7 @@ namespace Gui
 				_("Wood\0Stone\0Metal\0Armored"));
 			//im::Checkbox(_("Auto refill"), &vars->misc.autorefill);
 			im::Checkbox(_("Fakelag"), &vars->misc.fake_lag);
+			im::Checkbox(_("Freeze on desync"), &vars->misc.freezeondesync);
 			im::Checkbox(_("Desync on key"), &vars->misc.desync);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("D"), &vars->keybinds.desync_ok, ImVec2(50, 14));

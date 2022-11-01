@@ -418,7 +418,11 @@ namespace hooks {
 						}
 					}
 				}
-				
+			}
+			if (vars->combat.HitScan) {
+				auto n = ((BasePlayer*)target.ent)->GetVisibleBone(rpc_position);
+				if(!n.is_empty())
+					target_pos = n;
 			}
 			target_pos.y += 0.2f;
 
@@ -888,260 +892,264 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 	void hk_playerwalkmovement_ClientInput(PlayerWalkMovement* player_walk_movement, uintptr_t inputstate, ModelState* model_state) {
 		//if (esp::local_player) esp::local_player->console_echo(_(L"PWM clientinput start"));
-		if (player_walk_movement && inputstate && model_state) {
-			orig::playerwalkmovement_client_input(player_walk_movement, inputstate, model_state);
-			Vector3 vel = player_walk_movement->get_TargetMovement();
-			auto loco = esp::local_player;
-			auto dont_move = false;
-			if ((vars->combat.manipulator2 || vars->combat.manipulator)
-					&& (unity::GetKey(vars->keybinds.manipulator)
-						|| misc::manipulate_vis))
-			{
+
+		orig::playerwalkmovement_client_input(player_walk_movement, inputstate, model_state);
+		Vector3 vel = player_walk_movement->get_TargetMovement();
+		auto baseplayer = esp::local_player;
+		if (!baseplayer) return;
+		auto dont_move = false;
+		//if (esp::local_player) esp::local_player->console_echo(_(L"before manipulator"));
+		if ((vars->combat.manipulator2 || vars->combat.manipulator)
+			&& (unity::GetKey(vars->keybinds.manipulator)
+				|| misc::manipulate_vis))
+		{
+			if (vars->misc.freezeondesync) {
 				//manipulating
 				player_walk_movement->set_TargetMovement({ 0, 0, 0 });
 				return;
 			}
-			if (!loco || loco->is_sleeping())
-				return;
-			auto time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
-			float _timeSinceLastTick = time - loco->lastSentTickTime();
-			if (loco && !loco->is_sleeping()) {
-				if (unity::GetKey(vars->keybinds.tp)) {
-					if (vars->last_teleport_time + 20.f < get_fixedTime()) {
-						vars->last_teleport_time = get_fixedTime();
+		}
+		//if (esp::local_player) esp::local_player->console_echo(_(L"baseplayer"));
+		if (!baseplayer || baseplayer->is_sleeping()) 
+			return;
+		//if (esp::local_player) esp::local_player->console_echo(_(L"baseplayer after"));
+		auto time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
+		float _timeSinceLastTick = time - baseplayer->lastSentTickTime();
+		if (baseplayer && !baseplayer->is_sleeping()) {
+			if (unity::GetKey(vars->keybinds.tp)) {
+				if (vars->last_teleport_time + 20.f < get_fixedTime()) {
+					vars->last_teleport_time = get_fixedTime();
 
-						Vector3 a = Vector3::Zero();
-						auto fwd = loco->eyes()->body_forward() * 5;
-						auto right = loco->eyes()->body_right() * 5;
-						auto up = Vector3(0, 5, 0);
+					Vector3 a = Vector3::Zero();
+					auto fwd = baseplayer->eyes()->body_forward() * 5;
+					auto right = baseplayer->eyes()->body_right() * 5;
+					auto up = Vector3(0, 5, 0);
 
-						if (unity::GetKey(0x57)) //W
-						{
-							a = fwd;
-						}
-						else if (unity::GetKey(0x41)) //A
-						{
-							a = -right;
-						}
-						else if (unity::GetKey(0x53)) //S
-						{
-							a = -fwd;
-						}
-						else if (unity::GetKey(0x44)) //D
-						{
-							a = right;
-						}
-						else {
-							a = up;
-						}
-
-						player_walk_movement->teleport_to(loco->transform()->position() + a, loco);
+					if (unity::GetKey(0x57)) //W
+					{
+						a = fwd;
 					}
+					else if (unity::GetKey(0x41)) //A
+					{
+						a = -right;
+					}
+					else if (unity::GetKey(0x53)) //S
+					{
+						a = -fwd;
+					}
+					else if (unity::GetKey(0x44)) //D
+					{
+						a = right;
+					}
+					else {
+						a = up;
+					}
+
+					player_walk_movement->teleport_to(baseplayer->transform()->position() + a, baseplayer);
 				}
 			}
-			if (loco && !loco->is_sleeping() && vars->desyncTime < 0.f) {
-				if (vars->misc.flyhack_stop) {
-					Vector3 curr = esp::local_player->transform()->position();
-					Vector3 old = misc::cLastTickPos;
-					Vector3 v4 = (curr - misc::cLastTickPos);
-					Vector3 ov = Vector3(curr.x, curr.y, curr.z);
+		}
+		if (baseplayer && !baseplayer->is_sleeping()) {
+			if (vars->misc.flyhack_stop) {
+				Vector3 curr = esp::local_player->transform()->position();
+				Vector3 old = misc::cLastTickPos;
+				Vector3 v4 = (curr - misc::cLastTickPos);
+				Vector3 ov = Vector3(curr.x, curr.y, curr.z);
 
-					if (settings::vert_flyhack >= 2.5f)
-						ov = Vector3(ov.x, curr.y < old.y ? (curr.y - 0.3f) : old.y, ov.z);
-					if (settings::hor_flyhack >= 6.f)
-						ov = Vector3(old.x, ov.y, old.z);
+				if (settings::vert_flyhack >= 2.5f)
+					ov = Vector3(ov.x, curr.y < old.y ? (curr.y - 0.3f) : old.y, ov.z);
+				if (settings::hor_flyhack >= 6.f)
+					ov = Vector3(old.x, ov.y, old.z);
 
-					if (settings::vert_flyhack >= 2.5f
-						|| settings::hor_flyhack >= 6.f) {
-						if (ov != curr)
-							player_walk_movement->teleport_to(ov, loco);
-						dont_move = true;
-					}
+				if (settings::vert_flyhack >= 2.5f
+					|| settings::hor_flyhack >= 6.f) {
+					if (ov != curr)
+						player_walk_movement->teleport_to(ov, baseplayer);
+					dont_move = true;
 				}
+			}
 
-				if (loco->transform())
+			if (baseplayer->transform())
+			{
+				misc::cLastTickEyePos = baseplayer->eyes()->position();//get_transform(esp::local_player)->get_bone_position();//baseplayer->eyes()->get_position();
+				misc::cLastTickPos = baseplayer->transform()->position();//_get_transform(esp::local_player)->get_position();//get_transform(esp::local_player)->get_bone_position();//baseplayer->eyes()->get_position();
+				misc::ticks.AddPoint(misc::cLastTickPos);
+				misc::ServerUpdate(get_deltaTime(), baseplayer);
+			}
+		}
+		else if (!baseplayer || baseplayer->is_sleeping())
+		{
+			settings::vert_flyhack = 0.f; settings::hor_flyhack = 0.f;
+		}
+
+		if (baseplayer && !baseplayer->is_sleeping())
+		{
+			float max_speed = (player_walk_movement->get_swimming() || player_walk_movement->get_ducking() > 0.5) ? 1.7f : 5.5f;
+
+			set_sprinting(model_state, true);
+			flying = player_walk_movement->get_flying();
+
+			if (vars->misc.silentwalk && vars->keybinds.silentwalk) {
+				set_onLadder(model_state, true);
+			}
+			else set_onLadder(model_state, false);
+
+			if (vars->misc.interactive_debug)
+				model_state->set_flag(rust::classes::ModelState_Flag::Mounted);
+
+			model_state->remove_flag(rust::classes::ModelState_Flag::Flying);
+
+			if (vars->misc.always_sprint) {
+				if (vel.length() > 0.f) {
+					Vector3 target_vel = Vector3(vel.x / vel.length() * max_speed, vel.y, vel.z / vel.length() * max_speed);
+					player_walk_movement->set_TargetMovement(target_vel);
+				}
+			}
+
+			if (unity::GetKeyDown(rust::classes::KeyCode::Space)
+				&& vars->misc.infinite_jump)
+			{
+				misc::autobot::do_jump(player_walk_movement, model_state);
+			}
+
+			auto wpn = esp::local_player->GetActiveItem();
+			auto held = wpn ? wpn->GetHeldEntity<BaseProjectile>() : nullptr;
+			if (vars->combat.always_reload
+				&& held)
+			{
+				misc::time_since_last_shot = (get_fixedTime() - misc::fixed_time_last_shot);
+				vars->time_since_last_shot = misc::time_since_last_shot;
+				if (misc::just_shot && (misc::time_since_last_shot > 0.2f))
 				{
-					misc::cLastTickEyePos = loco->eyes()->position();//get_transform(esp::local_player)->get_bone_position();//baseplayer->eyes()->get_position();
-					misc::cLastTickPos = loco->transform()->position();//_get_transform(esp::local_player)->get_position();//get_transform(esp::local_player)->get_bone_position();//baseplayer->eyes()->get_position();
-					misc::ticks.AddPoint(misc::cLastTickPos);
-					misc::ServerUpdate(get_deltaTime(), loco);
+					held->ServerRPC(_(L"StartReload"));
+					esp::local_player->console_echo(_(L"[matrix]: ClientInput - starting reload"));
+					//esp::local_player->SendSignalBroadcast(rust::classes::Signal::Reload); //does this cause animation? YES
+					misc::just_shot = false;
+				}
+				float reloadtime = *reinterpret_cast<float*>((uintptr_t)held + 0x2B8);//held->reloadTime();
+				vars->reload = reloadtime;
+
+				if (misc::time_since_last_shot > reloadtime //-10% for faster reloads than normal >:)
+					&& !misc::did_reload)
+				{
+					esp::local_player->console_echo(_(L"[matrix]: ClientInput - finishing reload"));
+					held->ServerRPC(_(L"Reload"));
+					misc::did_reload = true;
+					misc::time_since_last_shot = 0;
 				}
 			}
-			else if (!loco || loco->is_sleeping())
+			else
 			{
-				settings::vert_flyhack = 0.f; settings::hor_flyhack = 0.f;
+				misc::time_since_last_shot = 0;
+			}
+			if (!baseplayer->is_sleeping()) {
+
+				//auto nm = il2cpp::methods::object_new(il2cpp::init_class(_("GameObject"), _("UnityEngine")));
+				//create(nm, _(L""));
+				//if (vars->misc.autofarm
+				//	&& !misc::hasNavigator) {
+				//	misc::hasNavigator = true;
+				//	auto comp = (BaseNavigator*)add_component((uintptr_t)((Networkable*)baseplayer)->GetComponent<GameObject>(unity::GetType(_("UnityEngine"), _("GameObject"))),
+				//		il2cpp::type_object(_(""), _("BaseNavigator")));
+				//	if (misc::node.ent == 0)
+				//		misc::node.ent = (BaseEntity*)baseplayer->find_closest(_("OreResourceEntity"), (Networkable*)baseplayer, 200.f);
+				//	comp->Destination() = misc::node.ent->get_transform()->get_position();
+				//}
+
+				switch (vars->misc.walkto)
+				{
+				case 0: //None	
+					misc::node.ent = 0;
+					misc::node.path.clear();
+					misc::node.pos = Vector3(0, 0, 0);
+					misc::node.steps = 0;
+					break;
+				case 1: //Marker
+				{
+					auto note = esp::local_player->ClientCurrentMapNote();
+					if (note) {
+						auto pos = esp::local_player->transform()->position();
+						Vector3 marker_pos = note->worldPosition;
+						if (marker_pos.is_empty())
+							break;
+						misc::node.pos = marker_pos;
+						misc::autobot::pathfind(player_walk_movement, marker_pos);
+					}
+					break;
+				}
+				case 2: //Stone
+					misc::autobot::auto_farm(player_walk_movement, _("OreResourceEntity"), _("stone"));
+					break;
+				case 3: //Sulfur
+					misc::autobot::auto_farm(player_walk_movement, _("OreResourceEntity"), _("sulfur"));
+					break;
+				case 4: //Metal
+					misc::autobot::auto_farm(player_walk_movement, _("OreResourceEntity"), _("metal"));
+					break;
+				case 5: //Player
+					misc::autobot::walktoplayer(player_walk_movement, vars->misc.playerselected);
+					break;
+				case 6: //Barrels
+					misc::autobot::auto_farm(player_walk_movement, _(""), _("barrel"));
+					break;
+				}
 			}
 
-			if (loco && !loco->is_sleeping() && vars->desyncTime < 0.f)
+			//maybe find max amount of velocity we can have before speedhack violations kick in?
+			if (vars->misc.antispeed)
 			{
-				float max_speed = (player_walk_movement->get_swimming() || player_walk_movement->get_ducking() > 0.5) ? 1.7f : 5.5f;
+				Vector3 current_velocity = player_walk_movement->get_TargetMovement();
 
-				set_sprinting(model_state, true);
-				flying = player_walk_movement->get_flying();
+				float mul = misc::speedhackDistance + 4;
 
-				if (vars->misc.silentwalk && vars->keybinds.silentwalk) {
+				if (mul > .1f && misc::speedhackCooldownEnd < get_fixedTime())//start cooldown
+				{
+					misc::lastSpeedhackReset = get_fixedTime();
+					misc::speedhackCooldownEnd = get_fixedTime() + 20.f;
+				}
+				else //still on cooldown
+				{
+					auto timeleft = misc::speedhackCooldownEnd - get_fixedTime(); //will be 10
+					//auto remainder = (timeleft - 10.f) < 0 ? 0 : (timeleft - 10.f);
+					auto remainder = timeleft > 20 ? 20 : (timeleft < 0 ? 0 : timeleft);
+					Vector3 new_vel = current_velocity;
+					float fslowdown = (mul / 1.f);
+					if (mul > .3f)
+					{
+						//auto fslowdown = (mul / 3.f);//percent to slow down
+						fslowdown = (mul / 0.5f);//percent to slow down
+						std::clamp(fslowdown, 0.f, 1.f);
+						Vector3 new_vel = Vector3(current_velocity.x * (2.f - fslowdown), current_velocity.y, current_velocity.z * (2.f - fslowdown));
+					}
+					else new_vel = Vector3(current_velocity.x * (2.f - (remainder / 20.f)), current_velocity.y, current_velocity.z * (2.f - (remainder / 20.f)));
+
+					player_walk_movement->set_TargetMovement(new_vel);
+				}
+			}
+
+			if (dont_move)
+				player_walk_movement->set_TargetMovement(Vector3(0, 0, 0));
+
+			if (vars->misc.flywall)
+			{
+				if (unity::GetKey(vars->keybinds.flywall))
+				{
 					set_onLadder(model_state, true);
-				}
-				else set_onLadder(model_state, false);
-
-				if (vars->misc.interactive_debug)
-					model_state->set_flag(rust::classes::ModelState_Flag::Mounted);
-
-				model_state->remove_flag(rust::classes::ModelState_Flag::Flying);
-
-				if (vars->misc.always_sprint) {
-					if (vel.length() > 0.f) {
-						Vector3 target_vel = Vector3(vel.x / vel.length() * max_speed, vel.y, vel.z / vel.length() * max_speed);
-						player_walk_movement->set_TargetMovement(target_vel);
-					}
-				}
-
-				if (unity::GetKeyDown(rust::classes::KeyCode::Space)
-					&& vars->misc.infinite_jump)
-				{
-					misc::autobot::do_jump(player_walk_movement, model_state);
-				}
-
-				auto wpn = esp::local_player->GetActiveItem();
-				auto held = wpn ? wpn->GetHeldEntity<BaseProjectile>() : nullptr;
-				if (vars->combat.always_reload
-					&& held)
-				{
-					misc::time_since_last_shot = (get_fixedTime() - misc::fixed_time_last_shot);
-					vars->time_since_last_shot = misc::time_since_last_shot;
-					if (misc::just_shot && (misc::time_since_last_shot > 0.2f))
+					if (settings::vert_flyhack > 1.5f
+						|| settings::hor_flyhack > 4.f)
 					{
-						held->ServerRPC(_(L"StartReload"));
-						esp::local_player->console_echo(_(L"[matrix]: ClientInput - starting reload"));
-						//esp::local_player->SendSignalBroadcast(rust::classes::Signal::Reload); //does this cause animation? YES
-						misc::just_shot = false;
+						//if (esp::local_player) esp::local_player->console_echo(_(L"PWM flywall return"));
+						return;
 					}
-					float reloadtime = *reinterpret_cast<float*>((uintptr_t)held + 0x2B8);//held->reloadTime();
-					vars->reload = reloadtime;
-
-					if (misc::time_since_last_shot > reloadtime //-10% for faster reloads than normal >:)
-						&& !misc::did_reload)
-					{
-						esp::local_player->console_echo(_(L"[matrix]: ClientInput - finishing reload"));
-						held->ServerRPC(_(L"Reload"));
-						misc::did_reload = true;
-						misc::time_since_last_shot = 0;
-					}
+					else
+						player_walk_movement->set_TargetMovement(Vector3(0, 25, 0));
 				}
 				else
 				{
-					misc::time_since_last_shot = 0;
+					set_onLadder(model_state, false);
 				}
-				if (!loco->is_sleeping()) {
-
-					//auto nm = il2cpp::methods::object_new(il2cpp::init_class(_("GameObject"), _("UnityEngine")));
-					//create(nm, _(L""));
-					//if (vars->misc.autofarm
-					//	&& !misc::hasNavigator) {
-					//	misc::hasNavigator = true;
-					//	auto comp = (BaseNavigator*)add_component((uintptr_t)((Networkable*)loco)->GetComponent<GameObject>(unity::GetType(_("UnityEngine"), _("GameObject"))),
-					//		il2cpp::type_object(_(""), _("BaseNavigator")));
-					//	if (misc::node.ent == 0)
-					//		misc::node.ent = (BaseEntity*)loco->find_closest(_("OreResourceEntity"), (Networkable*)loco, 200.f);
-					//	comp->Destination() = misc::node.ent->get_transform()->get_position();
-					//}
-
-					switch (vars->misc.walkto)
-					{
-					case 0: //None	
-						misc::node.ent = 0;
-						misc::node.path.clear();
-						misc::node.pos = Vector3(0, 0, 0);
-						misc::node.steps = 0;
-						break;
-					case 1: //Marker
-					{
-						auto note = esp::local_player->ClientCurrentMapNote();
-						if (note) {
-							auto pos = esp::local_player->transform()->position();
-							Vector3 marker_pos = note->worldPosition;
-							if (marker_pos.is_empty())
-								break;
-							misc::node.pos = marker_pos;
-							misc::autobot::pathfind(player_walk_movement, marker_pos);
-						}
-						break;
-					}
-					case 2: //Stone
-						misc::autobot::auto_farm(player_walk_movement, _("OreResourceEntity"), _("stone"));
-						break;
-					case 3: //Sulfur
-						misc::autobot::auto_farm(player_walk_movement, _("OreResourceEntity"), _("sulfur"));
-						break;
-					case 4: //Metal
-						misc::autobot::auto_farm(player_walk_movement, _("OreResourceEntity"), _("metal"));
-						break;
-					case 5: //Player
-						misc::autobot::walktoplayer(player_walk_movement, vars->misc.playerselected);
-						break;
-					case 6: //Barrels
-						misc::autobot::auto_farm(player_walk_movement, _(""), _("barrel"));
-						break;
-					}
-				}
-
-				//maybe find max amount of velocity we can have before speedhack violations kick in?
-				if (vars->misc.antispeed)
-				{
-					Vector3 current_velocity = player_walk_movement->get_TargetMovement();
-
-					float mul = misc::speedhackDistance + 4;
-
-					if (mul > .1f && misc::speedhackCooldownEnd < get_fixedTime())//start cooldown
-					{
-						misc::lastSpeedhackReset = get_fixedTime();
-						misc::speedhackCooldownEnd = get_fixedTime() + 20.f;
-					}
-					else //still on cooldown
-					{
-						auto timeleft = misc::speedhackCooldownEnd - get_fixedTime(); //will be 10
-						//auto remainder = (timeleft - 10.f) < 0 ? 0 : (timeleft - 10.f);
-						auto remainder = timeleft > 20 ? 20 : (timeleft < 0 ? 0 : timeleft);
-						Vector3 new_vel = current_velocity;
-						float fslowdown = (mul / 1.f);
-						if (mul > .3f)
-						{
-							//auto fslowdown = (mul / 3.f);//percent to slow down
-							fslowdown = (mul / 0.5f);//percent to slow down
-							std::clamp(fslowdown, 0.f, 1.f);
-							Vector3 new_vel = Vector3(current_velocity.x * (2.f - fslowdown), current_velocity.y, current_velocity.z * (2.f - fslowdown));
-						}
-						else new_vel = Vector3(current_velocity.x * (2.f - (remainder / 20.f)), current_velocity.y, current_velocity.z * (2.f - (remainder / 20.f)));
-
-						player_walk_movement->set_TargetMovement(new_vel);
-					}
-				}
-
-				if (dont_move)
-					player_walk_movement->set_TargetMovement(Vector3(0, 0, 0));
-
-				if (vars->misc.flywall)
-				{
-					if (unity::GetKey(vars->keybinds.flywall))
-					{
-						set_onLadder(model_state, true);
-						if (settings::vert_flyhack > 1.5f
-							|| settings::hor_flyhack > 4.f)
-						{
-							return;
-						}
-						else
-							player_walk_movement->set_TargetMovement(Vector3(0, 25, 0));
-					}
-					else
-					{
-						set_onLadder(model_state, false);
-					}
-				}
-				//if (esp::local_player) esp::local_player->console_echo(_(L"PWM flywall end"));
 			}
 		}
-		else return orig::playerwalkmovement_client_input(player_walk_movement, inputstate, model_state);
 	}
 
 	void hk_projectile_launchprojectile(BaseProjectile* p)
@@ -1266,6 +1274,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		PerformanceUI_Update(instance);
 	}
 
+
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
 	{
 		int echocount = 0;
@@ -1339,6 +1348,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 #pragma region static_method_hooks
 			static uintptr_t* serverrpc_projecshoot;
+			static uintptr_t* serverrpc_playerprojectileattack;
+			static uintptr_t* serverrpc_createbuilding;
 			if (!serverrpc_projecshoot) {
 				//auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot);
 				auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileShoot___);
@@ -1351,8 +1362,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					*serverrpc_projecshoot = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_projectileshoot);
 				}
 			}
-			
-			static uintptr_t* serverrpc_playerprojectileattack;
 			if (!serverrpc_playerprojectileattack) {
 				auto method_serverrpc_playerprojectileattack = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileAttack___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
 			
@@ -1364,7 +1373,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					*serverrpc_playerprojectileattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
 				}
 			}
-			static uintptr_t* serverrpc_createbuilding;
 			if (!serverrpc_createbuilding) {
 				auto method_serverrpc_createbuilding = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_CreateBuilding___);
 			
@@ -1378,13 +1386,15 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 #pragma endregion
 
-			auto loco = esp::local_player;
-			if (baseplayer && loco) {
-				get_skydome();
-				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
-				auto fixed_time = get_fixedTime();
+			//return orig::baseplayer_client_input(baseplayer, state);
+			if (baseplayer) {
+				//return orig::baseplayer_client_input(baseplayer, state);
+
 				auto tick_time = baseplayer->lastSentTickTime();
 				vars->desyncTime = (unity::get_realtimesincestartup() - tick_time) - 0.03125 * 3;
+				auto fixed_time = get_fixedTime();
+				get_skydome();
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 
 				auto wpn = baseplayer->GetActiveItem();
@@ -1393,6 +1403,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 
 				auto item2 = baseplayer->get_active_weapon();
+
+				//last return
 
 				if (vars->misc.attack_on_mountables) {
 					auto mountable = baseplayer->mounted();
@@ -1432,7 +1444,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				if (held) {
-					if (!LI_FIND(strcmp)(held->get_class_name(), _("Planner"))) {
+					if (!strcmp(held->get_class_name(), _("Planner"))) {
 						auto planner = reinterpret_cast<Planner*>(held);
 						if (unity::GetKeyDown(rust::classes::KeyCode::RightArrow))
 						{
@@ -1655,6 +1667,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				float _timeSinceLastTick = unity::get_realtimesincestartup() - esp::local_player->lastSentTickTime();
 				float timeSinceLastTickClamped = max(0.f, min(_timeSinceLastTick, 1.f));
 				float mm_eye = 0.1f + (timeSinceLastTickClamped + 2.f / 60.f) * 1.5f * maxVelocity;
+
 
 				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				if (esp::best_target.ent && held && wpn)
@@ -2315,6 +2328,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		}
 		__except (true) {
 			//baseplayer->console_echo(string::wformat(_(L"echocount %d __except return"), echocount++));
+			orig::baseplayer_client_input(baseplayer, state);
 			return;
 		}
 	}

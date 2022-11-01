@@ -1,4 +1,5 @@
 #pragma once
+#include "utils/vector.hpp"
 #include "utils/xorstr.hpp"
 #include <string>
 #include <vector>
@@ -37,6 +38,75 @@ public:
 		name(n), userid(i), is_friend(CheckFriend(i)), priority_target(p), follow(f2), block(b) { }
 };
 
+
+class RenderFlag {
+public:
+	Vector2 pos;
+	std::wstring Name;
+	float* Color;
+	RenderFlag(Vector2 position, std::wstring name, float* Col)
+		: pos(position), Name(name), Color(Col) { }
+};
+class RenderObject {
+public:
+	enum RenderType {
+		Entity,
+		Hotbar,
+		TC
+	};
+	RenderType type;
+	bool HasBeenDrawn = false;
+};
+class RLine {
+public:
+	Vector2 Start, End;
+	float *Color;
+	float Thickness;
+	RLine(Vector2 s, Vector2 e, float* c, float t = 1.5f) : Start(s), End(e), Color(c), Thickness(t) { }
+};
+class RHealthBar {
+public:
+	Vector2 Start, Sz, BarStart, BarSz;
+	float *Color;
+	RHealthBar() { }
+};
+class RenderEntity : public RenderObject {
+public:
+	Vector2 NamePos, DistPos;
+	float *LineColor, *NameColor, *DistColor;
+	float Dist;
+	bool IsPlayer = false;
+	std::wstring Name;
+	RHealthBar* Hp;
+	std::vector<RLine*> BoxLines{};
+	std::vector<RLine*> Skeleton{};
+	std::vector<RenderFlag*> Flags{};
+	RenderEntity() { type = RenderType::Entity; }
+	//RenderEntity(Vector2 namePos, Vector2 distPos, float* LineCol, float* NameCol, float* DistCol, float dist, std::wstring name, std::vector<RenderFlag> Flag, std::vector<RLine> lines, std::vector<RLine> Skel, RHealthBar hpbar)
+	//	: NamePos(namePos), DistPos(distPos), LineColor(LineCol), NameColor(NameCol), DistColor(DistCol), Dist(dist), Name(name), Flags(Flag), BoxLines(lines), Skeleton(Skel), Hp(hpbar) {
+	//	type = RenderType::Entity;
+	//}
+};
+class RenderHotbar : public RenderObject {
+public:
+	std::string Name;
+	std::vector<std::string> Items;
+	RenderHotbar(std::string n, std::vector<std::string> i)
+		: Name(n), Items(i) {
+		type = RenderType::Hotbar;
+	}
+};
+class RenderToolCupboard : public RenderObject {
+public:
+	Vector2 Start;
+	std::wstring Name = _(L"Tool cupboard");
+	std::vector<std::wstring> AuthNames;
+	RenderToolCupboard(Vector2 pos, std::vector<std::wstring> n) 
+		: Start(pos), AuthNames(n) {
+		type = RenderType::TC;
+	}
+};
+
 struct Vars
 {
 	std::string data_dir = _("");
@@ -49,22 +119,26 @@ struct Vars
 	std::map<ULONG, int> chams_player_map{};
 	std::map<ULONG, int> handchams_player_map{};
 
-
+	std::vector<RenderObject*> RenderList{};
+	IDXGISwapChain* pSwapChain;
 
 	int follow_player_id = -1;
 
 	bool open = false;
+	float rainbow[4] = { 0, 0, 0, 1 };
+	float bl[4] = { 0, 0, 0, 1 };
 	float accent_color[4] = { 28 / 255.f, 232 / 255.f, 89 / 255.f, 1.f };
 	float accent_color_opaque[4] = { 28 / 255.f, 232 / 255.f, 89 / 255.f, 0.6f };
 	bool wants_shoot = false;
 	bool rainbow_accent = false;
 	bool targetted = false;
+	bool grenadeclose = false;
 
 	float last_refill_time = 0.f;
 
 	struct combat {
 		bool aimbot = false;
-		bool vischeck = false;
+		bool vischeck = true;
 		float firerate = 0.133f;
 		float tpmultiplier = 0.75f;
 		bool psilent = false;
@@ -235,6 +309,7 @@ struct Vars
 		bool tp = false;
 		bool revivefriendsonly = false;
 		bool antispeed = false;
+		bool freezeondesync = false;
 		bool autofarmbarrel = false;
 		float    m_idebugcam_speed = 1.f;
 		float code_lock_code = 1000;
@@ -391,6 +466,10 @@ struct Vars
 				float visible[4] = { 1, 1, 1, 1 };
 				float invisible[4] = { 1, 1, 1, 1 };
 			}; animal animal;
+			struct vehicle {
+				float visible[4] = { 1, 1, 1, 1 };
+				float invisible[4] = { 1, 1, 1, 1 };
+			}; vehicle vehicle;
 			float collectibles[4] = { 1, 1, 1, 1 };
 		}; items items;
 

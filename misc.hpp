@@ -539,7 +539,7 @@ namespace misc
 				Sphere(p, 0.05f, col(10, 30, 90, 1), 0.01f, 10);
 
 			//check between manip pos and player pos
-			if (!ply->is_visible(p, pos, 0.18f))
+			if (!ply->is_visible(p, pos, 0.03f))
 			{
 				if (!vars->combat.thick_bullet || !vars->combat.targetbehindwall) return false;
 				bool t = false;
@@ -783,6 +783,7 @@ namespace misc
 		ticks.Reset();
 		auto trans = esp::local_player->transform();
 
+
 		if (ticks.HasNext()) {
 			bool flag = trans ? !(!trans) : false;
 			VMatrix v; v.matrix_identity();
@@ -800,6 +801,8 @@ namespace misc
 				vector = (flag ? ticks.currentPoint
 					: matrix4x.MultiplyPoint3x4(ticks.currentPoint));
 
+				if (esp::local_player->modelState()->has_flag(rust::classes::ModelState_Flag::OnLadder))
+					return false;
 				if (TestFlying2(lp, oldPos, vector, true))
 					return true;
 				oldPos = vector;

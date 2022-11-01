@@ -252,6 +252,8 @@ typedef struct Str
 
 //static auto setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
 
+static auto lpgetent = reinterpret_cast<BasePlayer*(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("LocalPlayer"), _("get_Entity"), 0, _(""), _(""))));
+
 static auto closestpoint = reinterpret_cast<Vector3(*)(BaseEntity*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ClosestPoint"), 1, _(""), _(""))));
 
 static auto thrownwpn_inheritedvel = reinterpret_cast<Vector3(*)(AttackEntity*, BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ThrownWeapon"), _("GetInheritedVelocity"), 2, _(""), _(""))));
@@ -464,6 +466,7 @@ float current_time;
 void init_bp() {
 	//setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
 	//ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
+	lpgetent = reinterpret_cast<BasePlayer * (*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("LocalPlayer"), _("get_Entity"), 0, _(""), _(""))));
 	closestpoint = reinterpret_cast<Vector3(*)(BaseEntity*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ClosestPoint"), 1, _(""), _(""))));
 	thrownwpn_inheritedvel = reinterpret_cast<Vector3(*)(AttackEntity*, BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ThrownWeapon"), _("GetInheritedVelocity"), 2, _(""), _(""))));
 	forceposto = reinterpret_cast<void(*)(BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ForcePositionTo"), 1, _(""), _(""))));
@@ -982,7 +985,7 @@ public:
 		auto off = reinterpret_cast<Transform * (*)(BaseEntity*, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("FindBone"), 1, _(""), _(""))));
 		return off(this, bone);
 	}
-	bool is_visible(Vector3 source, Vector3 destination, float p1 = 0.18f) {
+	bool is_visible(Vector3 source, Vector3 destination, float p1 = 0.03f) {
 		return unity::is_visible(source, destination, 0, p1);
 	}
 };
@@ -1692,6 +1695,7 @@ auto cliententities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), f
 class Networkable {
 public:
 	unsigned int get_id() {
+		if (!this) return -1;
 		return *reinterpret_cast<unsigned int*>((uintptr_t)this + 0x10);
 	}
 
@@ -1998,6 +2002,21 @@ public:
 
 	BoneCache* bones() {
 		return (this->isCached() ? cachedBones[this->userID()] : new BoneCache());
+	}
+
+	Vector3 GetVisibleBone(Vector3 from) {
+		if (!this) return {};
+		if (from.is_empty()) return {};
+		for (auto bone : { 48, 3, 4, 15, 14, 26, 57 }) {
+			Vector3 TargetPosition;
+			TargetPosition = this->get_bone_transform(bone)->position();
+			if (this->is_visible(from, TargetPosition)) {
+				settings::HitScanBone = bone;
+				return TargetPosition;
+			}
+		}
+		//empty
+		return Vector3::Zero();
 	}
 
 	void GroundAngleNew() {
@@ -3150,6 +3169,13 @@ public:
 
 class TerrainMeta {
 
+};
+
+class LocalPlayer {
+public:
+	static BasePlayer* Entity() {
+		return lpgetent();
+	}
 };
 
 void attack_melee(aim_target target, BaseProjectile* melee, BasePlayer* lp, bool is_player = false) {

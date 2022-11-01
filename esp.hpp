@@ -4,625 +4,6 @@
 
 #include "rust/features/player_esp.hpp"
 //#include "rust/classes.hpp"
-float r = 1.00f, g = 0.00f, b = 1.00f;
-
-struct hit {
-	Vector3 position;
-	float time;
-};
-std::vector<hit> hitpoints = {};
-
-std::vector<BasePlayer*> player_list = {};
-std::map<int32_t, BasePlayer*> player_map = {};
-
-void ColorConvertHSVtoRGB2(float h, float s, float v, float& out_r, float& out_g, float& out_b)
-{
-	if (s == 0.0f)
-	{
-		// gray
-		out_r = out_g = out_b = v;
-		return;
-	}
-
-	h = my_fmod(h, 1.0f) / (60.0f / 360.0f);
-	int   i = (int)h;
-	float f = h - (float)i;
-	float p = v * (1.0f - s);
-	float q = v * (1.0f - s * f);
-	float t = v * (1.0f - s * (1.0f - f));
-
-	switch (i)
-	{
-	case 0: out_r = v; out_g = t; out_b = p; break;
-	case 1: out_r = q; out_g = v; out_b = p; break;
-	case 2: out_r = p; out_g = v; out_b = t; break;
-	case 3: out_r = p; out_g = q; out_b = v; break;
-	case 4: out_r = t; out_g = p; out_b = v; break;
-	case 5: default: out_r = v; out_g = p; out_b = q; break;
-	}
-}
-
-D2D1::ColorF HSVD(float h, float s, float v, float a = 1.0f) 
-{ 
-	float r, g, b; ColorConvertHSVtoRGB2(h, s, v, r, g, b); return D2D1::ColorF(r, g, b, a);
-}
-
-void DrawPlayer(BasePlayer* ply, bool npc)	
-{
-	if (!ply) return;
-	if (!esp::local_player) return;
-	if (npc && !vars->visual.npc_esp) return;
-
-	auto player_id = ply->userID();
-
-	//esp::do_chams(ply);
-
-	bounds_t bounds;
-
-	struct bone_t {
-		Vector3 screen;
-		int8_t     index;
-		bool       on_screen;
-		Vector3 world_position;
-		bool visible;
-	};
-
-	std::array<bone_t, 20> bones = {
-		bone_t{ Vector3{}, 2, false, Vector3{}, false },  // l_hip
-		bone_t{ Vector3{}, 3, false, Vector3{}, false },  // l_knee
-		bone_t{ Vector3{}, 6, false, Vector3{}, false },  // l_ankle_scale
-		bone_t{ Vector3{}, 5, false, Vector3{}, false },  // l_toe
-		bone_t{ Vector3{}, 24, false, Vector3{}, false }, // l_upperarm
-		bone_t{ Vector3{}, 25, false, Vector3{}, false }, // l_forearm
-		bone_t{ Vector3{}, 26, false, Vector3{}, false }, // l_hand
-		bone_t{ Vector3{}, 27, false, Vector3{}, false }, // l_index1
-
-		bone_t{ Vector3{}, 48, false, Vector3{}, false }, // jaw
-		bone_t{ Vector3{}, 18, false, Vector3{}, false }, // spine1
-		bone_t{ Vector3{}, 21, false, Vector3{}, false }, // spine3
-		bone_t{ Vector3{}, 1, false, Vector3{}, false },  // pelvis
-		bone_t{ Vector3{}, 23, false, Vector3{}, false }, // l_clavicle
-
-		bone_t{ Vector3{}, 17, false, Vector3{}, false }, // r_ankle_scale
-		bone_t{ Vector3{}, 15, false, Vector3{}, false }, // r_foot
-		bone_t{ Vector3{}, 14, false, Vector3{}, false }, // r_knee
-		bone_t{ Vector3{}, 55, false, Vector3{}, false }, // r_upperarm
-		bone_t{ Vector3{}, 56, false, Vector3{}, false }, // r_forearm
-		bone_t{ Vector3{}, 57, false, Vector3{}, false }, // r_hand
-		bone_t{ Vector3{}, 76, false, Vector3{}, false }  // r_ulna
-	};
-
-	bool is_visible = false, is_teammate = ply->is_teammate(esp::local_player);
-	auto camera_position = unity::get_camera_pos();
-
-	
-	const auto get_bounds = [&](bounds_t& out, float expand = 0) -> bool {
-		bounds = { FLT_MAX, FLT_MIN, FLT_MAX, FLT_MIN };
-
-		for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
-
-			auto Transform = ply->model()->boneTransforms()->get(bone_idx);
-
-			world_position = Transform->position();
-
-			if (bone_idx == 48) // lol
-				world_position.y += 0.2f;
-
-			bone_screen = WorldToScreen(world_position);
-			if (bone_screen.x < bounds.left)
-				bounds.left = bone_screen.x;
-			if (bone_screen.x > bounds.right)
-				bounds.right = bone_screen.x;
-			if (bone_screen.y < bounds.top)
-				bounds.top = bone_screen.y;
-			if (bone_screen.y > bounds.bottom)
-				bounds.bottom = bone_screen.y;
-			on_screen = true;
-		}
-
-		if (bounds.left == FLT_MAX)
-			return false;
-		if (bounds.right == FLT_MIN)
-			return false;
-		if (bounds.top == FLT_MAX)
-			return false;
-		if (bounds.bottom == FLT_MIN)
-			return false;
-
-		bounds.left -= expand;
-		bounds.right += expand;
-		bounds.top -= expand;
-		bounds.bottom += expand;
-
-		bounds.center = bounds.left + ((bounds.right - bounds.left) / 2);
-
-		out = bounds;
-
-		return true;
-	};
-	
-	if (get_bounds(bounds, 4)) {
-		//is_visible = unity::is_visible(camera_position, bones[48].world_position, (uintptr_t)esp::local_player);
-		//is_visible = ply->visible();
-		is_visible = true;
-		if (vars->combat.vischeck) {
-			__try {
-				for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
-					if (is_visible) break;
-					is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
-				}
-			}
-			__except (true) {  }
-		}
-
-		float box_width = bounds.right - bounds.left;
-		float box_height = bounds.bottom - bounds.top;
-		auto name = ply->_displayName()->str;
-		auto activeitem = ply->GetActiveItem();
-
-		const auto rainbowcolor = D2D1::ColorF(r, g, b, 1);
-
-		//health bar
-		const auto cur_health = ply->health();
-		const auto max_health = (npc ? ply->maxHealth() : 100);
-		const auto health_pc = min(cur_health / max_health, 1);
-		const auto health_color =
-			HSVD((health_pc * .25f), 1, .875f * 1);
-		const auto h = (bounds.bottom - bounds.top) * health_pc;
-
-		//boxes
-		auto box_color = is_visible ? vars->colors.players.boxes.visible : vars->colors.players.boxes.invisible;
-		if (vars->visual.rainbowbox) { box_color[0] = r; box_color[1] = g; box_color[2] = b; }
-
-		if (vars->visual.custombox && strlen(vars->visual.boxfilename) > 0)
-		{
-			std::string ap(vars->visual.boxfilename);
-			std::string path = vars->data_dir + _("images\\") + ap;
-			if (!ap.empty()) {
-				if (std::filesystem::exists(path)) {
-					if (vars->customboxpath != path) {
-						vars->customboxpath = path;
-						//set custom box
-						//render.SetCustomBox(vars->customboxpath);
-					}
-					//else render.DrawCustomBox({ bounds.left, bounds.top }, { box_width, box_height });//draw custom box
-				}
-			}
-		}
-		else {
-			switch (vars->visual.boxtype)
-			{
-			case 1: //full box
-				render.Rectangle({ bounds.left, bounds.top }, { box_width, box_height }, { 0,0,0,1 }, 4.f);
-				render.Rectangle({ bounds.left, bounds.top }, { box_width, box_height }, FLOAT4TOD3DCOLOR(box_color), 2.f);
-				break;
-			case 2: //corner box
-
-				//top left
-				render.Line({ bounds.left, bounds.top }, { bounds.left + (box_width / 4), bounds.top }, { 0,0,0,1 }, 4.f);
-				render.Line({ bounds.left, bounds.top }, { bounds.left + (box_width / 4), bounds.top }, FLOAT4TOD3DCOLOR(box_color), 2.f);
-				render.Line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_height / 4) }, { 0,0,0,1 }, 4.f);
-				render.Line({ bounds.left, bounds.top }, { bounds.left, bounds.top + (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 2.f);
-				//top right
-				render.Line({ bounds.right, bounds.top }, { bounds.right - (box_width / 4), bounds.top }, { 0,0,0,1 }, 4.f);
-				render.Line({ bounds.right, bounds.top }, { bounds.right - (box_width / 4), bounds.top }, FLOAT4TOD3DCOLOR(box_color), 2.f);
-				render.Line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_height / 4) }, { 0,0,0,1 }, 4.f);
-				render.Line({ bounds.right, bounds.top }, { bounds.right, bounds.top + (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 2.f);
-				//bottom left
-				render.Line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 4), bounds.bottom }, { 0,0,0,1 }, 4.f);
-				render.Line({ bounds.left, bounds.bottom }, { bounds.left + (box_width / 4), bounds.bottom }, FLOAT4TOD3DCOLOR(box_color), 2.f);
-				render.Line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_height / 4) }, { 0,0,0,1 }, 4.f);
-				render.Line({ bounds.left, bounds.bottom }, { bounds.left, bounds.bottom - (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 2.f);
-				//bottom right
-				render.Line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 4), bounds.bottom }, { 0,0,0,1 }, 4.f);
-				render.Line({ bounds.right, bounds.bottom }, { bounds.right - (box_width / 4), bounds.bottom }, FLOAT4TOD3DCOLOR(box_color), 2.f);
-				render.Line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_height / 4) }, { 0,0,0,1 }, 4.f);
-				render.Line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 2.f);
-				break;
-			case 3: //3d cube
-			{
-				//LMAO I WILL DO THIS LATER
-
-				auto wid = 4;
-				Bounds cbounds = Bounds();
-
-				auto lfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_foot);
-				auto lfootp = lfoott->position();
-				auto rfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_foot);
-				auto rfootp = lfoott->position();
-				auto spine3 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine3)->position();
-				auto spine4 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine4)->position();
-				auto eyepos = spine3.midPoint(spine4);
-				Vector3 mp = Vector3(eyepos.x, eyepos.y - 1.2f, eyepos.z);//lfootp.midPoint(rfootp);
-
-				if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked)) {
-					//auto midpoint = ent->FindBone(_(L""))
-					cbounds.center = mp + Vector3(0.0f, 0.55f, 0.0f);
-					cbounds.extents = Vector3(0.4f, 0.65f, 0.4f);
-				}
-				else {
-					if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Crawling) || ply->modelState()->has_flag(rust::classes::ModelState_Flag::Sleeping)) {
-						cbounds.center = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
-						cbounds.extents = Vector3(0.9f, 0.2f, 0.4f);
-					}
-					else {
-						cbounds.center = mp + Vector3(0.0f, 0.85f, 0.0f);
-						cbounds.extents = Vector3(0.4f, 0.9f, 0.4f);
-					}
-				}
-
-				auto rotate_point = [&](Vector3 center, Vector3 origin, float angle) {
-					float num = angle * 0.0174532924f;
-					float num2 = -std::sin(num);
-					float num3 = std::cos(num);
-					origin.x -= center.x;
-					origin.z -= center.z;
-					float num4 = origin.x * num3 - origin.z * num2;
-					float num5 = origin.x * num2 + origin.z * num3;
-					float num6 = num4 + center.x;
-					num5 += center.z;
-					return Vector3(num6, origin.y, num5);
-				};
-
-				float y = EulerAngles(ply->eyes()->rotation()).y;
-				Vector3 center = cbounds.center;
-				Vector3 extents = cbounds.extents;
-				Vector3 frontTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z - extents.z), y);
-				Vector3 frontTopRight = rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z - extents.z), y);
-				Vector3 frontBottomLeft = rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z - extents.z), y);
-				Vector3 frontBottomRight = rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z - extents.z), y);
-				Vector3 backTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z + extents.z), y);
-				Vector3 backTopRight = rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z + extents.z), y);
-				Vector3 backBottomLeft = rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z + extents.z), y);
-				Vector3 backBottomRight = rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z + extents.z), y);
-
-				Vector2 frontTopLeft_2d, frontTopRight_2d, frontBottomLeft_2d, frontBottomRight_2d, backTopLeft_2d, backTopRight_2d, backBottomLeft_2d, backBottomRight_2d;
-
-				auto xy = WorldToScreen(frontTopLeft);
-				frontTopLeft_2d = Vector2(xy.x, xy.y);
-				xy = WorldToScreen(frontTopRight);
-				frontTopRight_2d = Vector2(xy.x, xy.y);
-				xy = WorldToScreen(frontBottomLeft);
-				frontBottomLeft_2d = Vector2(xy.x, xy.y);
-				xy = WorldToScreen(frontBottomRight);
-				frontBottomRight_2d = Vector2(xy.x, xy.y);
-				xy = WorldToScreen(backTopLeft);
-				backTopLeft_2d = Vector2(xy.x, xy.y);
-				xy = WorldToScreen(backTopRight);
-				backTopRight_2d = Vector2(xy.x, xy.y);
-				xy = WorldToScreen(backBottomLeft);
-				backBottomLeft_2d = Vector2(xy.x, xy.y);
-				xy = WorldToScreen(backBottomRight);
-				backBottomRight_2d = Vector2(xy.x, xy.y);
-
-				if (!frontTopLeft_2d.empty() &&
-					!frontTopRight_2d.empty() &&
-					!frontBottomLeft_2d.empty() &&
-					!frontBottomRight_2d.empty() &&
-					!backTopLeft_2d.empty() &&
-					!backTopRight_2d.empty() &&
-					!backBottomLeft_2d.empty() &&
-					!backBottomRight_2d.empty()) {
-					render.Line(frontTopLeft_2d, frontTopRight_2d, FLOAT4TOD3DCOLOR(box_color));
-					render.Line(frontTopRight_2d, frontBottomRight_2d, FLOAT4TOD3DCOLOR(box_color));
-					render.Line(frontBottomRight_2d, frontBottomLeft_2d, FLOAT4TOD3DCOLOR(box_color));
-					render.Line(frontBottomLeft_2d, frontTopLeft_2d, FLOAT4TOD3DCOLOR(box_color));
-					render.Line(backTopLeft_2d, backTopRight_2d, FLOAT4TOD3DCOLOR(box_color));
-					render.Line(backTopRight_2d, backBottomRight_2d, FLOAT4TOD3DCOLOR(box_color));
-					render.Line(backBottomRight_2d, backBottomLeft_2d, FLOAT4TOD3DCOLOR(box_color));
-					render.Line(backBottomLeft_2d, backTopLeft_2d, FLOAT4TOD3DCOLOR(box_color));
-					render.Line(frontTopLeft_2d, backTopLeft_2d, FLOAT4TOD3DCOLOR(box_color));
-					render.Line(frontTopRight_2d, backTopRight_2d, FLOAT4TOD3DCOLOR(box_color));
-					render.Line(frontBottomRight_2d, backBottomRight_2d, FLOAT4TOD3DCOLOR(box_color));
-					render.Line(frontBottomLeft_2d, backBottomLeft_2d, FLOAT4TOD3DCOLOR(box_color));
-				}
-				break;
-			}
-			case 4: //3d box
-			{
-				auto wid = 4;
-				Bounds cbounds = Bounds();
-
-				auto lfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_foot);
-				auto lfootp = lfoott->position();
-				auto rfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_foot);
-				auto rfootp = lfoott->position();
-				auto spine3 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine3)->position();
-				auto spine4 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine4)->position();
-				auto eyepos = spine3.midPoint(spine4);
-				Vector3 mp = Vector3(eyepos.x, eyepos.y - 1.25f, eyepos.z);//lfootp.midPoint(rfootp);
-
-				if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked)) {
-					//auto midpoint = ent->FindBone(_(L""))
-					cbounds.center = mp + Vector3(0.0f, 0.55f, 0.0f);
-					cbounds.extents = Vector3(0.4f, 0.65f, 0.4f);
-				}
-				else {
-					if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Crawling) || ply->modelState()->has_flag(rust::classes::ModelState_Flag::Sleeping)) {
-						cbounds.center = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
-						cbounds.extents = Vector3(0.9f, 0.2f, 0.4f);
-					}
-					else {
-						cbounds.center = mp + Vector3(0.0f, 0.8f, 0.0f);
-						cbounds.extents = Vector3(0.4f, 0.9f, 0.4f);
-					}
-				}
-
-				auto rotate_point = [&](Vector3 center, Vector3 origin, float angle) {
-					float num = angle * 0.0174532924f;
-					float num2 = -std::sin(num);
-					float num3 = std::cos(num);
-					origin.x -= center.x;
-					origin.z -= center.z;
-					float num4 = origin.x * num3 - origin.z * num2;
-					float num5 = origin.x * num2 + origin.z * num3;
-					float num6 = num4 + center.x;
-					num5 += center.z;
-					return Vector3(num6, origin.y, num5);
-				};
-
-				float y = EulerAngles(ply->eyes()->rotation()).y;
-				Vector3 center = cbounds.center;
-				Vector3 extents = cbounds.extents;
-				Vector3 frontTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z - extents.z), y);
-				Vector3 frontTopRight = rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z - extents.z), y);
-				Vector3 frontBottomLeft = rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z - extents.z), y);
-				Vector3 frontBottomRight = rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z - extents.z), y);
-				Vector3 backTopLeft = rotate_point(center, Vector3(center.x - extents.x, center.y + extents.y, center.z + extents.z), y);
-				Vector3 backTopRight = rotate_point(center, Vector3(center.x + extents.x, center.y + extents.y, center.z + extents.z), y);
-				Vector3 backBottomLeft = rotate_point(center, Vector3(center.x - extents.x, center.y - extents.y, center.z + extents.z), y);
-				Vector3 backBottomRight = rotate_point(center, Vector3(center.x + extents.x, center.y - extents.y, center.z + extents.z), y);
-
-				Vector3 middleBottomLeft = backBottomLeft.midPoint(frontBottomLeft);
-				Vector3 middleBottomRight = backBottomRight.midPoint(frontBottomRight);
-				Vector3 middleTopLeft = backTopLeft.midPoint(frontTopLeft);
-				Vector3 middleTopRight = backTopRight.midPoint(frontTopRight);
-
-				Vector2 middleBottomLeft_2d, middleBottomRight_2d, middleTopLeft_2d, middleTopRight_2d;
-
-				auto xy = WorldToScreen(middleBottomLeft);
-				middleBottomLeft_2d = Vector2(xy.x, xy.y);
-				xy = WorldToScreen(middleBottomRight);
-				middleBottomRight_2d = Vector2(xy.x, xy.y);
-				xy = WorldToScreen(middleTopLeft);
-				middleTopLeft_2d = Vector2(xy.x, xy.y);
-				xy = WorldToScreen(middleTopRight);
-				middleTopRight_2d = Vector2(xy.x, xy.y);
-
-				if (!middleBottomLeft_2d.empty() &&
-					!middleBottomRight_2d.empty() &&
-					!middleTopLeft_2d.empty() &&
-					!middleTopRight_2d.empty()) {
-
-					render.Line(middleBottomLeft_2d, middleBottomRight_2d, { 0, 0, 0, 1 }, 3);
-					render.Line(middleBottomLeft_2d, middleBottomRight_2d, FLOAT4TOD3DCOLOR(box_color), 2);
-					render.Line(middleBottomLeft_2d, middleTopLeft_2d, { 0, 0, 0, 1 }, 3);
-					render.Line(middleBottomLeft_2d, middleTopLeft_2d, FLOAT4TOD3DCOLOR(box_color), 2);
-					render.Line(middleBottomRight_2d, middleTopRight_2d, { 0, 0, 0, 1 }, 3);
-					render.Line(middleBottomRight_2d, middleTopRight_2d, FLOAT4TOD3DCOLOR(box_color), 2);
-					render.Line(middleTopLeft_2d, middleTopRight_2d, { 0, 0, 0, 1 }, 3);
-					render.Line(middleTopLeft_2d, middleTopRight_2d, FLOAT4TOD3DCOLOR(box_color), 2);
-				}
-				break;
-			}
-			}
-		}
-
-		switch (vars->visual.hpbar)
-		{
-		case 1:
-			render.FillRectangle({ bounds.left - 7, bounds.top - 1 }, { 4, box_height + 3 }, { 0,0,0,1 });
-			render.FillRectangle({ bounds.left - 6, bounds.bottom }, { 2, -h - 1 }, vars->visual.rainbowhpbar ? rainbowcolor : health_color);
-			break;
-		case 2:
-			render.FillRectangle({ bounds.left, bounds.bottom + 6 }, { box_width + 1, 4 }, { 0,0,0,1 });
-			render.FillRectangle({ bounds.left + 1, bounds.bottom + 7 }, { ((box_width / max_health) * cur_health) - 1, 2 }, vars->visual.rainbowhpbar ? rainbowcolor : health_color);
-			break;
-		}
-
-		//skeleton
-		if (vars->visual.skeleton)
-		{
-			//jaw
-			auto Transform = ply->model()->boneTransforms()->get(48);
-			if (!Transform) return;
-			Vector3 world_position = Transform->position();
-			Vector3 jaw = WorldToScreen(world_position);
-
-			//spine4
-			Transform = ply->model()->boneTransforms()->get(22);
-			if (!Transform) return;
-			world_position = Transform->position();
-			Vector3 spine4 = WorldToScreen(world_position);
-
-			//spine3
-			Transform = ply->model()->boneTransforms()->get(21);
-			if (!Transform) return;
-			world_position = Transform->position();
-			Vector3 spine3 = WorldToScreen(world_position);
-
-			//pelvis
-			Transform = ply->model()->boneTransforms()->get(7);
-			if (!Transform) return;
-			world_position = Transform->position();
-			Vector3 pelvis = WorldToScreen(world_position);
-
-			//l_hip
-			Transform = ply->model()->boneTransforms()->get(3);
-			if (!Transform) return;
-			world_position = Transform->position();
-			Vector3 l_hip = WorldToScreen(world_position);
-
-			//r_knee
-			Transform = ply->model()->boneTransforms()->get(14);
-			if (!Transform) return;
-			world_position = Transform->position();
-			Vector3 r_knee = WorldToScreen(world_position);
-
-			//l_ankle_scale
-			Transform = ply->model()->boneTransforms()->get(6);
-			if (!Transform) return;
-			world_position = Transform->position();
-			Vector3 l_ankle_scale = WorldToScreen(world_position);
-
-			//r_ankle_scale
-			Transform = ply->model()->boneTransforms()->get(17);
-			if (!Transform) return;
-			world_position = Transform->position();
-			Vector3 r_ankle_scale = WorldToScreen(world_position);
-
-			//r_foot
-			Transform = ply->model()->boneTransforms()->get(15);
-			if (!Transform) return;
-			world_position = Transform->position();
-			Vector3 r_foot = WorldToScreen(world_position);
-
-			//l_foot
-			Transform = ply->model()->boneTransforms()->get(4);
-			if (!Transform) return;
-			world_position = Transform->position();
-			Vector3 l_foot = WorldToScreen(world_position);
-
-			//r_upperarm
-			Transform = ply->model()->boneTransforms()->get(55);
-			if (!Transform) return;
-			world_position = Transform->position();
-			Vector3 r_upperarm = WorldToScreen(world_position);
-
-			//l_upperarm
-			Transform = ply->model()->boneTransforms()->get(24);
-			if (!Transform) return;
-			world_position = Transform->position();
-			Vector3 l_upperarm = WorldToScreen(world_position);
-
-			//r_forearm
-			Transform = ply->model()->boneTransforms()->get(56);
-			if (!Transform) return;
-			world_position = Transform->position();
-			Vector3 r_forearm = WorldToScreen(world_position);
-
-			//l_forearm
-			Transform = ply->model()->boneTransforms()->get(25);
-			if (!Transform) return;
-			world_position = Transform->position();
-			Vector3 l_forearm = WorldToScreen(world_position);
-
-			//r_hip
-			Transform = ply->model()->boneTransforms()->get(13);
-			if (!Transform) return;
-			world_position = Transform->position();
-			Vector3 r_hip = WorldToScreen(world_position);
-
-			//l_knee
-			Transform = ply->model()->boneTransforms()->get(2);
-			if (!Transform) return;
-			world_position = Transform->position();
-			Vector3 l_knee = WorldToScreen(world_position);
-
-			//l_hand
-			Transform = ply->model()->boneTransforms()->get(26);
-			if (!Transform) return;
-			world_position = Transform->position();
-			Vector3 l_hand = WorldToScreen(world_position);
-
-			//r_hand
-			Transform = ply->model()->boneTransforms()->get(57);
-			if (!Transform) return;
-			world_position = Transform->position();
-			Vector3 r_hand = WorldToScreen(world_position);
-
-			if (jaw.y >= 1080 || jaw.x >= 1920 || jaw.x <= 0 || jaw.y <= 0) return;
-			if (spine4.y >= 1080 || spine4.x >= 1920 || spine4.x <= 0 || spine4.y <= 0) return;
-			if (spine4.y >= 1080 || spine4.x >= 1920 || spine4.x <= 0 || spine4.y <= 0) return;
-			if (spine4.y >= 1080 || spine4.x >= 1920 || spine4.x <= 0 || spine4.y <= 0) return;
-			if (l_upperarm.y >= 1080 || l_upperarm.x >= 1920 || l_upperarm.x <= 0 || l_upperarm.y <= 0) return;
-			if (r_upperarm.y >= 1080 || r_upperarm.x >= 1920 || r_upperarm.x <= 0 || r_upperarm.y <= 0) return;
-			if (spine3.y >= 1080 || spine3.x >= 1920 || spine3.x <= 0 || spine3.y <= 0) return;
-			if (pelvis.y >= 1080 || pelvis.x >= 1920 || pelvis.x <= 0 || pelvis.y <= 0) return;
-			if (pelvis.y >= 1080 || pelvis.x >= 1920 || pelvis.x <= 0 || pelvis.y <= 0) return;
-			if (l_knee.y >= 1080 || l_knee.x >= 1920 || l_knee.x <= 0 || l_knee.y <= 0) return;
-			if (r_knee.y >= 1080 || r_knee.x >= 1920 || r_knee.x <= 0 || r_knee.y <= 0) return;
-			if (l_hand.y >= 1080 || l_hand.x >= 1920 || l_hand.x <= 0 || l_hand.y <= 0) return;
-			if (r_hand.y >= 1080 || r_hand.x >= 1920 || r_hand.x <= 0 || r_hand.y <= 0) return;
-			if (r_ankle_scale.y >= 1080 || r_ankle_scale.x >= 1920 || r_ankle_scale.x <= 0 || r_ankle_scale.y <= 0) return;
-			if (l_ankle_scale.y >= 1080 || l_ankle_scale.x >= 1920 || l_ankle_scale.x <= 0 || l_ankle_scale.y <= 0) return;
-
-			pelvis.y += 0.2;
-			l_hip.y += 0.2;
-
-			render.Line(Vector2(jaw.x, jaw.y), Vector2(spine4.x, spine4.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
-			render.Line(Vector2(spine4.x, spine4.y), Vector2(spine3.x, spine3.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
-			render.Line(Vector2(spine4.x, spine4.y), Vector2(l_upperarm.x, l_upperarm.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
-			render.Line(Vector2(spine4.x, spine4.y), Vector2(r_upperarm.x, r_upperarm.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
-			render.Line(Vector2(l_upperarm.x, l_upperarm.y), Vector2(l_forearm.x, l_forearm.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
-			render.Line(Vector2(r_upperarm.x, r_upperarm.y), Vector2(r_forearm.x, r_forearm.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
-			render.Line(Vector2(l_forearm.x, l_forearm.y), Vector2(l_hand.x, l_hand.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
-			render.Line(Vector2(r_forearm.x, r_forearm.y), Vector2(r_hand.x, r_hand.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
-			render.Line(Vector2(spine3.x, spine3.y), Vector2(pelvis.x, pelvis.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
-			render.Line(Vector2(l_hip.x, l_hip.y), Vector2(l_knee.x, l_knee.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
-			render.Line(Vector2(pelvis.x, pelvis.y), Vector2(r_knee.x, r_knee.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
-			render.Line(Vector2(l_knee.x, l_knee.y), Vector2(l_ankle_scale.x, l_ankle_scale.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
-			render.Line(Vector2(r_knee.x, r_knee.y), Vector2(r_ankle_scale.x, r_ankle_scale.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
-			render.Line(Vector2(r_ankle_scale.x, r_ankle_scale.y), Vector2(r_foot.x, r_foot.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
-
-			//HANDS??
-		}
-
-		//name, flags and distance
-		if (name)
-		{
-			auto Transform = ply->model()->boneTransforms()->get(48);
-			if (!Transform) return;
-
-			auto position = Transform->position();
-
-			auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().distance(position);
-
-			auto name_color = is_visible ? vars->colors.players.details.name.visible : vars->colors.players.details.name.invisible;
-			auto half = (bounds.right - bounds.left) / 2;
-
-			if (vars->visual.weaponesp) {
-				auto player_weapon = ply->GetActiveItem();
-				if(player_weapon)
-					render.StringCenter({ bounds.center, bounds.bottom + 19 }, player_weapon->get_weapon_name(), vars->visual.rainbowflags ? rainbowcolor : FLOAT4TOD3DCOLOR(vars->colors.players.details.flags.visible));
-			}
-
-
-			if (vars->visual.friendflag) {
-				if (map_contains_key(vars->gui_player_map, ply->userID()))
-				{
-					auto gp = vars->gui_player_map[ply->userID()];
-					if (gp->is_friend)
-					{
-						render.String({ bounds.right + 9, bounds.bottom - 5 }, _(L"[Friend]"), vars->visual.rainbowflags ? rainbowcolor : FLOAT4TOD3DCOLOR(vars->colors.players.details.flags.visible));
-					}
-				}
-			}
-
-			if (vars->visual.woundedflag) {
-				if (HasPlayerFlag(ply, rust::classes::PlayerFlags::Wounded)) {
-					render.String({ bounds.right + 9, bounds.top + 5 }, _(L"[Wounded]"), vars->visual.rainbowflags ? rainbowcolor : FLOAT4TOD3DCOLOR(vars->colors.players.details.flags.visible));
-				}
-			}
-
-			//distance
-			if (vars->visual.distance)
-			{
-				auto dist_color = is_visible ? vars->colors.players.details.distance.visible : vars->colors.players.details.distance.invisible;
-				auto nstr = string::wformat(_(L"[%dm]"), (int)distance);
-				render.StringCenter({ bounds.center, bounds.bottom + 9 }, nstr, vars->visual.rainbowdist ? rainbowcolor : FLOAT4TOD3DCOLOR(dist_color));
-			}
-
-
-
-			//name
-			if (vars->visual.nameesp) {
-				render.StringCenter({ bounds.center, bounds.top - 8 }, name, vars->visual.rainbowname ? D2D1::ColorF{ r, g, b, 1 } : FLOAT4TOD3DCOLOR(name_color));
-			}
-			// PLAYER NAME
-		}
-	}
-}
 
 void DrawToolcupboard(Vector2 w2s, System::list<PlayerNameID*>* authed) 
 {
@@ -761,38 +142,6 @@ void DrawPlayerHotbar(aim_target target) {
 	}
 }
 
-void entchams(BaseEntity* ent, Shader* s = 0, Material* m = 0) {
-	if (!ent) return;
-	if (!m && !s) return;
-	__try {
-		auto renderers = ((Networkable*)ent)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
-		if (!renderers) return;
-		auto sz = renderers->get_size();
-		for (size_t i = 0; i < sz; i++)
-		{
-			auto renderer = (Renderer*)renderers->get(i);
-			if (!renderer) continue;
-			if (m) {
-				auto cm = renderer->GetMaterial();
-				auto shader1 = cm->GetShader();
-				auto shader2 = m->GetShader();
-				SetInt((uintptr_t)m, _(L"_ZTest"), 8);
-				if(shader1 != shader2)
-					renderer->SetMaterial(m);
-			} else {
-				auto mat = renderer->GetMaterial();
-				SetInt((uintptr_t)mat, _(L"_ZTest"), 8);
-				if (mat) {
-					auto shader = mat->GetShader();
-					if (shader != s)
-						mat->SetShader(s);
-				}
-			}
-		}
-	}
-	__except (true) { return; }
-}
-
 void iterate_entities() {
 	auto get_client_entities = [&]() {
 		esp::client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
@@ -839,7 +188,7 @@ void iterate_entities() {
 
 	vars->player_name_list.clear();
 	bool flp = false;
-	
+
 	for (int i = 0; i <= size; i++) {
 		auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
 		if (!current_object || current_object <= 100000)
@@ -891,9 +240,9 @@ void iterate_entities() {
 		if (!object_name_ptr)
 			continue;
 
+
 		auto ent_net = *reinterpret_cast<Networkable**>(ent + 0x58);
 		auto ent_id = ent_net->get_id();
-
 
 		if (tag == 6)
 		{
@@ -903,9 +252,9 @@ void iterate_entities() {
 			if (!entity->is_alive()
 				|| (entity->is_sleeping() && !vars->visual.sleeper_esp))
 				continue;
-
+			//
 			bool npc = entity->playerModel()->isnpc();
-			//check npc
+			////check npc
 			if (npc && !vars->visual.npc_esp) continue;
 
 			if (!map_contains_key(player_map, ent_id)) {
@@ -926,6 +275,7 @@ void iterate_entities() {
 
 			//local player chams, player average velocity
 			if (entity->is_local_player()) {
+			//if (entity->userID() == LocalPlayer::Entity()->userID()) {
 				flp = true;
 				esp::local_player = entity;
 			}
@@ -1128,7 +478,7 @@ void iterate_entities() {
 			draw:
 				if (vars->visual.playeresp && esp::local_player)
 				{
-					DrawPlayer(entity, npc);
+					//DrawPlayer(entity, npc);
 					//offscreen indicator?
 					//silent melee?
 				}
@@ -1647,6 +997,14 @@ void IndicatorTp() {
 	render.ProgressBar({ x - 60, y + 50 }, { 120, 4 }, vars->last_teleport_time - get_fixedTime(), 10.0f);
 }
 
+void TargettedIndicator() {
+	if (!vars->visual.targetted) return;
+	if (vars->targetted) {
+		//lol
+		vars->targetted = false;
+	}
+}
+
 void DrawSnapline() {
 	Vector2 start = vars->visual.snapline == 1 ? Vector2(vars->ScreenX / 2, 0) :
 		vars->visual.snapline == 2 ? Vector2(vars->ScreenX / 2, vars->ScreenY / 2) :
@@ -1702,21 +1060,84 @@ void new_frame() {
 
 	//Draw watermark
 	Watermark();
-	if (esp::local_player) {
-		int rindex = -1;
-		for (size_t i = 0; i < hitpoints.size(); i++)
-		{
-			auto h = hitpoints[i];
-			auto w2s = WorldToScreen(h.position);
-			render.StringCenter({ w2s.x - 1, w2s.y }, _(L"hit"), { 0, 0, 0, 1 });
-			render.StringCenter({ w2s.x + 1, w2s.y }, _(L"hit"), { 0, 0, 0, 1 });
-			render.StringCenter({ w2s.x, w2s.y - 1 }, _(L"hit"), { 0, 0, 0, 1 });
-			render.StringCenter({ w2s.x, w2s.y + 1 }, _(L"hit"), { 0, 0, 0, 1 });
-			render.StringCenter({ w2s.x, w2s.y }, _(L"hit"), FLOAT4TOD3DCOLOR(vars->colors.ui.hitpoints));
-			if (h.time + 5.f < get_fixedTime()) rindex = i;
-		}
-		if (rindex != -1) hitpoints.erase(hitpoints.begin() + rindex);
-	}
+	//if (esp::local_player
+	//	&& vars->visual.hitpoint) {
+	//	int rindex = -1;
+	//	for (size_t i = 0; i < hitpoints.size(); i++)
+	//	{
+	//		auto h = hitpoints[i];
+	//		auto w2s = WorldToScreen(h.position);
+	//		render.StringCenter({ w2s.x - 1, w2s.y }, _(L"hit"), { 0, 0, 0, 1 });
+	//		render.StringCenter({ w2s.x + 1, w2s.y }, _(L"hit"), { 0, 0, 0, 1 });
+	//		render.StringCenter({ w2s.x, w2s.y - 1 }, _(L"hit"), { 0, 0, 0, 1 });
+	//		render.StringCenter({ w2s.x, w2s.y + 1 }, _(L"hit"), { 0, 0, 0, 1 });
+	//		render.StringCenter({ w2s.x, w2s.y }, _(L"hit"), FLOAT4TOD3DCOLOR(vars->colors.ui.hitpoints));
+	//		if (h.time + 5.f < get_fixedTime()) rindex = i;
+	//	}
+	//	if (rindex != -1) hitpoints.erase(hitpoints.begin() + rindex);
+	//}
 
-	iterate_entities();
+	//iterate_entities();
+	if (!esp::local_player) return;
+
+	//does it make the object 3 times? it lags and flickers lots.
+
+	for (auto o : vars->RenderList) {
+		switch (o->type) {
+		case RenderObject::RenderType::Entity:
+		{
+			auto obj = (RenderEntity*)o;
+
+			if (obj->Name.size() > 0) {
+				render.StringCenter(obj->NamePos, obj->Name.c_str(), FLOAT4TOD3DCOLOR(obj->NameColor));
+			}
+			if (obj->Dist > 0.f) {
+				render.StringCenter(obj->DistPos, string::wformat(_(L"[%dm]"), (int)(obj->Dist)), FLOAT4TOD3DCOLOR(obj->DistColor));
+			}
+			if (obj->IsPlayer) {
+				if (obj->BoxLines.size() > 0) {
+					for (auto l : obj->BoxLines) {
+						render.Line(l->Start, l->End, FLOAT4TOD3DCOLOR(l->Color), l->Thickness);
+						//delete l;
+					}
+					obj->BoxLines.clear();
+				}
+				if (obj->Skeleton.size() > 0) {
+					for (auto l : obj->Skeleton) {
+						render.Line(l->Start, l->End, FLOAT4TOD3DCOLOR(l->Color), l->Thickness);
+					}
+					obj->Skeleton.clear();
+				}
+				if (obj->Flags.size() > 0) {
+					for (auto f : obj->Flags) {
+						render.String(f->pos, f->Name.c_str(), FLOAT4TOD3DCOLOR(f->Color));
+						delete f;
+					}
+					obj->Flags.clear();
+				}
+				if (!obj->Hp->BarStart.empty() && !obj->Hp->Sz.empty()
+					&& !obj->Hp->Start.empty() && !obj->Hp->BarSz.empty()) {
+					render.FillRectangle(obj->Hp->Start, obj->Hp->Sz, FLOAT4TOD3DCOLOR(vars->bl));
+					render.FillRectangle(obj->Hp->BarStart, obj->Hp->BarSz, FLOAT4TOD3DCOLOR(obj->Hp->Color));
+					//delete obj->Hp;
+				}
+			}
+
+			o->HasBeenDrawn = true;
+		}
+		case RenderObject::RenderType::Hotbar:
+		{
+			auto obj = (RenderHotbar*)o;
+
+			o->HasBeenDrawn = true;
+		}
+		case RenderObject::RenderType::TC:
+		{
+			auto obj = (RenderToolCupboard*)o;
+
+			o->HasBeenDrawn = true;
+		}
+		}
+		vars->RenderList.erase(std::remove(vars->RenderList.begin(), vars->RenderList.end(), o), vars->RenderList.end());
+	}
 }

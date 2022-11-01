@@ -1112,6 +1112,8 @@ namespace gui {
 		const float ScreenHeight = vars->ScreenY;
 		const Vector2 screen_center = Vector2(ScreenWidth / 2, ScreenHeight / 2);
 
+		esp::start();
+
 		if (esp::local_player)
 		{
 			if ((esp::best_target.ent && esp::best_target.ent->is_alive())
@@ -1169,7 +1171,6 @@ namespace gui {
 					//esp::local_player->console_echo(string::wformat(_(L"[matrix]: OnGUI - Caching bones for: %d"), p->userID()));
 					//cache::CacheBones(p.second, esp::local_player);
 				}
-			//esp::start();
 
 			if (vars->misc.auto_upgrade)
 			{
