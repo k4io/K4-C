@@ -889,11 +889,13 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		}
 		return orig_fn(rcx, rdx, r9, _ppa, arg5);
 	}
-
+	 
 	void hk_playerwalkmovement_ClientInput(PlayerWalkMovement* player_walk_movement, uintptr_t inputstate, ModelState* model_state) {
 		//if (esp::local_player) esp::local_player->console_echo(_(L"PWM clientinput start"));
-
-		orig::playerwalkmovement_client_input(player_walk_movement, inputstate, model_state);
+		//printf("pwmclientinput\n");
+		//return orig::playerwalkmovement_client_input(player_walk_movement, inputstate, model_state);
+		//
+		//printf("pwmclientinput2\n");
 		Vector3 vel = player_walk_movement->get_TargetMovement();
 		auto baseplayer = esp::local_player;
 		if (!baseplayer) return;
@@ -1274,7 +1276,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		PerformanceUI_Update(instance);
 	}
 
-
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
 	{
 		int echocount = 0;
@@ -1282,6 +1283,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			//if(!do_fixed_update_ptr)
 			//do_fixed_update_ptr = mem::hook_virtual_function(_("PlayerWalkMovement"), _("DoFixedUpdate"), &hk_dofixedupdate);
 
+			//printf("clientinput\n");
 			//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 			if (!client_input_ptr)
 				client_input_ptr = mem::hook_virtual_function(_("PlayerWalkMovement"), _("ClientInput"), &hk_playerwalkmovement_ClientInput);
@@ -1386,7 +1388,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 #pragma endregion
 
+			//printf("clientinput2\n");
 			//return orig::baseplayer_client_input(baseplayer, state);
+			//printf("clientinput3\n");
 			if (baseplayer) {
 				//return orig::baseplayer_client_input(baseplayer, state);
 
@@ -1403,6 +1407,113 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 
 				auto item2 = baseplayer->get_active_weapon();
+				bool IsMounted = esp::local_player->modelState()->has_flag(rust::classes::ModelState_Flag::Mounted);
+				float maxVelocity = get_maxspeed(esp::local_player);
+				if (IsMounted)
+					maxVelocity *= 4;
+				float _timeSinceLastTick = unity::get_realtimesincestartup() - esp::local_player->lastSentTickTime();
+				float timeSinceLastTickClamped = max(0.f, min(_timeSinceLastTick, 1.f));
+				float mm_eye = 0.1f + (timeSinceLastTickClamped + 2.f / 60.f) * 1.5f * maxVelocity;
+
+				//desync on key
+				if (unity::GetKey(vars->keybinds.desync_ok)
+					|| ((vars->combat.manipulator2 || vars->combat.manipulator)
+						&& (unity::GetKey(vars->keybinds.manipulator)
+							|| misc::manipulate_vis)))
+					baseplayer->clientTickInterval() = 0.99f;
+				else if (!is_lagging && !is_speeding)
+					baseplayer->clientTickInterval() = 0.05f;
+
+
+				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
+				if (esp::best_target.ent && held && wpn)
+				{
+					//old manip
+					if (vars->combat.manipulator && ((unity::GetKey(vars->keybinds.manipulator))
+						|| misc::manipulate_vis))
+					{
+						Vector3 target = esp::best_target.pos;
+						auto mag_ammo = held->ammo_left();
+						float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
+						if (misc::can_manipulate(baseplayer, target, mm_eye))
+							if (nextshot < time
+								&& (held->timeSinceDeploy() > held->deployDelay() ||
+									!strcmp(held->get_class_name(), _("BowWeapon")) ||
+									!strcmp(held->get_class_name(), _("CompoundBowWeapon")) ||
+									!strcmp(held->get_class_name(), _("CrossbowWeapon")))
+								&& mag_ammo > 0)
+							{
+								auto v = esp::local_player->eyes()->position() + misc::best_lean;
+								esp::local_player->console_echo(string::wformat(_(L"[matrix]: ClientInput - manipulator attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(vars->desyncTime * 100.f)));
+
+								misc::manual = true;
+								hk_projectile_launchprojectile(held);
+								misc::best_target = Vector3(0, 0, 0);
+								baseplayer->SendClientTick();
+							}
+					}
+					else if ((vars->combat.manipulator2
+						&& esp::best_target.ent->is_alive()
+						&& !(!GetAsyncKeyState(vars->keybinds.manipulator)))
+						|| misc::manipulate_vis)
+					{
+						Vector3 target = esp::best_target.pos;
+						auto mag_ammo = held->ammo_left();
+						if (wpn && held && esp::best_target.ent) {
+							float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
+							if (CanManipulate(held, (BasePlayer*)esp::best_target.ent, baseplayer->input()->state()))
+								if (nextshot < time
+									&& (held->timeSinceDeploy() > held->deployDelay() ||
+										!strcmp(held->get_class_name(), _("BowWeapon")) ||
+										!strcmp(held->get_class_name(), _("CompoundBowWeapon")) ||
+										!strcmp(held->get_class_name(), _("CrossbowWeapon")))
+									&& held->ammo_left() > 0)
+								{
+									auto v = settings::RealGangstaShit;//esp::local_player->eyes()->get_position() + misc::best_lean;
+									esp::local_player->console_echo(string::wformat(_(L"[matrix]: ClientInput - manipulator attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(vars->desyncTime * 100.f)));
+
+									misc::manual = true;
+									hooks::hk_projectile_launchprojectile(held);
+									baseplayer->SendClientTick();
+								}
+						}
+					}
+
+					if (((vars->combat.autoshoot || unity::GetKey(vars->keybinds.autoshoot))
+						&& esp::best_target.ent->is_alive())
+						|| vars->wants_shoot)
+					{
+						Vector3 target = esp::best_target.pos;
+						auto mag_ammo = held->ammo_left();
+						float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
+						if ((baseplayer->is_visible(target, baseplayer->model()->boneTransforms()->get(48)->position())
+							&& get_fixedTime() > nextshot
+							&& held->timeSinceDeploy() > held->deployDelay()
+							&& mag_ammo > 0))
+						{
+							misc::autoshot = true;
+							misc::autobot::wants_shoot = false;
+							hooks::hk_projectile_launchprojectile(held);
+							baseplayer->SendClientTick();
+						}
+						else if (!baseplayer->is_visible(baseplayer->model()->boneTransforms()->get(48)->position(), target)
+							&& vars->combat.manipulator2
+							&& mag_ammo > 0)
+						{
+							if (misc::can_manipulate(baseplayer, target, 9.f))
+							{//maybe check more later idk
+								misc::manipulate_vis = true;
+							}
+							else misc::manipulate_vis = false;
+						}
+						vars->wants_shoot = false;
+					}
+					else misc::manipulate_vis = false;
+				}
+				else misc::manipulate_vis = false;
+
+				//orig::baseplayer_client_input(baseplayer, state);
+				
 
 				//last return
 
@@ -1601,14 +1712,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 
 
-				//desync on key
-				if (unity::GetKey(vars->keybinds.desync_ok)
-					|| ((vars->combat.manipulator2 || vars->combat.manipulator)
-						&& (unity::GetKey(vars->keybinds.manipulator)
-							|| misc::manipulate_vis)))
-					baseplayer->clientTickInterval() = 0.99f;
-				else if (!is_lagging && !is_speeding)
-					baseplayer->clientTickInterval() = 0.05f;
+
 
 				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 
@@ -1660,101 +1764,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				//float mm_eye = ((0.01f + ((vars->desyncTime + 2.f / 60.f + 0.125f) * baseplayer->max_velocity())));
-				bool IsMounted = esp::local_player->modelState()->has_flag(rust::classes::ModelState_Flag::Mounted);
-				float maxVelocity = get_maxspeed(esp::local_player);
-				if (IsMounted)
-					maxVelocity *= 4;
-				float _timeSinceLastTick = unity::get_realtimesincestartup() - esp::local_player->lastSentTickTime();
-				float timeSinceLastTickClamped = max(0.f, min(_timeSinceLastTick, 1.f));
-				float mm_eye = 0.1f + (timeSinceLastTickClamped + 2.f / 60.f) * 1.5f * maxVelocity;
 
 
-				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
-				if (esp::best_target.ent && held && wpn)
-				{
-					//old manip
-					if (vars->combat.manipulator && ((unity::GetKey(vars->keybinds.manipulator))
-						|| misc::manipulate_vis))
-					{
-						Vector3 target = esp::best_target.pos;
-						auto mag_ammo = held->ammo_left();
-						float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
-						if (misc::can_manipulate(baseplayer, target, mm_eye))
-							if (nextshot < time
-								&& (held->timeSinceDeploy() > held->deployDelay() ||
-									!strcmp(held->get_class_name(), _("BowWeapon")) ||
-									!strcmp(held->get_class_name(), _("CompoundBowWeapon")) ||
-									!strcmp(held->get_class_name(), _("CrossbowWeapon")))
-								&& mag_ammo > 0)
-							{
-								auto v = esp::local_player->eyes()->position() + misc::best_lean;
-								esp::local_player->console_echo(string::wformat(_(L"[matrix]: ClientInput - manipulator attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(vars->desyncTime * 100.f)));
 
-								misc::manual = true;
-								hk_projectile_launchprojectile(held);
-								misc::best_target = Vector3(0, 0, 0);
-								baseplayer->SendClientTick();
-							}
-					}
-					else if ((vars->combat.manipulator2
-						&& esp::best_target.ent->is_alive()
-						&& !(!GetAsyncKeyState(vars->keybinds.manipulator)))
-						|| misc::manipulate_vis)
-					{
-						Vector3 target = esp::best_target.pos;
-						auto mag_ammo = held->ammo_left();
-						if (wpn && held && esp::best_target.ent) {
-							float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
-							if (CanManipulate(held, (BasePlayer*)esp::best_target.ent, baseplayer->input()->state()))
-								if (nextshot < time
-									&& (held->timeSinceDeploy() > held->deployDelay() ||
-										!strcmp(held->get_class_name(), _("BowWeapon")) ||
-										!strcmp(held->get_class_name(), _("CompoundBowWeapon")) ||
-										!strcmp(held->get_class_name(), _("CrossbowWeapon")))
-									&& held->ammo_left() > 0)
-								{
-									auto v = settings::RealGangstaShit;//esp::local_player->eyes()->get_position() + misc::best_lean;
-									esp::local_player->console_echo(string::wformat(_(L"[matrix]: ClientInput - manipulator attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(vars->desyncTime * 100.f)));
-
-									misc::manual = true;
-									hooks::hk_projectile_launchprojectile(held);
-									baseplayer->SendClientTick();
-								}
-						}
-					}
-
-					if (((vars->combat.autoshoot || unity::GetKey(vars->keybinds.autoshoot))
-						&& esp::best_target.ent->is_alive())
-						|| vars->wants_shoot)
-					{
-						Vector3 target = esp::best_target.pos;
-						auto mag_ammo = held->ammo_left();
-						float nextshot = misc::fixed_time_last_shot + held->repeatDelay();
-						if ((baseplayer->is_visible(target, baseplayer->model()->boneTransforms()->get(48)->position())
-							&& get_fixedTime() > nextshot
-							&& held->timeSinceDeploy() > held->deployDelay()
-							&& mag_ammo > 0))
-						{
-							misc::autoshot = true;
-							misc::autobot::wants_shoot = false;
-							hooks::hk_projectile_launchprojectile(held);
-							baseplayer->SendClientTick();
-						}
-						else if (!baseplayer->is_visible(baseplayer->model()->boneTransforms()->get(48)->position(), target)
-							&& vars->combat.manipulator2
-							&& mag_ammo > 0)
-						{
-							if (misc::can_manipulate(baseplayer, target, 9.f))
-							{//maybe check more later idk
-								misc::manipulate_vis = true;
-							}
-							else misc::manipulate_vis = false;
-						}
-						vars->wants_shoot = false;
-					}
-					else misc::manipulate_vis = false;
-				}
-				else misc::manipulate_vis = false;
 
 				//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
 				if (vars->misc.speedhack && unity::GetKey(vars->keybinds.timescale)) {

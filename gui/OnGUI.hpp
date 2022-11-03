@@ -1112,7 +1112,7 @@ namespace gui {
 		const float ScreenHeight = vars->ScreenY;
 		const Vector2 screen_center = Vector2(ScreenWidth / 2, ScreenHeight / 2);
 
-		esp::start();
+		//esp::start();
 
 		if (esp::local_player)
 		{

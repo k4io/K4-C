@@ -1531,6 +1531,8 @@ namespace Gui
 			if (im::Button(_("Save config"))) { save_config(str0); }
 			im::SameLine();
 			if (im::Button(_("Load config"))) { load_config(); }
+			im::SameLine();
+			if (im::Button(_("Delete config"))) { delete_config(str0); }
 			im::InputText(_("Config name"), str0, IM_ARRAYSIZE(str0));
 
 			im::EndChild();

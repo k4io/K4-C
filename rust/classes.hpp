@@ -246,7 +246,6 @@ typedef struct Str
 	wchar_t str[1];
 } *str;
 
-
 #pragma region il2func
 //static auto ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
 

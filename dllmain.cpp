@@ -156,7 +156,7 @@ bool DllMain(HMODULE hmodule)
 		mem::game_assembly_base = LI_MODULE_SAFE_(_("GameAssembly.dll"));
 		mem::unity_player_base = LI_MODULE_SAFE_(_("UnityPlayer.dll"));
 
-		//AllocConsole();
+		AllocConsole();
 
 		il2cpp::init();
 
