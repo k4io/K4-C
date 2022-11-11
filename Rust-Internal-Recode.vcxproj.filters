@@ -261,5 +261,8 @@
     <ClInclude Include="snake.hpp">
       <Filter>gui</Filter>
     </ClInclude>
+    <ClInclude Include="skinstr.h">
+      <Filter>utils</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

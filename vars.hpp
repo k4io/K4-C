@@ -13,7 +13,7 @@
 
 class gplayer {
 private:
-	bool CheckFriend(int uid) {
+	static bool CheckFriend(int uid) {
 		auto s = getenv(_("APPDATA"));
 		auto p = s + std::string(_("\\matrix\\friends.lst"));
 
@@ -38,6 +38,18 @@ public:
 		name(n), userid(i), is_friend(CheckFriend(i)), priority_target(p), follow(f2), block(b) { }
 };
 
+struct gskin {
+public:
+	std::wstring DisplayName;
+	int SkinId;
+};
+
+struct guiskin {
+public:
+	std::wstring ShortName = _(L"");
+	std::wstring ItemName = _(L"");
+	std::vector<gskin> skins = {};
+};
 
 class RenderFlag {
 public:
@@ -113,11 +125,12 @@ struct Vars
 	std::string customboxpath = _("");
 	std::vector<std::wstring> player_name_list{};
 	
-	std::map<std::string, int> weaponskin_map;
-	std::map<int, std::string> allskins_map;
+	std::map<std::wstring, guiskin> gui_skin_map{};
+
 	std::map<ULONG, gplayer*> gui_player_map{};
 	std::map<ULONG, int> chams_player_map{};
 	std::map<ULONG, int> handchams_player_map{};
+	std::map<std::wstring, gskin> applied_skins_map{};
 
 	std::vector<RenderObject*> RenderList{};
 	IDXGISwapChain* pSwapChain;
@@ -138,7 +151,7 @@ struct Vars
 
 	struct combat {
 		bool aimbot = false;
-		bool vischeck = true;
+		bool vischeck = false;
 		float firerate = 0.133f;
 		float tpmultiplier = 0.75f;
 		bool psilent = false;

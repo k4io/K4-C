@@ -84,9 +84,9 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 
 		//0x52D200 losradius real rust alkad
 		typedef bool(*lr)(Vector3, Vector3, int, float, uintptr_t);
-		bool CenterLOS = ((lr)(mem::game_assembly_base + oLineOfSightRadius))(center, LastLocalEye, layermask, 0.2f, 0);
-		bool UpLOS = CenterLOS && ((lr)(mem::game_assembly_base + oLineOfSightRadius))(LastLocalEye, Up, layermask, 0.2f, 0) && LastLocalEye.distance(Up) > 0.01f && misc::ValidateEyePos(LastLocalEye, Up);// && LocalPlayer->checkNoclipMagicBullet(LastLocalEye, Up);
-		bool DownLOS = CenterLOS && ((lr)(mem::game_assembly_base + oLineOfSightRadius))(LastLocalEye, Down, layermask, 0.2f, 0) && LastLocalEye.distance(Down) > 0.01f && misc::ValidateEyePos(LastLocalEye, Down);// && LocalPlayer->checkNoclipMagicBullet(LastLocalEye, Down);
+		bool CenterLOS = unity::LineOfSightRadius(center, LastLocalEye, layermask, 0.2f);
+		bool UpLOS = CenterLOS && unity::LineOfSightRadius(LastLocalEye, Up, layermask, 0.2f) && LastLocalEye.distance(Up) > 0.01f && misc::ValidateEyePos(LastLocalEye, Up);// && LocalPlayer->checkNoclipMagicBullet(LastLocalEye, Up);
+		bool DownLOS = CenterLOS && unity::LineOfSightRadius(LastLocalEye, Down, layermask, 0.2f) && LastLocalEye.distance(Down) > 0.01f && misc::ValidateEyePos(LastLocalEye, Down);// && LocalPlayer->checkNoclipMagicBullet(LastLocalEye, Down);
 
 		static const bool debug_test = false;
 

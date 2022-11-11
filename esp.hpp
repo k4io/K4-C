@@ -1,8 +1,10 @@
 #pragma once
 #include "RenderClass.h"
 #include "vars.hpp"
-
+#include "skinstr.h"
 #include "rust/features/player_esp.hpp"
+
+#include "inttypes.h"
 //#include "rust/classes.hpp"
 void DrawPlayer(BasePlayer* ply, bool npc)
 {
@@ -581,7 +583,6 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 	}
 }
 
-
 void DrawToolcupboard(Vector2 w2s, System::list<PlayerNameID*>* authed) 
 {
 	Vector2 screen = { 0, 0 }; 
@@ -836,7 +837,7 @@ void iterate_entities() {
 
 			if (!map_contains_key(player_map, ent_id)) {
 				player_map.insert(std::make_pair(ent_id, entity));
-
+			
 				gplayer* p = new gplayer(entity->get_player_name(), entity->userID(), 0, 0, 0, 0);
 				vars->gui_player_map.insert(std::make_pair(entity->userID(), p));
 				vars->chams_player_map.insert(std::make_pair(entity->userID(), 0));
@@ -1600,14 +1601,55 @@ void Watermark() {
 	render.String({ 14,7 }, _(L"Matrix"), FLOAT4TOD3DCOLOR(vars->accent_color));
 }
 
+void LoadGuiSkinmap() {
+	guiskin item = {};
+	for(int i = 0; i < SkinFileLines.size(); i++) {
+		auto line = SkinFileLines[i];
+		if (line.find(_(L"(")) != std::wstring::npos) { //is new item name
+			if (wcslen(item.ItemName.c_str()) > 1) { //will not run first time
+				if (!map_contains_key(vars->gui_skin_map, item.ItemName)) {
+					vars->gui_skin_map.insert(std::make_pair(item.ItemName, item));
+					//item = new guiskin();
+					item = {};
+				}
+			}
+			auto fpos = line.find(L"(") + 1;
+			auto zpos = line.find(L")") + 1;
+			auto ns1 = line.substr(0, fpos - 2).c_str();
+			item.ShortName = ns1;
+			item.ItemName = line.substr(fpos, (zpos - fpos) - 1);
+		}
+		else if (line.find(_(L"Skin ID")) == std::string::npos
+			&& line.find(_(L"Skin Display Name")) == std::string::npos) {
+			//gskin* ns = new gskin();
+			gskin ns;
+			auto idws = line.substr(0, line.find_first_of(_(L" ")));
+			auto ids = std::string(idws.begin(), idws.end());
+			auto id = atoi(ids.c_str());
+			ns.SkinId = id;
+			ns.DisplayName = line.substr(line.find_first_of(_(L" ")) + 1, line.size());
+			item.skins.push_back(ns);
+		}
+	}
+}
+
+bool finit = false;
+
 void new_frame() {
-	float Y = GetSystemMetrics(SM_CYSCREEN);
-	float X = GetSystemMetrics(SM_CXSCREEN);
-	Vector2 vScreen = render.CanvasSize();
+	if (!finit) {
+		freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
+		freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
+		printf("unity base: %" PRIxPTR "\n", mem::unity_player_base);
+		printf("game assembly base: %" PRIxPTR "\n", mem::game_assembly_base);
+		float Y = GetSystemMetrics(SM_CYSCREEN);
+		float X = GetSystemMetrics(SM_CXSCREEN);
+		Vector2 vScreen = render.CanvasSize();
+		vars->ScreenX = vScreen.x;
+		vars->ScreenY = vScreen.y;
+		finit = true;
+	}
 
-	vars->ScreenX = vScreen.x;
-	vars->ScreenY = vScreen.y;
-
+	printf("crosshairs\n");
 	//Draw crosshairs
 	if (vars->visual.crosshair1)
 		Crosshair1();
@@ -1616,6 +1658,7 @@ void new_frame() {
 	if (vars->visual.crosshair3)
 		Crosshair3();
 
+	printf("indicators\n");
 	//Draw indicators
 	if (vars->visual.desync_indicator)
 		IndicatorDesync();
@@ -1629,11 +1672,12 @@ void new_frame() {
 	if (vars->visual.flyhack_indicator)
 		IndicatorFlyhack();
 
-
+	printf("fov\n");
 	//Draw FOV
 	if (vars->visual.show_fov)
 		DrawFov();
 
+	printf("watermark\n");
 	//Draw watermark
 	Watermark();
 	if (esp::local_player
@@ -1654,7 +1698,9 @@ void new_frame() {
 	}
 
 	//iterate_entities();
+	printf("iterate entities\n");
 	iterate_entities();
+	printf("return\n");
 	return;
 	//does it make the object 3 times? it lags and flickers lots.
 

@@ -39,6 +39,8 @@ namespace Gui
 {
 	sg::Snake mysnake;
 	gplayer* selected_player = nullptr;
+	guiskin selected_guiskin;
+	gskin selected_gskin;
 
 	void SnakeStuff() {
 		im::SetNextWindowSize({ 301, 395 });
@@ -226,21 +228,64 @@ namespace Gui
 	}
 
 	void SkinChanger() {
-		im::SetNextWindowSize({ 495, 206 });
-		im::Begin(_("##Items"), 0, ImGuiWindowFlags_NoCollapse);
+		im::SetNextWindowSize({ 495, 406 });
+		im::Begin(_("Skin changer"), 0, ImGuiWindowFlags_NoCollapse);
 		{
-			if (im::BeginChild(_("List"), { 285, 166 }, true))
+			if (im::BeginChild(_("List"), { 285, 366 }, true))
 			{
 				im::Text(_("Items"));
 				im::Separator();
-				if (im::ListBoxHeader(_("##ItemsList"), ImVec2(270, 128)))
+				if (im::ListBoxHeader(_("##ItemsList"), ImVec2(270, 328)))
 				{
+					for (auto pair : vars->gui_skin_map)
+					{
+						auto shortname = pair.second.ShortName;
+						auto isitemname = false;
+						if (shortname.size() <= 1) {
+							shortname = pair.second.ItemName;
+							isitemname = true;
+						}
+						if (im::Selectable(std::string(shortname.begin(), shortname.end()).c_str())) {
+							for (auto g : vars->gui_skin_map) {
+								if (isitemname) {
+									if (g.second.ItemName == shortname)
+										selected_guiskin = g.second;
+								}
+								else if (g.second.ShortName == shortname)
+									selected_guiskin = g.second;
+							}
+						}
+						if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+							auto n = std::wstring(pair.first);
+							im::SetTooltip(std::string(n.begin(), n.end()).c_str());
+						}
+					}
 					//for (auto s : weapon_names_list) {
 					//	if (im::Selectable(s.c_str())) {
 					//
 					//	}
 					//}
 					im::ListBoxFooter();
+				}
+				im::EndChild();
+				im::SameLine();
+				if (im::BeginChild(_("Skins"), { 185, 366 }, true)) {
+					if (selected_guiskin.skins.size() > 0) {
+						if (selected_guiskin.ShortName.size() <= 1)
+							im::Text(_("%ls skins"), selected_guiskin.ItemName.c_str());
+						else im::Text(_("%ls skins"), selected_guiskin.ShortName.c_str());
+					} else im::Text(_("Skins"));
+					im::Separator();
+					if (selected_guiskin.skins.size() > 0) {
+						for (auto s : selected_guiskin.skins) {
+							auto n = std::wstring(s.DisplayName);
+
+							if (im::Selectable(std::string(n.begin(), n.end()).c_str()))
+								for (auto s : selected_guiskin.skins)
+									if (n == std::wstring(s.DisplayName))
+										selected_gskin = s;
+						}
+					}
 				}
 				im::EndChild();
 			}
@@ -1184,6 +1229,7 @@ namespace Gui
 			}
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(50, 15));
+			//im::Checkbox(_("Target behind wall"), &vars->combat.shoot_at_fatbullet);
 			//im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
 			//im::Checkbox(_("STW (Ladder)"), &vars->combat.throughladder);
 			//im::Checkbox(_("Pierce"), &vars->combat.pierce);
@@ -1478,7 +1524,10 @@ namespace Gui
 			im::Checkbox(_("Auto upgrade"), &vars->misc.auto_upgrade);
 			im::Combo(_("Upgrade tier"), &vars->misc.upgrade_tier,
 				_("Wood\0Stone\0Metal\0Armored"));
-			//im::Checkbox(_("Auto refill"), &vars->misc.autorefill);
+			im::Checkbox(_("Auto refill"), &vars->misc.autorefill);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Auto refills jackhammers when close to workbenches if in hotbar"));
+			}
 			im::Checkbox(_("Fakelag"), &vars->misc.fake_lag);
 			im::Checkbox(_("Freeze on desync"), &vars->misc.freezeondesync);
 			im::Checkbox(_("Desync on key"), &vars->misc.desync);
@@ -1496,11 +1545,11 @@ namespace Gui
 			im::Checkbox(_("Rainbow accent"), &vars->rainbow_accent);
 			im::Combo(_("Gesture spam"), &vars->misc.gesture_spam, _(" None\x00 Clap\x00 Friendly\x00 Thumbsdown\x00 Thumbsup\x00 Ok\x00 Point\x00 Shrug\x00 Victory\x00 Wave"));
 			
-			//im::Checkbox(_("Skin changer"), &vars->misc.skinchanger);
-			//if(vars->misc.skinchanger)
-			//{
-			//	SkinChanger();
-			//}
+			im::Checkbox(_("Skin changer"), &vars->misc.skinchanger);
+			if(vars->misc.skinchanger)
+			{
+				SkinChanger();
+			}
 
 			im::Checkbox(_("Player list"), &vars->misc.playerlist);
 			im::Checkbox(_("Snake"), &vars->misc.snake);

@@ -185,21 +185,21 @@ namespace esp {
 		auto list_value = entity_list->get_value<uintptr_t>();
 		if (!list_value) {
 			//get_client_entities();
-			esp::local_player = nullptr;
+			//esp::local_player = nullptr;
 			return;
 		}
 
 		auto size = entity_list->get_size();
 		if (!size) {
 			//get_client_entities();
-			esp::local_player = nullptr;
+			//esp::local_player = nullptr;
 			return;
 		}
 
 		auto buffer = entity_list->get_buffer<uintptr_t>();
 		if (!buffer) {
 			//get_client_entities();
-			esp::local_player = nullptr;
+			//esp::local_player = nullptr;
 			return;
 		}
 
@@ -1610,8 +1610,8 @@ namespace esp {
 		
 		//draw_teammates();
 		//iterate_players();
-		tempRenderList.clear();
-		iterate_players_new();
-		vars->RenderList = tempRenderList;
+		//tempRenderList.clear();
+		//iterate_players_new();
+		//vars->RenderList = tempRenderList;
 	}
 }

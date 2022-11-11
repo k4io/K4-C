@@ -9,7 +9,7 @@ namespace sg {
 	static int highscore = 0;
 	static int gridsize = 20;
 	static int maxapples = 2;
-
+	static int mspt = 250;
 	static std::chrono::milliseconds lastinputtime = std::chrono::milliseconds(0);
 
 	std::vector<Vector2> apples = {};
@@ -36,7 +36,7 @@ namespace sg {
 		void DoInput() {
 			if (!alive) return;
 			auto ctime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());//time(0);
-			auto next_input_time = lastinputtime + std::chrono::milliseconds(500);
+			auto next_input_time = lastinputtime + std::chrono::milliseconds(mspt);
 			if (ctime > next_input_time) {
 				if (GetAsyncKeyState(0x57)) //W pressed
 					vel.y--;

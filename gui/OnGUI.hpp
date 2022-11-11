@@ -61,8 +61,7 @@ namespace gui {
 		static auto set_gizmos_color = reinterpret_cast<void(*)(gui::Color)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Gizmos"), _("set_color"), -1, _(""), _("UnityEngine"))));
 
 		static auto HorizontalSlider = reinterpret_cast<float(*)(rust::classes::Rect position, float value, float leftValue, float rightValue)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("HorizontalSlider"), 4, _(""), _("UnityEngine"))));
-		
-		static auto get_activemodel = reinterpret_cast<uintptr_t(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseViewModel"), _("get_ActiveModel"), 0, _(""), _(""))));
+	
 		
 		//gl stuff?
 
@@ -131,8 +130,6 @@ namespace gui {
 		methods::DrawLine = reinterpret_cast<void (*)(Vector3, Vector3, gui::Color)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Debug"), _("DrawLine"), 3, _("color"), _("UnityEngine"), 3)));
 
 		methods::set_gizmos_color = reinterpret_cast<void(*)(gui::Color)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Gizmos"), _("set_color"), -1, _(""), _("UnityEngine"))));
-
-		methods::get_activemodel = reinterpret_cast<uintptr_t(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseViewModel"), _("get_ActiveModel"), 0, _(""), _(""))));
 
 		methods::Vertex = reinterpret_cast<void(*)(Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GL"), _("Vertex"), 0, _(""), _("UnityEngine"))));
 
@@ -1077,7 +1074,8 @@ namespace gui {
 		if ((a / b) > 1)
 			a = b;
 
-		fill_box(rust::classes::Rect(start.x + 1, start.y + 1, (end.x * (a / b)) - 1, end.y - 1), perc_col(a / b));
+		fill_box(rust::classes::Rect(start.x + 1, start.y + 1, (end.x * (a / b)) - 1, end.y - 1), 
+			gui::Color(vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], 1.f));
 	}
 
 	float out;
@@ -1298,7 +1296,7 @@ namespace gui {
 			k = rust::classes::KeyCode::Mouse4;
 			md = true;
 		}
-		return;
+		//return;
 		
 		if (event_type == rust::classes::EventType::KeyDown || event_type == rust::classes::EventType::KeyUp
 			|| event_type == rust::classes::EventType::MouseDown || event_type == rust::classes::EventType::MouseUp
@@ -1319,10 +1317,10 @@ namespace gui {
 		fill_box(rust::classes::Rect{ 10, 6, 80, 16 }, rgba(14.f, 18.f, 24.f, 255));
 		outline_box({ 10, 6 }, { 80, 16 }, rgba(249.f, 130.f, 109.f, 255.f));
 		fill_box(rust::classes::Rect{ 10, 20, 81, 3 }, rgba(249.f, 130.f, 109.f, 255));
-		gui::Label(rust::classes::Rect{ 12, 4, 80, 20 }, _(L"trap.sh"), gui::Color(1, 1, 1, 1), true, 12);
+		gui::Label(rust::classes::Rect{ 12, 4, 80, 20 }, _(L"matrix"), gui::Color(1, 1, 1, 1), true, 12);
 
 
-		if (false) {
+		if (open) {
 			{
 				int margin = 3;
 				static int cases = 0;
@@ -2150,7 +2148,7 @@ namespace esp
 				if ((!shader && !mat) && (vars->visual.hand_chams < 1 && vars->visual.shader < 1)) return;
 
 				if (vars->visual.hand_chams >= 1) { //crashes on islocalplayer
-					auto model = gui::methods::get_activemodel();
+					auto model = get_activemodel();
 					auto renderers = ((Networkable*)model)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
 					if (renderers)
 					{

@@ -541,7 +541,7 @@ namespace misc
 			//check between manip pos and player pos
 			if (!ply->is_visible(p, pos, 0.03f))
 			{
-				if (!vars->combat.thick_bullet || !vars->combat.targetbehindwall) return false;
+				if (!vars->combat.thick_bullet || !vars->combat.shoot_at_fatbullet) return false;
 				bool t = false;
 				Vector3 z = pos;
 				//pos.y -= -0.2f; //imagine aiming at chest?????????

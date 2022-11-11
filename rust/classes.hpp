@@ -230,6 +230,10 @@ class Terrain;
 class TerrainHeightMap;
 class TerrainCollision;
 class TerrainMeta;
+class InputState;
+class PlayerVoiceRecorder;
+class BaseMovement;
+class TimeWarning;
 class col;
 
 std::map<uint64_t, BoneCache*> cachedBones = std::map<uint64_t, BoneCache*>();
@@ -250,6 +254,33 @@ typedef struct Str
 //static auto ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
 
 //static auto setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
+static auto item_cmd = reinterpret_cast<void(*)(unsigned int, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("LocalPlayer"), _("ItemCommand"), 2, _(""), _(""))));
+
+static auto get_activemodel = reinterpret_cast<uintptr_t(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseViewModel"), _("get_ActiveModel"), 0, _(""), _(""))));
+
+static auto useaction = reinterpret_cast<void(*)(BasePlayer*, InputState*) > (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("UseAction"), 1, _(""), _(""))));
+
+static auto bmclientinput = reinterpret_cast<void(*)(BaseMovement*, InputState*, ModelState*) > (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("ClientInput"), 2, _(""), _(""))));
+
+static auto timewarnnew = reinterpret_cast<TimeWarning*(*)(System::string, int) > (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TimeWarning"), _("New"), 2, _(""), _(""))));
+
+static auto heldentinput = reinterpret_cast<void(*)(BasePlayer*) > (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HeldEntityInput"), 0, _(""), _(""))));
+
+static auto mapinterfacesetopen = reinterpret_cast<void(*)(bool) > (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("MapInterface"), _("SetOpen"), 1, _(""), _(""))));
+
+static auto uiinvclose = reinterpret_cast<void(*)() > (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("UIInventory"), _("Close"), -1, _(""), _(""))));
+
+static auto pbclientinput = reinterpret_cast<void(*)(PlayerBelt*, InputState*) > (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerBelt"), _("ClientInput"), 1, _(""), _(""))));
+
+static auto anyactive = reinterpret_cast<bool(*)(int, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("NeedsKeyboard"), _("AnyActive"), 2, _(""), _(""))));
+
+static auto haslocalcontrols = reinterpret_cast<bool(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HasLocalControls"), 0, _(""), _(""))));
+
+static auto voicerecclientinput = reinterpret_cast<void(*)(PlayerVoiceRecorder*, InputState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerVoiceRecorder"), _("ClientInput"), 0, _(""), _(""))));
+
+static auto waterfactor = reinterpret_cast<float(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("WaterFactor"), 0, _(""), _(""))));
+
+static auto objgetname = reinterpret_cast<System::string*(*)(Object*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("get_name"), 0, _(""), _("UnityEngine"))));
 
 static auto lpgetent = reinterpret_cast<BasePlayer*(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("LocalPlayer"), _("get_Entity"), 0, _(""), _(""))));
 
@@ -408,6 +439,9 @@ static auto canchangetograde = reinterpret_cast<bool(*)(uintptr_t, rust::classes
 static auto upgradetograde = reinterpret_cast<void(*)(uintptr_t, rust::classes::BuildingGrade, BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BuildingBlock"), _("UpgradeToGrade"), 0, _(""), _(""))));
 
 static auto set_jumped = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_jumped"), 0, _(""), _(""))));
+static auto set_sprinting = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_sprinting"), 0, _(""), _(""))));
+static auto set_aiming = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_aiming"), 0, _(""), _(""))));
+static auto set_ducked = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_ducked"), 0, _(""), _(""))));
 
 static auto do_jump = reinterpret_cast<void(*)(uintptr_t, uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("Jump"), 0, _(""), _(""))));
 
@@ -465,6 +499,23 @@ float current_time;
 void init_bp() {
 	//setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
 	//ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
+	item_cmd = reinterpret_cast<void(*)(unsigned int, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("LocalPlayer"), _("ItemCommand"), 2, _(""), _(""))));
+	get_activemodel = reinterpret_cast<uintptr_t(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseViewModel"), _("get_ActiveModel"), 0, _(""), _(""))));
+	useaction = reinterpret_cast<void(*)(BasePlayer*, InputState*)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("UseAction"), 1, _(""), _(""))));
+	bmclientinput = reinterpret_cast<void(*)(BaseMovement*, InputState*, ModelState*)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("ClientInput"), 2, _(""), _(""))));
+	timewarnnew = reinterpret_cast<TimeWarning * (*)(System::string, int)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TimeWarning"), _("New"), 2, _(""), _(""))));
+	heldentinput = reinterpret_cast<void(*)(BasePlayer*)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HeldEntityInput"), 0, _(""), _(""))));
+	mapinterfacesetopen = reinterpret_cast<void(*)(bool)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("MapInterface"), _("SetOpen"), 1, _(""), _(""))));
+	uiinvclose = reinterpret_cast<void(*)()> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("UIInventory"), _("Close"), -1, _(""), _(""))));
+	pbclientinput = reinterpret_cast<void(*)(PlayerBelt*, InputState*)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerBelt"), _("ClientInput"), 1, _(""), _(""))));
+	anyactive = reinterpret_cast<bool(*)(int, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("NeedsKeyboard"), _("AnyActive"), 2, _(""), _(""))));
+	haslocalcontrols = reinterpret_cast<bool(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HasLocalControls"), 0, _(""), _(""))));
+	voicerecclientinput = reinterpret_cast<void(*)(PlayerVoiceRecorder*, InputState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerVoiceRecorder"), _("ClientInput"), 0, _(""), _(""))));
+	waterfactor = reinterpret_cast<float(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("WaterFactor"), 0, _(""), _(""))));
+	set_sprinting = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_sprinting"), 0, _(""), _(""))));
+	set_aiming = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_aiming"), 0, _(""), _(""))));
+	set_ducked = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_ducked"), 0, _(""), _(""))));
+	objgetname = reinterpret_cast<System::string * (*)(Object*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("get_name"), 0, _(""), _("UnityEngine"))));
 	lpgetent = reinterpret_cast<BasePlayer * (*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("LocalPlayer"), _("get_Entity"), 0, _(""), _(""))));
 	closestpoint = reinterpret_cast<Vector3(*)(BaseEntity*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ClosestPoint"), 1, _(""), _(""))));
 	thrownwpn_inheritedvel = reinterpret_cast<Vector3(*)(AttackEntity*, BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ThrownWeapon"), _("GetInheritedVelocity"), 2, _(""), _(""))));
@@ -702,7 +753,11 @@ void GenerateBuilletDropPredictionData(float drag, float gravityMod)
 }
 
 class Object {
-
+public:
+	System::string* get_name() {
+		if (!this) return nullptr;
+		return objgetname(this);
+	}
 };
 
 class Component : public Object {
@@ -946,14 +1001,26 @@ public:
 
 };
 
+class TimeWarning {
+public:
+	static TimeWarning* New(System::string name, int maxmilliseconds = 0) {
+		return timewarnnew(name, maxmilliseconds);
+	}
+};
+
 class BaseEntity : public BaseNetworkable {
 public:
 	//FIELD(_("BaseEntity"), _("model"), model, Model*);
+	FIELD(_("BaseEntity"), _("_name"), name, System::string*);
 
 	Model* model() {
 		return *reinterpret_cast<Model**>((uintptr_t)this + 0x130);
 	}
 
+	float WaterFactor() {
+		if (!this) return 0.f;
+		return waterfactor(this);
+	}
 	Vector3 ClosestPoint(Vector3 point) {
 		if (!this) return Vector3::Zero();
 		return closestpoint(this, point);
@@ -1564,6 +1631,26 @@ public:
 		if (!this) return;
 		return set_jumped((uintptr_t)this, j);
 	}
+	
+	void setsprinting(bool j) {
+		if (!this) return;
+		return set_sprinting((uintptr_t)this, j);
+	}
+	
+	void setaiming(bool j) {
+		if (!this) return;
+		return set_aiming((uintptr_t)this, j);
+	}
+	
+	void setducked(bool j) {
+		if (!this) return;
+		return set_ducked((uintptr_t)this, j);
+	}
+	
+	void setwaterlevel(float f) {
+		if (!this) return;
+		*reinterpret_cast<float*>((uintptr_t)this + 0x14) = f;
+	}
 
 	void remove_flag(rust::classes::ModelState_Flag flag) {
 		int flags = *reinterpret_cast<int*>((uintptr_t)this + 0x24);
@@ -1588,6 +1675,10 @@ public:
 
 class BaseMovement : public MonoBehaviour {
 public:
+	void ClientInput(InputState* i, ModelState* m) {
+		if (!this) return;
+		return bmclientinput(this, i, m);
+	}
 };
 
 class PlayerWalkMovement : public BaseMovement {
@@ -1891,7 +1982,7 @@ public:
 		return off(this);
 	}
 	bool isLocalPlayer() {
-		if (!this) return false;
+		if (!this || (uintptr_t)this < 0xFFFFFFFF) return false;
 		//if ((uintptr_t)this > 0xFFFFFFFFFFFF0000)
 		return *reinterpret_cast<bool*>((uintptr_t)this + 0x299);
 	}
@@ -1946,6 +2037,29 @@ public:
 		if (!this) return nullptr;
 		return (Item*)getiteminslot(this, slot);
 	}
+	void ClientInput(InputState* state) {
+		if (!this) return;
+		return pbclientinput(this, state);
+	}
+};
+
+class PlayerVoiceRecorder : public Component {
+public:
+	void ClientInput(InputState* state) {
+		if (!this) return;
+		voicerecclientinput(this, state);
+	}
+};
+
+class LocalPlayer {
+public:
+	static BasePlayer* Entity() {
+		return lpgetent();
+	}
+
+	static void ItemCommand(unsigned int ui, System::string cmd) {
+		item_cmd(ui, cmd);
+	}
 };
 
 class BasePlayer : public BaseCombatEntity {
@@ -1966,6 +2080,28 @@ public:
 	FIELD(_("BasePlayer"), _("inventory"), inventory, PlayerInventory*);
 	FIELD(_("BasePlayer"), _("ClientCurrentMapNote"), ClientCurrentMapNote, MapNote*);
 	FIELD(_("BasePlayer"), _("Belt"), Belt, PlayerBelt*);
+	FIELD(_("BasePlayer"), _("voiceRecorder"), voiceRecorder, PlayerVoiceRecorder*);
+	FIELD(_("BasePlayer"), _("Frozen"), Frozen, bool);
+
+	void UseAction(InputState* s) {
+		if (!this) return;
+		return useaction(this, s);
+	}
+
+	BaseMountable* GetMounted() {
+		if (!this) return nullptr;
+		return mem::read<BaseMountable*>((uintptr_t)this + 0x608);
+	}
+
+	void HeldEntityInput() {
+		if (!this) return;
+		return heldentinput(this);
+	}
+
+	bool HasLocalControls() {
+		if (!this) return false;
+		return haslocalcontrols(this);
+	}
 
 	void ForcePositionTo(Vector3 worldPos) {
 		if (!this) return;
@@ -2611,9 +2747,11 @@ public:
 	}
 
 	bool is_local_player() {
-		if (!this)
+		if (!this || (uintptr_t)this < 0xFFFFFFFF)
 			return false;
 
+		return LocalPlayer::Entity()->userID() == this->userID();
+		
 		auto player_model = this->playerModel();
 		if (!player_model)
 			return false;
@@ -2652,10 +2790,13 @@ public:
 
 class Model : public MonoBehaviour {
 public:
-	FIELD(_("Model"), _("boneTransforms"), boneTransforms, System::Array<Transform*>*);
+	//FIELD(_("Model"), _("boneTransforms"), boneTransforms, System::Array<Transform*>*);
 	FIELD(_("Model"), _("boneNames"), boneNames, System::Array<System::string*>*);
 
-
+	System::Array<Transform*>* boneTransforms() {
+		if (!this | (uintptr_t)this < 0xFFFFFFFF) return nullptr;
+		return *reinterpret_cast<System::Array<Transform*>**>(this + 0x48);
+	}
 	Bone* resolve(const wchar_t* bone_name, BasePlayer* lp) {
 		//auto lp = LocalPlayer::ent();
 		if (!this || !lp) return nullptr;
@@ -2716,24 +2857,24 @@ public:
 	bool CanAffordUpgrade(rust::classes::BuildingGrade g, BasePlayer* p) {
 		if (!this) return false;
 
-		typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7202688
-		return ((AAA)(mem::game_assembly_base + 0x6D3260))((uintptr_t)this, (int)g, p);
-		//return canaffordupgrade((uintptr_t)this, g, p);
+		//typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7202688
+		//return ((AAA)(mem::game_assembly_base + 0x6D3260))((uintptr_t)this, (int)g, p);
+		return canaffordupgrade((uintptr_t)this, g, p);
 	}
 
 	bool CanChangeToGrade(rust::classes::BuildingGrade g, BasePlayer* p) {
 		if (!this) return false;
 
-		typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7203152
-		return ((AAA)(mem::game_assembly_base + 0x6D3430))((uintptr_t)this, (int)g, p);
-		//return canchangetograde((uintptr_t)this, g, p);
+		//typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7203152
+		//return ((AAA)(mem::game_assembly_base + 0x6D3430))((uintptr_t)this, (int)g, p);
+		return canchangetograde((uintptr_t)this, g, p);
 	}
 
 	void Upgrade(rust::classes::BuildingGrade g, BasePlayer* p) {
 		if (!this) return;
-		typedef void (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7203152
-		return ((AAA)(mem::game_assembly_base + 0x6D6A50))((uintptr_t)this, (int)g, p);
-		//return upgradetograde((uintptr_t)this, g, p);
+		//typedef void (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7203152
+		//return ((AAA)(mem::game_assembly_base + 0x6D6A50))((uintptr_t)this, (int)g, p);
+		return upgradetograde((uintptr_t)this, g, p);
 	}
 };
 
@@ -2763,6 +2904,27 @@ public:
 
 class Effect {
 
+};
+
+
+class ScriptableObject : public Object {
+
+};
+
+class SkinnableGroup {
+public:
+	member(System::string*, Name, 0x10);
+};
+
+class Skinnable : public ScriptableObject {
+public:
+	FIELD(_("Skinnable"), _("Name"), Name, System::string*);
+	FIELD(_("Skinnable"), _("ItemName"), ItemName, System::string*);
+	FIELD(_("Skinnable"), _("EntityPrefabName"), EntityPrefabName, System::string*);
+	FIELD(_("Skinnable"), _("ViewmodelPrefabName"), ViewmodelPrefabName, System::string*);
+	FIELD(_("Skinnable"), _("EntityPrefab"), EntityPrefab, GameObject*);
+	FIELD(_("Skinnable"), _("ViewmodelPrefab"), ViewmodelPrefab, GameObject*);
+	member(System::Array<Material*>*, _sourceMaterials, 0x68);
 };
 
 namespace ConVar {
@@ -3142,6 +3304,46 @@ public:
 	}
 };
 
+class NeedsKeyboard {
+public:
+	static bool AnyActive(int k = 0, int b = 0) {
+		return anyactive(k, b);
+	}
+};
+
+class MapInterface {
+public:
+	static void SetOpen(bool b) {
+		return mapinterfacesetopen(b);
+	}
+};
+
+class UIInventory {
+public:
+	static void Close() {
+		return uiinvclose();
+	}
+};
+
+class ConButton {
+public:
+	member(bool, IsDown, 0x10);
+};
+
+class Buttons {
+public:
+	static ConButton* Chat() {
+		auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
+		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+		return mem::read<ConButton*>(fieldz + 0x50);
+	}
+	static ConButton* Map() {
+		auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
+		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+		return mem::read<ConButton*>(fieldz + 0xF0);
+	}
+};
+
 class Terrain {
 public:
 	float SampleHeight(Vector3 worldPos) {
@@ -3170,11 +3372,13 @@ class TerrainMeta {
 
 };
 
-class LocalPlayer {
+class Skin {
 public:
-	static BasePlayer* Entity() {
-		return lpgetent();
-	}
+	member(System::string*, manifestName, 0x10);
+	member(System::string*, manifestContent, 0x18);
+	member(System::string*, iconName, 0x30);
+	member(Skinnable*, skinnable, 0x48);
+	member(System::Array<Material*>*, materials, 0x50);
 };
 
 void attack_melee(aim_target target, BaseProjectile* melee, BasePlayer* lp, bool is_player = false) {
