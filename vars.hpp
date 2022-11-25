@@ -1,6 +1,7 @@
 #pragma once
 #include "utils/vector.hpp"
 #include "utils/xorstr.hpp"
+#include "../sol/sol.hpp"
 #include <string>
 #include <vector>
 #include <fstream>
@@ -119,18 +120,27 @@ public:
 	}
 };
 
+struct _item {
+	wchar_t* name;
+	int count;
+};
+
 struct Vars
 {
+	sol::state lua;
 	std::string data_dir = _("");
 	std::string customboxpath = _("");
+	std::string target_name = _("");
 	std::vector<std::wstring> player_name_list{};
-	
+	std::vector<_item*> target_hotbar_list{};
+
 	std::map<std::wstring, guiskin> gui_skin_map{};
 
 	std::map<ULONG, gplayer*> gui_player_map{};
 	std::map<ULONG, int> chams_player_map{};
 	std::map<ULONG, int> handchams_player_map{};
 	std::map<std::wstring, gskin> applied_skins_map{};
+	std::map<std::string, bool*> loaded_lua_list{};
 
 	std::vector<RenderObject*> RenderList{};
 	IDXGISwapChain* pSwapChain;
@@ -183,10 +193,12 @@ struct Vars
 		bool norecoil = false;
 		bool nospread = false;
 		bool fast_bullet = false;
+		bool bestvelocity = false;
 		bool instaeoka = false;
 		bool pierce = false;
 		bool fastbow = false;
 		bool throughladder = false;
+		bool psilentmelee = false;
 		bool weakspots = false;
 		bool targetbehindwall = false;
 		float recoilx = 1.f;
@@ -289,6 +301,8 @@ struct Vars
 		bool rainbowskeleton = false;
 		bool rainbowflags = false;
 		bool rainbowdist = false;
+		bool movementline = false;
+		bool showcapsule = false;
 		int hpbar = 0;
 		int snapline = 0;
 		bool sidehealth = false;
@@ -302,6 +316,7 @@ struct Vars
 		bool distance = false;
 		bool weaponesp = false;
 		bool friendflag = false;
+		bool targettedflag = false;
 		bool desync_indicator = false;
 		bool speedhack_indicator = false;
 		bool hitpoint = false;
@@ -344,6 +359,7 @@ struct Vars
 		float tpcamfov = 70.f;
 
 		bool pickup_collectibles = false;
+		bool autoknock = false;
 		float spinspeed = 50.f;
 		bool TakeFallDamage = false;
 		bool silent_farm = false;
@@ -381,6 +397,12 @@ struct Vars
 		bool playerlist = false;
 		bool interactive_debug = false;
 
+		float capsuleHeight = 0.5f;
+		float capsuleCenter = 0.5f;
+		float capsuleHeightDucked = 0.5f;
+		float capsuleCenterDucked = 0.5f;
+		float capsuleradius = 0.5f;
+
 		int gesture_spam = 0;
 	}; misc misc;
 
@@ -391,6 +413,7 @@ struct Vars
 		int silentmelee = 0;
 		int autoshoot = 0;
 		int manipulator = 0;
+		int manipulator2 = 0;
 		int desync_ok = 0;
 		int timescale = 0;
 		int silentwalk = 0;
@@ -489,6 +512,16 @@ struct Vars
 		float sun[4] = { 1, 1, 1, 1 };
 		float moon[4] = { 1, 1, 1, 1 };
 	}; colors colors;
+
+	struct menu {
+		float TabRounding = 0.f;
+		float GrabRounding = 0.f;
+		float ScrollbarRounding = 0.f;
+		float FrameRounding = 0.f;
+		float PopupRounding = 0.f;
+		float ChildRounding = 0.f;
+		float WindowRounding = 0.f;
+	}; menu menu;
 
 	int tab = 0;
 

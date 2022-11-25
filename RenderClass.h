@@ -204,6 +204,10 @@ public:
 		SolidColor->SetColor(Clr); Canvas->FillEllipse({ { Start.x, Start.y }, Rad, Rad }, SolidColor);
 	}
 
+	__forceinline void FuckYouTest(int x) {
+		printf("FuckYouTest called %i\n", x);
+	}
+
 	__forceinline void FillRectangle(const Vector2& Start, const Vector2& Sz, const D2D1::ColorF& Clr) {
 		SolidColor->SetColor(Clr); Canvas->FillRectangle({ Start.x, Start.y, Start.x + Sz.x, Start.y + Sz.y }, SolidColor);
 	}

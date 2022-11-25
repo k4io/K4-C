@@ -43,6 +43,9 @@
     <Filter Include="gui\assets">
       <UniqueIdentifier>{22a37c5f-4804-47dc-9c9e-2b8c20714b22}</UniqueIdentifier>
     </Filter>
+    <Filter Include="sol">
+      <UniqueIdentifier>{0b963be9-8155-4428-a7fa-4ff38e0e44a2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
@@ -264,5 +267,20 @@
     <ClInclude Include="skinstr.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="sol\config.hpp">
+      <Filter>sol</Filter>
+    </ClInclude>
+    <ClInclude Include="sol\forward.hpp">
+      <Filter>sol</Filter>
+    </ClInclude>
+    <ClInclude Include="sol\sol.hpp">
+      <Filter>sol</Filter>
+    </ClInclude>
+    <ClInclude Include="lua_wrapper.hpp">
+      <Filter>sol</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

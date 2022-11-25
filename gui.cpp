@@ -293,6 +293,29 @@ namespace Gui
 		im::End();
 	}
 
+	struct it {
+		wchar_t* name;
+		int count;
+	};
+
+	void HotbarWindow(int height, std::string name, std::vector<_item*> items) {
+		im::SetNextWindowSize({ 200.f, (float)height });
+		im::Begin(_("Hotbar"), nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+		{
+			im::Text(name.c_str());
+			im::Separator();
+			for (auto i : items)
+			{
+				auto ws = std::wstring(i->name);
+				if (i->count > 1)
+					ws = ws + _(L" (x") + std::to_wstring(i->count) + _(L")");
+				auto s = std::string(ws.begin(), ws.end());
+				im::Text(s.c_str());
+			}
+		}
+		im::End();
+	}
+
 	class dot
 	{
 	public:
@@ -386,11 +409,17 @@ namespace Gui
 	bool init = false;
 	int selected_tab = 0;
 	static char str0[32] = "";
+	static char lua[32] = "";
 	int selected_cfg = 0;
 	std::vector<char*> tempnames;
 
-	void delete_config(char* cfgname) {
+	void delete_config(char* cfgname, bool lua = false) {
 		auto s = LI_FIND(getenv)(_("APPDATA"));
+		if (lua) {
+			auto p = s + std::string(_("\\trap\\scripts\\")) + std::string(cfgname) + _(".lua");
+			remove(p.c_str());
+			return;
+		}
 		auto p = s + std::string(_("\\trap\\configs\\")) + std::string(cfgname) + _(".t");
 		remove(p.c_str());
 	}
@@ -407,9 +436,9 @@ namespace Gui
 		return beginning + "=" + std::to_string(col[0]) + _(",") + std::to_string(col[1]) + _(",") + std::to_string(col[2]) + _("\n");
 	}
 
-	void load_config() {
+	void load_config(const char* str) {
 		auto s = LI_FIND(getenv)(_("APPDATA"));
-		auto p = s + std::string(_("\\matrix\\configs\\")) + std::string(str0) + _(".m");
+		auto p = s + std::string(_("\\matrix\\configs\\")) + std::string(str) + _(".m");
 		if (!std::filesystem::exists(p)) return;
 		std::ifstream cFile(p, std::ios::in);
 		
@@ -1177,6 +1206,7 @@ namespace Gui
 			im::Separator();
 
 			im::Checkbox(_("PSilent"), &vars->combat.psilent);
+			im::Checkbox(_("PSilent Melee"), &vars->combat.psilentmelee);
 			im::Checkbox(_("Vis check"), &vars->combat.vischeck);
 			im::SliderFloat(_("Movement pred"), &vars->combat.movementpred, 0.1f, 1.0f, _("%.2f"), 1.f);
 			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
@@ -1242,7 +1272,7 @@ namespace Gui
 			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Multiplier for distance to teleport the bullet within desync time"));
 			}
-			//im::Checkbox(_("Lower velocities"), &vars->combat.lower_vel);
+			im::Checkbox(_("Best velocity"), &vars->combat.bestvelocity);
 			im::Checkbox(_("Fast bullets"), &vars->combat.fast_bullet);
 			im::Checkbox(_("Instant eoka"), &vars->combat.instaeoka);
 			//im::Checkbox(_("Fast bow"), &vars->combat.fastbow);
@@ -1314,6 +1344,7 @@ namespace Gui
 			im::Combo(_("Health bar"), &vars->visual.hpbar,
 				_("None\0Side\0Bottom"));
 			im::Checkbox(_("Rainbow health bar"), &vars->visual.rainbowhpbar);
+			im::Checkbox(_("Target flag"), &vars->visual.targettedflag);
 			im::Checkbox(_("Friend flag"), &vars->visual.friendflag);
 			im::Checkbox(_("Wounded flag"), &vars->visual.woundedflag);
 			im::Checkbox(_("Held item flag"), &vars->visual.weaponesp);
@@ -1344,6 +1375,8 @@ namespace Gui
 			im::Text(_("Gameplay"));
 			im::Separator();
 			im::SliderFloat(_("Player fov"), &vars->visual.playerfov, 50.f, 179.9f, _("%.1f"));
+			im::Checkbox(_("Movement line"), &vars->visual.movementline);
+			im::Checkbox(_("Show capsule"), &vars->visual.showcapsule);
 			im::Checkbox(_("Bullet tracers"), &vars->visual.tracers);
 			im::Checkbox(_("Crosshair 1"), &vars->visual.crosshair1);
 			im::Checkbox(_("Crosshair 2"), &vars->visual.crosshair2);
@@ -1506,6 +1539,7 @@ namespace Gui
 			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Turn off recyclers"));
 			}
+			//im::Checkbox(_("Auto-knock"), &vars->misc.autoknock);
 			im::Checkbox(_("Pickup collectibles"), &vars->misc.pickup_collectibles);
 			im::Checkbox(_("Interactive debug"), &vars->misc.interactive_debug);
 			im::Checkbox(_("Instant med"), &vars->misc.instant_med);
@@ -1521,6 +1555,11 @@ namespace Gui
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("L"), &vars->keybinds.neck, ImVec2(50, 14));
 			im::SliderFloat(_("Size"), &vars->misc.PlayerEyes, 1.f, 1.5f, _("%.2f"));
+			im::SliderFloat(_("Capsule Height"), &vars->misc.capsuleHeight, 0.f, 5.f, _("%.2f"));
+			im::SliderFloat(_("Capsule Center"), &vars->misc.capsuleCenter, 0.f, 5.f, _("%.2f"));
+			im::SliderFloat(_("Capsule Height Ducked"), &vars->misc.capsuleHeightDucked, 0.f, 5.f, _("%.2f"));
+			im::SliderFloat(_("Capsule Center Ducked"), &vars->misc.capsuleCenterDucked, 0.f, 5.f, _("%.2f"));
+			im::SliderFloat(_("Capsule Radius"), &vars->misc.capsuleradius, 0.f, 5.f, _("%.2f"));
 			im::Checkbox(_("Auto upgrade"), &vars->misc.auto_upgrade);
 			im::Combo(_("Upgrade tier"), &vars->misc.upgrade_tier,
 				_("Wood\0Stone\0Metal\0Armored"));
@@ -1560,7 +1599,11 @@ namespace Gui
 		//do buttons on left side
 		if (im::BeginChild(_("Listbox"), ImVec2(480, 330), true))
 		{
-			if (im::ListBoxHeader(_("Configs"), ImVec2(475, 130)))
+			im::Text(_("Config"));
+			im::SameLine();
+			im::SetCursorPosX(im::GetCursorPosX() + 148);
+			im::Text(_("Lua"));
+			if (im::ListBoxHeader(_("##Configs"), ImVec2(190, 130)))
 			{
 				int i = 0;
 				auto s = LI_FIND(getenv)(_("APPDATA"));
@@ -1571,17 +1614,37 @@ namespace Gui
 						i++;
 						if (im::Selectable(p.path().stem().string().c_str(), ImGuiSelectableFlags_AllowDoubleClick))
 						{
-							selected_cfg = i;
+							selected_cfg = i;	
 							LI_FIND(strcpy)(str0, const_cast<char*>(p.path().stem().string().c_str()));
+							if (im::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+								load_config(str0);
 						}
 					}
 				im::ListBoxFooter();
 			}
+			im::SameLine();
+			if (im::ListBoxHeader(_("##Luas"), ImVec2(190, 130)))
+			{
+				int i = 0;
+				auto s = LI_FIND(getenv)(_("APPDATA"));
+				auto p = s + std::string(_("\\matrix\\scripts\\"));
+				for (auto& p : std::filesystem::recursive_directory_iterator(p))
+					if (p.path().extension() == _(".lua"))
+					{
+						i++;
+						auto a = p.path().stem().string();
+						if (vars->loaded_lua_list.count(a) == 0)
+							vars->loaded_lua_list.insert(std::make_pair(a, new bool{ 0 }));
+					}
+				for (auto pair : vars->loaded_lua_list) {
+					im::Checkbox(pair.first.c_str(), pair.second);
+					im::SetCursorPosY(im::GetCursorPosY() - 10);
+				}
+				im::ListBoxFooter();
+			}
 			if (im::Button(_("Save config"))) { save_config(str0); }
 			im::SameLine();
-			if (im::Button(_("Load config"))) { load_config(); }
-			im::SameLine();
-			if (im::Button(_("Delete config"))) { delete_config(str0); }
+			if (im::Button(_("Load config"))) { load_config(str0); }
 			im::InputText(_("Config name"), str0, IM_ARRAYSIZE(str0));
 
 			im::EndChild();
@@ -1634,6 +1697,15 @@ namespace Gui
 			vars->accent_color_opaque[0] = vars->accent_color[0];
 			vars->accent_color_opaque[1] = vars->accent_color[1];
 			vars->accent_color_opaque[2] = vars->accent_color[2];
+
+			im::SliderFloat(_("TabRounding"), &vars->menu.TabRounding, 0.f, 10.f, "%.0f", 1.f);
+			im::SliderFloat(_("GrabRounding"), &vars->menu.GrabRounding, 0.f, 10.f, "%.0f", 1.f);
+			im::SliderFloat(_("ScrollbarRounding"), &vars->menu.ScrollbarRounding, 0.f, 10.f, "%.0f", 1.f);
+			im::SliderFloat(_("FrameRounding"), &vars->menu.FrameRounding, 0.f, 10.f, "%.0f", 1.f);
+			im::SliderFloat(_("PopupRounding"), &vars->menu.PopupRounding, 0.f, 10.f, "%.0f", 1.f);
+			im::SliderFloat(_("ChildRounding"), &vars->menu.ChildRounding, 0.f, 10.f, "%.0f", 1.f);
+			im::SliderFloat(_("WindowRounding"), &vars->menu.WindowRounding, 0.f, 10.f, "%.0f", 1.f);
+
 			im::EndChild();
 		}
 		im::SetCursorPos(ImVec2(im::GetCursorPosX() + 243, im::GetCursorPosY() - 184));
@@ -1659,8 +1731,7 @@ namespace Gui
 			init = true;
 
 			//load 'default' config by default
-			strcpy(str0, _("default"));
-			load_config();
+			load_config(_("default"));
 		}
 
 #ifdef DOTS
@@ -1701,48 +1772,76 @@ namespace Gui
 		im::PushStyleColor(ImGuiCol_TextSelectedBg, { vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], vars->accent_color[3] });
 		im::PushStyleColor(ImGuiCol_Separator, { 0.43f, 0.43f, 0.50f, 0.65f });
 
+
+
+		im::PushStyleVar(ImGuiStyleVar_TabRounding, vars->menu.TabRounding);
+		im::PushStyleVar(ImGuiStyleVar_GrabRounding, vars->menu.GrabRounding);
+		im::PushStyleVar(ImGuiStyleVar_ScrollbarRounding, vars->menu.ScrollbarRounding);
+		im::PushStyleVar(ImGuiStyleVar_FrameRounding, vars->menu.FrameRounding);
+		im::PushStyleVar(ImGuiStyleVar_PopupRounding, vars->menu.PopupRounding);
+		im::PushStyleVar(ImGuiStyleVar_ChildRounding, vars->menu.ChildRounding);
+		im::PushStyleVar(ImGuiStyleVar_WindowRounding, vars->menu.WindowRounding);
+
 		//im::SetNextWindowPos(ImVec2(x + 170, y + 60));
 		//im::SetNextWindowSize(ImVec2(520, plus2));
-		im::Begin(GUI_NAME, nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-		{
-			ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
-
-			im::Separator();
-			if (im::Button(_("Combat"), ImVec2(73, 20))) { selected_tab = 0; }  im::SameLine();
-			if (im::Button(_("Visuals"), ImVec2(73, 20))) { selected_tab = 1; }  im::SameLine();
-			if (im::Button(_("ESP Items"), ImVec2(73, 20))) { selected_tab = 2; }  im::SameLine();
-			if (im::Button(_("Misc"), ImVec2(73, 20))) { selected_tab = 3; }  im::SameLine();
-			if (im::Button(_("Configs"), ImVec2(73, 20))) { selected_tab = 4; }  im::SameLine();
-			if (im::Button(_("Colors"), ImVec2(73, 20))) { selected_tab = 5; }
-			im::Separator();
-			im::PushStyleColor(ImGuiCol_Separator, { vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], vars->accent_color[3] });
-			switch (selected_tab)
+		if (vars->open) {
+			im::Begin(GUI_NAME, nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 			{
-			case 0:
-				combat();
-				break;
-			case 1:
-				visual();
-				break;
-			case 2:
-				esp_items();
-				break;
-			case 3:
-				misc();
-				break;
-			case 4:
-				configs();
-				break;
-			case 5:
-				colors();
-				break;
+				ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
+
+				im::Separator();
+				if (im::Button(_("Combat"), ImVec2(73, 20))) { selected_tab = 0; }  im::SameLine();
+				if (im::Button(_("Visuals"), ImVec2(73, 20))) { selected_tab = 1; }  im::SameLine();
+				if (im::Button(_("ESP Items"), ImVec2(73, 20))) { selected_tab = 2; }  im::SameLine();
+				if (im::Button(_("Misc"), ImVec2(73, 20))) { selected_tab = 3; }  im::SameLine();
+				if (im::Button(_("Configs"), ImVec2(73, 20))) { selected_tab = 4; }  im::SameLine();
+				if (im::Button(_("Colors"), ImVec2(73, 20))) { selected_tab = 5; }
+				im::Separator();
+				im::PushStyleColor(ImGuiCol_Separator, { vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], vars->accent_color[3] });
+				switch (selected_tab)
+				{
+				case 0:
+					combat();
+					break;
+				case 1:
+					visual();
+					break;
+				case 2:
+					esp_items();
+					break;
+				case 3:
+					misc();
+					break;
+				case 4:
+					configs();
+					break;
+				case 5:
+					colors();
+					break;
+				}
+			}
+			im::End();
+			if (vars->misc.playerlist)
+				PlayersListWindow();
+			if (vars->misc.snake)
+				SnakeStuff();
+		}
+
+		if (vars->visual.hotbar_esp)
+		{
+			Vector2 screen = { 0, 0 };
+
+			if (!vars->target_name.empty()) {
+				auto s = vars->target_name + _("'s items");
+				HotbarWindow(40 + (vars->target_hotbar_list.size() * 20), s, vars->target_hotbar_list);
+			}
+			else if (vars->open) {
+				std::vector<_item*> items{};
+				items.push_back(new _item({ _(L"Assault Rifle"), 1 }));
+				std::string n = _("Player's items");
+				int height = 80;
+				HotbarWindow(height, n, items);
 			}
 		}
-		im::End();
-
-		if (vars->misc.playerlist)
-			PlayersListWindow();
-		if (vars->misc.snake)
-			SnakeStuff();
 	}
 }

@@ -29,6 +29,7 @@
 
 #define consoleout
 
+
 bool has_initialized = false, init = false, menuopen = false;
 
 //extern DWORD D3DThread();
@@ -89,20 +90,11 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	if (GetAsyncKeyState(VK_INSERT) & 1)
 		vars->open = !vars->open;
 
-	//__try {
-		im::NewFrame();
-		if (render.NewFrame(pSwapChain))
-		{
-			new_frame();
-		}
-		render.EndFrame();
-		if (vars->open)
-		{
-			Gui::Render();
-		}
-	//} __except(true) {
-	//	esp::local_player->console_echo(_(L"[matrix]: ERROR. Crash inside: " __FUNCTION__));
-	//}
+	im::NewFrame();
+	if (render.NewFrame(pSwapChain))
+		new_frame();
+	render.EndFrame();
+	Gui::Render();
 	im::End();
 	
 	im::Render();
@@ -151,16 +143,19 @@ bool DllMain(HMODULE hmodule)
 		auto p = s + std::string(_("\\matrix\\"));
 		vars->data_dir = p;
 		CreateDirectoryA(p.c_str(), 0);
+		auto p2 = p + std::string(_("scripts"));
 		p = p + std::string(_("configs"));
 		CreateDirectoryA(p.c_str(), 0);
+		CreateDirectoryA(p2.c_str(), 0);
 
 		mem::game_assembly_base = LI_MODULE_SAFE_(_("GameAssembly.dll"));
 		mem::unity_player_base = LI_MODULE_SAFE_(_("UnityPlayer.dll"));
 
 		AllocConsole();
+		freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
+		freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
 
 		il2cpp::init();
-
 		unity::init_unity();
 		gui::init_gui();
 		hooks::init_hooks();
@@ -194,7 +189,8 @@ bool DllMain(HMODULE hmodule)
 
 	il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
 	il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
-	//il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);
+	il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);
+
 	mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
 	mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);
 

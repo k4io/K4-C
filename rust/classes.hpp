@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 
+
 #include "../utils/xor_float.hpp"
 #include "../utils/string_format.h"
 
@@ -81,6 +82,7 @@ default_t const defaultt = default_t();
 	NP(type) \
 	static auto off = il2cpp::value(klass, tr); \
 	return *reinterpret_cast<type*>(this + off); }
+
 
 template<typename T>
 void pop_front(std::vector<T>& vec)
@@ -227,10 +229,13 @@ class BasePlayer;
 class HitTest;
 class PlayerBelt;
 class Terrain;
+class Projectile;
 class TerrainHeightMap;
 class TerrainCollision;
 class TerrainMeta;
 class InputState;
+class Collider;
+class CapsuleCollider;
 class PlayerVoiceRecorder;
 class BaseMovement;
 class TimeWarning;
@@ -254,6 +259,18 @@ typedef struct Str
 //static auto ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
 
 //static auto setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
+static auto capgetheight = reinterpret_cast<float(*)(CapsuleCollider*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("get_height"), 0, _(""), _("UnityEngine"))));
+
+static auto capsetheight = reinterpret_cast<void(*)(CapsuleCollider*, float f)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("set_height"), 1, _(""), _("UnityEngine"))));
+
+static auto capgetrad = reinterpret_cast<float(*)(CapsuleCollider*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("get_radius"), 0, _(""), _("UnityEngine"))));
+
+static auto capsetrad = reinterpret_cast<void(*)(CapsuleCollider*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("set_radius"), 1, _(""), _("UnityEngine"))));
+
+static auto basemeldothrow = reinterpret_cast<void(*)(BaseMelee*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("DoThrow"), 0, _(""), _(""))));
+
+static auto baseentgetitem = reinterpret_cast<Item*(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetItem"), 0, _(""), _(""))));
+
 static auto item_cmd = reinterpret_cast<void(*)(unsigned int, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("LocalPlayer"), _("ItemCommand"), 2, _(""), _(""))));
 
 static auto get_activemodel = reinterpret_cast<uintptr_t(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseViewModel"), _("get_ActiveModel"), 0, _(""), _(""))));
@@ -499,6 +516,12 @@ float current_time;
 void init_bp() {
 	//setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
 	//ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
+	capgetheight = reinterpret_cast<float(*)(CapsuleCollider*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("get_height"), 0, _(""), _("UnityEngine"))));
+	capsetheight = reinterpret_cast<void(*)(CapsuleCollider*, float f)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("set_height"), 1, _(""), _("UnityEngine"))));
+	capgetrad = reinterpret_cast<float(*)(CapsuleCollider*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("get_radius"), 0, _(""), _("UnityEngine"))));
+	capsetrad = reinterpret_cast<void(*)(CapsuleCollider*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("set_radius"), 0, _(""), _("UnityEngine"))));
+	basemeldothrow = reinterpret_cast<void(*)(BaseMelee*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("DoThrow"), 0, _(""), _(""))));
+	baseentgetitem = reinterpret_cast<Item * (*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetItem"), 0, _(""), _(""))));
 	item_cmd = reinterpret_cast<void(*)(unsigned int, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("LocalPlayer"), _("ItemCommand"), 2, _(""), _(""))));
 	get_activemodel = reinterpret_cast<uintptr_t(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseViewModel"), _("get_ActiveModel"), 0, _(""), _(""))));
 	useaction = reinterpret_cast<void(*)(BasePlayer*, InputState*)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("UseAction"), 1, _(""), _(""))));
@@ -699,7 +722,6 @@ void init_bp() {
 #pragma endregion
 }
 
-
 Vector3 GetEndPointForTrajectory(float speed, float angle, float drag, float gravityMod, bool draw = false, Vector3 addto = Vector3::Zero())
 {
 	float pitchRad = DEG2RAD(angle);
@@ -752,6 +774,11 @@ void GenerateBuilletDropPredictionData(float drag, float gravityMod)
 	}
 }
 
+#define COMPONENT(space, type) type* { \
+	NP(type) \
+	static auto ret = ((Component*)this)->GetComponent<type*>(unity::GetType(_(space), _(#type))); \
+	return ret; }
+
 class Object {
 public:
 	System::string* get_name() {
@@ -762,6 +789,7 @@ public:
 
 class Component : public Object {
 public:
+
 	Transform* transform() {
 		__try {
 			if (!this) return nullptr;
@@ -1016,7 +1044,10 @@ public:
 	Model* model() {
 		return *reinterpret_cast<Model**>((uintptr_t)this + 0x130);
 	}
-
+	Item* GetItem() {
+		if (!this) return nullptr;
+		return baseentgetitem(this);
+	}
 	float WaterFactor() {
 		if (!this) return 0.f;
 		return waterfactor(this);
@@ -1045,6 +1076,12 @@ public:
 		if (!this) return;
 		auto off = reinterpret_cast<void (*)(BaseEntity*, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
 		return off(this, func);
+	}
+	void ServerRPCs(const char* func) {
+		if (!this) return;
+		auto s = std::string(func);
+		auto off = reinterpret_cast<void (*)(BaseEntity*, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
+		return off(this, std::wstring(s.begin(), s.end()).c_str());
 	}
 	Transform* FindBone(wchar_t* bone) {
 		if (!this) return nullptr;
@@ -1086,6 +1123,7 @@ public:
 	FIELD(_("ItemModProjectile"), _("projectileVelocity"), projectileVelocity, float);
 	FIELD(_("ItemModProjectile"), _("projectileSpread"), projectileSpread, float);
 	FIELD(_("ItemModProjectile"), _("projectileVelocitySpread"), projectileVelocitySpread, float);
+	FIELD(_("ItemModProjectile"), _("projectileObject"), projectileObject, Projectile*);
 };
 
 class BasePlayer;
@@ -1222,6 +1260,11 @@ public:
 		if (!this) return false;
 		auto off = reinterpret_cast<bool (*)(BaseMelee*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("CanHit"), 1, _(""), _(""))));
 		return off(this, ht);
+	}
+
+	void DoThrow() {
+		if (!this) return;
+		return basemeldothrow(this);
 	}
 };
 
@@ -1681,8 +1724,38 @@ public:
 	}
 };
 
+class Collider : public Component {
+
+};
+
+class CapsuleCollider : public Collider {
+public:
+	float GetRadius() {
+		if (!this) return 0;
+		return capgetrad(this);
+	}
+	void SetRadius(float f) {
+		if (!this) return;
+		return capsetrad(this, f);
+	}
+	float GetHeight() {
+		if (!this) return 0;
+		return capgetheight(this);
+	}
+	void SetHeight(float f) {
+		if (!this) return;
+		return capsetheight(this, f);
+	}
+};
+
 class PlayerWalkMovement : public BaseMovement {
 public:
+	FIELD(_("PlayerWalkMovement"), _("capsuleHeight"), capsuleHeight, float);
+	FIELD(_("PlayerWalkMovement"), _("capsuleCenter"), capsuleCenter, float);
+	FIELD(_("PlayerWalkMovement"), _("capsuleHeightDucked"), capsuleHeightDucked, float);
+	FIELD(_("PlayerWalkMovement"), _("capsuleCenterDucked"), capsuleCenterDucked, float);
+	FIELD(_("PlayerWalkMovement"), _("capsule"), capsule, CapsuleCollider*);
+
 	void set_swimming(bool flag) {
 		*reinterpret_cast<bool*>((uintptr_t)this + swimming) = flag;
 	}
@@ -1951,6 +2024,11 @@ public:
 		auto off = reinterpret_cast<void(*)(Renderer*, Material*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("set_material"), 0, _(""), _("UnityEngine"))));
 		return off(this, m);
 	}
+	void SetMaterials(System::Array<Material*>* m) {
+		if (!this) return;
+		auto off = reinterpret_cast<void(*)(Renderer*, System::Array<Material*>*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("SetMaterialArray"), 0, _(""), _("UnityEngine"))));
+		return off(this, m);
+	}
 };
 
 class SkinnedMultiMesh : public MonoBehaviour {
@@ -2195,6 +2273,17 @@ public:
 		return player_name->str;
 	}
 
+	std::string GetName() {
+		if (!this) return "";
+		auto w = std::wstring(this->get_player_name());
+		return std::string(w.begin(), w.end());
+	}
+	
+	bool is_npc() {
+		if (!this) return false;
+		return this->playerModel()->isnpc();
+	}
+
 	void SendSignalBroadcast(rust::classes::Signal signal, wchar_t* str = _(L""))
 	{
 		if (!this) return;
@@ -2227,7 +2316,7 @@ public:
 		}
 	}
 
-	void set_admin_flag(rust::classes::PlayerFlags flag) {
+	void set_player_flag(rust::classes::PlayerFlags flag) {
 		int PlayerFlag = *reinterpret_cast<int*>((uintptr_t)this + playerFlags);
 
 		*reinterpret_cast<int*>((uintptr_t)this + playerFlags) = PlayerFlag |= (int)flag;
@@ -2457,6 +2546,12 @@ public:
 		return BoneValue;
 	}
 
+	Vector3 GetBonePos(int id) {
+		auto t = get_bone_transform(id)->position();
+		if (!t.is_empty()) return t;
+		return Vector3::Zero();
+	}
+
 	std::pair<aim_target, bool> resolve_closest_entity(float max_distance, bool get_code = true) {
 		aim_target closest_entity;
 		auto client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
@@ -2522,19 +2617,22 @@ public:
 
 				if (name != 'eerT' && 
 					name != 'HerO' && 
+					name != 'RerO' && 
+					strcmp(entity_class_name, _("Door")) &&
 					std::string(n).find(_("barrel")) == std::string::npos &&
 					strcmp(entity_class_name, _("TreeMarker")))
 					continue;
 
-				if (name == 'HerO')
-					is_code_lock = false;
-				else
-					is_code_lock = true;
+				//if (name == 'HerO')
+				//	is_code_lock = false;
+				//else
+				//	is_code_lock = true;
 
-				if (name == 'eerT') {
-					if (*(int*)(entity_class_name + 4) != 'itnE')
-						continue;
-				}
+				//if (name == 'eerT') {
+				//	if (*(int*)(entity_class_name + 4) != 'itnE'
+				//		|| *(int*)(entity_class_name + 4) != 'kraM')
+				//		continue;
+				//}
 			}
 
 			auto game_object = *reinterpret_cast<uintptr_t*>(object + 0x30);
@@ -2548,6 +2646,30 @@ public:
 			auto bone_pos = this->get_bone_transform(48)->position();
 
 			auto distance = bone_pos.get_3d_dist(world_position);
+
+			if (distance < 2.f
+				&& !strcmp(entity_class_name, _("TreeMarker"))) {
+
+				aim_target new_target;
+				new_target.pos = world_position;//this->ClosestPoint(world_position);
+				new_target.ent = (BaseCombatEntity*)ent;
+				new_target.distance = distance;
+				new_target.visible = /*unity::is_visible(bone_pos, world_position)*/true;
+				new_target.found = true;
+				return { new_target, false };
+			}
+			else if (distance < 2.f
+				&& !strcmp(entity_class_name, _("OreHotSpot"))) {
+
+					aim_target new_target;
+					new_target.pos = world_position;//this->ClosestPoint(world_position);
+					new_target.ent = (BaseCombatEntity*)ent;
+					new_target.distance = distance;
+					new_target.visible = /*unity::is_visible(bone_pos, world_position)*/true;
+					new_target.found = true;
+					return { new_target, false };
+			}
+
 			if (distance < closest_entity_distance && distance < max_distance) {
 				auto object_class = *reinterpret_cast<uintptr_t*>(object + 0x30);
 				if (!object_class)
@@ -2779,12 +2901,12 @@ public:
 		//auto s = string::wformat(_(L"trap [%d]: %s"), (int)get_fixedTime(), str);
 		if (vars->misc.logs)
 			console_msg((uintptr_t)this, str);
-		//else {
-		//	freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
-		//	freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
-		//	wcscat(const_cast<wchar_t*>(str), _(L"\n"));
-		//	wprintf(str);
-		//}
+		else {
+			freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
+			freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
+			wcscat(const_cast<wchar_t*>(str), _(L"\n"));
+			wprintf(str);
+		}
 	}
 };
 
@@ -2856,9 +2978,6 @@ public:
 
 	bool CanAffordUpgrade(rust::classes::BuildingGrade g, BasePlayer* p) {
 		if (!this) return false;
-
-		//typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7202688
-		//return ((AAA)(mem::game_assembly_base + 0x6D3260))((uintptr_t)this, (int)g, p);
 		return canaffordupgrade((uintptr_t)this, g, p);
 	}
 
@@ -2925,6 +3044,17 @@ public:
 	FIELD(_("Skinnable"), _("EntityPrefab"), EntityPrefab, GameObject*);
 	FIELD(_("Skinnable"), _("ViewmodelPrefab"), ViewmodelPrefab, GameObject*);
 	member(System::Array<Material*>*, _sourceMaterials, 0x68);
+};
+
+
+class BaseViewModel : public MonoBehaviour {
+public:
+
+};
+
+class ViewModel : public BaseViewModel {
+public:
+
 };
 
 namespace ConVar {
@@ -3380,6 +3510,8 @@ public:
 	member(Skinnable*, skinnable, 0x48);
 	member(System::Array<Material*>*, materials, 0x50);
 };
+
+
 
 void attack_melee(aim_target target, BaseProjectile* melee, BasePlayer* lp, bool is_player = false) {
 	if (!target.visible)

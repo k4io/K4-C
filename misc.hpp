@@ -1507,7 +1507,7 @@ namespace misc
 		}
 	}
 
-	void get_prediction(aim_target target,
+	bool get_prediction(aim_target target,
 		Vector3 rpc_position,
 		Vector3 target_pos,
 		Vector3 original_vel,
@@ -1520,14 +1520,17 @@ namespace misc
 		float gravityModifier,
 		Vector3& actualposition,
 		bool skip_draw = false,
-		int simulationsmax = 100) 
+		int simulationsmax = 100,
+		float offset = -.5f,
+		float offsetstep = .05f) 
 	{
+
 		Vector3 player_velocity = Vector3(0, 0, 0);
 		std::vector<Vector3> path = {};
 		int simulations = 0;
 
 		target_pos.y -= 0.1f;
-
+		float o = offset;
 		if (target.ent) {
 			auto travel = 0.f;
 			auto vel = (getmodifiedaimcone(0, rpc_position - target_pos, true)).Normalized() * original_vel.length();
@@ -1535,7 +1538,6 @@ namespace misc
 			auto gravity = get_gravity();
 			auto deltatime = get_deltaTime();
 			auto timescale = get_timeScale();
-			auto offset = 0.1f;
 			simulations = 0;
 
 			//auto wv = GetWorldVelocity(target.player);
@@ -1563,7 +1565,8 @@ namespace misc
 					velocity += gravity * grav * num;
 					velocity -= velocity * drag * num;
 					travel_t += num;
-					if (misc::LineCircleIntersection(target_pos, 0.1f, origin, pos, offset))
+					if (misc::LineCircleIntersection(target_pos, 0.1f, origin, pos, offset)
+						&& unity::LineOfSightRadius(pos, origin, 0))
 					{
 						aimbot_velocity = (_aimdir).Normalized() * original_vel.length();
 						//emulate 1 tick has already passed
@@ -1576,13 +1579,13 @@ namespace misc
 						//Line(origin, pos, col(1, 1, 1, 1), 2.f, false, true);
 					}
 				}
-				offset += 0.1f;
+				offset += offsetstep;
 				simulations++;
 				if (!aimbot_velocity.is_empty())
 					break;
 			}
 		}
-
+		offset = o;
 		if (travel_t > 0.f) {
 			//movement prediction
 
@@ -1617,7 +1620,6 @@ namespace misc
 				auto gravity = get_gravity();
 				auto deltatime = get_deltaTime();
 				auto timescale = get_timeScale();
-				auto offset = -.5f;
 				simulations = 0;
 
 
@@ -1646,7 +1648,8 @@ namespace misc
 						velocity -= velocity * drag * num;
 						travel_t += num;
 
-						if (misc::LineCircleIntersection(actual, 0.1f, origin, pos, offset))
+						if (misc::LineCircleIntersection(actual, 0.1f, origin, pos, offset)
+							&& unity::LineOfSightRadius(pos, origin, 0))
 						{
 							//Line(origin, pos, col(0, 1, 0, 1), 10.f, false, true);
 							aimbot_velocity = (_aimdir).Normalized() * original_vel.length();
@@ -1665,20 +1668,22 @@ namespace misc
 									va = v;
 								}
 							}
-							break;
+							return true;
 						}
 						else
 						{
 							//Line(origin, pos, col(1, 1, 1, 1), 10.f, false, true);
 						}
 					}
-					offset += 0.05f;
+					offset += offsetstep;
 					simulations++;
 					if (!aimbot_velocity.is_empty())
 						break;
 				}
 			}
 		}
+
+		return false;
 	}
 
 	void lower_velocity(aim_target target,
@@ -1689,58 +1694,34 @@ namespace misc
 		Vector3& aimbot_velocity,
 		Vector3& _aimdir,
 		float& travel_t,
+		float partialTime,
+		float drag,
+		float gravityModifier,
 		Projectile* p,
 		Vector3 actualposition,
 		bool skip_draw = false,
 		int simulations = 100) {
-		Vector2 angle = CalcAngle(rpc_position, target_pos);
 
-		float yRad = DEG2RAD(angle.y);
+		auto velocitymin = 0.9f;
+		auto velocitymax = 1.5f;
 
-		GenerateBuilletDropPredictionData(p->drag(), p->gravityModifier());
-
-		int currentIndex = 0;
-		for (float pitch = 35.f; pitch <= 85.f; pitch += 5.f)
+		for (size_t i = velocitymax; i > velocitymin; i -= 0.02f)
 		{
-			float pitchRad = DEG2RAD(pitch);
-
-			Vector3 dir = {
-				(float)(sinf(yRad) * cosf(pitchRad)),
-				(float)sinf(pitchRad),
-				(float)(cosf(yRad) * cosf(pitchRad))
-			};
-			esp::local_player->console_echo(string::wformat(_(L"[matrix]: Lower velocities - pitch: %d"), (int)pitch));
-			float heightDiff = target_pos.y - target_pos.y;
-			float dist2D = target_pos.distancexz(rpc_position);
-
-			BulletDropPredictionData& predData = bulletDropData[currentIndex++];
-			float idealSpeed = dist2D / predData.distCoeff;
-			float yTravel = (predData.startY + (idealSpeed - 30.f) * predData.yCoeff);
-			if (idealSpeed <= original_velmax && yTravel < heightDiff)
-			{
-				auto t = 0.f;
-				Vector3 vel = original_vel.normalize() * idealSpeed;
-				get_prediction(target,
-					rpc_position,
-					target_pos,
-					vel,
-					aimbot_velocity,
-					dir,
-					t,
-					p->partialTime(),
-					p->drag(),
-					p->gravityModifier(),
-					actualposition,
-					skip_draw,
-					simulations);
-				if (!aimbot_velocity.is_empty()) {
-					target.visible = true;
-					return;
-				}
-				// your prediction here,
-				// idealSpeed = the projectile speed to shoot with
-				// dir = the direction of the projectile to shoot 
-			}
+			if (get_prediction(target,
+				rpc_position,
+				target_pos,
+				(original_vel * i),
+				aimbot_velocity,
+				_aimdir,
+				travel_t,
+				partialTime,
+				drag,
+				gravityModifier,
+				actualposition,
+				skip_draw,
+				50))
+				return;
 		}
+
 	}
 }

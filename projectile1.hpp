@@ -1,6 +1,6 @@
 #include "misc.hpp"
 
-uintptr_t pools_offset = 0xB85990;
+uintptr_t pools_offset = 0xB85800;
 /*
  /* GenericInstMethod :
 	|
@@ -29,7 +29,7 @@ uintptr_t pools_offset = 0xB85990;
 	|-Pool.Get<PositionLerp>
 	|-Pool.Get<AIDesign>
 */
-uintptr_t Method$System_Collections_Generic_List_Projectile__Clear__ = 15408096; //Method$System.Collections.Generic.List<Projectile>.Clear() (METHOD ADDRESS)
+uintptr_t Method$System_Collections_Generic_List_Projectile__Clear__ = 15407696; //Method$System.Collections.Generic.List<Projectile>.Clear() (METHOD ADDRESS)
 
 static auto _DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
 
@@ -38,8 +38,8 @@ class Projectile1 : public BaseMonoBehaviour
 {
 public:
 	void UpdateBulletTracer(Vector3 OldPos, Vector3 NewPos, bool Update = true) {
-		Line(OldPos, NewPos, { 1, 1, 1, 1 }, 10.f, false, false);
-		Sphere(((Projectile*)this)->currentPosition(), .5f, { 1, 1, 1, 1 }, 10.f, 10.f);
+		//Line(OldPos, NewPos, { 1, 1, 1, 1 }, 10.f, false, false);
+		//Sphere(((Projectile*)this)->currentPosition(), .5f, { 1, 1, 1, 1 }, 10.f, 10.f);
 		/*
 		if (!settings.BulletTracers)
 			return;
@@ -161,7 +161,7 @@ public:
 
 					//Bounds bnds = RealTarget->GetBounds1111();
 					Bounds bnds = GetBounds((uintptr_t)RealTarget.ent);
-
+					
 					//Vector3 pos = bnds._m_Center;
 					Vector3 pos = bnds.m_center;
 
@@ -173,6 +173,9 @@ public:
 					float maxHitDist = GetHitDist(min(travelTime, maxTime), (BasePlayer*)RealTarget.ent, true);
 					float maxTravelDst = _this->initialDistance() + startVelocityLen * min(travelTime + num, maxTime) * projectile_forgiviness;
 					float absoluteMaxDst = _this->initialDistance() + startVelocityLen * min((travelTime + (dst - maxHitDist) / 0.98f * (num * 2)), 7.95f) * projectile_forgiviness;
+					//Sphere(position, maxHitDist, { 1, 0, 0, 1 }, 5.f, 100.f);
+					//Sphere(position, maxTravelDst, { 0, 1, 0, 1 }, 5.f, 100.f);
+					//Sphere(position, absoluteMaxDst, { 0, 0, 1, 1 }, 5.f, 100.f);
 					updateDist = min(absoluteMaxDst, updateDist);
 				FOR:
 					bool shouldWait = false;
@@ -353,13 +356,15 @@ public:
 			//typedef bool(*dh)(Projectile*, HitTest*, Vector3, Vector3);
 			//if (((dh)(mem::game_assembly_base + 0x7A9420))(_this, ht, point, Vector3())) {
 
+			Sphere(point, 0.2f, { 1, 1, 1, 1 }, 10.f, 100.f);
+
 			//static auto DoHit = *reinterpret_cast<bool(**)(Projectile * _instance, HitTest * test, Vector3 point, Vector3 normal)>(Il2CppWrapper::GetClassFromName(_(""), _("Projectile"))->GetMethodFromName(_("DoHit")));
-			if(_DoHit(_this, (HitTest*)ht, point, _this->currentVelocity())) {
-			//if (Do_Hit(_this, (uintptr_t)ht, point, Vector3::Zero())) {
-				_this->currentVelocity(vel);
-				_this->traveledTime(real_travel_time);
-				return true;
-			}
+			//if(_DoHit(_this, (HitTest*)ht, point, _this->currentVelocity())) {
+			////if (Do_Hit(_this, (uintptr_t)ht, point, Vector3::Zero())) {
+			//	_this->currentVelocity(vel);
+			//	_this->traveledTime(real_travel_time);
+			//	return true;
+			//}
 			return false;
 		}
 	}
@@ -453,7 +458,7 @@ public:
 			return;
 
 		typedef uintptr_t(*AAA)(); // Client get_cl() { }
-		auto cl = ((AAA)(mem::game_assembly_base + 0x132D4C0))();
+		auto cl = ((AAA)(mem::game_assembly_base + 0x132D330))();
 		if (!cl)
 			return;
 		esp::local_player->console_echo(_(L"[matrix]: SendPlayerProjectileUpdate - Called"));
@@ -471,10 +476,10 @@ public:
 
 		//public bool Start() { }
 		//if (write->Start()) {
-		if (((netwrite_start)(mem::game_assembly_base + 0x249D490))(write)) {
+		if (((netwrite_start)(mem::game_assembly_base + 0x249D300))(write)) {
 
 			typedef void(*netwrite_packetid)(uintptr_t, UINT);
-			((netwrite_packetid)(mem::game_assembly_base + 0x249D0C0))(write, (UINT)MessageType::RPCMessage);
+			((netwrite_packetid)(mem::game_assembly_base + 0x249CF30))(write, (UINT)MessageType::RPCMessage);
 			//write->PacketID((UINT)MessageType::RPCMessage);
 
 			auto net = *reinterpret_cast<uintptr_t*>((uintptr_t)esp::local_player + 0x58);
@@ -488,14 +493,14 @@ public:
 
 			typedef void(*netwrite_uint32)(uintptr_t, UINT);
 
-			((netwrite_uint32)(mem::game_assembly_base + 0x249D790))(write, id);
+			((netwrite_uint32)(mem::game_assembly_base + 0x249D600))(write, id);
 			//write->UInt32(id);
 
-			((netwrite_uint32)(mem::game_assembly_base + 0x249D790))(write, 2324190493); //projectile update id 2324190493
+			((netwrite_uint32)(mem::game_assembly_base + 0x249D600))(write, 2324190493); //projectile update id 2324190493
 			//write->UInt32(2324190493); //projectile update
 
 			typedef void(*serialize)(uintptr_t, uint64_t);
-			((serialize)(mem::game_assembly_base + 0x22E1400))(write, update);
+			((serialize)(mem::game_assembly_base + 0x22E1270))(write, update);
 			//ProtoBuf::PlayerProjectileUpdate::Serialize(write, (ProtoBuf::PlayerProjectileUpdate*)update);
 
 			auto conn = *reinterpret_cast<uintptr_t*>(cl + 0x28);
@@ -524,8 +529,9 @@ public:
 			//sendInfo->connection() = conn;
 			//sendInfo->connections() = 0;
 
+			//public void Send(SendInfo info) { }
 			typedef void(*netwrite_send)(uintptr_t, uintptr_t);
-			((netwrite_send)(mem::game_assembly_base + 0x249D370))(write, si);
+			((netwrite_send)(mem::game_assembly_base + 0x249D1E0))(write, si);
 			esp::local_player->console_echo(_(L"[matrix]: SendPlayerProjectileUpdate - Finished"));
 			//write->Send(sendInfo);
 		}
@@ -564,6 +570,12 @@ public:
 
 
 		((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->projectileID = _this->projectileID();
+		/*
+			member(int, projectileID, 0x14);
+			member(Vector3, position, 0x18);
+			member(Vector3, velocity, 0x24);
+			member(float, traveltime, 0x30);
+			*/
 		//((ProtoBuf::PlayerProjectileUpdate*)g_UpdateReusable)->projectileID() = _this->projectileID();
 
 		constexpr float num = 0.03125f;
@@ -635,6 +647,8 @@ public:
 				else
 					movPos = closest + (c / len) * min(len, stepSize);
 			}
+
+			Sphere(movPos, reduceLen, { 1, 1, 1, 1 }, 10.f, 100.f);
 
 			prevPos = movPos;
 
@@ -804,15 +818,16 @@ public:
 				if (settings::RealGangstaShit != Vector3(0, 0, 0))
 					pos = settings::RealGangstaShit;
 
-				_this->currentPosition() = pos;
+				//_this->currentPosition() = pos;
+				_this->currentPosition(pos);
 
 				float time1 = unity::get_realtimesincestartup();//unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
 				_this->launchTime(time1);
 				_this->sentTraveledTime(0.f);
 				_this->sentPosition(pos);
 				_this->prevSentVelocity(pos);
-				_this->previousPosition() = pos;
-				_this->previousVelocity() = _this->initialVelocity();
+				_this->previousPosition(pos);
+				_this->previousVelocity(_this->initialVelocity());
 
 				Vector3 InitialVel = _this->initialVelocity();
 				*reinterpret_cast<float*>((uintptr_t)_this + 0x90) = InitialVel.Length();
@@ -946,6 +961,7 @@ public:
 			Velocity = 95.f;
 
 		float maxDist = 0.1f + (timeSinceLastTickClamped + 2.f / 60.f) * 1.5f * Velocity;
+		//Sphere(((Projectile*)this)->currentPosition(), )
 
 		if (projectileProtection1 >= 6) {
 			if (ent && !mountedplayer)

@@ -9,6 +9,7 @@
 #include "../classes.hpp"
 #include "../rust.hpp"
 #include <map>
+#include <D2D1Helper.h>
 
 float r = 1.00f, g = 0.00f, b = 1.00f;
 

@@ -1,11 +1,6 @@
 #pragma once
-#include "RenderClass.h"
-#include "vars.hpp"
-#include "skinstr.h"
-#include "rust/features/player_esp.hpp"
+#include "lua_wrapper.hpp"
 
-#include "inttypes.h"
-//#include "rust/classes.hpp"
 void DrawPlayer(BasePlayer* ply, bool npc)
 {
 	if (!ply) return;
@@ -203,6 +198,10 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 					if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Crawling) || ply->modelState()->has_flag(rust::classes::ModelState_Flag::Sleeping)) {
 						cbounds.center = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
 						cbounds.extents = Vector3(0.9f, 0.2f, 0.4f);
+					}
+					else if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked)) {
+						cbounds.center = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
+						cbounds.size.y *= .5f;
 					}
 					else {
 						cbounds.center = mp + Vector3(0.0f, 0.85f, 0.0f);
@@ -546,6 +545,13 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 					render.StringCenter({ bounds.center, bounds.bottom + 19 }, player_weapon->get_weapon_name(), vars->visual.rainbowflags ? rainbowcolor : FLOAT4TOD3DCOLOR(vars->colors.players.details.flags.visible));
 			}
 
+			if (vars->visual.targettedflag) {
+				if (esp::best_target.ent) {
+					if (ply->userID() == ((BasePlayer*)esp::best_target.ent)->userID()) {
+						render.String({ bounds.right + 9, bounds.bottom - (box_height / 2) }, _(L"[Target]"), vars->visual.rainbowflags ? rainbowcolor : FLOAT4TOD3DCOLOR(vars->colors.players.details.flags.visible));
+					}
+				}
+			}
 
 			if (vars->visual.friendflag) {
 				if (map_contains_key(vars->gui_player_map, ply->userID()))
@@ -571,8 +577,6 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 				auto nstr = string::wformat(_(L"[%dm]"), (int)distance);
 				render.StringCenter({ bounds.center, bounds.bottom + 9 }, nstr, vars->visual.rainbowdist ? rainbowcolor : FLOAT4TOD3DCOLOR(dist_color));
 			}
-
-
 
 			//name
 			if (vars->visual.nameesp) {
@@ -645,11 +649,7 @@ void DrawPlayerHotbar(aim_target target) {
 	esp::out_w2s(target.pos, screen);
 
 	//create window length based off amount of items in belt
-	struct it {
-		wchar_t* name;
-		int count;
-	};
-	std::vector<it> items = {};
+	std::vector<_item*> items = {};
 
 	if (target.ent && !target.is_heli && !target.teammate)
 	{
@@ -659,20 +659,31 @@ void DrawPlayerHotbar(aim_target target) {
 		belt->for_each([&](Item* item, int32_t idx) {
 			{
 				if (!item) return;
+				_item* cur = new _item();
 				const auto name = item->get_weapon_name();
 				if (name)
 				{
+					cur->name = name;
 					const auto amt = item->GetAmount();
-					items.push_back({ name, amt });
+					cur->count = amt;
+					items.push_back(cur);
 				}
 			}
 			});
 
-		//check for draw wearable?
+		auto player_name = ((BasePlayer*)target.ent)->_displayName()->str;
+		auto ws = std::wstring(player_name);
+		auto s = std::string(ws.begin(), ws.end());
 
+		vars->target_hotbar_list = items;
+		vars->target_name = s;
+
+		return;
+
+		//check for draw wearable?
 		if (items.size() > 0)
 		{
-			auto player_name = ((BasePlayer*)target.ent)->_displayName()->str;
+
 
 			// 
 			// box has player name
@@ -706,8 +717,8 @@ void DrawPlayerHotbar(aim_target target) {
 			int k = 0;
 			for (auto i : items)
 			{
-				auto name = i.name;
-				auto amount = i.count;
+				auto name = i->name;
+				auto amount = i->count;
 
 				std::wstring ws(name);
 				auto astr = std::to_string(amount);
@@ -717,6 +728,10 @@ void DrawPlayerHotbar(aim_target target) {
 				render.String({ start.x, start.y + (k++ * 20) }, ws.c_str(), { 0.71, 0.71, 0.71, 1 });
 			}
 		}
+	}
+	else {
+		vars->target_hotbar_list = {};
+		vars->target_name = _("");
 	}
 }
 
@@ -843,10 +858,11 @@ void iterate_entities() {
 				vars->chams_player_map.insert(std::make_pair(entity->userID(), 0));
 				vars->handchams_player_map.insert(std::make_pair(entity->userID(), 0));
 			}
+			lw::playerlist.push_back(entity);
 
 			bool is_friend = false, follow = false, block = false;
 			if (map_contains_key(vars->gui_player_map, entity->userID())) {
-				is_friend = vars->gui_player_map[entity->userID()]->is_friend;
+				is_friend = vars->gui_player_map[entity->userID()]->is_friend || entity->is_teammate(esp::local_player);
 				follow = vars->gui_player_map[entity->userID()]->follow;
 				block = vars->gui_player_map[entity->userID()]->block;
 			}
@@ -1012,35 +1028,35 @@ void iterate_entities() {
 						esp::best_target.ent = target.ent;
 						esp::best_target.visible = visible;
 
-						auto vel = target.ent->GetWorldVelocity();
-
-						float next_frame = esp::best_target.last_frame + get_deltaTime();
-						if (get_fixedTime() > next_frame)
-						{
-							//new frame, record velocity, record frame
-							esp::best_target.last_frame = get_fixedTime();
-							if (esp::best_target.velocity_list.size() < 30) //0.03125 * 30 = 0.9 seconds
-								esp::best_target.velocity_list.push_back(vel);
-							else
-							{
-								esp::best_target.velocity_list.pop_back();
-								esp::best_target.velocity_list.insert(esp::best_target.velocity_list.begin(), 1, vel);
-							}
-							float avgx = 0.f;
-							float avgy = 0.f;
-							float avgz = 0.f;
-							int count = 0;
-							for (auto v : esp::best_target.velocity_list)
-							{
-								if (v.is_empty()) break;
-								avgx += v.x;
-								avgy += v.y;
-								avgz += v.z;
-								count += 1;
-							}
-							avgx /= count; avgy /= count; avgz /= count;
-							esp::best_target.avg_vel = Vector3(avgx, avgy, avgz);
-						}
+						//auto vel = target.ent->GetWorldVelocity();
+						//
+						//float next_frame = esp::best_target.last_frame + get_deltaTime();
+						//if (get_fixedTime() > next_frame)
+						//{
+						//	//new frame, record velocity, record frame
+						//	esp::best_target.last_frame = get_fixedTime();
+						//	if (esp::best_target.velocity_list.size() < 30) //0.03125 * 30 = 0.9 seconds
+						//		esp::best_target.velocity_list.push_back(vel);
+						//	else
+						//	{
+						//		esp::best_target.velocity_list.pop_back();
+						//		esp::best_target.velocity_list.insert(esp::best_target.velocity_list.begin(), 1, vel);
+						//	}
+						//	float avgx = 0.f;
+						//	float avgy = 0.f;
+						//	float avgz = 0.f;
+						//	int count = 0;
+						//	for (auto v : esp::best_target.velocity_list)
+						//	{
+						//		if (v.is_empty()) break;
+						//		avgx += v.x;
+						//		avgy += v.y;
+						//		avgz += v.z;
+						//		count += 1;
+						//	}
+						//	avgx /= count; avgy /= count; avgz /= count;
+						//	esp::best_target.avg_vel = Vector3(avgx, avgy, avgz);
+						//}
 					}
 
 					if (esp::best_target.distance > 400.f)
@@ -1523,8 +1539,13 @@ void iterate_entities() {
 	}
 	if (esp::best_target.ent
 		&& vars->visual.hotbar_esp
-		&& esp::local_player)
+		&& esp::local_player) {
 		DrawPlayerHotbar(esp::best_target);
+	}
+	else {
+		vars->target_hotbar_list = {};
+		vars->target_name = _("");
+	}
 }
 
 void Crosshair1() {
@@ -1541,7 +1562,7 @@ void Crosshair2() {
 }
 void Crosshair3() { //Circle crosshair
 	float x = vars->ScreenX / 2, y = vars->ScreenY / 2;
-	render.Circle(Vector2(x, y), FLOAT4TOD3DCOLOR(vars->colors.ui.crosshair), 2.3f);
+	render.Circle(Vector2(x, y), FLOAT4TOD3DCOLOR(vars->colors.ui.crosshair), 1.3f);
 }
 
 int indicators_on_screen = 0;
@@ -1635,21 +1656,80 @@ void LoadGuiSkinmap() {
 
 bool finit = false;
 
+sol::state initlua() {
+	sol::state lua;
+	lua.open_libraries(sol::lib::base, sol::lib::string, sol::lib::package, sol::lib::io);
+
+	//auto core = lua["cheat"].get_or_create<sol::table>();
+
+	lua.new_usertype<Vector2>("Vector2",
+		"x", &Vector2::x,
+		"y", &Vector2::y);
+
+	lua.new_usertype<Vector3>("Vector3",
+		"x", &Vector3::x,
+		"y", &Vector3::y,
+		"z", &Vector3::z);
+
+	lua.new_usertype<lw::color>("color",
+		"r", &lw::color::r,
+		"g", &lw::color::g,
+		"b", &lw::color::b,
+		"a", &lw::color::a);
+
+	auto gui = lua["gui"].get_or_create<sol::table>();
+
+	gui.set_function("drawrect", &lw::draw::Rect);
+	gui.set_function("drawfilledrect", &lw::draw::FillRect);
+	gui.set_function("drawcircle", &lw::draw::Circle);
+	gui.set_function("drawfilledcircle", &lw::draw::FillCircle);
+	gui.set_function("drawtext", &lw::draw::Text);
+	gui.set_function("drawtextcentered", &lw::draw::TextCentered);
+
+	lua.new_usertype<lw::Player>("Player",
+		"settargetmovement", &lw::Player::SetTargetMovement,
+		"gettargetmovement", &lw::Player::GetTargetMovement,
+		"isalive", &lw::Player::IsAlive,
+		"gethealth", &lw::Player::GetHealth,
+		"getbonepos", &lw::Player::GetBonePos,
+		"getname", &lw::Player::GetName,
+		"isnpc", &lw::Player::IsNpc,
+		"userid", &lw::Player::GetUserId,
+		"serverrpc", &lw::Player::Rpc,
+		"islocalplayer", &lw::Player::IsLocalPlayer,
+		"isfriend", &lw::Player::IsFriend,
+		"isteammate", &lw::Player::IsTeammate);
+
+
+	auto core = lua["cheat"].get_or_create<sol::table>();
+
+	core.set_function("getplayer", &lw::entities::GetPlayer);
+	core.set_function("lineofsight", &lw::misc::LineOfSight);
+	core.set_function("worldtoscreen", &lw::misc::w2s);
+	core.set_function("playerlistsize", &lw::entities::PlayerListSize);
+
+	core["desynctime"] = vars->desyncTime;
+	core["flyhackDistanceY"] = settings::vert_flyhack;
+	core["flyhackDistanceX"] = settings::hor_flyhack;
+	return lua;
+}
+
 void new_frame() {
 	if (!finit) {
-		freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
-		freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
-		printf("unity base: %" PRIxPTR "\n", mem::unity_player_base);
-		printf("game assembly base: %" PRIxPTR "\n", mem::game_assembly_base);
-		float Y = GetSystemMetrics(SM_CYSCREEN);
-		float X = GetSystemMetrics(SM_CXSCREEN);
+		//printf("unity base: %" PRIxPTR "\n", mem::unity_player_base);
+		//printf("game assembly base: %" PRIxPTR "\n", mem::game_assembly_base);
+		//float Y = GetSystemMetrics(SM_CYSCREEN);
+		//float X = GetSystemMetrics(SM_CXSCREEN);
 		Vector2 vScreen = render.CanvasSize();
 		vars->ScreenX = vScreen.x;
 		vars->ScreenY = vScreen.y;
 		finit = true;
-	}
 
-	printf("crosshairs\n");
+		//lw::entities::playerlist = new std::vector<BasePlayer*>();
+		//InitLua();
+	}
+	lw::playerlist.clear();
+	//printf("crosshairs\n");
 	//Draw crosshairs
 	if (vars->visual.crosshair1)
 		Crosshair1();
@@ -1658,7 +1738,7 @@ void new_frame() {
 	if (vars->visual.crosshair3)
 		Crosshair3();
 
-	printf("indicators\n");
+	//printf("indicators\n");
 	//Draw indicators
 	if (vars->visual.desync_indicator)
 		IndicatorDesync();
@@ -1672,12 +1752,12 @@ void new_frame() {
 	if (vars->visual.flyhack_indicator)
 		IndicatorFlyhack();
 
-	printf("fov\n");
+	//printf("fov\n");
 	//Draw FOV
 	if (vars->visual.show_fov)
 		DrawFov();
 
-	printf("watermark\n");
+	//printf("watermark\n");
 	//Draw watermark
 	Watermark();
 	if (esp::local_player
@@ -1687,23 +1767,48 @@ void new_frame() {
 		{
 			auto h = hitpoints[i];
 			auto w2s = WorldToScreen(h.position);
-			render.StringCenter({ w2s.x - 1, w2s.y }, _(L"hit"), { 0, 0, 0, 1 });
-			render.StringCenter({ w2s.x + 1, w2s.y }, _(L"hit"), { 0, 0, 0, 1 });
-			render.StringCenter({ w2s.x, w2s.y - 1 }, _(L"hit"), { 0, 0, 0, 1 });
-			render.StringCenter({ w2s.x, w2s.y + 1 }, _(L"hit"), { 0, 0, 0, 1 });
-			render.StringCenter({ w2s.x, w2s.y }, _(L"hit"), FLOAT4TOD3DCOLOR(vars->colors.ui.hitpoints));
+			if(!w2s.is_empty())
+				render.StringCenter({ w2s.x, w2s.y }, _(L"hit"), FLOAT4TOD3DCOLOR(vars->colors.ui.hitpoints));
 			if (h.time + 5.f < get_fixedTime()) rindex = i;
 		}
 		if (rindex != -1) hitpoints.erase(hitpoints.begin() + rindex);
 	}
 
 	//iterate_entities();
-	printf("iterate entities\n");
+	//printf("iterate entities\n");
 	iterate_entities();
-	printf("return\n");
+
+	__try {
+		auto lua = initlua();
+		for (auto pair : vars->loaded_lua_list) {
+			if (*pair.second) {
+
+				auto filename = vars->data_dir + _("scripts\\") + pair.first + _(".lua");
+				lua.script_file(filename);
+
+				sol::protected_function func = lua[_("entityloop")];
+				func.set_error_handler(lua[_("errorhandler")]);
+				auto f = (std::function<void()>)func();
+			}
+		}
+	}
+	__except (true) {}
+
+	//if(lw::entities::playerlist.size() > 0)
+	if(!esp::local_player)
+		lw::playerlist.clear();
+	for (auto v : lw::playerlist)
+		if (!v)
+			lw::playerlist.erase(
+				std::remove(
+					lw::playerlist.begin(),
+					lw::playerlist.end(),
+					v),
+				lw::playerlist.end());
+	
+	//printf("return\n");
 	return;
 	//does it make the object 3 times? it lags and flickers lots.
-
 	for (auto o : vars->RenderList) {
 		if (o->HasBeenDrawn) {
 			vars->RenderList.erase(std::remove(vars->RenderList.begin(), vars->RenderList.end(), o), vars->RenderList.end());
