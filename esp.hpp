@@ -1098,7 +1098,7 @@ void iterate_entities() {
 				}
 			}
 
-			auto object_name = *reinterpret_cast<rust_str*>(object_name_ptr);
+			//auto object_name = *reinterpret_cast<rust_str*>(object_name_ptr);
 
 			//buildingblock stuff
 			if (vars->visual.block_chams > 0 || vars->misc.auto_upgrade) {
@@ -1151,6 +1151,18 @@ void iterate_entities() {
 					auto dist = world_position.distance(esp::local_player->transform()->position());
 					if (dist < 4.f)
 						ent->ServerRPC(_(L"Pickup"));
+				}
+			}
+
+			//silent stash stuff
+			if (vars->misc.openstash) {
+				if (unity::GetKey(vars->keybinds.stash)) {
+					if (!strcmp(ent->get_class_name(), _("StashContainer"))) {
+						if (ent->transform()->position().distance(
+							esp::local_player->transform()->position()) < .9f) {
+							ent->ServerRPC(_(L"RPC_OpenLoot"));
+						}
+					}
 				}
 			}
 

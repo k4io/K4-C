@@ -259,6 +259,8 @@ typedef struct Str
 //static auto ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
 
 //static auto setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
+static auto launchproj = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("LaunchProjectile"), 0, _(""), _(""))));
+
 static auto capgetheight = reinterpret_cast<float(*)(CapsuleCollider*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("get_height"), 0, _(""), _("UnityEngine"))));
 
 static auto capsetheight = reinterpret_cast<void(*)(CapsuleCollider*, float f)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("set_height"), 1, _(""), _("UnityEngine"))));
@@ -516,6 +518,7 @@ float current_time;
 void init_bp() {
 	//setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
 	//ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
+	launchproj = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("LaunchProjectile"), 0, _(""), _(""))));
 	capgetheight = reinterpret_cast<float(*)(CapsuleCollider*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("get_height"), 0, _(""), _("UnityEngine"))));
 	capsetheight = reinterpret_cast<void(*)(CapsuleCollider*, float f)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("set_height"), 1, _(""), _("UnityEngine"))));
 	capgetrad = reinterpret_cast<float(*)(CapsuleCollider*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("get_radius"), 0, _(""), _("UnityEngine"))));
@@ -1300,6 +1303,11 @@ public:
 	void set_projectile_thickness(float thickness)
 	{
 		*reinterpret_cast<float*>((uintptr_t)this + thickness_addr) = thickness;
+	}
+
+	void LaunchProjectile() {
+		if (!this) return;
+		return launchproj((uintptr_t)this);
 	}
 
 	void set_last_hit_time(float time) {

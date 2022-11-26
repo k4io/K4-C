@@ -1235,6 +1235,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		if (vars->combat.doubletap
 			&& !vars->combat.rapidfire)
 		{
+
+
 			auto m = held->repeatDelay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
 
 			int r = vars->desyncTime / m;
@@ -1586,7 +1588,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							if (!strcmp(held->get_class_name(), _("BaseMelee"))
 								&& vars->combat.psilentmelee)
 								((BaseMelee*)held)->DoThrow();
-							else hk_projectile_launchprojectile(held);
+							else {
+								auto m = held->repeatDelay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
+								int r = vars->desyncTime / m;
+								for(int i = 0; i <= r; i++)
+									held->LaunchProjectile();
+							}
 							misc::best_target = Vector3(0, 0, 0);
 							baseplayer->SendClientTick();
 						}
@@ -1612,7 +1619,10 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								baseplayer->console_echo(string::wformat(_(L"[matrix]: ClientInput - manipulator attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(vars->desyncTime * 100.f)));
 
 								misc::manual = true;
-								hooks::hk_projectile_launchprojectile(held);
+								auto m = held->repeatDelay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
+								int r = vars->desyncTime / m;
+								for (int i = 0; i <= r; i++)
+									held->LaunchProjectile();
 								baseplayer->SendClientTick();
 							}
 					}
@@ -1632,7 +1642,10 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					{
 						misc::autoshot = true;
 						misc::autobot::wants_shoot = false;
-						hooks::hk_projectile_launchprojectile(held);
+						auto m = held->repeatDelay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
+						int r = vars->desyncTime / m;
+						for (int i = 0; i <= r; i++)
+							held->LaunchProjectile();
 						baseplayer->SendClientTick();
 					}
 					else if (!baseplayer->is_visible(baseplayer->model()->boneTransforms()->get(48)->position(), target)

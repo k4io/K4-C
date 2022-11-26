@@ -336,6 +336,7 @@ struct Vars
 		bool flyhack_stop = false;
 		bool tp = false;
 		bool revivefriendsonly = false;
+		bool openstash = false;
 		bool antispeed = false;
 		bool freezeondesync = false;
 		bool autofarmbarrel = false;
@@ -424,6 +425,7 @@ struct Vars
 		int fakelag = 0;
 		int tp = 0;
 		int locktarget = 0;
+		int stash = 0;
 	}; keybinds keybinds;
 
 	struct colors {

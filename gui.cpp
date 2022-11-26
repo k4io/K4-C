@@ -1541,6 +1541,9 @@ namespace Gui
 			}
 			//im::Checkbox(_("Auto-knock"), &vars->misc.autoknock);
 			im::Checkbox(_("Pickup collectibles"), &vars->misc.pickup_collectibles);
+			im::Checkbox(_("Silent stash-open"), &vars->misc.openstash);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			im::Hotkey(_("X"), &vars->keybinds.stash, ImVec2(50, 14));
 			im::Checkbox(_("Interactive debug"), &vars->misc.interactive_debug);
 			im::Checkbox(_("Instant med"), &vars->misc.instant_med);
 			im::Checkbox(_("Instant revive"), &vars->misc.instant_revive);
