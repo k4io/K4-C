@@ -10,6 +10,8 @@
 
 //static float r = 1.00f, g = 0.00f, b = 1.00f;
 
+static float lastchamsupdate = 0.f;
+
 namespace gui {
 	class Color {
 	public:
@@ -1161,14 +1163,19 @@ namespace gui {
 			esp::matrix = unity::get_view_matrix();
 
 			//int fff = 0;
-			for (auto p : player_map)
-				if (vars->visual.playeresp
-					&& p.second)
-				{
-					esp::do_chams(p.second);
-					//esp::local_player->console_echo(string::wformat(_(L"[matrix]: OnGUI - Caching bones for: %d"), p->userID()));
-					//cache::CacheBones(p.second, esp::local_player);
-				}
+
+			if (lastchamsupdate + 60.f < get_fixedTime()) {
+				for (auto p : player_map)
+					if (vars->visual.playeresp
+						&& p.second)
+					{
+						esp::do_chams(p.second);
+						//esp::local_player->console_echo(string::wformat(_(L"[matrix]: OnGUI - Caching bones for: %d"), p->userID()));
+						//cache::CacheBones(p.second, esp::local_player);
+					}
+				lastchamsupdate = get_fixedTime();
+			}
+
 
 			if (vars->misc.auto_upgrade)
 			{
@@ -2118,8 +2125,9 @@ namespace esp
 			auto lastcham = vars->chams_player_map[ent->userID()];
 
 			//if (lastchamh != vars->visual.hand_chams)
-			if ((lastslot != esp::local_player->Belt()->GetSelectedSlot() || vars->visual.rainbow_chams)
-				&& ent->is_local_player())
+			//if ((lastslot != esp::local_player->Belt()->GetSelectedSlot() || vars->visual.rainbow_chams)
+			//	&& ent->is_local_player())
+			if (ent->is_local_player())
 			{
 				switch (vars->visual.hand_chams)
 				{
@@ -2143,7 +2151,7 @@ namespace esp
 					break;
 				}
 				//vars->handchams_player_map[ent->userID()] = vars->visual.hand_chams;
-				lastslot = esp::local_player->Belt()->GetSelectedSlot();
+				//lastslot = esp::local_player->Belt()->GetSelectedSlot();
 
 				if ((!shader && !mat) && (vars->visual.hand_chams < 1 && vars->visual.shader < 1)) return;
 
@@ -2193,119 +2201,116 @@ namespace esp
 				}
 			}
 
-			if (lastcham != vars->visual.shader)
+			switch (vars->visual.shader)
 			{
-				switch (vars->visual.shader)
-				{
-				case 1:
-					shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
-					break;
-				case 2:
-					shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"SeethroughShader"), unity::GetType(_("UnityEngine"), _("Shader")));
-					break;
-				case 3:
-					shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"WireframeTransparent"), unity::GetType(_("UnityEngine"), _("Shader")));
-					break;
-				case 4:
-					shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"chamslit"), unity::GetType(_("UnityEngine"), _("Shader")));
-					break;
-				case 5:
-					mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/force field.mat"), unity::GetType(_("UnityEngine"), _("Material")));
-					break;
-				case 6:
-					mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/distortionrim.mat"), unity::GetType(_("UnityEngine"), _("Material")));
-					break;
-				case 7:
-					mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/2dmat.mat"), unity::GetType(_("UnityEngine"), _("Material")));
-					break;
-				case 8:
-					mat = (Material*)unity::LoadAsset(unity::galaxy_bundle, string::wformat(vars->visual.galaxymat < 10 ? _(L"GalaxyMaterial_0%d") : _(L"GalaxyMaterial_%d"), vars->visual.galaxymat), unity::GetType(_("UnityEngine"), _("Material")));
-					break;
-				}
-				vars->chams_player_map[ent->userID()] = vars->visual.shader;
+			case 1:
+				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 2:
+				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"SeethroughShader"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 3:
+				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"WireframeTransparent"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 4:
+				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"chamslit"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 5:
+				mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/force field.mat"), unity::GetType(_("UnityEngine"), _("Material")));
+				break;
+			case 6:
+				mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/distortionrim.mat"), unity::GetType(_("UnityEngine"), _("Material")));
+				break;
+			case 7:
+				mat = (Material*)unity::LoadAsset(unity::bundle2, _(L"assets/2dmat.mat"), unity::GetType(_("UnityEngine"), _("Material")));
+				break;
+			case 8:
+				mat = (Material*)unity::LoadAsset(unity::galaxy_bundle, string::wformat(vars->visual.galaxymat < 10 ? _(L"GalaxyMaterial_0%d") : _(L"GalaxyMaterial_%d"), vars->visual.galaxymat), unity::GetType(_("UnityEngine"), _("Material")));
+				break;
+			}
+			//vars->chams_player_map[ent->userID()] = vars->visual.shader;
 
-				if (vars->visual.shader >= 1 && (shader || mat)) {
-					uintptr_t chams_shader = 0;
+			if (vars->visual.shader >= 1 && (shader || mat)) {
+				uintptr_t chams_shader = 0;
 
-					//static int cases = 0;
-					//switch (cases) {
-					//case 0: { r -= 0.004f; if (r <= 0) cases += 1; break; }
-					//case 1: { g += 0.004f; b -= 0.004f; if (g >= 1) cases += 1; break; }
-					//case 2: { r += 0.004f; if (r >= 1) cases += 1; break; }
-					//case 3: { b += 0.004f; g -= 0.004f; if (b >= 1) cases = 0; break; }
-					//default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
-					//}
-					//unity::chams_shader = unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
+				//static int cases = 0;
+				//switch (cases) {
+				//case 0: { r -= 0.004f; if (r <= 0) cases += 1; break; }
+				//case 1: { g += 0.004f; b -= 0.004f; if (g >= 1) cases += 1; break; }
+				//case 2: { r += 0.004f; if (r >= 1) cases += 1; break; }
+				//case 3: { b += 0.004f; g -= 0.004f; if (b >= 1) cases = 0; break; }
+				//default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
+				//}
+				//unity::chams_shader = unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
 
-					//this breaks?
-					//auto _multiMesh = ent->playerModel()->_multiMesh();//mem::read<uintptr_t>(player->playerModel() + 0x2D0); //SkinnedMultiMesh _multiMesh;
-					//auto model = ent->playerModel();
-					auto model = *reinterpret_cast<PlayerModel**>((uintptr_t)ent + 0x4D0);
-					if (!model || (uintptr_t)model < 0xFFFF) return;
-					auto _multiMesh = *reinterpret_cast<SkinnedMultiMesh**>((uintptr_t)model + 0x2D0);
-					if (!_multiMesh) return;
-					auto render = _multiMesh->get_Renderers(); //get_Renderers(_multiMesh);
-					if (!render) return;
+				//this breaks?
+				//auto _multiMesh = ent->playerModel()->_multiMesh();//mem::read<uintptr_t>(player->playerModel() + 0x2D0); //SkinnedMultiMesh _multiMesh;
+				//auto model = ent->playerModel();
+				auto model = *reinterpret_cast<PlayerModel**>((uintptr_t)ent + 0x4D0);
+				if (!model || (uintptr_t)model < 0xFFFF) return;
+				auto _multiMesh = *reinterpret_cast<SkinnedMultiMesh**>((uintptr_t)model + 0x2D0);
+				if (!_multiMesh) return;
+				auto render = _multiMesh->get_Renderers(); //get_Renderers(_multiMesh);
+				if (!render) return;
 
-					for (int i = 0; i < render->get_size(); i++) {
-						auto renderer = render->get_value(i);
-						if (!renderer) continue;
-						auto material = renderer->GetMaterial();
-						if (!material) continue;
-						auto viscolor = col(vars->colors.players.chams.visible[0], vars->colors.players.chams.visible[1], vars->colors.players.chams.visible[2], 1);
-						auto inviscolor = col(vars->colors.players.chams.invisible[0], vars->colors.players.chams.invisible[1], vars->colors.players.chams.invisible[2], 1);
+				for (int i = 0; i < render->get_size(); i++) {
+					auto renderer = render->get_value(i);
+					if (!renderer) continue;
+					auto material = renderer->GetMaterial();
+					if (!material) continue;
+					auto viscolor = col(vars->colors.players.chams.visible[0], vars->colors.players.chams.visible[1], vars->colors.players.chams.visible[2], 1);
+					auto inviscolor = col(vars->colors.players.chams.invisible[0], vars->colors.players.chams.invisible[1], vars->colors.players.chams.invisible[2], 1);
 
-						if (vars->visual.rainbow_chams)
-						{
-							viscolor = col(r, g, b, 1);
-							inviscolor = col(1.f - r, 1.f - g, 1.f - b, 1);
-						}
+					if (vars->visual.rainbow_chams)
+					{
+						viscolor = col(r, g, b, 1);
+						inviscolor = col(1.f - r, 1.f - g, 1.f - b, 1);
+					}
 
-						if (shader || mat)//(vars->visual.shader >= 5 && unity::galaxy_material))
-						{
-							if (mat) {
-								auto cm = renderer->GetMaterial();
-								auto shader1 = cm->GetShader();
-								auto shader2 = mat->GetShader();
-								if (shader1 != shader2)
-								{
-									if (material != mat) {
-										renderer->SetMaterial(mat);
-										SetInt((uintptr_t)material, _(L"_ZTest"), 8);
-										if (vars->visual.shader == 6)
-										{
-											mat->SetColor(_(L"_RimColor"), viscolor);
-										}
-										else if (vars->visual.shader == 7)
-										{
-											mat->SetColor(_(L"_Color"), viscolor);
-											mat->SetColor(_(L"_OutlineColor"), inviscolor);
-											mat->SetFloat(_(L"_OutlineSize"), 20.f);
-										}
+					if (shader || mat)//(vars->visual.shader >= 5 && unity::galaxy_material))
+					{
+						if (mat) {
+							auto cm = renderer->GetMaterial();
+							auto shader1 = cm->GetShader();
+							auto shader2 = mat->GetShader();
+							if (shader1 != shader2)
+							{
+								if (material != mat) {
+									renderer->SetMaterial(mat);
+									SetInt((uintptr_t)material, _(L"_ZTest"), 8);
+									if (vars->visual.shader == 6)
+									{
+										mat->SetColor(_(L"_RimColor"), viscolor);
+									}
+									else if (vars->visual.shader == 7)
+									{
+										mat->SetColor(_(L"_Color"), viscolor);
+										mat->SetColor(_(L"_OutlineColor"), inviscolor);
+										mat->SetFloat(_(L"_OutlineSize"), 20.f);
 									}
 								}
 							}
-							else if (shader != material->GetShader()) {
-								if (vars->visual.shader >= 5 && unity::galaxy_material && (uintptr_t)renderer->GetMaterial() != unity::galaxy_material)
-									renderer->SetMaterial((Material*)unity::galaxy_material);
-								else material->SetShader(shader);
-							}
-							else
+						}
+						else if (shader != material->GetShader()) {
+							if (vars->visual.shader >= 5 && unity::galaxy_material && (uintptr_t)renderer->GetMaterial() != unity::galaxy_material)
+								renderer->SetMaterial((Material*)unity::galaxy_material);
+							else material->SetShader(shader);
+						}
+						else
+						{
+							switch (vars->visual.shader)
 							{
-								switch (vars->visual.shader)
-								{
-								case 1:
-									material->SetColor(_(L"_ColorVisible"), viscolor);
-									material->SetColor(_(L"_ColorBehind"), inviscolor);
-									break;
-								case 3:
-									material->SetColor(_(L"_WireColor"), viscolor);
-									break;
-								case 4:
-									material->SetColor(_(L"_ColorVisible"), viscolor);
-									material->SetColor(_(L"_ColorBehind"), inviscolor);
-									break;
-								}
+							case 1:
+								material->SetColor(_(L"_ColorVisible"), viscolor);
+								material->SetColor(_(L"_ColorBehind"), inviscolor);
+								break;
+							case 3:
+								material->SetColor(_(L"_WireColor"), viscolor);
+								break;
+							case 4:
+								material->SetColor(_(L"_ColorVisible"), viscolor);
+								material->SetColor(_(L"_ColorBehind"), inviscolor);
+								break;
 							}
 						}
 					}
