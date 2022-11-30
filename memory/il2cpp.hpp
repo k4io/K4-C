@@ -4,6 +4,8 @@
 
 #include "memory.hpp"
 
+#include <map>
+
 namespace il2cpp {
 	namespace methods {
 		using il2cpp_domain_get = uintptr_t (*)();
@@ -264,7 +266,15 @@ namespace il2cpp {
 	}
 }
 
+std::map<std::string, uintptr_t> addrmap{};
+
 uintptr_t mem::hook_virtual_function(const char* classname, const char* function_to_hook, void* our_func, const char* name_space = _("")) {
+	std::string mstr(name_space);
+	mstr += classname;
+	mstr += function_to_hook;
+	if (addrmap.count(mstr) > 1)
+		return addrmap[mstr];
+	
 	uintptr_t search = *reinterpret_cast<uintptr_t*>(il2cpp::method(classname, function_to_hook, -1, _(""), name_space));
 	uintptr_t table = il2cpp::init_class(classname, name_space);
 
@@ -275,6 +285,7 @@ uintptr_t mem::hook_virtual_function(const char* classname, const char* function
 		uintptr_t addr = *reinterpret_cast<uintptr_t*>(i);
 		if (addr == search) {
 			*reinterpret_cast<uintptr_t*>(i) = (uintptr_t)our_func;
+			addrmap.insert(std::make_pair(mstr, addr));
 			return addr;
 		}
 	}

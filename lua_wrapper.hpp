@@ -9,6 +9,72 @@
 //lua wrapper for functions
 namespace lw {
 	std::vector<BasePlayer*> playerlist{};
+	std::vector<BaseEntity*> entitylist{};
+
+	class Entity {
+	public:
+		BaseEntity* self;
+
+		Vector3 GetPosition() {
+			if (!self) return {};
+			return self->transform()->position();
+		}
+
+		void Rpc(std::string s) {
+			if (!self) return;
+			return self->ServerRPCs(s.c_str());
+		}
+
+		std::string GetClassname() {
+			if (!self) return "";
+			return self->get_class_name();
+		}
+
+		Entity(BaseEntity* e) 
+			: self(e) { }
+
+		Entity(int i) :
+			self(lw::entitylist[i]) { }
+	};
+
+	class Eyes {
+	public:
+		PlayerEyes* self;
+
+		Vector3 GetPosition() {
+			if (!self) return {};
+			return self->position();
+		}
+
+		Vector4 GetRotation() {
+			if (!self) return {};
+			return self->rotation();
+		}
+
+		Vector3 BodyForward() {
+			if (!self) return {};
+			return self->body_forward();
+		}
+
+		Vector3 BodyRight() {
+			if (!self) return {};
+			return self->body_right();
+		}
+
+		Vector3 GetViewOffset() {
+			if (!self) return {};
+			return self->get_view_offset();
+		}
+
+		void SetViewOffset(Vector3 v) {
+			if (!self) return;
+			return self->set_view_offset(v);
+		}
+
+		Eyes(PlayerEyes* e) 
+			: self(e) { }
+	};
+
 	class Player {
 	public:
 		BasePlayer* self;
@@ -82,6 +148,11 @@ namespace lw {
 			return self->set_player_flag((rust::classes::PlayerFlags)f);
 		}
 
+		//Eyes GetEyes() {
+		//	if (!self) return Eyes();
+		//	return Eyes(self->eyes());
+		//}
+
 		Player(BasePlayer* e)
 			: self(e) { }
 
@@ -114,6 +185,15 @@ namespace lw {
 			auto ws = std::wstring(s.begin(), s.end());
 			render.StringCenter(a, ws.c_str(), d2c(c), outline);
 		}
+		void Line(Vector2 a, Vector2 b, color c, float t) {
+			render.Line(a, b, d2c(c), t);
+		}
+		void Line3d(Vector3 a, Vector3 b, color c, float t) {
+			::Line(a, b, { c.r, c.g, c.b, c.a }, t, false, false);
+		}
+		void Sphere3d(Vector3 p, float f, color c, float t) {
+			::Sphere(p, f, { c.r, c.g, c.b, c.a }, t, false);
+		}
 	}
 
 	namespace entities {
@@ -121,8 +201,16 @@ namespace lw {
 			return Player(lw::playerlist[idx]);
 		}
 
+		Entity GetEntity(int idx) {
+			return Entity(idx);
+		}
+
 		static int PlayerListSize() {
 			return playerlist.size();
+		}
+
+		static int EntityListSize() {
+			return entitylist.size();
 		}
 	}
 
@@ -135,6 +223,18 @@ namespace lw {
 
 		bool LineOfSight(Vector3 a, Vector3 b, float radius) {
 			return unity::LineOfSightRadius(a, b, 0, radius);
+		}
+
+		bool IsKeyPressed(int vk) {
+			return unity::GetKey(vk);
+		}
+
+		float TimeSinceStartup() {
+			return unity::get_realtimesincestartup();
+		}
+
+		float FixedTime() {
+			return get_fixedTime();
 		}
 	}
 }

@@ -24,6 +24,7 @@ namespace offsets {
 
 #define oButtons_TypeInfo 56835632
 #define oChatOpen 0x746E0 //public static void open() { } <- inside 'ConVar::Chat'
+#define oSetGestureMenuOpen 0x5E6300 //private void SetGestureMenuOpen(bool wantsOpen) { }
 #define oSphereCast 0x2528E70
 #define oGetWorldVelocity 0xC97710
 #define oSetRayleigh 0x469380 //public static void set_atmosphere_rayleigh(float value) { }

@@ -151,9 +151,11 @@ bool DllMain(HMODULE hmodule)
 		mem::game_assembly_base = LI_MODULE_SAFE_(_("GameAssembly.dll"));
 		mem::unity_player_base = LI_MODULE_SAFE_(_("UnityPlayer.dll"));
 
-		AllocConsole();
-		freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
-		freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
+
+		//AllocConsole();
+		//freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
+		//freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
+		//printf("gab: %" PRIxPTR "\n", mem::game_assembly_base);
 
 		il2cpp::init();
 		unity::init_unity();
@@ -183,16 +185,16 @@ bool DllMain(HMODULE hmodule)
 				}
 			}
 		}
+
+		il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
+		il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
+		il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);
+
+		mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
+		//mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);
+
 		has_initialized = true;
 	}
-
-
-	il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
-	il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
-	il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);
-
-	mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
-	//mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);
 
 	return true;
 }

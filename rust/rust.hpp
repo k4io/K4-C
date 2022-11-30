@@ -25,15 +25,15 @@ namespace System {
 	class Array {
 	public:
 		uint32_t size() {
-			if (!this) return 0;
+			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return 0;
 			return *reinterpret_cast<uint32_t*>(this + 0x18);
 		}
 		T get(int idx) {
-			if (!this) return T{};
+			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return T{};
 			return *reinterpret_cast<T*>(this + (0x20 + (idx * 0x8)));
 		}
 		void add(int idx, T value) {
-			if (!this) return;
+			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
 			*reinterpret_cast<T*>(this + (0x20 + (idx * 0x8))) = value;
 		}
 	};
@@ -82,7 +82,7 @@ namespace System {
 		}
 
 		void add(int idx, T value) {
-			if (!this) return;
+			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
 			*reinterpret_cast<T*>(this + (0x20 + (idx * 0x8))) = value;
 		}
 	};

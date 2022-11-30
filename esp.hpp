@@ -97,17 +97,16 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 
 	if (get_bounds(bounds, 4)) {
 		//is_visible = unity::is_visible(camera_position, bones[48].world_position, (uintptr_t)esp::local_player);
-		//is_visible = ply->visible();
-		is_visible = true;
-		if (vars->combat.vischeck) {
-			__try {
-				for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
-					if (is_visible) break;
-					is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
-				}
-			}
-			__except (true) {}
-		}
+		is_visible = ply->visible();
+		//if (vars->combat.vischeck) {
+		//	__try {
+		//		for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
+		//			if (is_visible) break;
+		//			is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
+		//		}
+		//	}
+		//	__except (true) {}
+		//} else is_visible = true;
 
 		float box_width = bounds.right - bounds.left;
 		float box_height = bounds.bottom - bounds.top;
@@ -151,7 +150,7 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 				render.Rectangle({ bounds.left, bounds.top }, { box_width, box_height }, FLOAT4TOD3DCOLOR(box_color), 2.f);
 				break;
 			case 2: //corner box
-
+			{
 				//top left
 				render.Line({ bounds.left, bounds.top }, { bounds.left + (box_width / 4), bounds.top }, { 0,0,0,1 }, 4.f);
 				render.Line({ bounds.left, bounds.top }, { bounds.left + (box_width / 4), bounds.top }, FLOAT4TOD3DCOLOR(box_color), 2.f);
@@ -173,6 +172,7 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 				render.Line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_height / 4) }, { 0,0,0,1 }, 4.f);
 				render.Line({ bounds.right, bounds.bottom }, { bounds.right, bounds.bottom - (box_height / 4) }, FLOAT4TOD3DCOLOR(box_color), 2.f);
 				break;
+			}
 			case 3: //3d cube
 			{
 				//LMAO I WILL DO THIS LATER
@@ -360,7 +360,33 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 					render.Line(middleBottomRight_2d, middleTopRight_2d, FLOAT4TOD3DCOLOR(box_color), 2);
 					render.Line(middleTopLeft_2d, middleTopRight_2d, { 0, 0, 0, 1 }, 3);
 					render.Line(middleTopLeft_2d, middleTopRight_2d, FLOAT4TOD3DCOLOR(box_color), 2);
+
+
+					if (vars->visual.hpbar == 3) {
+						Vector2 points[4];
+						auto c = vars->visual.rainbowhpbar ? rainbowcolor : health_color;
+						c.a = 0.5f;
+						points[0] = middleBottomLeft_2d;
+						points[1] = middleBottomRight_2d;
+
+						int leftsz = middleTopLeft_2d.y - middleBottomLeft_2d.y;
+						int rightsz = middleTopRight_2d.y - middleBottomRight_2d.y;
+
+						middleTopLeft_2d.y -= leftsz;
+						middleTopRight_2d.y -= rightsz;
+
+						leftsz = ((leftsz / max_health) * cur_health);
+						rightsz = ((rightsz / max_health) * cur_health);
+
+						middleTopLeft_2d.y += leftsz;
+						middleTopRight_2d.y += rightsz;
+
+						points[2] = middleTopRight_2d;
+						points[3] = middleTopLeft_2d;
+						render.FillPolygon(points, 4, c);
+					}
 				}
+
 				break;
 			}
 			}
@@ -376,6 +402,17 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			render.FillRectangle({ bounds.left, bounds.bottom + 6 }, { box_width + 1, 4 }, { 0,0,0,1 });
 			render.FillRectangle({ bounds.left + 1, bounds.bottom + 7 }, { ((box_width / max_health) * cur_health) - 1, 2 }, vars->visual.rainbowhpbar ? rainbowcolor : health_color);
 			break;
+		case 3:
+		{
+			if (vars->visual.boxtype != 3
+				&& vars->visual.boxtype != 4)
+			{
+				auto c = vars->visual.rainbowhpbar ? rainbowcolor : health_color;
+				c.a = 0.5;
+				render.FillRectangle({ bounds.left, bounds.bottom }, { box_width, -h - 1 }, c);
+			}
+			break;
+		}
 		}
 
 		//skeleton
@@ -781,6 +818,8 @@ void iterate_entities() {
 
 	vars->player_name_list.clear();
 	bool flp = false;
+	bool found_a_target = false;
+	auto temptarget = aim_target();
 
 	for (int i = 0; i <= size; i++) {
 		auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
@@ -885,16 +924,10 @@ void iterate_entities() {
 
 						auto dist = fwd.distance(localpos);
 						auto r = (distance / 50.f); r = (r < 1.f ? 1.f : r);
-						//Line(playerpos, fwd, { 1, 1, 1, 1 }, 0.05f, true, true);
-						//Sphere(fwd, r, { 1, 1, 1, 1 }, 0.05f, 100.f);
 						if (dist < r)
 						{
 							auto ws = string::wformat(_(L"%s is looking at you!"), ((BasePlayer*)ent)->get_player_name());
 							vars->targetted = true;
-							//render.StringCenter({ vars->ScreenX / 2 + 1, (vars->ScreenY / 2) - 30 }, ws, { 0, 0, 0, 1 });
-							//render.StringCenter({ vars->ScreenX / 2 - 1, (vars->ScreenY / 2) - 30 }, ws, { 0, 0, 0, 1 });
-							//render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 30 + 1 }, ws, { 0, 0, 0, 1 });
-							//render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 30 - 1 }, ws, { 0, 0, 0, 1 });
 							render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 30 }, ws, { 227 / 255.f, 32 / 255.f, 61 / 255.f, 1 });
 						}
 					}
@@ -1018,7 +1051,7 @@ void iterate_entities() {
 
 				choosetarget:
 					if (target < esp::best_target
-						|| !esp::best_target.ent->is_alive()
+						|| (!esp::best_target.ent->is_alive() && entity->is_alive())
 						|| (target.ent && ((BasePlayer*)target.ent)->userID() == ((BasePlayer*)esp::best_target.ent)->userID()))
 					{
 					setandrecordtarget:
@@ -1028,42 +1061,44 @@ void iterate_entities() {
 						esp::best_target.ent = target.ent;
 						esp::best_target.visible = visible;
 
-						//auto vel = target.ent->GetWorldVelocity();
-						//
-						//float next_frame = esp::best_target.last_frame + get_deltaTime();
-						//if (get_fixedTime() > next_frame)
-						//{
-						//	//new frame, record velocity, record frame
-						//	esp::best_target.last_frame = get_fixedTime();
-						//	if (esp::best_target.velocity_list.size() < 30) //0.03125 * 30 = 0.9 seconds
-						//		esp::best_target.velocity_list.push_back(vel);
-						//	else
-						//	{
-						//		esp::best_target.velocity_list.pop_back();
-						//		esp::best_target.velocity_list.insert(esp::best_target.velocity_list.begin(), 1, vel);
-						//	}
-						//	float avgx = 0.f;
-						//	float avgy = 0.f;
-						//	float avgz = 0.f;
-						//	int count = 0;
-						//	for (auto v : esp::best_target.velocity_list)
-						//	{
-						//		if (v.is_empty()) break;
-						//		avgx += v.x;
-						//		avgy += v.y;
-						//		avgz += v.z;
-						//		count += 1;
-						//	}
-						//	avgx /= count; avgy /= count; avgz /= count;
-						//	esp::best_target.avg_vel = Vector3(avgx, avgy, avgz);
-						//}
+						auto vel = target.ent->GetWorldVelocity();
+						
+						float next_frame = esp::best_target.last_frame + get_deltaTime();
+						if (get_fixedTime() > next_frame)
+						{
+							//new frame, record velocity, record frame
+							esp::best_target.last_frame = get_fixedTime();
+							if (esp::best_target.velocity_list.size() < 30) //0.03125 * 30 = 0.9 seconds
+								esp::best_target.velocity_list.push_back(vel);
+							else
+							{
+								esp::best_target.velocity_list.pop_back();
+								esp::best_target.velocity_list.insert(esp::best_target.velocity_list.begin(), 1, vel);
+							}
+							float avgx = 0.f;
+							float avgy = 0.f;
+							float avgz = 0.f;
+							int count = 0;
+							for (auto v : esp::best_target.velocity_list)
+							{
+								if (v.is_empty()) break;
+								avgx += v.x;
+								avgy += v.y;
+								avgz += v.z;
+								count += 1;
+							}
+							avgx /= count; avgy /= count; avgz /= count;
+							esp::best_target.avg_vel = Vector3(avgx, avgy, avgz);
+						}
 					}
 
 					if (esp::best_target.distance > 400.f)
 						esp::best_target = aim_target();
 					if (target < esp::best_target
-						&& target.fov < vars->combat.aimbotfov)
+						&& target.fov < vars->combat.aimbotfov) {
 						esp::best_target = target;
+						found_a_target = true;
+					}
 					if (esp::best_target.fov > vars->combat.aimbotfov)
 						esp::best_target = aim_target();
 				}
@@ -1080,6 +1115,8 @@ void iterate_entities() {
 
 		if (esp::local_player)
 		{
+			lw::entitylist.push_back(ent);
+
 			//select entity			
 			if (esp::selected_entity_id == ent_id) {
 
@@ -1511,6 +1548,80 @@ void iterate_entities() {
 					esp_color = Vector4(0, 219, 58, 255);
 				}
 
+				else if (vars->visual.barrels && std::string(object_name.zpad).find(_("barrel")) != std::string::npos) {
+					world_position.y += 1.f;
+					esp_name = _(L"Barrel");
+					esp_color = Vector4(vars->colors.items.crate[0] * 255.f,
+						vars->colors.items.crate[1] * 255.f,
+						vars->colors.items.crate[2] * 255.f,
+						1);
+				}
+
+				//food crates
+				else if (vars->visual.food && std::string(object_name.zpad).find(_("crate_normal_2_food")) != std::string::npos) {
+					world_position.y += 0.3f;
+					esp_name = _(L"Food crate");
+					esp_color = Vector4(vars->colors.items.crate[0] * 255.f,
+						vars->colors.items.crate[1] * 255.f,
+						vars->colors.items.crate[2] * 255.f,
+						1);
+				}
+
+				//mil crates
+				else if (vars->visual.crates && std::string(object_name.zpad).find(_("crate_normal")) != std::string::npos) {
+					world_position.y += 0.3f;
+					esp_name = _(L"Military crate");
+					esp_color = Vector4(vars->colors.items.crate[0] * 255.f,
+						vars->colors.items.crate[1] * 255.f,
+						vars->colors.items.crate[2] * 255.f,
+						1);
+				}
+				
+
+				//mil crates
+				else if (vars->visual.crates && std::string(object_name.zpad).find(_("crate_tools")) != std::string::npos) {
+					world_position.y += 0.3f;
+					esp_name = _(L"Tool crate");
+					esp_color = Vector4(vars->colors.items.crate[0] * 255.f,
+						vars->colors.items.crate[1] * 255.f,
+						vars->colors.items.crate[2] * 255.f,
+						1);
+				}
+
+				//elite crates
+				else if (vars->visual.crates && std::string(object_name.zpad).find(_("crate_elite")) != std::string::npos) {
+					world_position.y += 0.3f;
+					esp_name = _(L"Elite crate");
+					esp_color = Vector4(vars->colors.items.crate[0] * 255.f,
+						vars->colors.items.crate[1] * 255.f,
+						vars->colors.items.crate[2] * 255.f,
+						1);
+				}
+
+				//animals
+				else if (vars->visual.animal) {
+					if (std::string(object_name.zpad) == _("bear"))
+						esp_name = _(L"Bear");
+					else if (std::string(object_name.zpad) == _("polarbear"))
+						esp_name = _(L"Polar bear");
+					else if (std::string(object_name.zpad) == _("reindeer"))
+						esp_name = _(L"Reindeer");
+					else if (std::string(object_name.zpad) == _("reindeer1"))
+						esp_name = _(L"Reindeer");
+					else if (std::string(object_name.zpad) == _("wolf"))
+						esp_name = _(L"Wolf");
+					else if (std::string(object_name.zpad) == _("chicken"))
+						esp_name = _(L"Chicken");
+					else if (std::string(object_name.zpad) == _("horse"))
+						esp_name = _(L"Horse");
+
+					world_position.y += 0.5f;
+					esp_color = Vector4(vars->colors.items.animal[0] * 255.f,
+						vars->colors.items.animal[1] * 255.f,
+						vars->colors.items.animal[2] * 255.f,
+						1);
+				}
+
 				//corpse
 				else if (vars->visual.corpses && *(int*)(object_name.zpad + 29) == 'proc') {
 					esp_name = _(L"Player Corpse");
@@ -1549,6 +1660,11 @@ void iterate_entities() {
 			}
 		}
 	}
+	
+	System::list<Item*>* belt = ((BasePlayer*)esp::best_target.ent)->get_belt_items();
+	if (!belt)
+		esp::best_target = aim_target();
+
 	if (esp::best_target.ent
 		&& vars->visual.hotbar_esp
 		&& esp::local_player) {
@@ -1667,7 +1783,7 @@ void LoadGuiSkinmap() {
 }
 
 bool finit = false;
-
+/*
 sol::state initlua() {
 	sol::state lua;
 	lua.open_libraries(sol::lib::base, sol::lib::string, sol::lib::package, sol::lib::io);
@@ -1683,20 +1799,37 @@ sol::state initlua() {
 		"y", &Vector3::y,
 		"z", &Vector3::z);
 
+	lua.new_usertype<Vector4>("Vector4",
+		"x", &Vector4::x,
+		"y", &Vector4::y,
+		"z", &Vector4::z,
+		"w", &Vector4::w);
+
 	lua.new_usertype<lw::color>("color",
 		"r", &lw::color::r,
 		"g", &lw::color::g,
 		"b", &lw::color::b,
 		"a", &lw::color::a);
 
-	auto gui = lua["gui"].get_or_create<sol::table>();
+	auto gui = lua["draw"].get_or_create<sol::table>();
 
-	gui.set_function("drawrect", &lw::draw::Rect);
-	gui.set_function("drawfilledrect", &lw::draw::FillRect);
-	gui.set_function("drawcircle", &lw::draw::Circle);
-	gui.set_function("drawfilledcircle", &lw::draw::FillCircle);
-	gui.set_function("drawtext", &lw::draw::Text);
-	gui.set_function("drawtextcentered", &lw::draw::TextCentered);
+	gui.set_function("rect", &lw::draw::Rect);
+	gui.set_function("filledrect", &lw::draw::FillRect);
+	gui.set_function("circle", &lw::draw::Circle);
+	gui.set_function("filledcircle", &lw::draw::FillCircle);
+	gui.set_function("text", &lw::draw::Text);
+	gui.set_function("textcentered", &lw::draw::TextCentered);
+	gui.set_function("line", &lw::draw::Line);
+	gui.set_function("line3d", &lw::draw::Line3d);
+	gui.set_function("sphere3d", &lw::draw::Sphere3d);
+
+	lua.new_usertype<lw::Eyes>("PlayerEyes",
+		"getpos", &lw::Eyes::GetPosition,
+		"getrot", &lw::Eyes::GetRotation,
+		"bodyfwd", &lw::Eyes::BodyForward,
+		"bodyright", &lw::Eyes::BodyRight,
+		"getviewoffset", &lw::Eyes::GetViewOffset,
+		"setviewoffset", &lw::Eyes::SetViewOffset);
 
 	lua.new_usertype<lw::Player>("Player",
 		"settargetmovement", &lw::Player::SetTargetMovement,
@@ -1710,22 +1843,32 @@ sol::state initlua() {
 		"serverrpc", &lw::Player::Rpc,
 		"islocalplayer", &lw::Player::IsLocalPlayer,
 		"isfriend", &lw::Player::IsFriend,
+		"geteyes", &lw::Player::GetEyes,
 		"isteammate", &lw::Player::IsTeammate);
 
+	lua.new_usertype<lw::Entity>("Entity",
+		"getpos", &lw::Entity::GetPosition,
+		"classname", &lw::Entity::GetClassname,
+		"rpc", &lw::Entity::Rpc);
 
 	auto core = lua["cheat"].get_or_create<sol::table>();
 
 	core.set_function("getplayer", &lw::entities::GetPlayer);
+	core.set_function("getentity", &lw::entities::GetEntity);
 	core.set_function("lineofsight", &lw::misc::LineOfSight);
 	core.set_function("worldtoscreen", &lw::misc::w2s);
+	core.set_function("iskeydown", &lw::misc::IsKeyPressed);
 	core.set_function("playerlistsize", &lw::entities::PlayerListSize);
+	core.set_function("entitylistsize", &lw::entities::EntityListSize);
+	core.set_function("realtimesincestartup", &lw::misc::TimeSinceStartup);
+	core.set_function("fixedtime", &lw::misc::FixedTime);
 
 	core["desynctime"] = vars->desyncTime;
 	core["flyhackDistanceY"] = settings::vert_flyhack;
 	core["flyhackDistanceX"] = settings::hor_flyhack;
 	return lua;
 }
-
+*/
 void new_frame() {
 	if (!finit) {
 		//printf("unity base: %" PRIxPTR "\n", mem::unity_player_base);
@@ -1740,7 +1883,8 @@ void new_frame() {
 		//lw::entities::playerlist = new std::vector<BasePlayer*>();
 		//InitLua();
 	}
-	lw::playerlist.clear();
+	//lw::playerlist.clear();
+	//lw::entitylist.clear();
 	//printf("crosshairs\n");
 	//Draw crosshairs
 	if (vars->visual.crosshair1)
@@ -1790,33 +1934,43 @@ void new_frame() {
 	//printf("iterate entities\n");
 	iterate_entities();
 
-	__try {
-		auto lua = initlua();
-		for (auto pair : vars->loaded_lua_list) {
-			if (*pair.second) {
-
-				auto filename = vars->data_dir + _("scripts\\") + pair.first + _(".lua");
-				lua.script_file(filename);
-
-				sol::protected_function func = lua[_("entityloop")];
-				func.set_error_handler(lua[_("errorhandler")]);
-				auto f = (std::function<void()>)func();
-			}
-		}
-	}
-	__except (true) {}
+	//__try {
+	//	auto lua = initlua();
+	//	for (auto pair : vars->loaded_lua_list) {
+	//		if (*pair.second) {
+	//
+	//			auto filename = vars->data_dir + _("scripts\\") + pair.first + _(".lua");
+	//			lua.script_file(filename);
+	//
+	//			sol::protected_function func = lua[_("entityloop")];
+	//			func.set_error_handler(lua[_("errorhandler")]);
+	//			auto f = (std::function<void()>)func();
+	//		}
+	//	}
+	//}
+	//__except (true) {}
 
 	//if(lw::entities::playerlist.size() > 0)
-	if(!esp::local_player)
-		lw::playerlist.clear();
-	for (auto v : lw::playerlist)
-		if (!v)
-			lw::playerlist.erase(
-				std::remove(
-					lw::playerlist.begin(),
-					lw::playerlist.end(),
-					v),
-				lw::playerlist.end());
+	//if (!esp::local_player) {
+	//	lw::playerlist.clear();
+	//	lw::entitylist.clear();
+	//}
+	//for (auto v : lw::playerlist)
+	//	if (!v)
+	//		lw::playerlist.erase(
+	//			std::remove(
+	//				lw::playerlist.begin(),
+	//				lw::playerlist.end(),
+	//				v),
+	//			lw::playerlist.end());
+	//for (auto v : lw::entitylist)
+	//	if (!v)
+	//		lw::playerlist.erase(
+	//			std::remove(
+	//				lw::playerlist.begin(),
+	//				lw::playerlist.end(),
+	//				v),
+	//			lw::playerlist.end());
 	
 	//printf("return\n");
 	return;

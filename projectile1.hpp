@@ -330,7 +330,8 @@ public:
 				//auto v = trans->InverseTransformPoint(point);
 				auto v = _InverseTransformPoint(trans, point);
 				esp::local_player->console_echo(string::wformat(_(L"[matrix]: DoHit - Point: (%d, %d, %d)"), v.x, v.y, v.z));
-				ht->set_hit_point(v);
+				if(!v.is_empty() && !v.is_nan())
+					ht->set_hit_point(v);
 				//ht->HitMaterial() = Il2CppString::create(_("flesh"));
 
 				ht->set_hit_material(System::string(_(L"flesh")));
@@ -354,17 +355,17 @@ public:
 			//private bool DoHit(HitTest test, Vector3 point, Vector3 normal) { }
 			//0x7A9420
 			//typedef bool(*dh)(Projectile*, HitTest*, Vector3, Vector3);
-			//if (((dh)(mem::game_assembly_base + 0x7A9420))(_this, ht, point, Vector3())) {
-
-			Sphere(point, 0.2f, { 1, 1, 1, 1 }, 10.f, 100.f);
-
+			//if (((dh)(mem::game_assembly_base + 0x8ABF20))(_this, (HitTest*)ht, point, Vector3())) {
+			//Sphere(point, 0.2f, { 1, 1, 1, 1 }, 10.f, 100.f);
 			//static auto DoHit = *reinterpret_cast<bool(**)(Projectile * _instance, HitTest * test, Vector3 point, Vector3 normal)>(Il2CppWrapper::GetClassFromName(_(""), _("Projectile"))->GetMethodFromName(_("DoHit")));
-			//if(_DoHit(_this, (HitTest*)ht, point, _this->currentVelocity())) {
-			////if (Do_Hit(_this, (uintptr_t)ht, point, Vector3::Zero())) {
-			//	_this->currentVelocity(vel);
-			//	_this->traveledTime(real_travel_time);
-			//	return true;
-			//}
+			//__try {
+				if (_DoHit(_this, (HitTest*)ht, point, Vector3::Zero())) {
+					//if (Do_Hit(_this, (uintptr_t)ht, point, Vector3::Zero())) {
+					_this->currentVelocity(vel);
+					_this->traveledTime(real_travel_time);
+					return true;
+				}
+			//} __except(true) { }
 			return false;
 		}
 	}
@@ -379,10 +380,11 @@ public:
 
 		if (!hitTest) {
 			/*HitTest_TypeInfo*/
-			DWORD64 htstatic = il2cpp::init_class(_("HitTest"), _(""));
+			//DWORD64 htstatic = il2cpp::init_class(_("HitTest"), _(""));
 
-			DWORD64 HitTest = il2cpp::methods::object_new(htstatic);
-			*reinterpret_cast<uintptr_t*>((uintptr_t)_this + 0x198) = HitTest; //hittest
+			DWORD64 HitTest = il2cpp::methods::object_new(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + 56832624));
+			_this->hitTest((DWORD64)HitTest);
+			//*reinterpret_cast<uintptr_t*>((uintptr_t)_this + 0x198) = HitTest; //hittest
 
 			//auto HitTest_TypeInfo = reinterpret_cast<uint64_t>(HitTest::StaticClass());
 			//if (!HitTest_TypeInfo)
@@ -648,7 +650,7 @@ public:
 					movPos = closest + (c / len) * min(len, stepSize);
 			}
 
-			Sphere(movPos, reduceLen, { 1, 1, 1, 1 }, 10.f, 100.f);
+			Sphere(movPos, reduceLen, { 1, 0, 1, 1 }, 10.f, 100.f);
 
 			prevPos = movPos;
 
@@ -691,7 +693,7 @@ public:
 	{
 		esp::local_player->console_echo(_(L"[matrix]: DoRealMovement - Called"));
 		auto _this = (Projectile*)this;
-		if (!this) return;
+		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
 		if (!_this) return;
 		constexpr float num = 0.03125f;
 		constexpr float projectile_forgiviness = 1.5f;

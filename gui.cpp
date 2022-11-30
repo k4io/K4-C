@@ -480,8 +480,7 @@ namespace Gui
 			else if (name == _("metalinvis")) loadcolor(vars->colors.items.metal.invisible, value);
 			else if (name == _("barrelvis")) loadcolor(vars->colors.items.barrel.visible, value);
 			else if (name == _("barrelinvis")) loadcolor(vars->colors.items.barrel.invisible, value);
-			else if (name == _("animalvis")) loadcolor(vars->colors.items.animal.visible, value);
-			else if (name == _("animalinvis")) loadcolor(vars->colors.items.animal.invisible, value);
+			else if (name == _("animalvis")) loadcolor(vars->colors.items.animal, value);
 			else if (name == _("stashopen")) loadcolor(vars->colors.items.stash.open, value);
 			else if (name == _("stashclosed")) loadcolor(vars->colors.items.stash.closed, value);
 			else if (name == _("accent")) loadcolor(vars->accent_color, value);
@@ -517,7 +516,7 @@ namespace Gui
 			else if (name == _("crosshair2")) vars->visual.crosshair2 = std::stoi(value);
 			else if (name == _("crosshair3")) vars->visual.crosshair3 = std::stoi(value);
 			else if (name == _("playerfov")) vars->visual.playerfov = std::stof(value);
-			else if (name == _("zoomtoggle")) vars->visual.zoomtoggle = std::stoi(value);
+			else if (name == _("zoomtoggle")) vars->visual.zoom = std::stoi(value);
 			else if (name == _("staramount")) vars->visual.staramount = std::stof(value);
 			else if (name == _("hitpoint")) vars->visual.hitpoint = std::stoi(value);
 			else if (name == _("targetted")) vars->visual.targetted = std::stoi(value);
@@ -536,6 +535,8 @@ namespace Gui
 			else if (name == _("boxesp")) vars->visual.boxesp = std::stoi(value);
 			else if (name == _("spriteitem")) vars->visual.spriteitem = std::stoi(value);
 			else if (name == _("snaplines")) vars->visual.snaplines = std::stoi(value);
+			else if (name == _("movementline")) vars->visual.movementline = std::stoi(value);
+			else if (name == _("showcapsule")) vars->visual.showcapsule = std::stoi(value);
 			else if (name == _("rainbowname")) vars->visual.rainbowname = std::stoi(value);
 			else if (name == _("rainbowbox")) vars->visual.rainbowbox = std::stoi(value);
 			else if (name == _("rainbowhpbar")) vars->visual.rainbowhpbar = std::stoi(value);
@@ -644,6 +645,7 @@ namespace Gui
 			else if (name == _("keyfakelag")) vars->keybinds.fakelag = std::stoi(value);
 			else if (name == _("keytp")) vars->keybinds.tp = std::stoi(value);
 			else if (name == _("keylocktarget")) vars->keybinds.locktarget = std::stoi(value);
+			else if (name == _("keyzoom")) vars->keybinds.zoom = std::stoi(value);
 			//else if (name == _("gesture_spam")) vars->misc.gesture_spam = std::stoi(value);
 		}
 	}
@@ -710,9 +712,7 @@ namespace Gui
 		f.write(str.c_str(), str.size());
 		str = savefloat(_("barrelinvis"), vars->colors.items.barrel.invisible);
 		f.write(str.c_str(), str.size());
-		str = savefloat(_("animalvis"), vars->colors.items.animal.visible);
-		f.write(str.c_str(), str.size());
-		str = savefloat(_("animalinvis"), vars->colors.items.animal.invisible);
+		str = savefloat(_("animalvis"), vars->colors.items.animal);
 		f.write(str.c_str(), str.size());
 		str = savefloat(_("stashopen"), vars->colors.items.stash.open);
 		f.write(str.c_str(), str.size());
@@ -818,7 +818,7 @@ namespace Gui
 		sprintf(buffer, _("%.2f"), vars->visual.playerfov);
 		str = (std::string(_("playerfov=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
-		itoa(vars->visual.zoomtoggle, buffer, 4);
+		itoa(vars->visual.zoom, buffer, 4);
 		str = (std::string(_("zoomtoggle=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
 		sprintf(buffer, _("%.2f"), vars->visual.staramount);
@@ -830,6 +830,17 @@ namespace Gui
 		sprintf(buffer, _("%.2f"), vars->visual.zoomfov);
 		str = (std::string(_("zoomfov=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
+
+		itoa(vars->visual.movementline, buffer, 4);
+		str = (std::string(_("movementline=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->visual.showcapsule, buffer, 4);
+		str = (std::string(_("showcapsule=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->visual.zoom, buffer, 4);
+		str = (std::string(_("zoom=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+
 		itoa(vars->visual.berry, buffer, 4);
 		str = (std::string(_("berry=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
@@ -1195,6 +1206,8 @@ namespace Gui
 		f.write(str.c_str(), str.size());
 		str = (std::string(_("keylocktarget=")) + std::to_string(vars->keybinds.locktarget) + _("\n"));
 		f.write(str.c_str(), str.size());
+		str = (std::string(_("keyzoom=")) + std::to_string(vars->keybinds.zoom) + _("\n"));
+		f.write(str.c_str(), str.size());
 
 		f.close();
 	}
@@ -1259,8 +1272,12 @@ namespace Gui
 			}
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(50, 15));
+			im::Checkbox(_("Manipulator2"), &vars->combat.manipulator2);
+
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			im::Hotkey(_("M2"), &vars->keybinds.manipulator2, ImVec2(50, 15));
 			//im::Checkbox(_("Target behind wall"), &vars->combat.shoot_at_fatbullet);
-			//im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
+			im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
 			//im::Checkbox(_("STW (Ladder)"), &vars->combat.throughladder);
 			//im::Checkbox(_("Pierce"), &vars->combat.pierce);
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
@@ -1342,7 +1359,7 @@ namespace Gui
 			im::Checkbox(_("Distance"), &vars->visual.distance);
 			im::Checkbox(_("Rainbow distance"), &vars->visual.rainbowdist);
 			im::Combo(_("Health bar"), &vars->visual.hpbar,
-				_("None\0Side\0Bottom"));
+				_("None\0Side\0Bottom\0Fill box"));
 			im::Checkbox(_("Rainbow health bar"), &vars->visual.rainbowhpbar);
 			im::Checkbox(_("Target flag"), &vars->visual.targettedflag);
 			im::Checkbox(_("Friend flag"), &vars->visual.friendflag);
@@ -1378,10 +1395,12 @@ namespace Gui
 			im::Checkbox(_("Movement line"), &vars->visual.movementline);
 			im::Checkbox(_("Show capsule"), &vars->visual.showcapsule);
 			im::Checkbox(_("Bullet tracers"), &vars->visual.tracers);
+			im::Checkbox(_("Visual thick bullet"), &vars->visual.visthick);
+			im::SliderFloat(_("Size"), &vars->visual.visthickness, 1.f, 10.f, _("%.1f"));
 			im::Checkbox(_("Crosshair 1"), &vars->visual.crosshair1);
 			im::Checkbox(_("Crosshair 2"), &vars->visual.crosshair2);
 			im::Checkbox(_("Crosshair 3"), &vars->visual.crosshair3);
-			im::Checkbox(_("Zoom"), &vars->visual.zoomtoggle);
+			im::Checkbox(_("Zoom"), &vars->visual.zoom);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("Z"), &vars->keybinds.zoom, ImVec2(50, 14));
 			im::SliderFloat(_("Zoom fov"), &vars->visual.zoomfov, 1.f, 100.f, _("%.1f"));
@@ -1457,6 +1476,7 @@ namespace Gui
 			im::Checkbox(_("Airdrops"), &vars->visual.airdrops);
 			im::Checkbox(_("Hackable crates"), &vars->visual.hackable_crate_esp);
 			im::Checkbox(_("Animals"), &vars->visual.animal);
+			im::Checkbox(_("Crates"), &vars->visual.crates);
 			im::Checkbox(_("Traps"), &vars->visual.traps);
 			im::Checkbox(_("Tool cupboard"), &vars->visual.tc_esp);
 			im::Checkbox(_("Dropped items"), &vars->visual.dropped_items);
@@ -1585,9 +1605,10 @@ namespace Gui
 			}
 			im::Checkbox(_("Console logs"), &vars->misc.logs);
 			im::Checkbox(_("Rainbow accent"), &vars->rainbow_accent);
+			im::SliderFloat(_("Rainbow speed"), &vars->rainbow_speed, .1f, 10.f, _("%.0f"), 1.f);
 			im::Combo(_("Gesture spam"), &vars->misc.gesture_spam, _(" None\x00 Clap\x00 Friendly\x00 Thumbsdown\x00 Thumbsup\x00 Ok\x00 Point\x00 Shrug\x00 Victory\x00 Wave"));
 			
-			im::Checkbox(_("Skin changer"), &vars->misc.skinchanger);
+			//im::Checkbox(_("Skin changer"), &vars->misc.skinchanger);
 			if(vars->misc.skinchanger)
 			{
 				SkinChanger();
@@ -1603,9 +1624,9 @@ namespace Gui
 		if (im::BeginChild(_("Listbox"), ImVec2(480, 330), true))
 		{
 			im::Text(_("Config"));
-			im::SameLine();
-			im::SetCursorPosX(im::GetCursorPosX() + 148);
-			im::Text(_("Lua"));
+			//im::SameLine();
+			//im::SetCursorPosX(im::GetCursorPosX() + 148);
+			//im::Text(_("Lua"));
 			if (im::ListBoxHeader(_("##Configs"), ImVec2(190, 130)))
 			{
 				int i = 0;
@@ -1625,26 +1646,26 @@ namespace Gui
 					}
 				im::ListBoxFooter();
 			}
-			im::SameLine();
-			if (im::ListBoxHeader(_("##Luas"), ImVec2(190, 130)))
-			{
-				int i = 0;
-				auto s = LI_FIND(getenv)(_("APPDATA"));
-				auto p = s + std::string(_("\\matrix\\scripts\\"));
-				for (auto& p : std::filesystem::recursive_directory_iterator(p))
-					if (p.path().extension() == _(".lua"))
-					{
-						i++;
-						auto a = p.path().stem().string();
-						if (vars->loaded_lua_list.count(a) == 0)
-							vars->loaded_lua_list.insert(std::make_pair(a, new bool{ 0 }));
-					}
-				for (auto pair : vars->loaded_lua_list) {
-					im::Checkbox(pair.first.c_str(), pair.second);
-					im::SetCursorPosY(im::GetCursorPosY() - 10);
-				}
-				im::ListBoxFooter();
-			}
+			//im::SameLine();
+			//if (im::ListBoxHeader(_("##Luas"), ImVec2(190, 130)))
+			//{
+			//	int i = 0;
+			//	auto s = LI_FIND(getenv)(_("APPDATA"));
+			//	auto p = s + std::string(_("\\matrix\\scripts\\"));
+			//	for (auto& p : std::filesystem::recursive_directory_iterator(p))
+			//		if (p.path().extension() == _(".lua"))
+			//		{
+			//			i++;
+			//			auto a = p.path().stem().string();
+			//			if (vars->loaded_lua_list.count(a) == 0)
+			//				vars->loaded_lua_list.insert(std::make_pair(a, new bool{ 0 }));
+			//		}
+			//	for (auto pair : vars->loaded_lua_list) {
+			//		im::Checkbox(pair.first.c_str(), pair.second);
+			//		im::SetCursorPosY(im::GetCursorPosY() - 10);
+			//	}
+			//	im::ListBoxFooter();
+			//}
 			if (im::Button(_("Save config"))) { save_config(str0); }
 			im::SameLine();
 			if (im::Button(_("Load config"))) { load_config(str0); }
@@ -1754,10 +1775,10 @@ namespace Gui
 		{
 			static int cases = 0;
 			switch (cases) {
-			case 0: { _r -= 0.003f; if (_r <= 0) cases += 1; break; }
-			case 1: { _g += 0.003f; _b -= 0.003f; if (_g >= 1) cases += 1; break; }
-			case 2: { _r += 0.003f; if (_r >= 1) cases += 1; break; }
-			case 3: { _b += 0.003f; _g -= 0.003f; if (_b >= 1) cases = 0; break; }
+			case 0: { _r -= (0.003f * vars->rainbow_speed); if (_r <= 0) cases += 1; break; }
+			case 1: { _g += (0.003f * vars->rainbow_speed); _b -= (0.003f * vars->rainbow_speed); if (_g >= 1) cases += 1; break; }
+			case 2: { _r += (0.003f * vars->rainbow_speed); if (_r >= 1) cases += 1; break; }
+			case 3: { _b += (0.003f * vars->rainbow_speed); _g -= (0.003f * vars->rainbow_speed); if (_b >= 1) cases = 0; break; }
 			default: { _r = 1.00f; _g = 0.00f; _b = 1.00f; break; }
 			}
 			vars->accent_color[0] = _r;

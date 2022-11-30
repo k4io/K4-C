@@ -1171,10 +1171,16 @@ namespace gui {
 					{
 						esp::do_chams(p.second);
 						//esp::local_player->console_echo(string::wformat(_(L"[matrix]: OnGUI - Caching bones for: %d"), p->userID()));
-						//cache::CacheBones(p.second, esp::local_player);
 					}
 				lastchamsupdate = get_fixedTime();
 			}
+			for (auto p : player_map)
+				if (vars->visual.playeresp
+					&& p.second) {
+					if (!p.second->get_belt_items())
+						player_map.erase(p.first);
+					cache::CacheBones(p.second, esp::local_player);
+				}
 
 
 			if (vars->misc.auto_upgrade)
@@ -1613,7 +1619,7 @@ namespace gui {
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Size")), pos, vars->misc.PlayerEyes, 1.5f, misc_tab);
 					//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Player FOV"), &vars->misc.playerfovtoggle, misc_tab);
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Player fov")), pos, vars->visual.playerfov, 150, misc_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Zoom"), &vars->visual.zoomtoggle, misc_tab, true, &vars->keybinds.zoom);
+					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Zoom"), &vars->visual.zoom, misc_tab, true, &vars->keybinds.zoom);
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Zoom fov")), pos, vars->visual.zoomfov, 50, misc_tab);
 					//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Brightnight"), &vars->misc.brightnight, misc_tab);
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Stars")), pos, vars->visual.staramount, 1000, misc_tab);
@@ -2122,7 +2128,7 @@ namespace esp
 			Material* mat = 0;
 
 			//auto lastchamh = vars->handchams_player_map[ent->userID()];
-			auto lastcham = vars->chams_player_map[ent->userID()];
+			//auto lastcham = vars->chams_player_map[ent->userID()];
 
 			//if (lastchamh != vars->visual.hand_chams)
 			//if ((lastslot != esp::local_player->Belt()->GetSelectedSlot() || vars->visual.rainbow_chams)
@@ -2247,7 +2253,7 @@ namespace esp
 				//auto _multiMesh = ent->playerModel()->_multiMesh();//mem::read<uintptr_t>(player->playerModel() + 0x2D0); //SkinnedMultiMesh _multiMesh;
 				//auto model = ent->playerModel();
 				auto model = *reinterpret_cast<PlayerModel**>((uintptr_t)ent + 0x4D0);
-				if (!model || (uintptr_t)model < 0xFFFF) return;
+				if (!model || (uintptr_t)model < 0xFFFF|| (uintptr_t)model > 0xF000000000000000) return;
 				auto _multiMesh = *reinterpret_cast<SkinnedMultiMesh**>((uintptr_t)model + 0x2D0);
 				if (!_multiMesh) return;
 				auto render = _multiMesh->get_Renderers(); //get_Renderers(_multiMesh);

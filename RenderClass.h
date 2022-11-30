@@ -183,12 +183,12 @@ public:
 	//		D2D1::RectF(0, 0, size.width, size.height));
 	//}
 
-	//line
+	
 	__forceinline void Line(const Vector2& Start, const Vector2& End, const D2D1::ColorF& Clr, float Thick = 1.5f)
 	{
 		SolidColor->SetColor(Clr); Canvas->DrawLine({ Start.x, Start.y }, { End.x, End.y }, SolidColor, Thick);
 	}
-	//circle
+	
 	__forceinline void Circle(const Vector2& Start, const D2D1::ColorF& Clr, float Rad, float Thick = 1.5f)
 	{
 		SolidColor->SetColor(Clr); Canvas->DrawEllipse({ { Start.x, Start.y }, Rad, Rad }, SolidColor, Thick);
@@ -208,11 +208,50 @@ public:
 		printf("FuckYouTest called %i\n", x);
 	}
 
+	__forceinline void FillPolygon(Vector2* points, int size, D2D1::ColorF& clr) {
+		if (size < 3) //just draw triangle?
+			return;
+
+		HRESULT hr;
+
+		ID2D1PathGeometry* pGeometry = nullptr;
+		hr = Interface->CreatePathGeometry(&pGeometry);
+		if (FAILED(hr))
+		{
+			return;
+		}
+
+		ID2D1GeometrySink* pGeometrySink = nullptr;
+		hr = pGeometry->Open(&pGeometrySink);
+		if (FAILED(hr))
+		{
+			return;
+		}
+
+		if (SUCCEEDED(hr))
+		{
+			pGeometrySink->BeginFigure(D2D1::Point2((FLOAT)points[0].x, (FLOAT)points[0].y), D2D1_FIGURE_BEGIN_FILLED);
+
+			for (int i = 1; i < size; ++i)
+				pGeometrySink->AddLine(D2D1::Point2F((FLOAT)points[i].x, (FLOAT)points[i].y));
+
+			pGeometrySink->EndFigure(D2D1_FIGURE_END_CLOSED);
+
+			hr = pGeometrySink->Close();
+		}
+
+		if (SUCCEEDED(hr))
+		{
+			SolidColor->SetColor(clr);
+			Canvas->FillGeometry(pGeometry, SolidColor);
+			return;
+		}
+	}
+
 	__forceinline void FillRectangle(const Vector2& Start, const Vector2& Sz, const D2D1::ColorF& Clr) {
 		SolidColor->SetColor(Clr); Canvas->FillRectangle({ Start.x, Start.y, Start.x + Sz.x, Start.y + Sz.y }, SolidColor);
 	}
 
-	//rectangle
 	__forceinline void Rectangle(const Vector2& Start, const Vector2& Sz, const D2D1::ColorF& Clr, float Thick = 1.5f)
 	{
 		SolidColor->SetColor(Clr); Canvas->DrawRectangle({ Start.x, Start.y, Start.x + Sz.x, Start.y + Sz.y }, SolidColor, Thick);
@@ -340,7 +379,6 @@ public:
 		Canvas->FillRoundedRectangle({ { Start.x, Start.y, Start.x + Sz.x, Start.y + Sz.y }, Rad, Rad }, RadialGradientBrush);
 	}
 
-	//text
 	__forceinline Vector2 StringCenter(const Vector2& Start, const wchar_t* Str, const D2D1::ColorF& Clr = D2D1::ColorF(D2D1::ColorF::White), bool outline = true, float fontsize = 12.f)
 	{
 		if (vars->visual.text_background_box && outline)

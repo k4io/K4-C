@@ -1,7 +1,7 @@
 #pragma once
 #include "utils/vector.hpp"
 #include "utils/xorstr.hpp"
-#include "../sol/sol.hpp"
+//#include "../sol/sol.hpp"
 #include <string>
 #include <vector>
 #include <fstream>
@@ -127,7 +127,7 @@ struct _item {
 
 struct Vars
 {
-	sol::state lua;
+	//sol::state lua;
 	std::string data_dir = _("");
 	std::string customboxpath = _("");
 	std::string target_name = _("");
@@ -154,6 +154,7 @@ struct Vars
 	float accent_color_opaque[4] = { 28 / 255.f, 232 / 255.f, 89 / 255.f, 0.6f };
 	bool wants_shoot = false;
 	bool rainbow_accent = false;
+	float rainbow_speed = 1.f;
 	bool targetted = false;
 	bool grenadeclose = false;
 
@@ -230,7 +231,7 @@ struct Vars
 		float dist_on_items = 100.f;
 		float playerfov = 90.f;
 		float rayleigh = 1.f;
-		bool zoomtoggle = false;
+		bool zoom = false;
 		float staramount = 350;
 		bool always_day = true;
 		float zoomfov = 10.f;
@@ -238,6 +239,7 @@ struct Vars
 		bool offscreen_indicator = false;
 		bool food = false;
 		bool animal = false;
+		bool crates = false;
 		bool corpses = false;
 		bool draw_fov = false;
 		bool rainbow_chams = false;
@@ -322,6 +324,8 @@ struct Vars
 		bool hitpoint = false;
 		bool flyhack_indicator = false;
 		bool tracers = false;
+		bool visthick = false;
+		float visthickness = 1.f;
 
 		int shader = 0;
 	}; visual visual;
@@ -500,15 +504,13 @@ struct Vars
 				float visible[4] = { 1, 1, 1, 1 };
 				float invisible[4] = { 1, 1, 1, 1 };
 			}; barrel barrel;
-			struct animal {
-				float visible[4] = { 1, 1, 1, 1 };
-				float invisible[4] = { 1, 1, 1, 1 };
-			}; animal animal;
 			struct vehicle {
 				float visible[4] = { 1, 1, 1, 1 };
 				float invisible[4] = { 1, 1, 1, 1 };
 			}; vehicle vehicle;
 			float collectibles[4] = { 1, 1, 1, 1 };
+			float crate[4] = { 1, 1, 1, 1 };
+			float animal[4] = { 1, 1, 1, 1 };
 		}; items items;
 
 		float sun[4] = { 1, 1, 1, 1 };

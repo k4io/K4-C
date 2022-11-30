@@ -7,11 +7,11 @@
 class RaycastHit {
 public:
 	Vector3 point() {
-		if (!this) return Vector3::Zero();
+		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return Vector3::Zero();
 		return *reinterpret_cast<Vector3*>(this);
 	}
 	Vector3 normal() {
-		if (!this) return Vector3::Zero();
+		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return Vector3::Zero();
 		return *reinterpret_cast<Vector3*>(this + 0xC);
 	}
 };
@@ -162,11 +162,15 @@ namespace unity {
 	}
 
 	bool LineOfSightRadius(Vector3 source, Vector3 destination, uintptr_t ent, float p1 = 0.18f) {
-		auto layer = (int)rust::classes::Layers::ProjectileLineOfSightCheck | (int)rust::classes::Layers::Terrain | (int)rust::classes::Layers::z;
-		typedef bool (*AAA)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t);
-		//if (destination.is_empty() || source.is_empty()) return false;
-		//return ((AAA)(mem::game_assembly_base + oLineOfSightRadius))(source, destination, (rust::classes::Layers)layer, p1, ent);
-		return LineOfSightInternal(source, destination, layer, p1, 0, 0, ent);
+		__try {
+			//auto layer = (int)rust::classes::Layers::ProjectileLineOfSightCheck | (int)rust::classes::Layers::Terrain | (int)rust::classes::Layers::z;
+			int layer = 1218519041;
+			//typedef bool (*AAA)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t);
+			//if (destination.is_empty() || source.is_empty()) return false;
+			//return ((AAA)(mem::game_assembly_base + oLineOfSightRadius))(source, destination, (rust::classes::Layers)layer, p1, ent);
+			return LineOfSightInternal(source, destination, layer, p1, 0, 0, ent);
+		}
+		__except(true) { return false; }
 	}
 
 	bool is_visible(Vector3 source, Vector3 destination, uintptr_t ent, float p1 = 0.18f) {
