@@ -125,8 +125,8 @@ void extractfiles() {
 	std::ofstream font_out(_("mc.ttf"), std::ios::out | std::ios::binary);
 	font_out.write(reinterpret_cast<const char*>(minecraft_ttf), 13000);
 	font_out.close();
-	SetFileAttributes(_(L"mc.ttf"), FILE_ATTRIBUTE_HIDDEN);
-	AddFontResource(_(L"mc.ttf"));
+	SetFileAttributes(_("mc.ttf"), FILE_ATTRIBUTE_HIDDEN);
+	AddFontResource(_("mc.ttf"));
 }
 
 float placeholder = 1.f;
@@ -134,11 +134,9 @@ bool DllMain(HMODULE hmodule)
 {
 	if (!has_initialized) {
 		extractfiles();
-		//CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)downloadchams, hmodule, 0, 0));
 		DisableThreadLibraryCalls(hmodule);
 		CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)MainThread, hmodule, 0, 0));
-		//CloseHandle()
-		//init cheat?
+
 		auto s = LI_FIND(getenv)(_("APPDATA"));
 		auto p = s + std::string(_("\\matrix\\"));
 		vars->data_dir = p;

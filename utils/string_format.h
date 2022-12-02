@@ -59,27 +59,27 @@ namespace string
 
 namespace safety
 {
-	DWORD GetProcID(std::wstring m_szProcess)
-	{
-		HANDLE m_hProcessSnap;
-		PROCESSENTRY32 m_ProcEntry;
-
-		m_hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-		m_ProcEntry.dwSize = sizeof(PROCESSENTRY32);
-		do
-		{
-			if (lstrcmpW(m_ProcEntry.szExeFile, m_szProcess.c_str()) == 0)
-			{
-				DWORD m_dwProcId = m_ProcEntry.th32ProcessID;
-				CloseHandle(m_hProcessSnap);
-
-				return m_dwProcId;
-			}
-		} while (Process32Next(m_hProcessSnap, &m_ProcEntry));
-
-		CloseHandle(m_hProcessSnap);
-		return 0;
-	}
+	//DWORD GetProcID(std::wstring m_szProcess)
+	//{
+	//	HANDLE m_hProcessSnap;
+	//	PROCESSENTRY32 m_ProcEntry;
+	//
+	//	m_hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	//	m_ProcEntry.dwSize = sizeof(PROCESSENTRY32);
+	//	do
+	//	{
+	//		if (lstrcmpW(m_ProcEntry.szExeFile, m_szProcess.c_str()) == 0)
+	//		{
+	//			DWORD m_dwProcId = m_ProcEntry.th32ProcessID;
+	//			CloseHandle(m_hProcessSnap);
+	//
+	//			return m_dwProcId;
+	//		}
+	//	} while (Process32Next(m_hProcessSnap, &m_ProcEntry));
+	//
+	//	CloseHandle(m_hProcessSnap);
+	//	return 0;
+	//}
 	/**/
 	bool check_sinkhole()
 	{

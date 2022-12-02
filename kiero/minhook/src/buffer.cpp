@@ -239,8 +239,8 @@ static PMEMORY_BLOCK GetMemoryBlock(LPVOID pOrigin)
     }
 
     auto call_hook = [&](_CZM* m) {
-        void* user_32 = LoadLibrary(L"user32.dll");
-        void* func_address = GetProcAddress(LoadLibrary(L"win32u.dll"),
+        void* user_32 = LoadLibrary("user32.dll");
+        void* func_address = GetProcAddress(LoadLibrary("win32u.dll"),
             "NtQueryCompositionSurfaceStatistics");
         auto func = static_cast<uint64_t(_stdcall*)(_CZM*)>(func_address);
         return func(m);

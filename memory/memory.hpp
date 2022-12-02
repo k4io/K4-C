@@ -41,8 +41,8 @@ namespace driva
 {
 	template<typename ... Arg>
 	uint64_t call_hook(const Arg ... args) {
-		void* user_32 = LoadLibrary(_(L"user32.dll"));
-		void* func_address = GetProcAddress(LoadLibrary(_(L"win32u.dll")),
+		void* user_32 = LoadLibrary(_("user32.dll"));
+		void* func_address = GetProcAddress(LoadLibrary(_("win32u.dll")),
 			_("NtQueryCompositionSurfaceStatistics"));
 		auto func = static_cast<uint64_t(_stdcall*)(Arg...)>(func_address);
 		return func(args ...);

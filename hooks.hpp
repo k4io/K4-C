@@ -1241,7 +1241,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						|| settings::hor_flyhack > 4.f)
 						last_fwd_fly = get_fixedTime();
 
-					if(last_fwd_fly + 0.3f > get_fixedTime())
+					if (last_fwd_fly + 0.3f > get_fixedTime())
 					{
 						auto p = ((baseplayer->eyes()->position() + baseplayer->eyes()->body_forward()) - baseplayer->eyes()->position()).Normalized();
 						p = p * 10.f; p.y = 0;
@@ -1255,13 +1255,13 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						//check if there is obstruction above, if so, move backwards, else move upwards
 						auto headpos = baseplayer->eyes()->position();
 						auto height = baseplayer->movement()->capsule()->GetHeight();
-						auto _r = baseplayer->eyes()->body_right() * .3f;
-						auto _f = baseplayer->eyes()->body_forward() * .3f;
-						auto abovepos = headpos; abovepos.y += .3f;
-						auto rightpos = abovepos + _r; rightpos.y += .3f;
-						auto leftpos = abovepos - _r; leftpos.y += .3f;
-						auto fwdpos = abovepos + _f; fwdpos.y += .3f;
-						auto backpos = abovepos - _f; backpos.y += .3f;
+						auto _r = baseplayer->eyes()->body_right() * .1f;
+						auto _f = baseplayer->eyes()->body_forward() * .1f;
+						auto abovepos = headpos; abovepos.y += .9f;
+						auto rightpos = abovepos + _r; rightpos.y += .9f;
+						auto leftpos = abovepos - _r; leftpos.y += .9f;
+						auto fwdpos = abovepos + _f; fwdpos.y += .9f;
+						auto backpos = abovepos - _f; backpos.y += .9f;
 
 						auto r = baseplayer->movement()->capsule()->GetRadius();
 
@@ -1297,57 +1297,58 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							1503731969,
 							2);
 
-						if (blocked_right) Capsule(rightpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 1, 0, 0, 1 }, .01f, false);
-						else Capsule(rightpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 0, 1, 0, 1 }, .01f, false);
-
-						if (blocked_left) Capsule(leftpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 1, 0, 0, 1 }, .01f, false);
-						else Capsule(leftpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 0, 1, 0, 1 }, .01f, false);
-
-						if (blocked_fwd) Capsule(fwdpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 1, 0, 0, 1 }, .01f, false);
-						else Capsule(fwdpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 0, 1, 0, 1 }, .01f, false);
-
-						if (blocked_back) Capsule(backpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 1, 0, 0, 1 }, .01f, false);
-						else Capsule(backpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 0, 1, 0, 1 }, .01f, false);
+						//if (blocked_right) Capsule(rightpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 1, 0, 0, 1 }, .01f, false);
+						//else Capsule(rightpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 0, 1, 0, 1 }, .01f, false);
+						//
+						//if (blocked_left) Capsule(leftpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 1, 0, 0, 1 }, .01f, false);
+						//else Capsule(leftpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 0, 1, 0, 1 }, .01f, false);
+						//
+						//if (blocked_fwd) Capsule(fwdpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 1, 0, 0, 1 }, .01f, false);
+						//else Capsule(fwdpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 0, 1, 0, 1 }, .01f, false);
+						//
+						//if (blocked_back) Capsule(backpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 1, 0, 0, 1 }, .01f, false);
+						//else Capsule(backpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 0, 1, 0, 1 }, .01f, false);
 
 						if (blocked_above) {
-							Capsule(abovepos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 1, 0, 0, 1 }, .01f, false);
-							if (blocked_right) {
-								if (blocked_left) {
-									if (blocked_fwd) {
-										if (blocked_back) {
+							//Capsule(abovepos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 1, 0, 0, 1 }, .01f, false);
+
+							if (blocked_back) {
+								if (blocked_right) {
+									if (blocked_left) {
+										if (blocked_fwd) {
 											//blocked in all directions.................... ???????????????????
 										}
 										else {
-											//not blocked on back above so move back
-											auto p = (backpos - baseplayer->eyes()->position()).Normalized();
+											//not blocked on fwd above so move fwd
+											auto p = (fwdpos - baseplayer->eyes()->position()).Normalized();
 											p = p * 5.f; p.y = 0;
 											player_walk_movement->set_TargetMovement(p);
 										}
 									}
 									else {
-										//not blocked on fwd above so move fwd
-										auto p = (fwdpos - baseplayer->eyes()->position()).Normalized();
+										//not blocked on left above so move left
+										auto p = (leftpos - baseplayer->eyes()->position()).Normalized();
 										p = p * 5.f; p.y = 0;
 										player_walk_movement->set_TargetMovement(p);
 									}
 								}
 								else {
-									//not blocked on left above so move left
-									auto p = (leftpos - baseplayer->eyes()->position()).Normalized();
+									//not blocked on right above so move right
+									auto p = (rightpos - baseplayer->eyes()->position()).Normalized();
 									p = p * 5.f; p.y = 0;
 									player_walk_movement->set_TargetMovement(p);
 								}
 							}
 							else {
-								//not blocked on right above so move right
-								auto p = (rightpos - baseplayer->eyes()->position()).Normalized();
+								//not blocked on back above so move back
+								auto p = (backpos - baseplayer->eyes()->position()).Normalized();
 								p = p * 5.f; p.y = 0;
 								player_walk_movement->set_TargetMovement(p);
 							}
 						}
 						else {
-							Capsule(abovepos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 0, 1, 0, 1 }, .01f, false);
-							player_walk_movement->set_TargetMovement(Vector3(0, 3, 0));
+							//Capsule(abovepos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 0, 1, 0, 1 }, .01f, false);
+							player_walk_movement->set_TargetMovement(Vector3(0, 10, 0));
 						}
 					}
 				}

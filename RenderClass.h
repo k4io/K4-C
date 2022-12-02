@@ -101,7 +101,7 @@ private:
 			auto dwrite = DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(TextEngine), (IUnknown**)&TextEngine);
 			auto d2d1 = D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory), &CreateOpt, (void**)&Interface);
 			
-			auto fontname = _(L"mc.ttf");
+			auto fontname = _("mc.ttf");
 			if (std::filesystem::exists(fontname))
 			{
 				if (SUCCEEDED(TextEngine->GetSystemFontCollection(&fontCollection, false)))
@@ -504,7 +504,7 @@ public:
 		}
 
 		SolidColor->SetColor(color);
-		Canvas->DrawTextW(text, wcslen(text), TextFormat, { pos.x, pos.y, FLT_MAX, FLT_MAX }, SolidColor);
+		Canvas->DrawTextA(text, wcslen(text), TextFormat, { pos.x, pos.y, FLT_MAX, FLT_MAX }, SolidColor);
 
 		TextLayout->Release();
 
@@ -547,7 +547,7 @@ public:
 		}
 
 		SolidColor->SetColor(Clr); 
-		Canvas->DrawTextW(Str, this->wcslen(Str), TextFormat, { Start.x, Start.y, FLT_MAX, FLT_MAX }, SolidColor);
+		Canvas->DrawTextA(Str, this->wcslen(Str), TextFormat, { Start.x, Start.y, FLT_MAX, FLT_MAX }, SolidColor);
 	}
 };
 
