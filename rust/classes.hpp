@@ -262,6 +262,10 @@ typedef struct Str
 //static auto ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
 
 //static auto setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
+static auto sendprojupdate = reinterpret_cast<void(*)(BasePlayer*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("SendProjectileUpdate"), 0, _(""), _(""))));
+
+static auto gamephystrace = reinterpret_cast<bool(*)(Ray r, float f, RaycastHit * r2, float f2, int layer, int querytriggerinteraction)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("Trace"), 0, _(""), _(""))));
+
 static auto get_localscale = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_localScale"), 0, _(""), _("UnityEngine"))));
 
 static auto set_localscale = reinterpret_cast<void(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_localScale"), 1, _(""), _("UnityEngine"))));
@@ -529,6 +533,8 @@ float current_time;
 void init_bp() {
 	//setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
 	//ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
+	sendprojupdate = reinterpret_cast<void(*)(BasePlayer*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("SendProjectileUpdate"), 0, _(""), _(""))));
+	gamephystrace = reinterpret_cast<bool(*)(Ray r, float f, RaycastHit * r2, float f2, int layer, int querytriggerinteraction)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("Trace"), 0, _(""), _(""))));
 	headright = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("HeadRight"), 0, _(""), _(""))));
 	headforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("HeadForward"), 0, _(""), _(""))));
 	get_localscale = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_localScale"), 0, _(""), _("UnityEngine"))));
@@ -2356,6 +2362,11 @@ public:
 	FIELD(_("BasePlayer"), _("voiceRecorder"), voiceRecorder, PlayerVoiceRecorder*);
 	FIELD(_("BasePlayer"), _("Frozen"), Frozen, bool);
 
+	void SendProjectileUpdate(uintptr_t p) {
+		if (!this) return;
+		sendprojupdate(this, p);
+	}
+
 	void UseAction(InputState* s) {
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
@@ -2772,7 +2783,9 @@ auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base +
 	Transform* get_bone_transform(int bone_id) {
 		pent
 			uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x130); //public Model model; // 
+		if (!entity_model) return nullptr;
 		uintptr_t bone_dict = *reinterpret_cast<uintptr_t*>(entity_model + 0x48);
+		if (!bone_dict) return nullptr;
 		Transform* BoneValue = *reinterpret_cast<Transform**>(bone_dict + 0x20 + bone_id * 0x8);
 
 		return BoneValue;
@@ -3797,6 +3810,13 @@ public:
 			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
 		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
 		return mem::read<ConButton*>(fieldz + 0x48);
+	}
+};
+
+class GamePhysics {
+public:
+	static bool Trace(Ray r, float f, RaycastHit* r2, float f2, int layer, int querytriggerinteraction) {
+		return gamephystrace(r, f, r2, f2, layer, querytriggerinteraction);
 	}
 };
 

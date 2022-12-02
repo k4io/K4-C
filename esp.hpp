@@ -163,21 +163,21 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 
 		if (vars->visual.boxtype == 5)
 		{
-			__try {
-				std::string ap(vars->visual.boxfilename);
-				if (!ap.empty()) {
-					std::string path = vars->data_dir + _("images\\") + ap;
-					if (std::filesystem::exists(path)) {
-						if (vars->customboxpath != path) {
-							vars->customboxpath = path;
-							//set custom box
-							render.SetCustomBox(vars->customboxpath);
-						}
-						else render.DrawCustomBox({ bounds.left, bounds.top }, { box_width, box_height });//draw custom box
-					}
-				}
-			}
-			__except (true) {}
+			//__try {
+			//	std::string ap(vars->visual.boxfilename);
+			//	if (!ap.empty()) {
+			//		std::string path = vars->data_dir + _("images\\") + ap;
+			//		if (std::filesystem::exists(path)) {
+			//			if (vars->customboxpath != path) {
+			//				vars->customboxpath = path;
+			//				//set custom box
+			//				render.SetCustomBox(vars->customboxpath);
+			//			}
+			//			else render.DrawCustomBox({ bounds.left, bounds.top }, { box_width, box_height });//draw custom box
+			//		}
+			//	}
+			//}
+			//__except (true) {}
 		}
 		else {
 			switch (vars->visual.boxtype)

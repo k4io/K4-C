@@ -1,10 +1,10 @@
 #include "misc.hpp"
 
-uintptr_t pools_offset = 0xB85800;
+uintptr_t pools_offset = 0xBC69B0;
 /*
  /* GenericInstMethod :
 	|
-	|-RVA: 0xCD9520 Offset: 0xCD8920 VA: 0x180CD9520
+	|-RVA: 0xBC69B0 Offset: 0xCD8920 VA: 0x180CD9520
 	|-Pool.Get<BaseMission.MissionInstance>
 	|-Pool.Get<BaseVehicle.Enumerator.Box>
 	|-Pool.Get<BuildingManager.Building>
@@ -436,11 +436,11 @@ public:
 		ConsoleReplicatedVars = 25,
 	};
 
-	uint64_t CreatePlayerProjectileUpdate()
+	static uint64_t CreatePlayerProjectileUpdate()
 	{
 		esp::local_player->console_echo(_(L"[matrix]: CreatePlayerProjectileUpdate - Called"));
 		typedef uint64_t(__stdcall* PoolGet)(uint64_t);
-		uint64_t update = *reinterpret_cast<uint64_t*>(mem::game_assembly_base + 56595040); //"Method$Facepunch.Pool.Get<PlayerProjectileUpdate>()",
+		uint64_t update = *reinterpret_cast<uint64_t*>(mem::game_assembly_base + 56671120); //"Method$Facepunch.Pool.Get<PlayerProjectileUpdate>()",
 
 		if (!update)
 			return 0;

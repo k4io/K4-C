@@ -1298,7 +1298,7 @@ namespace Gui
 			//im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			//im::Hotkey(_("M2"), &vars->keybinds.manipulator2, ImVec2(50, 15));
 			//im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
-			//im::Checkbox(_("STW (Ladder)"), &vars->combat.throughladder);
+			//im::Checkbox(_("STW (many invalids)"), &vars->combat.throughladder);
 			//im::Checkbox(_("Pierce"), &vars->combat.pierce);
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
 			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
@@ -1399,7 +1399,7 @@ namespace Gui
 			im::Combo(_("Text box"), &vars->visual.text_background_box,
 				_("None\0Full\0Rounded"));
 			im::Combo(_("Box type"), &vars->visual.boxtype,
-				_("None\0Full\0Corner\0Cube\0Box\0Custom"));
+				_("None\0Full\0Corner\0Cube\0Box"));
 			if(vars->visual.boxtype == 5)
 				im::InputTextWithHint(_("##BoxFilename"), _("filename"), vars->visual.boxfilename, 32);
 			im::Checkbox(_("Rainbow box"), &vars->visual.rainbowbox);
@@ -1888,7 +1888,7 @@ namespace Gui
 
 			if (!vars->target_name.empty()) {
 				auto s = vars->target_name + _("'s items");
-				HotbarWindow(40 + (vars->target_hotbar_list.size() * 20), s, vars->target_hotbar_list);
+				HotbarWindow(60 + (vars->target_hotbar_list.size() * 15), s, vars->target_hotbar_list);
 			}
 			else if (vars->open) {
 				std::vector<_item*> items{};

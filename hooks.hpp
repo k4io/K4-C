@@ -267,6 +267,12 @@ namespace hooks {
 		}
 	}
 
+	static uintptr_t* serverrpc_projecshoot;
+	static uintptr_t* serverrpc_playerprojectileattack;
+	static uintptr_t* serverrpc_playerprojectileupdate;
+
+	int pppid = 0;
+
 	void hk_serverrpc_projectileshoot(int64_t rcx, int64_t rdx, int64_t r9, int64_t projectileShoot, int64_t arg5) {
 		Projectile* p;
 		Vector3 rpc_position;
@@ -630,7 +636,7 @@ namespace hooks {
 
 		esp::local_player->console_echo(string::wformat(_(L"[matrix]: ProjectileShoot (prediction) simulated %i times before hit!"), simulations));
 		reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(hooks::orig::serverrpc_projectileshoot)(rcx, rdx, r9, projectileShoot, arg5);
-		
+		pppid++;
 		//calls base.serverrpc<projectileshoot>("clproject", x) ^^
 		//loops through created projectiles and launches with
 		//projectile.launch(); - this function has a while loop
@@ -642,17 +648,19 @@ namespace hooks {
 		misc::did_reload = false;
 	}
 
+	protobuf::PlayerProjectileUpdate* tppu;
 	void hk_serverrpc_playerprojectileupdate(int64_t rcx, int64_t rdx, int64_t r9, int64_t _ppa, int64_t arg5) {
 		auto  projectile = reinterpret_cast<Projectile*>(get_rbx_value());
 		auto  ppu = reinterpret_cast<protobuf::PlayerProjectileUpdate*>(_ppa);
-
+		tppu = ppu;
 		const auto orig_fn =
 			reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(
-				hooks::orig::playerprojectileupdate);
+				hooks::orig::playerprojectileattack);
 
 		//call fake domovement? after called set current position etc
 		//projectile->DoMovement(misc::tickDeltaTime, projectile);
 		//return;
+
 
 
 		return orig_fn(rcx, rdx, r9, _ppa, arg5);
@@ -1255,8 +1263,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						//check if there is obstruction above, if so, move backwards, else move upwards
 						auto headpos = baseplayer->eyes()->position();
 						auto height = baseplayer->movement()->capsule()->GetHeight();
-						auto _r = baseplayer->eyes()->body_right() * .1f;
-						auto _f = baseplayer->eyes()->body_forward() * .1f;
+						auto _r = baseplayer->eyes()->body_right();
+						auto _f = baseplayer->eyes()->body_forward();
 						auto abovepos = headpos; abovepos.y += .9f;
 						auto rightpos = abovepos + _r; rightpos.y += .9f;
 						auto leftpos = abovepos - _r; leftpos.y += .9f;
@@ -1348,7 +1356,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						}
 						else {
 							//Capsule(abovepos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 0, 1, 0, 1 }, .01f, false);
-							player_walk_movement->set_TargetMovement(Vector3(0, 10, 0));
+							player_walk_movement->set_TargetMovement(Vector3(0, 5, 0));
 						}
 					}
 				}
@@ -1400,7 +1408,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 	}
 
 	void hk_projectile_update(uintptr_t pr) {
-
 		if (vars->combat.throughladder)
 		{
 			for (size_t i = 0; i <= 0; i++)
@@ -1413,53 +1420,54 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				Vector3 vel = p->currentVelocity();
 				Vector3 dir = vel.normalize();
 				Vector3 traveledThisUpdate = vel * get_deltaTime();
-				RaycastHit hitInfo;
 
-				typedef bool(*AA)(Ray, float, RaycastHit*, float, int, int);
+				DWORD64 sistat = il2cpp::init_class(_("RaycastHit"), _("UnityEngine"));
+				RaycastHit* hitInfo = (RaycastHit*)il2cpp::methods::object_new(sistat);
+				if (!hitInfo) return;
+				//RaycastHit hitInfo;
 
-				if (!((AA)(mem::game_assembly_base + 0x7F58A0))(Ray(p->currentPosition(), dir),
+				//Sphere(p->currentPosition(), .05f, { 1, 1, 1, 1 }, 10.f, false);
+
+				if (!GamePhysics::Trace(
+					Ray(p->currentPosition(), dir),
 					0.f,
-					&hitInfo,
-					traveledThisUpdate.length(),
-					(int)rust::classes::layer::Deployed,
-					0))
+					hitInfo,
+					traveledThisUpdate.length() + 1.f,
+					8388608 | 2097152 | 65536, 0))
 					break;
-				typedef BaseEntity* (*A)(RaycastHit*);
-				BaseEntity* ladder = ((A)(mem::game_assembly_base + 0x7C5120))(&hitInfo);
-				if (!ladder || *reinterpret_cast<unsigned int*>(ladder + 0x4C) != 2150203378)
-					break;
-				RaycastHit hitInfo2;
-				if (!((AA)(mem::game_assembly_base + 0x7F58A0))(Ray(hitInfo.point(), dir),
-					0.f,
-					&hitInfo2,
-					0.5f,
-					(int)rust::classes::layer::Construction,
-					0))
-					break;
-				Transform* ladder_transform = ladder->transform();
-				p->traveledDistance(p->traveledDistance() + traveledThisUpdate.length());
-				p->traveledTime(p->traveledTime() + get_deltaTime());
 
-				Vector3 pointOutsideWall = hitInfo2.point() + hitInfo2.normal() * 0.0005f;
-				Vector3 pointBehindWall = hitInfo2.point() - hitInfo2.normal() * 0.2f;
+				if (!g_UpdateReusable)
+					g_UpdateReusable = Projectile1::CreatePlayerProjectileUpdate();
 
-				auto test = (HitTest2*)p->hitTest();
-				test->set_hit_transform(ladder_transform);
-				test->set_hit_entity((BasePlayer*)ladder);
-				test->set_attack_ray({ hitInfo.point(), { 0, 1.f, 0 } });
-				test->set_max_distance(0.5f);
-				test->set_hit_point(ladder_transform->InverseTransformPoint(pointOutsideWall));
-				test->set_hit_normal(ladder_transform->InverseTransformDirection(hitInfo2.normal()));
-				test->set_did_hit(true);
-				Do_Hit(p, (uintptr_t)test, hitInfo2.point(), hitInfo2.normal());
+				auto ppu = (protobuf::PlayerProjectileUpdate*)g_UpdateReusable;
 
-				p->traveledDistance(p->traveledDistance() + 0.2f);
+				ppu->projectileID = p->projectileID();
+				ppu->traveltime = p->traveledTime() + p->currentPosition().distance(hitInfo->point()) / traveledThisUpdate.length();
+				ppu->position = hitInfo->point() - (dir * .1f);
+				ppu->velocity = p->currentVelocity();
+				esp::local_player->SendProjectileUpdate((uintptr_t)tppu);
+				//orig_fn(rcx, rdx, r9, _ppa, arg5);
 
-				p->previousPosition(pointBehindWall);
-				p->currentPosition(pointBehindWall);
-				Transform* p_trans = p->transform();
-				p_trans->setposition(pointBehindWall);
-				p->currentVelocity(vel * 0.5f);
+				auto trans = ((BasePlayer*)esp::best_target.ent)->get_bone_transform(48);
+
+				float dist = p->currentPosition().distance(trans->position());
+
+				p->traveledDistance(p->traveledDistance() + dist);
+				p->traveledTime(p->traveledTime() + (dist / p->currentVelocity().Length()));
+
+				auto ht = (HitTest*)p->hitTest();
+
+
+				ht->HitTransform() = trans;
+				ht->HitEntity() = esp::best_target.ent;
+				ht->AttackRay() = Ray(hitInfo->point(), dir.Normalized());
+				ht->HitPoint() = trans->InverseTransformPoint(trans->position());
+				ht->HitNormal() = Vector3(0, 0, 0);
+				ht->DidHit() = true;
+				ht->HitDistance() = dist;
+				ht->MaxDistance() = 999.f;
+				_DoHit(p, ht, trans->position(), Vector3(0, 0, 0));
+				//return;
 			}
 		}
 		if (launchedmelee) {
@@ -1542,8 +1550,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 	}
 
 	bool iii = false, iiii = false;
-	static uintptr_t* serverrpc_projecshoot;
-	static uintptr_t* serverrpc_playerprojectileattack;
 
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
 	{
@@ -1639,6 +1645,17 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				hooks::orig::playerprojectileattack = *serverrpc_playerprojectileattack;
 
 				*serverrpc_playerprojectileattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
+			}
+		}
+		if (!serverrpc_playerprojectileupdate) {
+			auto method_serverrpc_playerprojectileupdate = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
+
+			if (method_serverrpc_playerprojectileupdate) {
+				serverrpc_playerprojectileupdate = **(uintptr_t***)(method_serverrpc_playerprojectileupdate + 0x30);
+
+				hooks::orig::playerprojectileupdate = *serverrpc_playerprojectileupdate;
+
+				*serverrpc_playerprojectileupdate = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileupdate);
 			}
 		}
 		//if (!serverrpc_createbuilding) {
