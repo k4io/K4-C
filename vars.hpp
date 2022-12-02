@@ -256,6 +256,7 @@ struct Vars
 		bool snaplines = true;
 		bool show_fov = false;
 		bool showpred = false;
+		bool radar = false;
 		bool targetted = false;
 		bool misc_esp = true;
 		bool sleeper_esp = false;
@@ -325,7 +326,13 @@ struct Vars
 		bool flyhack_indicator = false;
 		bool tracers = false;
 		bool visthick = false;
+		bool radarname = false;
 		float visthickness = 1.f;
+		float radarsize = 150.f;
+		float radarrange = 150.f;
+
+		int radarx = 1670;
+		int radary = 80;
 
 		int shader = 0;
 	}; visual visual;

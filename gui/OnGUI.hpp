@@ -1090,6 +1090,7 @@ namespace gui {
 		return;
 	}
 
+	int lastslot = -1;
 	bool b_init = false;
 	void OnGUI(uintptr_t rcx)
 	{
@@ -1116,22 +1117,22 @@ namespace gui {
 
 		if (esp::local_player)
 		{
-			if ((esp::best_target.ent && esp::best_target.ent->is_alive())
-				&& vars->visual.snapline > 1)
-			{
-				Vector2 start = vars->visual.snapline == 1 ? Vector2(ScreenWidth / 2, 0) :
-					vars->visual.snapline == 2 ? Vector2(ScreenWidth / 2, ScreenHeight / 2) :
-					vars->visual.snapline == 3 ? Vector2(ScreenWidth / 2, ScreenHeight) :
-					Vector2(ScreenWidth / 2, 1080); // does not matter
-				Vector3 o = WorldToScreen(esp::best_target.pos);
-				if (o.x != 0 && o.y != 0)
-				{
-					if (esp::best_target.visible)
-						gui::line(start, Vector2(o.x, o.y), gui::Color(0, 0.9, 0.2, 1), 0.1f, true);
-					else
-						gui::line(start, Vector2(o.x, o.y), gui::Color(0.9, 0, 0.2, 1), 0.1f, true);
-				}
-			}
+			//if ((esp::best_target.ent && esp::best_target.ent->is_alive())
+			//	&& vars->visual.snapline > 1)
+			//{
+			//	Vector2 start = vars->visual.snapline == 1 ? Vector2(ScreenWidth / 2, 0) :
+			//		vars->visual.snapline == 2 ? Vector2(ScreenWidth / 2, ScreenHeight / 2) :
+			//		vars->visual.snapline == 3 ? Vector2(ScreenWidth / 2, ScreenHeight) :
+			//		Vector2(ScreenWidth / 2, 1080); // does not matter
+			//	Vector3 o = WorldToScreen(esp::best_target.pos);
+			//	if (o.x != 0 && o.y != 0)
+			//	{
+			//		if (esp::best_target.visible)
+			//			gui::line(start, Vector2(o.x, o.y), gui::Color(0, 0.9, 0.2, 1), 0.1f, true);
+			//		else
+			//			gui::line(start, Vector2(o.x, o.y), gui::Color(0.9, 0, 0.2, 1), 0.1f, true);
+			//	}
+			//}
 			if (vars->visual.flyhack_indicator) {
 				if (settings::vert_flyhack >= 3.f) {
 					gui::Progbar({ screen_center.x - 300, screen_center.y - 500 },
@@ -1164,7 +1165,9 @@ namespace gui {
 
 			//int fff = 0;
 
-			if (lastchamsupdate + 60.f < get_fixedTime()) {
+			if (lastchamsupdate + 60.f < get_fixedTime()
+				|| esp::local_player->Belt()->GetSelectedSlot() != lastslot) {
+				lastslot = esp::local_player->Belt()->GetSelectedSlot();
 				for (auto p : player_map)
 					if (vars->visual.playeresp
 						&& p.second)

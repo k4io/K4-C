@@ -57,6 +57,7 @@ namespace hooks {
 
 		static auto _update = reinterpret_cast<void (*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Update"), 0, _(""), _(""))));
 
+		static auto VisUpdateUsingCulling = reinterpret_cast<void (*)(void*, float, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("VisUpdateUsingCulling"), 1, _(""), _(""))));
 		uintptr_t playerprojectileattack;
 		uintptr_t createbuilding;
 		uintptr_t playerprojectilericochet;
@@ -97,6 +98,7 @@ namespace hooks {
 	static auto PerformanceUI_Update = reinterpret_cast<void (*)(void*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PerformanceUI"), _("Update"), -1, _(""), _("Facepunch"))));
 
 	void init_hooks() {
+		orig::VisUpdateUsingCulling = reinterpret_cast<void (*)(void*, float, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("VisUpdateUsingCulling"), 1, _(""), _(""))));
 		orig::requestuserinfo = reinterpret_cast<void (*)(Client*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("OnRequestUserInformation"), 1, _(""), _(""))));
 		orig::pifu = reinterpret_cast<void(*)(PlayerInput*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerInput"), _("FrameUpdate"), 0, _(""), _(""))));
 		orig::createeffect = reinterpret_cast<GameObject * (*)(System::string, Effect*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("EffectLibrary"), _("CreateEffect"), 2, _(""), _(""))));
@@ -185,7 +187,7 @@ namespace hooks {
 	uintptr_t client_entities;
 
 	bool flying = false, is_speeding = false, is_lagging = false, has_intialized_methods = false, wake = true, launchedmelee = false;
-	float nextActionTime = 0, period = 1.4721, last_gesture_rpc = 0.f, last_revive_rpc = 0.f, last_refill_rpc = 0.f;
+	float nextActionTime = 0, period = 1.4721, last_gesture_rpc = 0.f, last_revive_rpc = 0.f, last_refill_rpc = 0.f, last_fwd_fly = 0.f;
 	Vector3 m_debugcam_toggle_pos, m_debugcam_pos, tempmelvel, tempmelpos, lastMovementLinePos;
 	uintptr_t do_fixed_update_ptr, client_input_ptr, bodylean_ptr, mounteyepos_ptr, isdown_ptr, __go;
 	
@@ -422,7 +424,7 @@ namespace hooks {
 							if (misc::best_target != Vector3(0, 0, 0))
 							{
 								target_pos = misc::best_target;
-								vis_fat = true;
+								//vis_fat = true;
 							}
 						}
 					}
@@ -437,7 +439,7 @@ namespace hooks {
 
 			if (!ismelee) {
 				BaseProjectile* projectile_list = *reinterpret_cast<BaseProjectile**>(
-					*reinterpret_cast<uintptr_t*>((uintptr_t)baseprojectile + 0x370) + 0x10); //createdProjectiles;
+					*reinterpret_cast<uintptr_t*>((uintptr_t)baseprojectile + 0x398) + 0x10); //createdProjectiles;
 				for (int i = 0; i < projectile_list->get_size(); i++)
 				{
 					auto projectile = *(BaseProjectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
@@ -516,7 +518,7 @@ namespace hooks {
 			}
 			if (!ismelee) {
 				BaseProjectile* projectile_list = *reinterpret_cast<BaseProjectile**>(
-					*reinterpret_cast<uintptr_t*>((uintptr_t)baseprojectile + 0x370) + 0x10); //createdProjectiles;
+					*reinterpret_cast<uintptr_t*>((uintptr_t)baseprojectile + 0x398) + 0x10); //createdProjectiles;
 				for (int i = 0; i < projectile_list->get_size(); i++) {
 					auto projectile = *(BaseProjectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
 					p = *(Projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
@@ -619,7 +621,7 @@ namespace hooks {
 			if (vars->combat.targetbehindwall)
 			{
 				typedef void(*cclear)(uintptr_t);
-				((cclear)(mem::game_assembly_base + 15408096))((uintptr_t)baseprojectile + 0x370); //"System.Collections.Generic.List<Projectile>$$Clear",
+				((cclear)(mem::game_assembly_base + 15440112))((uintptr_t)baseprojectile + 0x398); //"System.Collections.Generic.List<Projectile>$$Clear",
 			}
 
 			if (misc::autoshot)
@@ -964,7 +966,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		auto baseplayer = esp::local_player;
 		//__try {
 		//	player_walk_movement->ClientInput((InputState*)inputstate, model_state);
-		//	//orig::playerwalkmovement_client_input(player_walk_movement, inputstate, model_state);
+		orig::playerwalkmovement_client_input(player_walk_movement, inputstate, model_state);
 		//}
 		//__except (true) {  }
 		Vector3 vel = player_walk_movement->get_TargetMovement();
@@ -1235,28 +1237,119 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			{
 				if (unity::GetKey(vars->keybinds.flywall))
 				{
-					set_onLadder(model_state, true);
 					if (settings::vert_flyhack > 2.f
 						|| settings::hor_flyhack > 4.f)
+						last_fwd_fly = get_fixedTime();
+
+					if(last_fwd_fly + 0.3f > get_fixedTime())
 					{
-						//check capsule
-						bool f = unity::CheckCapsule(
-							baseplayer->transform()->position(),
-							baseplayer->eyes()->position(),
-							player_walk_movement->capsule()->GetRadius(),
-							1503731969,
-							0);
-						auto dir = (baseplayer->eyes()->body_forward() - baseplayer->eyes()->position()).Normalized();
-						dir = dir * player_walk_movement->get_TargetMovement().length(); dir.y = 0;
-						if(!f)
-							player_walk_movement->set_TargetMovement(dir);
+						auto p = ((baseplayer->eyes()->position() + baseplayer->eyes()->body_forward()) - baseplayer->eyes()->position()).Normalized();
+						p = p * 10.f; p.y = 0;
+						player_walk_movement->set_TargetMovement(p);
+
+
+
+						//maybe check here for a place i can fly into within 1m left right fwd back up
 					}
-					else
-						player_walk_movement->set_TargetMovement(Vector3(0, 10, 0));
-				}
-				else
-				{
-					set_onLadder(model_state, false);
+					else {
+						//check if there is obstruction above, if so, move backwards, else move upwards
+						auto headpos = baseplayer->eyes()->position();
+						auto height = baseplayer->movement()->capsule()->GetHeight();
+						auto _r = baseplayer->eyes()->body_right() * .3f;
+						auto _f = baseplayer->eyes()->body_forward() * .3f;
+						auto abovepos = headpos; abovepos.y += .3f;
+						auto rightpos = abovepos + _r; rightpos.y += .3f;
+						auto leftpos = abovepos - _r; leftpos.y += .3f;
+						auto fwdpos = abovepos + _f; fwdpos.y += .3f;
+						auto backpos = abovepos - _f; backpos.y += .3f;
+
+						auto r = baseplayer->movement()->capsule()->GetRadius();
+
+						headpos.y -= 1.f;
+						bool blocked_above = unity::CheckCapsule(
+							abovepos,
+							headpos,
+							.4f,
+							1503731969,
+							2);
+						bool blocked_right = unity::CheckCapsule(
+							rightpos,
+							Vector3(rightpos.x, rightpos.y -= 1.3f, rightpos.z),
+							.4f,
+							1503731969,
+							2);
+						bool blocked_left = unity::CheckCapsule(
+							leftpos,
+							Vector3(leftpos.x, leftpos.y -= 1.3f, leftpos.z),
+							.4f,
+							1503731969,
+							2);
+						bool blocked_fwd = unity::CheckCapsule(
+							fwdpos,
+							Vector3(fwdpos.x, fwdpos.y -= 1.3f, fwdpos.z),
+							.4f,
+							1503731969,
+							2);
+						bool blocked_back = unity::CheckCapsule(
+							backpos,
+							Vector3(backpos.x, backpos.y -= 1.3f, backpos.z),
+							.4f,
+							1503731969,
+							2);
+
+						if (blocked_right) Capsule(rightpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 1, 0, 0, 1 }, .01f, false);
+						else Capsule(rightpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 0, 1, 0, 1 }, .01f, false);
+
+						if (blocked_left) Capsule(leftpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 1, 0, 0, 1 }, .01f, false);
+						else Capsule(leftpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 0, 1, 0, 1 }, .01f, false);
+
+						if (blocked_fwd) Capsule(fwdpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 1, 0, 0, 1 }, .01f, false);
+						else Capsule(fwdpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 0, 1, 0, 1 }, .01f, false);
+
+						if (blocked_back) Capsule(backpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 1, 0, 0, 1 }, .01f, false);
+						else Capsule(backpos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 0, 1, 0, 1 }, .01f, false);
+
+						if (blocked_above) {
+							Capsule(abovepos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 1, 0, 0, 1 }, .01f, false);
+							if (blocked_right) {
+								if (blocked_left) {
+									if (blocked_fwd) {
+										if (blocked_back) {
+											//blocked in all directions.................... ???????????????????
+										}
+										else {
+											//not blocked on back above so move back
+											auto p = (backpos - baseplayer->eyes()->position()).Normalized();
+											p = p * 5.f; p.y = 0;
+											player_walk_movement->set_TargetMovement(p);
+										}
+									}
+									else {
+										//not blocked on fwd above so move fwd
+										auto p = (fwdpos - baseplayer->eyes()->position()).Normalized();
+										p = p * 5.f; p.y = 0;
+										player_walk_movement->set_TargetMovement(p);
+									}
+								}
+								else {
+									//not blocked on left above so move left
+									auto p = (leftpos - baseplayer->eyes()->position()).Normalized();
+									p = p * 5.f; p.y = 0;
+									player_walk_movement->set_TargetMovement(p);
+								}
+							}
+							else {
+								//not blocked on right above so move right
+								auto p = (rightpos - baseplayer->eyes()->position()).Normalized();
+								p = p * 5.f; p.y = 0;
+								player_walk_movement->set_TargetMovement(p);
+							}
+						}
+						else {
+							Capsule(abovepos, baseplayer->eyes()->rotation(), .4f, 1.3f, { 0, 1, 0, 1 }, .01f, false);
+							player_walk_movement->set_TargetMovement(Vector3(0, 3, 0));
+						}
+					}
 				}
 			}
 		}
@@ -1447,7 +1540,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		//}
 	}
 
-	bool iii = false;
+	bool iii = false, iiii = false;
 	static uintptr_t* serverrpc_projecshoot;
 	static uintptr_t* serverrpc_playerprojectileattack;
 
@@ -1455,8 +1548,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 	{
 		int echocount = 0;
 		//printf("clientinput start\n");
-		//if (!hooks::client_input_ptr)
-		//	hooks::client_input_ptr = mem::hook_virtual_function(_("PlayerWalkMovement"), _("ClientInput"), &hooks::hk_playerwalkmovement_ClientInput);
+		if (!hooks::client_input_ptr)
+			hooks::client_input_ptr = mem::hook_virtual_function(_("PlayerWalkMovement"), _("ClientInput"), &hooks::hk_playerwalkmovement_ClientInput);
 
 		//if(!do_fixed_update_ptr)
 			//do_fixed_update_ptr = mem::hook_virtual_function(_("PlayerWalkMovement"), _("DoFixedUpdate"), &hk_dofixedupdate);
@@ -1523,7 +1616,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		}
 
 #pragma region static_method_hooks
-		static uintptr_t* serverrpc_createbuilding;
+		//static uintptr_t* serverrpc_createbuilding;
 		if (!serverrpc_projecshoot) {
 			//auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot);
 			auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileShoot___);
@@ -1562,11 +1655,11 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 
 			//printf("before clientinput recreation\n");
-		baseplayer->modelState()->remove_flag(rust::classes::ModelState_Flag::Flying);
-		fakeorig_clientinput(baseplayer, state);
-		baseplayer->modelState()->remove_flag(rust::classes::ModelState_Flag::Flying);
+		//baseplayer->modelState()->remove_flag(rust::classes::ModelState_Flag::Flying);
+		//fakeorig_clientinput(baseplayer, state);
+		//baseplayer->modelState()->remove_flag(rust::classes::ModelState_Flag::Flying);
 		//printf("after clientinput recreation\n");
-		//orig::baseplayer_client_input(baseplayer, state);
+		orig::baseplayer_client_input(baseplayer, state);
 
 		if (baseplayer) {
 			baseplayer->modelState()->remove_flag(rust::classes::ModelState_Flag::Flying);
@@ -1628,9 +1721,11 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								((BaseMelee*)held)->DoThrow();
 							else {
 								auto m = held->repeatDelay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
-								int r = vars->desyncTime / m;
-								for(int i = 0; i <= r; i++)
+								int r = vars->desyncTime / m; r = r < 1 ? 1 : r;
+								for (int i = 0; i <= r; i++) {
 									held->LaunchProjectile();
+									held->remove_ammo();
+								}
 							}
 							misc::best_target = Vector3(0, 0, 0);
 							baseplayer->SendClientTick();
@@ -1658,9 +1753,11 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 								misc::manual = true;
 								auto m = held->repeatDelay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
-								int r = vars->desyncTime / m;
-								for (int i = 0; i <= r; i++)
+								int r = vars->desyncTime / m; r = r < 1 ? 1 : r;
+								for (int i = 0; i <= r; i++) {
 									held->LaunchProjectile();
+									held->remove_ammo();
+								}
 								baseplayer->SendClientTick();
 							}
 					}
@@ -1681,9 +1778,11 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						misc::autoshot = true;
 						misc::autobot::wants_shoot = false;
 						auto m = held->repeatDelay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
-						int r = vars->desyncTime / m;
-						for (int i = 0; i <= r; i++)
+						int r = vars->desyncTime / m; r = r < 1 ? 1 : r;
+						for (int i = 0; i <= r; i++) {
 							held->LaunchProjectile();
+							held->remove_ammo();
+						}
 						baseplayer->SendClientTick();
 					}
 					else if (!baseplayer->is_visible(baseplayer->model()->boneTransforms()->get(48)->position(), target)
@@ -1709,8 +1808,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					d.first.ent->ServerRPC(_(L"RPC_KnockDoor"));
 				}
 			}
-
-			//last return
 
 			if (vars->misc.always_shoot) {
 				auto mountable = baseplayer->mounted();

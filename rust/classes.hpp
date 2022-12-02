@@ -436,7 +436,11 @@ static auto get_center = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_ca
 
 static auto PEyes_get_rotation = reinterpret_cast<Vector4(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_rotation"), 0, _(""), _(""))));
 
+static auto headforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("HeadForward"), 0, _(""), _(""))));
+
 static auto bodyforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("BodyForward"), 0, _(""), _(""))));
+
+static auto headright = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("HeadRight"), 0, _(""), _(""))));
 
 static auto bodyright = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("BodyRight"), 0, _(""), _(""))));
 
@@ -525,6 +529,8 @@ float current_time;
 void init_bp() {
 	//setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
 	//ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
+	headright = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("HeadRight"), 0, _(""), _(""))));
+	headforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("HeadForward"), 0, _(""), _(""))));
 	get_localscale = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_localScale"), 0, _(""), _("UnityEngine"))));
 	set_localscale = reinterpret_cast<void(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_localScale"), 1, _(""), _("UnityEngine"))));
 	launchproj = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("LaunchProjectile"), 0, _(""), _(""))));
@@ -1407,7 +1413,7 @@ public:
 
 	void remove_ammo() {
 		pent
-			const auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x2C0);
+		const auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x2C0);
 		if (!mag || mag < 0xFFFF) return;
 		auto ammo = *reinterpret_cast<int*>(mag + 0x1C);
 		*reinterpret_cast<int*>(mag + 0x1C) = (ammo - 1);
@@ -2089,6 +2095,18 @@ public:
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return Vector4(0, 0, 0, 0);
 		return PEyes_get_rotation((uintptr_t)this);
+	}
+
+	Vector3 head_forward() {
+		pent
+			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return Vector3(0, 0, 0);
+		return headforward((uintptr_t)this);
+	}
+
+	Vector3 head_right() {
+		pent
+			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return Vector3(0, 0, 0);
+		return headright((uintptr_t)this);
 	}
 
 	Vector3 body_forward() {
@@ -2875,7 +2893,20 @@ auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base +
 				new_target.distance = distance;
 				new_target.visible = /*unity::is_visible(bone_pos, world_position)*/true;
 				new_target.found = true;
-				return { new_target, false };
+				return { new_target, true };
+			}
+			else if (distance < 2.f
+				&& !strcmp(entity_class_name, _("TreeEntity"))) {
+				pent
+
+					aim_target new_target;
+				world_position.y += 1.f;
+				new_target.pos = world_position;//this->ClosestPoint(world_position);
+				new_target.ent = (BaseCombatEntity*)ent;
+				new_target.distance = distance;
+				new_target.visible = /*unity::is_visible(bone_pos, world_position)*/true;
+				new_target.found = true;
+				return { new_target, true };
 			}
 			else if (distance < 2.f
 				&& !strcmp(entity_class_name, _("OreHotSpot"))) {
@@ -3755,6 +3786,18 @@ public:
 		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
 		return mem::read<ConButton*>(fieldz + 0xF0);
 	}
+	static ConButton* Hoverloot() {
+		pent
+			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
+		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+		return mem::read<ConButton*>(fieldz + 0x78);
+	}
+	static ConButton* Inventory() {
+		pent
+			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
+		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+		return mem::read<ConButton*>(fieldz + 0x48);
+	}
 };
 
 class Terrain {
@@ -3821,11 +3864,12 @@ void attack_melee(aim_target target, BaseProjectile* melee, BasePlayer* lp, bool
 
 	if (!is_player) {
 		pent
-			HitTest2* hit_test = (HitTest2*)il2cpp::methods::object_new(hit_test_class);
+		HitTest2* hit_test = (HitTest2*)il2cpp::methods::object_new(hit_test_class);
 
-		Ray ray = Ray(local_position, (target.pos - local_position).Normalized());
+		Ray ray = Ray(lp->eyes()->position(), (target.pos - lp->eyes()->position()).Normalized());
 
-		Transform* trans = is_player ? target.ent->model()->boneTransforms()->get(48) : target.ent->transform();
+		Transform* trans = target.ent->transform();
+
 
 		auto v = trans->InverseTransformPoint(target.pos);//_InverseTransformPoint(trans, target.pos);
 
@@ -3838,7 +3882,8 @@ void attack_melee(aim_target target, BaseProjectile* melee, BasePlayer* lp, bool
 		hit_test->set_did_hit(true);
 		hit_test->set_hit_entity((BasePlayer*)target.ent);
 		hit_test->set_hit_point(v);
-		hit_test->set_hit_normal(Vector3(0, 0, 0));
+		//hit_test->set_hit_normal(Vector3(0, 0, 0));
+		hit_test->set_hit_normal(trans->InverseTransformDirection(target.pos));
 		hit_test->set_damage_properties(melee->get_damage_properties());
 
 		//hit_test->MaxDistance() = 1000.f;

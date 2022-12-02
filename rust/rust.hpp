@@ -275,6 +275,7 @@ namespace rust {
 			Unused2 = 31
 		};
 
+		//tag numbers
 		enum objects
 		{
 			MAINCAMERA = 5,

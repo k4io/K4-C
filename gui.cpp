@@ -316,6 +316,27 @@ namespace Gui
 		im::End();
 	}
 
+	bool rin = false;
+	void RadarWindow() {
+		if (!rin)
+		{
+			im::SetNextWindowPos({ (float)vars->visual.radarx, (float)vars->visual.radary });
+			rin = true;
+		}
+		im::SetNextWindowSize({ vars->visual.radarsize, vars->visual.radarsize });
+		im::Begin(_("Radar preview"), nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+		{
+			if (im::GetWindowPos().x != (float)vars->visual.radarx
+				|| im::GetWindowPos().y != (float)vars->visual.radary)
+			{
+				vars->visual.radarx = im::GetWindowPos().x;
+				vars->visual.radary = im::GetWindowPos().y;
+				rin = false;
+			}
+		}
+		im::End();
+	}
+
 	class dot
 	{
 	public:
@@ -1272,12 +1293,11 @@ namespace Gui
 			}
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(50, 15));
-			im::Checkbox(_("Manipulator2"), &vars->combat.manipulator2);
-
-			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
-			im::Hotkey(_("M2"), &vars->keybinds.manipulator2, ImVec2(50, 15));
-			//im::Checkbox(_("Target behind wall"), &vars->combat.shoot_at_fatbullet);
-			im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
+			//im::Checkbox(_("Manipulator2"), &vars->combat.manipulator2);
+			//
+			//im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			//im::Hotkey(_("M2"), &vars->keybinds.manipulator2, ImVec2(50, 15));
+			//im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
 			//im::Checkbox(_("STW (Ladder)"), &vars->combat.throughladder);
 			//im::Checkbox(_("Pierce"), &vars->combat.pierce);
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
@@ -1332,6 +1352,13 @@ namespace Gui
 			im::Checkbox(_("Desync indicator"), &vars->visual.desync_indicator);
 			im::Checkbox(_("Flyhack indicator"), &vars->visual.flyhack_indicator);
 			im::Checkbox(_("Speedhack indicator"), &vars->visual.speedhack_indicator);
+			im::Checkbox(_("Radar"), &vars->visual.radar);
+			if (vars->visual.radar) {
+				im::SliderFloat(_("Size"), &vars->visual.radarsize, 1.f, 250.f, _("%.0f"));
+				im::SliderFloat(_("Range"), &vars->visual.radarrange, 1.f, 300.f, _("%.0f"));
+				im::Checkbox(_("Show name"), &vars->visual.radarname);
+				RadarWindow();
+			}
 			//im::Checkbox(_("Offscreen indicator"), &vars->visual.offscreen_indicator);
 			im::Combo(_("Snapline"), &vars->visual.snapline,
 				_("None\0Top\0Center\0Bottom"));
@@ -1372,10 +1399,10 @@ namespace Gui
 			im::Combo(_("Text box"), &vars->visual.text_background_box,
 				_("None\0Full\0Rounded"));
 			im::Combo(_("Box type"), &vars->visual.boxtype,
-				_("None\0Full\0Corner\0Cube\0Box"));
+				_("None\0Full\0Corner\0Cube\0Box\0Custom"));
+			if(vars->visual.boxtype == 5)
+				im::InputTextWithHint(_("##BoxFilename"), _("filename"), vars->visual.boxfilename, 32);
 			im::Checkbox(_("Rainbow box"), &vars->visual.rainbowbox);
-			//im::Checkbox(_("Custom box"), &vars->visual.custombox);
-			//im::InputTextWithHint(_("##File"), _("filename"), vars->visual.boxfilename, 32);
 			//im::Checkbox(_("Corner box"), &vars->visual.corner_box);
 			//im::Checkbox(_("3D Cube"), &vars->visual.cube);
 			im::Checkbox(_("Crosshair name"), &vars->visual.midhealth);
@@ -1502,6 +1529,9 @@ namespace Gui
 			im::Checkbox(_("Big jump"), &vars->misc.gravity);
 			im::Checkbox(_("Infinite jump"), &vars->misc.infinite_jump);
 			im::Checkbox(_("Fly-wall"), &vars->misc.flywall);
+			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Will automatically fly up the wall in-front of the player, also has collision detection, controlled by rotation of player"));
+			}
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("F"), &vars->keybinds.flywall, ImVec2(50, 14));
 			im::Checkbox(_("No collisions"), &vars->misc.no_playercollision);
@@ -1565,6 +1595,7 @@ namespace Gui
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("X"), &vars->keybinds.stash, ImVec2(50, 14));
 			im::Checkbox(_("Interactive debug"), &vars->misc.interactive_debug);
+			//im::Checkbox(_("Fast loot"), &vars->misc.fastloot);
 			im::Checkbox(_("Instant med"), &vars->misc.instant_med);
 			im::Checkbox(_("Instant revive"), &vars->misc.instant_revive);
 			im::Checkbox(_("Revive friends only"), &vars->misc.revivefriendsonly);

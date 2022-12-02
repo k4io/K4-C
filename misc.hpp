@@ -539,7 +539,7 @@ namespace misc
 				Sphere(p, 0.05f, col(10, 30, 90, 1), 0.01f, 10);
 
 			//check between manip pos and player pos
-			if (!ply->is_visible(p, pos, 0.03f))
+			if (!ply->is_visible(p, pos, .18f))
 			{
 				if (!vars->combat.thick_bullet || !vars->combat.shoot_at_fatbullet) return false;
 				bool t = false;
@@ -582,6 +582,7 @@ namespace misc
 				Line(p, pos, { r * 100, g * 100, b * 100, 1 }, (vars->desyncTime * 5.f), true, true);
 
 			misc::best_lean = p;
+			misc::best_target = pos;
 			return true;
 		};
 

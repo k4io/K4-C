@@ -1,6 +1,36 @@
 #pragma once
 #include "lua_wrapper.hpp"
 
+void DrawOnRadar(Vector3 worldpos, wchar_t* entityname, bool visible = false) {
+	if (!esp::local_player) return;
+	auto local = esp::local_player->transform()->position();
+	float dist = local.distance(worldpos);
+	const float x = local.z - worldpos.z, y = local.x - worldpos.x;
+	auto euler = EulerAngles(esp::local_player->eyes()->rotation());
+	const float n = Vector3::my_atan2(y, x) * 57.29578f - 270.f - euler.y;
+	float px = dist * Vector3::my_cos(n * 0.0174532924f);
+	float py = dist * Vector3::my_sin(n * 0.0174532924f);
+
+	px = px * (vars->visual.radarsize / vars->visual.radarrange) / 2.f;
+	py = py * (vars->visual.radarsize / vars->visual.radarrange) / 2.f;
+
+	if (dist <= vars->visual.radarrange)
+	{
+		render.FillRectangle({ 
+			vars->visual.radarx + vars->visual.radarsize / 2.f + px - 3.f, 
+			vars->visual.radary + vars->visual.radarsize / 2.f + py - 3.f }, 
+			{ 5, 5 }, 
+			FLOAT4TOD3DCOLOR(visible ? vars->colors.players.boxes.visible : vars->colors.players.boxes.invisible));
+		if (vars->visual.radarname)
+			render.StringCenter({
+			vars->visual.radarx + vars->visual.radarsize / 2.f + px - 3.f,
+			(vars->visual.radary + vars->visual.radarsize / 2.f + py - 3.f) + 5 },
+			entityname,
+			FLOAT4TOD3DCOLOR(visible ? vars->colors.players.details.name.visible : vars->colors.players.details.name.invisible));
+		//gui::FullRect({ settings::Radar::Pos_X + settings::Radar::Radar_Size / 2.f + PointPos_X - 3.f, settings::Radar::Pos_Y + settings::Radar::Radar_Size / 2.f + PointPos_Y - 3.f, 5, 5 }, { 40,212,101,255 });
+	}
+}
+
 void DrawPlayer(BasePlayer* ply, bool npc)
 {
 	if (!ply) return;
@@ -95,6 +125,10 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 		return true;
 	};
 
+
+	if (vars->visual.radar)
+		DrawOnRadar(ply->transform()->position(), ply->get_player_name(), ply->visible());
+
 	if (get_bounds(bounds, 4)) {
 		//is_visible = unity::is_visible(camera_position, bones[48].world_position, (uintptr_t)esp::local_player);
 		is_visible = ply->visible();
@@ -127,20 +161,23 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 		auto box_color = is_visible ? vars->colors.players.boxes.visible : vars->colors.players.boxes.invisible;
 		if (vars->visual.rainbowbox) { box_color[0] = r; box_color[1] = g; box_color[2] = b; }
 
-		if (vars->visual.custombox && strlen(vars->visual.boxfilename) > 0)
+		if (vars->visual.boxtype == 5)
 		{
-			std::string ap(vars->visual.boxfilename);
-			std::string path = vars->data_dir + _("images\\") + ap;
-			if (!ap.empty()) {
-				if (std::filesystem::exists(path)) {
-					if (vars->customboxpath != path) {
-						vars->customboxpath = path;
-						//set custom box
-						//render.SetCustomBox(vars->customboxpath);
+			__try {
+				std::string ap(vars->visual.boxfilename);
+				if (!ap.empty()) {
+					std::string path = vars->data_dir + _("images\\") + ap;
+					if (std::filesystem::exists(path)) {
+						if (vars->customboxpath != path) {
+							vars->customboxpath = path;
+							//set custom box
+							render.SetCustomBox(vars->customboxpath);
+						}
+						else render.DrawCustomBox({ bounds.left, bounds.top }, { box_width, box_height });//draw custom box
 					}
-					//else render.DrawCustomBox({ bounds.left, bounds.top }, { box_width, box_height });//draw custom box
 				}
 			}
+			__except (true) {}
 		}
 		else {
 			switch (vars->visual.boxtype)
@@ -273,7 +310,33 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 					render.Line(frontTopRight_2d, backTopRight_2d, FLOAT4TOD3DCOLOR(box_color));
 					render.Line(frontBottomRight_2d, backBottomRight_2d, FLOAT4TOD3DCOLOR(box_color));
 					render.Line(frontBottomLeft_2d, backBottomLeft_2d, FLOAT4TOD3DCOLOR(box_color));
+
+					if (vars->visual.hpbar == 3) {
+						Vector2 points[4];
+						auto c = vars->visual.rainbowhpbar ? rainbowcolor : health_color;
+						c.a = 0.5f;
+						points[0] = frontBottomLeft_2d;
+						points[1] = frontBottomRight_2d;
+
+						int leftsz = frontTopLeft_2d.y - frontBottomLeft_2d.y;
+						int rightsz = frontTopRight_2d.y - frontBottomRight_2d.y;
+
+						frontTopLeft_2d.y -= leftsz;
+						frontTopRight_2d.y -= rightsz;
+
+						leftsz = ((leftsz / max_health) * cur_health);
+						rightsz = ((rightsz / max_health) * cur_health);
+
+						frontTopLeft_2d.y += leftsz;
+						frontTopRight_2d.y += rightsz;
+
+						points[2] = frontTopRight_2d;
+						points[3] = frontTopLeft_2d;
+						render.FillPolygon(points, 4, c);
+					}
 				}
+
+
 				break;
 			}
 			case 4: //3d box
@@ -392,6 +455,7 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			}
 		}
 
+
 		switch (vars->visual.hpbar)
 		{
 		case 1:
@@ -423,6 +487,77 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			if (!Transform) return;
 			Vector3 world_position = Transform->position();
 			Vector3 jaw = WorldToScreen(world_position);
+
+			//smiley face
+			//eyes
+			//auto r = ply->eyes()->position() + (ply->eyes()->body_right() * .035f) + (ply->eyes()->body_forward() * 0.23f);
+			//auto left = ply->eyes()->position() - (ply->eyes()->body_right() * .035f) + (ply->eyes()->body_forward() * 0.23f);
+			////Vector3 eye1 = WorldToScreen(left);
+			////Vector3 eye2 = WorldToScreen(r);
+			//auto doeye = [&](Vector3 e) {
+			//	std::vector<Vector2> vl{};
+			//	float step = (M_PI_2) / 10;
+			//	float x, z, y, current = 0;
+			//	for (size_t i = 0; i < 10; i++)
+			//	{
+			//		x = Vector3::my_sin(current) * .02f;
+			//		y = Vector3::my_cos(current) * .02f;
+			//
+			//		Vector3 p1 = WorldToScreen(e + Vector3(x, y + .03f, x));
+			//		Vector3 p2 = WorldToScreen(e + Vector3(-x, y + .03f, -x));
+			//		Vector3 p3 = WorldToScreen(e + Vector3(x, -y + .03f, x));
+			//		Vector3 p4 = WorldToScreen(e + Vector3(-x, -y + .03f, -x));
+			//
+			//		vl.push_back(Vector2(p1.x, p1.y));
+			//		vl.push_back(Vector2(p2.x, p2.y));
+			//		vl.push_back(Vector2(p3.x, p3.y));
+			//		vl.push_back(Vector2(p4.x, p4.y));
+			//
+			//		//if (!p1.is_empty()
+			//		//	&& !l.is_empty()) {
+			//		//	render.Line(Vector2(p1.x, p1.y), Vector2(l.x, l.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color, 2.f);
+			//		//}
+			//		//
+			//		//render.Line(Vector2(p1.x, p1.y), Vector2(p2.x, p2.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color, 2.f);
+			//		//render.Line(Vector2(p2.x, p2.y), Vector2(p3.x, p3.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color, 2.f);
+			//		//render.Line(Vector2(p3.x, p3.y), Vector2(p4.x, p4.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color, 2.f);
+			//
+			//		current += step;
+			//	}
+			//	render.FillPolygon(vl.data(), vl.size(), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
+			//};
+			//doeye(r);
+			//doeye(left);
+
+			//smile
+			//Vector3 l = Vector3::Zero();
+			//float step = (M_PI_2) / 10;
+			//float x, z, y, current = 0;
+			//Vector3 e = ply->eyes()->position() + (ply->eyes()->head_forward() * 0.23f);
+			//e.y -= 0.08f;
+			//for (size_t i = 0; i < 10; i++)
+			//{
+			//	x = Vector3::my_sin(current) * .05f;
+			//	y = Vector3::my_cos(current) * .05f;
+			//
+			//	//Vector3 p1 = WorldToScreen(e + Vector3(x, y + .03f, 0));
+				//Vector3 p2 = WorldToScreen(e + Vector3(-x, y + .03f, 0));
+			//	Vector3 p3 = WorldToScreen(e + Vector3(x, -y + .04f, 0));
+			//	Vector3 p4 = WorldToScreen(e + Vector3(-x, -y + .04f, 0));
+			//
+			//	if (!p3.is_empty()
+			//		&& !l.is_empty()) {
+			//		render.Line(Vector2(p3.x, p3.y), Vector2(l.x, l.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color, 2.f);
+			//	}
+			//
+			//	render.Line(Vector2(p3.x, p3.y), Vector2(p4.x, p4.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color, 2.f);
+			//	//render.Line(Vector2(p2.x, p2.y), Vector2(p3.x, p3.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color, 2.f);
+				//render.Line(Vector2(p3.x, p3.y), Vector2(p4.x, p4.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color, 2.f);
+			//
+			//	l = p3;
+			//	current += step;
+			//}
+			//l = Vector3::Zero();
 
 			//spine4
 			Transform = ply->model()->boneTransforms()->get(22);
@@ -545,7 +680,7 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			pelvis.y += 0.2;
 			l_hip.y += 0.2;
 
-			render.Line(Vector2(jaw.x, jaw.y), Vector2(spine4.x, spine4.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
+			//render.Line(Vector2(jaw.x, jaw.y), Vector2(spine4.x, spine4.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
 			render.Line(Vector2(spine4.x, spine4.y), Vector2(spine3.x, spine3.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
 			render.Line(Vector2(spine4.x, spine4.y), Vector2(l_upperarm.x, l_upperarm.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
 			render.Line(Vector2(spine4.x, spine4.y), Vector2(r_upperarm.x, r_upperarm.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
@@ -559,6 +694,10 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			render.Line(Vector2(l_knee.x, l_knee.y), Vector2(l_ankle_scale.x, l_ankle_scale.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
 			render.Line(Vector2(r_knee.x, r_knee.y), Vector2(r_ankle_scale.x, r_ankle_scale.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
 			render.Line(Vector2(r_ankle_scale.x, r_ankle_scale.y), Vector2(r_foot.x, r_foot.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
+			
+			//render.Circle(Vector2(eye1.x, eye1.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color, 10, 3);
+			//render.Circle(Vector2(eye2.x, eye2.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color, 10, 3);
+			//render.Line(Vector2(r_ankle_scale.x, r_ankle_scale.y), Vector2(r_foot.x, r_foot.y), vars->visual.rainbowskeleton ? rainbowcolor : health_color);
 
 			//HANDS??
 		}
@@ -770,6 +909,24 @@ void DrawPlayerHotbar(aim_target target) {
 		vars->target_hotbar_list = {};
 		vars->target_name = _("");
 	}
+}
+
+void DrawRadarBackground() {
+	float r = 2;
+	float x = vars->visual.radarx;
+	float y = vars->visual.radary;
+	auto acol = FLOAT4TOD3DCOLOR(vars->accent_color);
+	render.FillCircle({ (x + r / 2) + (vars->visual.radarsize / 2), (y + r / 2) + (vars->visual.radarsize / 2) }, acol, r);
+	render.FillRectangle({ x, y }, { vars->visual.radarsize, vars->visual.radarsize }, { .2f, .2f, .2f, .6f });
+	render.Rectangle({ x, y }, { vars->visual.radarsize, vars->visual.radarsize }, acol, 1.f);
+	float c[4] = { vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], .2f };
+	acol = FLOAT4TOD3DCOLOR(c);
+	render.Line({ (x + r / 2) + (vars->visual.radarsize / 2), (y + r / 2) },
+		{ (x + r / 2) + (vars->visual.radarsize / 2), (y + r / 2) + vars->visual.radarsize },
+		acol, 1.f);
+	render.Line({ (x + r / 2), (y + r / 2) + (vars->visual.radarsize / 2) },
+		{ (x + r / 2) + vars->visual.radarsize, (y + r / 2) + (vars->visual.radarsize / 2) },
+		acol, 1.f);
 }
 
 void iterate_entities() {
@@ -1732,10 +1889,14 @@ void TargettedIndicator() {
 }
 
 void DrawSnapline() {
+	if (esp::best_target.pos.is_empty()) return;
 	Vector2 start = vars->visual.snapline == 1 ? Vector2(vars->ScreenX / 2, 0) :
 		vars->visual.snapline == 2 ? Vector2(vars->ScreenX / 2, vars->ScreenY / 2) :
 		vars->visual.snapline == 3 ? Vector2(vars->ScreenX / 2, vars->ScreenY) :
 		Vector2(vars->ScreenX / 2, vars->ScreenY);
+	Vector3 o = WorldToScreen(esp::best_target.pos);
+	if (o.x != 0 && o.y != 0)
+		render.Line(start, Vector2(o.x, o.y), FLOAT4TOD3DCOLOR(esp::best_target.visible ? vars->colors.ui.snapline.visible : vars->colors.ui.snapline.invisible), 1.f, true);
 }
 
 void DrawFov() {
@@ -1904,6 +2065,8 @@ void new_frame() {
 		IndicatorSpeedhack();
 	if (vars->misc.tp)
 		IndicatorTp();
+	if (vars->visual.snapline > 0)
+		DrawSnapline();
 
 	if (vars->visual.flyhack_indicator)
 		IndicatorFlyhack();
@@ -1913,6 +2076,8 @@ void new_frame() {
 	if (vars->visual.show_fov)
 		DrawFov();
 
+	if (vars->visual.radar)
+		DrawRadarBackground();
 	//printf("watermark\n");
 	//Draw watermark
 	Watermark();
