@@ -2048,7 +2048,7 @@ void new_frame() {
 	}
 	//lw::playerlist.clear();
 	//lw::entitylist.clear();
-	printf("crosshairs\n");
+	//printf("crosshairs\n");
 	//Draw crosshairs
 	if (vars->visual.crosshair1)
 		Crosshair1();
@@ -2080,7 +2080,7 @@ void new_frame() {
 
 	if (vars->visual.radar)
 		DrawRadarBackground();
-	printf("watermark\n");
+	//printf("watermark\n");
 	//Draw watermark
 	Watermark();
 	if (esp::local_player
@@ -2098,7 +2098,7 @@ void new_frame() {
 	}
 
 	//iterate_entities();
-	printf("iterate entities\n");
+	//printf("iterate entities\n");
 	iterate_entities();
 
 	//__try {
@@ -2139,7 +2139,7 @@ void new_frame() {
 	//				v),
 	//			lw::playerlist.end());
 	
-	//printf("return\n");
+	//printf("new_frame return\n");
 	return;
 	//does it make the object 3 times? it lags and flickers lots.
 	for (auto o : vars->RenderList) {

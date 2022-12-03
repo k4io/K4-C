@@ -1553,7 +1553,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
 	{
-		printf("clientinput start\n");
+		//printf("clientinput start\n");
 		int echocount = 0;
 		//printf("clientinput start\n");
 		if (!hooks::client_input_ptr)
@@ -1673,7 +1673,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 #pragma endregion
 
 
-			printf("before clientinput original\n");
+			//printf("before clientinput original\n");
 		//baseplayer->modelState()->remove_flag(rust::classes::ModelState_Flag::Flying);
 		//fakeorig_clientinput(baseplayer, state);
 		//baseplayer->modelState()->remove_flag(rust::classes::ModelState_Flag::Flying);
@@ -2654,7 +2654,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				//printf("clientinput finish\n");
 			}
 
-		printf("before clientinput return\n");
+		//printf("before clientinput return\n");
 		return;
 	}
 }

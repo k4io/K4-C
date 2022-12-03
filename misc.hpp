@@ -1571,8 +1571,8 @@ namespace misc
 					{
 						aimbot_velocity = (_aimdir).Normalized() * original_vel.length();
 						//emulate 1 tick has already passed
-						aimbot_velocity += gravity * grav * num;
-						aimbot_velocity -= aimbot_velocity * drag * num;
+						//aimbot_velocity += gravity * grav * num;
+						//aimbot_velocity -= aimbot_velocity * drag * num;
 						break;
 					}
 					else
@@ -1655,9 +1655,11 @@ namespace misc
 						{
 							Line(actual, pos, col(0, 1, 0, 1), 10.f, false, true);
 							aimbot_velocity = (_aimdir).Normalized() * original_vel.length();
-							//emulate 1 tick has already passed
-							aimbot_velocity += gravity * grav * num;
-							aimbot_velocity -= aimbot_velocity * drag * num;
+							////emulate 1 tick has already passed
+							//aimbot_velocity += gravity * grav * 0;
+							//aimbot_velocity -= aimbot_velocity * drag * 0;
+
+							//aimbot_velocity.y += 1.f;
 
 							actualposition = pos;
 
