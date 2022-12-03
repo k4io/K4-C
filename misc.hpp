@@ -1614,6 +1614,7 @@ namespace misc
 
 				Vector3 final_vel = player_velocity * travel_t;
 				Vector3 actual = target_pos += final_vel;
+				Sphere(actual, 0.1f, { 1, 1, 1, 1 }, 10.f, 0);
 
 				auto travel = 0.f;
 				auto vel = (getmodifiedaimcone(0, rpc_position - actual, true)).Normalized() * original_vel.length();
@@ -1652,7 +1653,7 @@ namespace misc
 						if (misc::LineCircleIntersection(actual, 0.1f, origin, pos, offset)
 							&& unity::LineOfSightRadius(pos, origin, 0))
 						{
-							//Line(origin, pos, col(0, 1, 0, 1), 10.f, false, true);
+							Line(actual, pos, col(0, 1, 0, 1), 10.f, false, true);
 							aimbot_velocity = (_aimdir).Normalized() * original_vel.length();
 							//emulate 1 tick has already passed
 							aimbot_velocity += gravity * grav * num;

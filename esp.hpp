@@ -977,7 +977,7 @@ void iterate_entities() {
 	bool flp = false;
 	bool found_a_target = false;
 	auto temptarget = aim_target();
-
+	printf("before ent loop\n");
 	for (int i = 0; i <= size; i++) {
 		auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
 		if (!current_object || current_object <= 100000)
@@ -1817,7 +1817,8 @@ void iterate_entities() {
 			}
 		}
 	}
-	
+
+	printf("after ent loop\n");
 	System::list<Item*>* belt = ((BasePlayer*)esp::best_target.ent)->get_belt_items();
 	if (!belt)
 		esp::best_target = aim_target();
@@ -1831,6 +1832,7 @@ void iterate_entities() {
 		vars->target_hotbar_list = {};
 		vars->target_name = _("");
 	}
+	printf("iterate entities return\n");
 }
 
 void Crosshair1() {
@@ -1844,7 +1846,7 @@ void Crosshair2() {
 
 	render.Line(Vector2{ x, y - 5 }, Vector2{ x , y + 5 }, FLOAT4TOD3DCOLOR(vars->colors.ui.crosshair), 2.3f);
 	render.Line(Vector2{ x - 5, y }, Vector2{ x + 5, y }, FLOAT4TOD3DCOLOR(vars->colors.ui.crosshair), 2.3f);
-}
+} 
 void Crosshair3() { //Circle crosshair
 	float x = vars->ScreenX / 2, y = vars->ScreenY / 2;
 	render.Circle(Vector2(x, y), FLOAT4TOD3DCOLOR(vars->colors.ui.crosshair), 1.3f);
@@ -2046,7 +2048,7 @@ void new_frame() {
 	}
 	//lw::playerlist.clear();
 	//lw::entitylist.clear();
-	//printf("crosshairs\n");
+	printf("crosshairs\n");
 	//Draw crosshairs
 	if (vars->visual.crosshair1)
 		Crosshair1();
@@ -2078,7 +2080,7 @@ void new_frame() {
 
 	if (vars->visual.radar)
 		DrawRadarBackground();
-	//printf("watermark\n");
+	printf("watermark\n");
 	//Draw watermark
 	Watermark();
 	if (esp::local_player
@@ -2096,7 +2098,7 @@ void new_frame() {
 	}
 
 	//iterate_entities();
-	//printf("iterate entities\n");
+	printf("iterate entities\n");
 	iterate_entities();
 
 	//__try {

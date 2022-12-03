@@ -1553,6 +1553,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
 	{
+		printf("clientinput start\n");
 		int echocount = 0;
 		//printf("clientinput start\n");
 		if (!hooks::client_input_ptr)
@@ -1647,17 +1648,17 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				*serverrpc_playerprojectileattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
 			}
 		}
-		if (!serverrpc_playerprojectileupdate) {
-			auto method_serverrpc_playerprojectileupdate = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
-
-			if (method_serverrpc_playerprojectileupdate) {
-				serverrpc_playerprojectileupdate = **(uintptr_t***)(method_serverrpc_playerprojectileupdate + 0x30);
-
-				hooks::orig::playerprojectileupdate = *serverrpc_playerprojectileupdate;
-
-				*serverrpc_playerprojectileupdate = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileupdate);
-			}
-		}
+		//if (!serverrpc_playerprojectileupdate) {
+		//	auto method_serverrpc_playerprojectileupdate = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
+		//
+		//	if (method_serverrpc_playerprojectileupdate) {
+		//		serverrpc_playerprojectileupdate = **(uintptr_t***)(method_serverrpc_playerprojectileupdate + 0x30);
+		//
+		//		hooks::orig::playerprojectileupdate = *serverrpc_playerprojectileupdate;
+		//
+		//		*serverrpc_playerprojectileupdate = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileupdate);
+		//	}
+		//}
 		//if (!serverrpc_createbuilding) {
 		//	auto method_serverrpc_createbuilding = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_CreateBuilding___);
 		//
@@ -1672,7 +1673,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 #pragma endregion
 
 
-			//printf("before clientinput recreation\n");
+			printf("before clientinput original\n");
 		//baseplayer->modelState()->remove_flag(rust::classes::ModelState_Flag::Flying);
 		//fakeorig_clientinput(baseplayer, state);
 		//baseplayer->modelState()->remove_flag(rust::classes::ModelState_Flag::Flying);
@@ -2179,180 +2180,181 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				set_timeScale(1);
 				is_speeding = false;
 			}
+			__try {
+				auto target = esp::best_target; //baseplayer->get_aimbot_target(unity::get_camera_pos());
+				if (item) {
+					auto baseprojectile = *reinterpret_cast<BaseProjectile**>((uintptr_t)item + heldEntity);//item->GetHeldEntity<BaseProjectile>();
+					if (baseprojectile) {
+						auto wep_class_name = *(const char**)(*(uintptr_t*)(uintptr_t)baseprojectile + 0x10);
 
-			auto target = esp::best_target; //baseplayer->get_aimbot_target(unity::get_camera_pos());
-			if (item) {
-				auto baseprojectile = *reinterpret_cast<BaseProjectile**>((uintptr_t)item + heldEntity);//item->GetHeldEntity<BaseProjectile>();
-				if (baseprojectile) {
-					auto wep_class_name = *(const char**)(*(uintptr_t*)(uintptr_t)baseprojectile + 0x10);
+						auto attack = [&](aim_target target, bool is_tree) {
+							auto gathering = ((BaseMelee*)baseprojectile)->gathering();
 
-					auto attack = [&](aim_target target, bool is_tree) {
-						auto gathering = ((BaseMelee*)baseprojectile)->gathering();
+							auto baseprojectile = item2->get_base_projetile();
 
-						auto baseprojectile = item2->get_base_projetile();
-
-						if (is_tree) {
-							if (!(gathering->tree()->gatherDamage() > 1)) {
-								return;
-							}
-						}
-						else {
-							if (!(gathering->ore()->gatherDamage() > 1)) {
-								return;
-							}
-						}
-
-						attack_melee(target, baseprojectile, baseplayer);
-					};
-
-					if (target.ent
-						&& vars->combat.aimbot
-						&& unity::GetKey(vars->keybinds.aimbot))
-					{
-						//predict aiming direction
-									//
-									// normalize angles
-									// smooth angles
-									// set bodyangles to result
-									//
-						Vector3 eyes = baseplayer->eyes()->position();
-						Vector3 aim_dir;
-						Vector3 aim_vel;
-
-						auto m = *reinterpret_cast<uintptr_t*>((uintptr_t)baseprojectile + 0x2C0); //public BaseProjectile.Magazine primaryMagazine; // 0x2C0
-						auto ammo = *reinterpret_cast<uintptr_t*>((uintptr_t)m + 0x20); //public ItemDefinition ammoType; // 0x20
-						auto mod = ((Networkable*)ammo)->GetComponent(unity::GetType(_(""), _("ItemModProjectile")));
-						auto projectile = (Projectile*)((Networkable*)mod)->GetComponent(unity::GetType(_(""), _("Projectile")));
-
-						//auto v = projectile->initialVelocity();//((base_projectile*)projectile)->get_item_mod_projectile()->get_projectile_velocity();
-									//auto v1 = ((base_projectile*)projectile)->projectileVelocityScale();
-									//if (vars->combat.fast_bullet)
-									//	v1 *= 1.49f;
-									//v *= v1;
-						auto vel = projectile->initialVelocity();
-						//auto vel = (getmodifiedaimcone(0, eyes - target.pos, true)).Normalized() * v;
-
-						//misc::get_prediction(target, eyes, target.pos, vel, aim_vel, aim_dir, (Projectile*)projectile, true);
-
-
-						Vector3 va = baseplayer->input()->bodyAngles();
-						Vector2 vb = { va.x, va.y };
-
-						auto calc = [&](const Vector3& src, const Vector3& dst) {
-							Vector3 d = src - dst;
-							return Vector2(RAD2DEG(Vector3::my_asin(d.y / d.length())), RAD2DEG(-Vector3::my_atan2(d.x, -d.z)));
-						};
-						auto normalize = [&](float& yaw, float& pitch) {
-							//baseplayer->console_echo(string::wformat(_(L"[matrix]: ClientInput - yaw: %d, pitch: %d"), (int)yaw, (int)pitch));
-							if (pitch < -270) pitch = -270;
-							else if (pitch > 180) pitch = 180;
-							if (yaw < -360) yaw = -360;
-							else if (yaw > 360) yaw = 360;
-						};
-						auto step = [&](Vector2& angles) {
-							bool smooth = true;
-							Vector3 v = va;
-							Vector2 va = { v.x, v.y };
-							Vector2 angles_step = angles - va;
-							normalize(angles_step.x, angles_step.y);
-
-							if (smooth) {
-								float factor_pitch = vars->combat.aimbot_smooth;
-								if (angles_step.x < 0.f) {
-									if (factor_pitch > std::fabs(angles_step.x)) {
-										factor_pitch = std::fabs(angles_step.x);
-									}
-									angles.x = va.x - factor_pitch;
-								}
-								else {
-									if (factor_pitch > angles_step.x) {
-										factor_pitch = angles_step.x;
-									}
-									angles.x = va.x + factor_pitch;
+							if (is_tree) {
+								if (!(gathering->tree()->gatherDamage() > 1)) {
+									return;
 								}
 							}
-							if (smooth) {
-								float factor_yaw = vars->combat.aimbot_smooth;
-								if (angles_step.y < 0.f) {
-									if (factor_yaw > std::fabs(angles_step.y)) {
-										factor_yaw = std::fabs(angles_step.y);
-									}
-									angles.y = va.y - factor_yaw;
-								}
-								else {
-									if (factor_yaw > angles_step.y) {
-										factor_yaw = angles_step.y;
-									}
-									angles.y = va.y + factor_yaw;
+							else {
+								if (!(gathering->ore()->gatherDamage() > 1)) {
+									return;
 								}
 							}
+
+							attack_melee(target, baseprojectile, baseplayer);
 						};
 
-						Vector2 offset = calc(eyes, target.pos) - vb;
-						Vector2 ai = vb + offset;
-						step(ai);
-						step(ai);
-						normalize(ai.x, ai.y);
-						Vector3 i = { ai.x, ai.y, 0.0f };
-						baseplayer->input()->bodyAngles() = i;
-					}
+						if (target.ent
+							&& vars->combat.aimbot
+							&& unity::GetKey(vars->keybinds.aimbot))
+						{
+							//predict aiming direction
+										//
+										// normalize angles
+										// smooth angles
+										// set bodyangles to result
+										//
+							Vector3 eyes = baseplayer->eyes()->position();
+							Vector3 aim_dir;
+							Vector3 aim_vel;
 
-					if (vars->misc.silent_farm) {
-						auto entity = baseplayer->resolve_closest_entity(4, false);
-						if (entity.first.found && entity.first.ent) {
-							if (*(int*)(wep_class_name + 4) == 'eleM' || *(int*)(wep_class_name + 4) == 'mmah') {
-								attack(entity.first, entity.second);
-							}
-						}
-					}
+							auto m = *reinterpret_cast<uintptr_t*>((uintptr_t)baseprojectile + 0x2C0); //public BaseProjectile.Magazine primaryMagazine; // 0x2C0
+							auto ammo = *reinterpret_cast<uintptr_t*>((uintptr_t)m + 0x20); //public ItemDefinition ammoType; // 0x20
+							auto mod = ((Networkable*)ammo)->GetComponent(unity::GetType(_(""), _("ItemModProjectile")));
+							auto projectile = (Projectile*)((Networkable*)mod)->GetComponent(unity::GetType(_(""), _("Projectile")));
 
-					if (vars->misc.autofarmbarrel) {
-						auto entity = baseplayer->resolve_closest_entity(2, false);
-						if (entity.first.ent) {
-							if (*(int*)(wep_class_name + 4) == 'eleM' || *(int*)(wep_class_name + 4) == 'mmah'
-								&& entity.first.distance < 1.f) {
-								//entity.first.pos = entity.first.ent->ClosestPoint(baseplayer->eyes()->position());
-								attack(entity.first, entity.second);
-							}
-						}
-					}
+							//auto v = projectile->initialVelocity();//((base_projectile*)projectile)->get_item_mod_projectile()->get_projectile_velocity();
+										//auto v1 = ((base_projectile*)projectile)->projectileVelocityScale();
+										//if (vars->combat.fast_bullet)
+										//	v1 *= 1.49f;
+										//v *= v1;
+							auto vel = projectile->initialVelocity();
+							//auto vel = (getmodifiedaimcone(0, eyes - target.pos, true)).Normalized() * v;
 
-					if (!(*(int*)(wep_class_name + 4) == 'eleM' && *(int*)(wep_class_name) == 'esaB')) {
-						if (unity::GetKey(VK_LBUTTON) && vars->misc.instant_med) {
-							//const auto item_id = item->info()->itemid;
-							const auto item_id = item->info()->itemid;
+							//misc::get_prediction(target, eyes, target.pos, vel, aim_vel, aim_dir, (Projectile*)projectile, true);
 
-							if (item_id == 1079279582 || item_id == -2072273936) {
-								auto time = get_time();
-								if (baseprojectile->timeSinceDeploy() > baseprojectile->deployDelay() && baseprojectile->nextAttackTime() <= get_time()) {
-									if (time > nextActionTime) {
-										nextActionTime = time + period;
-										baseprojectile->ServerRPC(_(L"UseSelf"));
+
+							Vector3 va = baseplayer->input()->bodyAngles();
+							Vector2 vb = { va.x, va.y };
+
+							auto calc = [&](const Vector3& src, const Vector3& dst) {
+								Vector3 d = src - dst;
+								return Vector2(RAD2DEG(Vector3::my_asin(d.y / d.length())), RAD2DEG(-Vector3::my_atan2(d.x, -d.z)));
+							};
+							auto normalize = [&](float& yaw, float& pitch) {
+								//baseplayer->console_echo(string::wformat(_(L"[matrix]: ClientInput - yaw: %d, pitch: %d"), (int)yaw, (int)pitch));
+								if (pitch < -270) pitch = -270;
+								else if (pitch > 180) pitch = 180;
+								if (yaw < -360) yaw = -360;
+								else if (yaw > 360) yaw = 360;
+							};
+							auto step = [&](Vector2& angles) {
+								bool smooth = true;
+								Vector3 v = va;
+								Vector2 va = { v.x, v.y };
+								Vector2 angles_step = angles - va;
+								normalize(angles_step.x, angles_step.y);
+
+								if (smooth) {
+									float factor_pitch = vars->combat.aimbot_smooth;
+									if (angles_step.x < 0.f) {
+										if (factor_pitch > std::fabs(angles_step.x)) {
+											factor_pitch = std::fabs(angles_step.x);
+										}
+										angles.x = va.x - factor_pitch;
 									}
+									else {
+										if (factor_pitch > angles_step.x) {
+											factor_pitch = angles_step.x;
+										}
+										angles.x = va.x + factor_pitch;
+									}
+								}
+								if (smooth) {
+									float factor_yaw = vars->combat.aimbot_smooth;
+									if (angles_step.y < 0.f) {
+										if (factor_yaw > std::fabs(angles_step.y)) {
+											factor_yaw = std::fabs(angles_step.y);
+										}
+										angles.y = va.y - factor_yaw;
+									}
+									else {
+										if (factor_yaw > angles_step.y) {
+											factor_yaw = angles_step.y;
+										}
+										angles.y = va.y + factor_yaw;
+									}
+								}
+							};
+
+							Vector2 offset = calc(eyes, target.pos) - vb;
+							Vector2 ai = vb + offset;
+							step(ai);
+							step(ai);
+							normalize(ai.x, ai.y);
+							Vector3 i = { ai.x, ai.y, 0.0f };
+							baseplayer->input()->bodyAngles() = i;
+						}
+
+						if (vars->misc.silent_farm) {
+							auto entity = baseplayer->resolve_closest_entity(4, false);
+							if (entity.first.found && entity.first.ent) {
+								if (*(int*)(wep_class_name + 4) == 'eleM' || *(int*)(wep_class_name + 4) == 'mmah') {
+									attack(entity.first, entity.second);
 								}
 							}
 						}
-						else if (unity::GetKey(VK_RBUTTON) && vars->misc.instant_med) {
-							const auto item_id = item->info()->itemid;
 
-							if (item_id == 1079279582 || item_id == -2072273936) {
-								esp::matrix = unity::get_view_matrix();
-								auto camera_pos = unity::get_camera_pos();
+						if (vars->misc.autofarmbarrel) {
+							auto entity = baseplayer->resolve_closest_entity(2, false);
+							if (entity.first.ent) {
+								if (*(int*)(wep_class_name + 4) == 'eleM' || *(int*)(wep_class_name + 4) == 'mmah'
+									&& entity.first.distance < 1.f) {
+									//entity.first.pos = entity.first.ent->ClosestPoint(baseplayer->eyes()->position());
+									attack(entity.first, entity.second);
+								}
+							}
+						}
 
-								auto target = esp::best_target; //baseplayer->get_aimbot_target(camera_pos);
+						if (!(*(int*)(wep_class_name + 4) == 'eleM' && *(int*)(wep_class_name) == 'esaB')) {
+							if (unity::GetKey(VK_LBUTTON) && vars->misc.instant_med) {
+								//const auto item_id = item->info()->itemid;
+								const auto item_id = item->info()->itemid;
 
-								if (target.ent && target.distance < 5) {
-									auto net = *reinterpret_cast<Networkable**>((uintptr_t)target.ent + 0x58);
-									if (net) {
-										auto id = net->get_id();
-										if (id) {
-											auto method_addr = mem::read<uintptr_t>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_uint);
-											if (method_addr) {
-												auto time = get_time();
-												if (baseprojectile->timeSinceDeploy() > baseprojectile->deployDelay() && baseprojectile->nextAttackTime() <= get_time()) {
-													if (time > nextActionTime) {
-														nextActionTime = time + period;
-														ServerRPC_int(baseprojectile, System::string(_(L"UseOther")), id, method_addr);
+								if (item_id == 1079279582 || item_id == -2072273936) {
+									auto time = get_time();
+									if (baseprojectile->timeSinceDeploy() > baseprojectile->deployDelay() && baseprojectile->nextAttackTime() <= get_time()) {
+										if (time > nextActionTime) {
+											nextActionTime = time + period;
+											baseprojectile->ServerRPC(_(L"UseSelf"));
+										}
+									}
+								}
+							}
+							else if (unity::GetKey(VK_RBUTTON) && vars->misc.instant_med) {
+								const auto item_id = item->info()->itemid;
+
+								if (item_id == 1079279582 || item_id == -2072273936) {
+									esp::matrix = unity::get_view_matrix();
+									auto camera_pos = unity::get_camera_pos();
+
+									auto target = esp::best_target; //baseplayer->get_aimbot_target(camera_pos);
+
+									if (target.ent && target.distance < 5) {
+										auto net = *reinterpret_cast<Networkable**>((uintptr_t)target.ent + 0x58);
+										if (net) {
+											auto id = net->get_id();
+											if (id) {
+												auto method_addr = mem::read<uintptr_t>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_uint);
+												if (method_addr) {
+													auto time = get_time();
+													if (baseprojectile->timeSinceDeploy() > baseprojectile->deployDelay() && baseprojectile->nextAttackTime() <= get_time()) {
+														if (time > nextActionTime) {
+															nextActionTime = time + period;
+															ServerRPC_int(baseprojectile, System::string(_(L"UseOther")), id, method_addr);
+														}
 													}
 												}
 											}
@@ -2360,41 +2362,41 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 									}
 								}
 							}
-						}
 
-						//////weapon mods/////
-						if (*(int*)(wep_class_name) == 'esaB' && *(int*)(wep_class_name + 4) == 'jorP' || *(int*)(wep_class_name) == 'nilF') {
-							if (item->is_weapon()) {
-								//const auto item_id = item->info()->itemid;
+							//////weapon mods/////
+							if (*(int*)(wep_class_name) == 'esaB' && *(int*)(wep_class_name + 4) == 'jorP' || *(int*)(wep_class_name) == 'nilF') {
+								if (item->is_weapon()) {
+									//const auto item_id = item->info()->itemid;
 
-								if (*(int*)(wep_class_name) == 'nilF'
-									&& vars->combat.instaeoka) {
-									mem::write<float>((uint64_t)baseprojectile + 0x378, 1.f); //eoka success fraction
-									mem::write<bool>((uint64_t)baseprojectile + 0x388, true); //eoka _didSparkThisFrame
+									if (*(int*)(wep_class_name) == 'nilF'
+										&& vars->combat.instaeoka) {
+										mem::write<float>((uint64_t)baseprojectile + 0x378, 1.f); //eoka success fraction
+										mem::write<bool>((uint64_t)baseprojectile + 0x388, true); //eoka _didSparkThisFrame
+									}
+									else {
+										if (vars->combat.rapidfire)
+											baseprojectile->repeatDelay() = vars->combat.firerate;
+										if (vars->combat.automatic)
+											baseprojectile->automatic() = true;
+									}
+
+									if (vars->combat.fast_bullet && !vars->combat.bestvelocity)
+										baseprojectile->projectileVelocityScale() = 1.48f;
+									else if (vars->combat.bestvelocity)
+										baseprojectile->projectileVelocityScale() = 1.f;
+									if (vars->combat.nospread)
+										baseprojectile->set_no_spread();
+									baseprojectile->set_recoil();
 								}
-								else {
-									if (vars->combat.rapidfire)
-										baseprojectile->repeatDelay() = vars->combat.firerate;
-									if (vars->combat.automatic)
-										baseprojectile->automatic() = true;
-								}
-
-								if (vars->combat.fast_bullet && !vars->combat.bestvelocity)
-									baseprojectile->projectileVelocityScale() = 1.48f;
-								else if (vars->combat.bestvelocity)
-									baseprojectile->projectileVelocityScale() = 1.f;
-								if (vars->combat.nospread)
-									baseprojectile->set_no_spread();
-								baseprojectile->set_recoil();
 							}
 						}
-					}
-					else //is BaseMelee
-					{
-						//melee manipulator? lol
+						else //is BaseMelee
+						{
+							//melee manipulator? lol
+						}
 					}
 				}
-			}
+			} __except(true) { }
 
 			if (vars->misc.instant_revive) {
 				auto Target = baseplayer->resolve_closest_player(5);
@@ -2652,6 +2654,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				//printf("clientinput finish\n");
 			}
 
+		printf("before clientinput return\n");
 		return;
 	}
 }
