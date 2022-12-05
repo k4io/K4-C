@@ -2039,7 +2039,7 @@ void new_frame() {
 		//float Y = GetSystemMetrics(SM_CYSCREEN);
 		//float X = GetSystemMetrics(SM_CXSCREEN);
 		Vector2 vScreen = render.CanvasSize();
-		vars->ScreenX = vScreen.x;
+		vars->ScreenX = vScreen.x; 
 		vars->ScreenY = vScreen.y;
 		finit = true;
 
