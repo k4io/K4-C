@@ -198,7 +198,7 @@ struct Vars
 		bool instaeoka = false;
 		bool pierce = false;
 		bool fastbow = false;
-		bool throughladder = false;
+		bool throughwall = false;
 		bool psilentmelee = false;
 		bool weakspots = false;
 		bool targetbehindwall = false;

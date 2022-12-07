@@ -9,8 +9,8 @@
 
 #include "unity.hpp"
 
-#define pent printf("entered function: " __FUNCTION__ "!\n");
-//#define pent ;
+//#define pent printf("entered function: " __FUNCTION__ "!\n");
+#define pent ;
 
 #define safe_read(Addr, Type) mem::read<Type>((DWORD64)Addr)
 #define safe_write(Addr, Data, Type) mem::write<Type>((DWORD64)Addr, Data); 
@@ -1122,7 +1122,8 @@ Vector3 get_center(uintptr_t u) {
 Vector4 PEyes_get_rotation(uintptr_t u) {
 	__try {
 		pent
-			auto method = il2cpp::method(_("PlayerEyes"), _("get_rotation"), 0, _(""), _(""));
+			if (!u || u < 0xffffff || u > 0x7fffffff0000) return {};
+		auto method = il2cpp::method(_("PlayerEyes"), _("get_rotation"), 0, _(""), _(""));
 		if (!method || method < 0xFFFF || method > 0xF000000000000000) return {};
 		return reinterpret_cast<Vector4(*)(uintptr_t u)>(*reinterpret_cast<uintptr_t*>(method))(u);
 	}
@@ -2631,6 +2632,7 @@ public:
 
 class BaseProjectile : public AttackEntity {
 public:
+	FIELD(_("BaseProjectile"), _("fractionalReload"), fractionalReload, bool);
 	FIELD(_("BaseProjectile"), _("reloadTime"), reloadTime, float);
 	FIELD(_("BaseProjectile"), _("nextReloadTime"), nextReloadTime, float);
 	FIELD(_("BaseProjectile"), _("recoil"), recoil, RecoilProperties*);
@@ -2700,6 +2702,15 @@ public:
 		const auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x2C0);
 		if (!mag || mag < 0xFFFF) return 0;
 		const auto ammo = *reinterpret_cast<int*>(mag + 0x1C);
+		return ammo;
+	}
+
+	int ammo_cap() {
+		
+			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return 0;
+		const auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x2C0);
+		if (!mag || mag < 0xFFFF) return 0;
+		const auto ammo = *reinterpret_cast<int*>(mag + 0x18);
 		return ammo;
 	}
 
@@ -4045,8 +4056,8 @@ auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base +
 	}
 
 	Transform* get_bone_transform(int bone_id) {
-		
-			uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x130); //public Model model; // 
+		if (!this) return nullptr;
+		uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x130); //public Model model; // 
 		if (!entity_model) return nullptr;
 		uintptr_t bone_dict = *reinterpret_cast<uintptr_t*>(entity_model + 0x48);
 		if (!bone_dict) return nullptr;

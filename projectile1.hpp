@@ -1,6 +1,6 @@
 #include "misc.hpp"
 
-uintptr_t pools_offset = 0xBC69B0;
+uintptr_t pools_offset = 0xBC7090;
 /*
  /* GenericInstMethod :
 	|
@@ -440,7 +440,7 @@ public:
 	{
 		esp::local_player->console_echo(_(L"[matrix]: CreatePlayerProjectileUpdate - Called"));
 		typedef uint64_t(__stdcall* PoolGet)(uint64_t);
-		uint64_t update = *reinterpret_cast<uint64_t*>(mem::game_assembly_base + 56671120); //"Method$Facepunch.Pool.Get<PlayerProjectileUpdate>()",
+		uint64_t update = *reinterpret_cast<uint64_t*>(mem::game_assembly_base + 56671192); //"Method$Facepunch.Pool.Get<PlayerProjectileUpdate>()",
 
 		if (!update)
 			return 0;

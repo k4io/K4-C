@@ -715,8 +715,6 @@ namespace hooks {
 		do {
 			if (!esp::local_player)
 				break;
-			
-			//Update((Projectile*)projectile); //many invalids with fat bullet manipulator as projectile position isnt updated before the hit
 
 			auto hit_test = projectile->get_hit_test();
 			if (!hit_test)
@@ -1125,9 +1123,25 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 			auto wpn = baseplayer->GetActiveItem();
 			auto held = wpn ? wpn->GetHeldEntity<BaseProjectile>() : nullptr;
+
 			if (vars->combat.always_reload
 				&& held)
 			{
+				bool fractional = held->fractionalReload();
+				auto cap = held->ammo_cap();
+				auto ammo = held->ammo_left();
+				if (ammo < cap
+					&& !misc::started_reload
+					&& misc::did_reload
+					&& misc::time_since_last_shot < 0.2f)
+				{
+					misc::started_reload = true;
+					misc::did_reload = false;
+					misc::time_since_last_shot = 0.21f;
+					misc::fixed_time_last_shot = get_fixedTime() - 0.2f;
+					misc::just_shot = true;
+				}
+
 				misc::time_since_last_shot = (get_fixedTime() - misc::fixed_time_last_shot);
 				vars->time_since_last_shot = misc::time_since_last_shot;
 				if (misc::just_shot && (misc::time_since_last_shot > 0.2f))
@@ -1136,8 +1150,14 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					baseplayer->console_echo(_(L"[matrix]: ClientInput - starting reload"));
 					//baseplayer->SendSignalBroadcast(rust::classes::Signal::Reload); //does this cause animation? YES
 					misc::just_shot = false;
+					misc::started_reload = false;
+					misc::last_reload_time = get_fixedTime();
 				}
+
+
 				float reloadtime = *reinterpret_cast<float*>((uintptr_t)held + 0x2B8);//held->reloadTime();
+				//if (fractional)
+				//	reloadtime = *reinterpret_cast<float*>((uintptr_t)held + 0x2D0); //reloadFractionDuration
 				vars->reload = reloadtime;
 
 				if (misc::time_since_last_shot > reloadtime + 0.2f//-10% for faster reloads than normal >:)
@@ -1147,6 +1167,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					held->ServerRPC(_(L"Reload"));
 					misc::did_reload = true;
 					misc::time_since_last_shot = 0;
+					misc::fixed_time_last_shot = 0;
 				}
 			}
 			else
@@ -1408,13 +1429,24 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 	}
 
 	void hk_projectile_update(uintptr_t pr) {
-		if (vars->combat.throughladder)
+		if (launchedmelee) {
+			((Projectile*)pr)->currentVelocity(tempmelvel);
+			((Projectile*)pr)->currentPosition(tempmelpos);
+			((Projectile*)pr)->transform()->setposition(tempmelpos);
+
+			((Projectile*)pr)->transform()->SetLocalScale(((Projectile*)pr)->transform()->GetLocalScale() * vars->visual.visthickness);
+			((BaseProjectile*)pr)->set_projectile_thickness(vars->combat.thickness);
+			tempmelvel = {};
+			tempmelpos = {};
+			launchedmelee = false;
+			return _update((Projectile*)pr);
+		}
+		if (vars->combat.throughwall)
 		{
 			for (size_t i = 0; i <= 0; i++)
 			{
 				auto p = (Projectile*)pr;
-				if (!p->hitTest())
-					break;
+				if (!p->hitTest()) break;
 				if (p->penetrationPower() <= .5f) break;
 
 				Vector3 vel = p->currentVelocity();
@@ -1423,7 +1455,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 				DWORD64 sistat = il2cpp::init_class(_("RaycastHit"), _("UnityEngine"));
 				RaycastHit* hitInfo = (RaycastHit*)il2cpp::methods::object_new(sistat);
-				if (!hitInfo) return;
+				if (!hitInfo) break;
 				//RaycastHit hitInfo;
 
 				//Sphere(p->currentPosition(), .05f, { 1, 1, 1, 1 }, 10.f, false);
@@ -1439,17 +1471,19 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				if (!g_UpdateReusable)
 					g_UpdateReusable = Projectile1::CreatePlayerProjectileUpdate();
 
+				_update((Projectile*)pr);
+
 				auto ppu = (protobuf::PlayerProjectileUpdate*)g_UpdateReusable;
 
 				ppu->projectileID = p->projectileID();
 				ppu->traveltime = p->traveledTime() + p->currentPosition().distance(hitInfo->point()) / traveledThisUpdate.length();
 				ppu->position = hitInfo->point() - (dir * .1f);
 				ppu->velocity = p->currentVelocity();
-				esp::local_player->SendProjectileUpdate((uintptr_t)tppu);
+				esp::local_player->SendProjectileUpdate((uintptr_t)ppu);
 				//orig_fn(rcx, rdx, r9, _ppa, arg5);
 
 				auto trans = ((BasePlayer*)esp::best_target.ent)->get_bone_transform(48);
-
+				if (!trans) break;
 				float dist = p->currentPosition().distance(trans->position());
 
 				p->traveledDistance(p->traveledDistance() + dist);
@@ -1457,6 +1491,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 				auto ht = (HitTest*)p->hitTest();
 
+				p->integrity(1);
+				Sphere(hitInfo->point(), 0.1f, { r, g, b, 1 }, 10.f, false);
 
 				ht->HitTransform() = trans;
 				ht->HitEntity() = esp::best_target.ent;
@@ -1467,20 +1503,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				ht->HitDistance() = dist;
 				ht->MaxDistance() = 999.f;
 				_DoHit(p, ht, trans->position(), Vector3(0, 0, 0));
-				//return;
+				
 			}
-		}
-		if (launchedmelee) {
-			((Projectile*)pr)->currentVelocity(tempmelvel);
-			((Projectile*)pr)->currentPosition(tempmelpos);
-			((Projectile*)pr)->transform()->setposition(tempmelpos);
-
-			((Projectile*)pr)->transform()->SetLocalScale(((Projectile*)pr)->transform()->GetLocalScale() * vars->visual.visthickness);
-			((BaseProjectile*)pr)->set_projectile_thickness(vars->combat.thickness);
-			tempmelvel = {};
-			tempmelpos = {};
-			launchedmelee = false;
-			return _update((Projectile*)pr);
 		}
 		if (vars->combat.targetbehindwall) {
 			//return _update((Projectile*)pr);

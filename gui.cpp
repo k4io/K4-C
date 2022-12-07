@@ -1298,7 +1298,7 @@ namespace Gui
 			//im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			//im::Hotkey(_("M2"), &vars->keybinds.manipulator2, ImVec2(50, 15));
 			//im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
-			//im::Checkbox(_("STW (many invalids)"), &vars->combat.throughladder);
+			im::Checkbox(_("STW (many invalids)"), &vars->combat.throughwall);
 			//im::Checkbox(_("Pierce"), &vars->combat.pierce);
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
 			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {

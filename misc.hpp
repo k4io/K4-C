@@ -266,6 +266,7 @@ namespace misc
 	NodeTarget node;
 
 	bool automation_wants_shoot = false;
+	bool started_reload = false;
 
 	float speedhackCooldownEnd = 0.f;
 	float lastSpeedhackReset = 0.f;
@@ -283,6 +284,7 @@ namespace misc
 	float time_since_last_shot = 0.0f;
 	float fixed_time_last_shot = 0.0f;
 	float last_teleport_time = 0.f; //cooldown 10s?
+	float last_reload_time = 0.f;
 
 	bool hasNavigator = false;
 
@@ -1566,8 +1568,7 @@ namespace misc
 					velocity += gravity * grav * num;
 					velocity -= velocity * drag * num;
 					travel_t += num;
-					if (misc::LineCircleIntersection(target_pos, 0.1f, origin, pos, offset)
-						&& unity::LineOfSightRadius(pos, origin, 0))
+					if (misc::LineCircleIntersection(target_pos, 0.1f, origin, pos, offset))
 					{
 						aimbot_velocity = (_aimdir).Normalized() * original_vel.length();
 						//emulate 1 tick has already passed
@@ -1650,10 +1651,9 @@ namespace misc
 						velocity -= velocity * drag * num;
 						travel_t += num;
 
-						if (misc::LineCircleIntersection(actual, 0.1f, origin, pos, offset)
-							&& unity::LineOfSightRadius(pos, origin, 0))
+						if (misc::LineCircleIntersection(actual, 0.1f, origin, pos, offset))
 						{
-							Line(actual, pos, col(0, 1, 0, 1), 10.f, false, true);
+							//Line(actual, pos, col(0, 1, 0, 1), 10.f, false, true);
 							aimbot_velocity = (_aimdir).Normalized() * original_vel.length();
 							////emulate 1 tick has already passed
 							//aimbot_velocity += gravity * grav * 0;
