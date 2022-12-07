@@ -766,7 +766,7 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 void DrawToolcupboard(Vector2 w2s, System::list<PlayerNameID*>* authed) 
 {
 	Vector2 screen = { 0, 0 }; 
-
+	
 	//create window length based off amount of items in belt
 	std::vector<std::wstring> names = {};
 
@@ -785,10 +785,7 @@ void DrawToolcupboard(Vector2 w2s, System::list<PlayerNameID*>* authed)
 		Vector2 sz = { 130, 35.f + (names.size() * 20.f) };
 
 		//filled gradient
-		render.FillRoundedRectangle_GradientLinear(start, sz,
-			{ 0.14f, 0.14f, 0.14f, 0.65f },
-			{ 159.f / 255.f, 40.f / 255.f, 29.f / 255.f, 0.65f },
-			2);
+		render.Rectangle({ start.x, start.y }, { 190, 40.f + names.size() * 20.f }, { 0.21, 0.21, 0.21, 1 });
 
 		render.String({ start.x + 10, start.y + 5 }, _(L"Tool cupboard"), { 0.71, 0.71, 0.71, 1 });
 
@@ -796,7 +793,7 @@ void DrawToolcupboard(Vector2 w2s, System::list<PlayerNameID*>* authed)
 		render.Line({ start.x, start.y + 25 }, { start.x + sz.x, start.y + 25 }, { 0.11, 0.11, 0.11, 1 }, 1);
 
 		//outline
-		render.RoundedRectangle(start, sz, { 0.11, 0.11, 0.11, 1 }, 2, 1);
+		render.Rectangle(start, sz, { 0.11, 0.11, 0.11, 1 }, 2);
 
 		if (names.size() > 0)
 		{
@@ -873,9 +870,8 @@ void DrawPlayerHotbar(aim_target target) {
 			Vector2 sz = { 200, 35.f + (items.size() * 20.f) };
 
 			//filled gradient
-			render.FillRoundedRectangle_GradientLinear(start, sz,
-				{ 0.14f, 0.14f, 0.14f, 0.65f },
-				{ 159.f / 255.f, 40.f / 255.f, 29.f / 255.f, 0.65f },
+			render.Rectangle(start, sz,
+				{ 0.14f, 0.14f, 0.14f, 1 },
 				2);
 
 			std::wstring name_str(player_name); name_str = name_str + _(L"'s items");
@@ -885,7 +881,7 @@ void DrawPlayerHotbar(aim_target target) {
 			render.Line({ start.x, start.y + 25 }, { start.x + sz.x, start.y + 25 }, { 0.11, 0.11, 0.11, 1 }, 1);
 
 			//outline
-			render.RoundedRectangle(start, sz, { 0.11, 0.11, 0.11, 1 }, 2, 1);
+			render.Rectangle(start, sz, { 0.11, 0.11, 0.11, 1 }, 2);
 
 			start.x += 10; //left-side margin
 			start.y += 30; //margin from seperator

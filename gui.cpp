@@ -1778,7 +1778,7 @@ namespace Gui
 		}
 	}
 
-	void Render()
+	void Render() 
 	{
 		if (!init)
 		{
