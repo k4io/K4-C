@@ -38,7 +38,7 @@ extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam
 
 Present oPresent;
 HWND window = NULL;
-WNDPROC oWndProc;
+WNDPROC oWndProc;	
 ID3D11Device* pDevice = NULL;
 ID3D11DeviceContext* pContext = NULL;
 ID3D11RenderTargetView* mainRenderTargetView;

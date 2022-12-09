@@ -122,7 +122,7 @@ namespace lw {
 
 		Vector3 GetBonePos(int id) {
 			if (!self) return Vector3::Zero();
-			return self->get_bone_transform(id)->position();
+			return self->get_bone_Transform(id)->position();
 		}
 
 		bool IsLocalPlayer() {
@@ -145,7 +145,7 @@ namespace lw {
 
 		void SetPlayerFlag(int f) {
 			if (!self) return;
-			return self->set_player_flag((rust::classes::PlayerFlags)f);
+			return self->set_player_flag((PlayerFlags)f);
 		}
 
 		//Eyes GetEyes() {

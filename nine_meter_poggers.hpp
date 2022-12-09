@@ -62,7 +62,7 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 		//else
 		layermask = 1218519041;
 
-		bool IsMounted = LocalPlayer->modelState()->has_flag(rust::classes::ModelState_Flag::Mounted);
+		bool IsMounted = LocalPlayer->modelState()->has_flag(ModelState_Flag::Mounted);
 
 		float maxVelocity = get_maxspeed(LocalPlayer);
 		if (IsMounted)

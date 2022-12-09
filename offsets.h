@@ -1,5 +1,5 @@
 #pragma once
-
+#include "dump.h"
 /*
 #define oLineOfSightRadius 0x52CE70
 #define oSphereCast 0x2272C50

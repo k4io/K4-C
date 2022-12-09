@@ -6,67 +6,6 @@
 #include <windows.h>
 #include "offsets.h"
 
-namespace O::Projectile {
-	constexpr auto initialVelocity = 0x18;
-	constexpr auto drag = 0x24;
-	constexpr auto gravityModifier = 0x28;
-	constexpr auto thickness = 0x2c;
-	constexpr auto initialDistance = 0x30;
-	constexpr auto remainInWorld = 0x34;
-	constexpr auto stickProbability = 0x38;
-	constexpr auto breakProbability = 0x3c;
-	constexpr auto conditionLoss = 0x40;
-	constexpr auto ricochetChance = 0x44;
-	constexpr auto penetrationPower = 0x48;
-	constexpr auto damageProperties = 0x50;
-	constexpr auto damageDistances = 0x58;
-	constexpr auto damageMultipliers = 0x60;
-	constexpr auto damageTypes = 0x68;
-	constexpr auto rendererToScale = 0x70;
-	constexpr auto firstPersonRenderer = 0x78;
-	constexpr auto createDecals = 0x80;
-	constexpr auto flybySound = 0x88;
-	constexpr auto flybySoundDistance = 0x90;
-	constexpr auto closeFlybySound = 0x98;
-	constexpr auto closeFlybyDistance = 0xa0;
-	constexpr auto tumbleSpeed = 0xa4;
-	constexpr auto tumbleAxis = 0xa8;
-	constexpr auto swimScale = 0xb4;
-	constexpr auto swimSpeed = 0xc0;
-	constexpr auto owner = 0xd0;
-	constexpr auto sourceWeaponPrefab = 0xd8;
-	constexpr auto sourceProjectilePrefab = 0xe0;
-	constexpr auto mod = 0xe8;
-	constexpr auto projectileID = 0xf0;
-	constexpr auto seed = 0xf4;
-	constexpr auto clientsideEffect = 0xf8;
-	constexpr auto clientsideAttack = 0xf9;
-	constexpr auto integrity = 0xfc;
-	constexpr auto maxDistance = 0x100;
-	constexpr auto modifier = 0x104;
-	constexpr auto invisible = 0x114;
-	constexpr auto currentVelocity = 0x118;
-	constexpr auto currentPosition = 0x124;
-	constexpr auto traveledDistance = 0x130;
-	constexpr auto traveledTime = 0x134;
-	constexpr auto launchTime = 0x138;
-	constexpr auto sentPosition = 0x13c;
-	constexpr auto previousPosition = 0x148;
-	constexpr auto previousVelocity = 0x154;
-	constexpr auto previousTraveledTime = 0x160;
-	constexpr auto isRicochet = 0x164;
-	constexpr auto isRetiring = 0x165;
-	constexpr auto flybyPlayed = 0x166;
-	constexpr auto wasFacingPlayer = 0x167;
-	constexpr auto flybyPlane = 0x168;
-	constexpr auto flybyRay = 0x178;
-	constexpr auto cleanupAction = 0x190;
-	constexpr auto hitTest = 0x198;
-	constexpr auto swimRandom = 0x1a0;
-	constexpr auto _waterMaterialID = 0x4;
-	constexpr auto cachedWaterString = 0x8;
-};
-
 #define safe_read(Addr, Type) mem::read<Type>((DWORD64)Addr)
 #define safe_write(Addr, Data, Type) mem::write<Type>((DWORD64)Addr, Data);
 
@@ -93,8 +32,8 @@ static auto _launch = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uin
 
 void init_projectile() {
 	_update = reinterpret_cast<void(*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Update"), 0, _(""), _(""))));
-	//Sphere = reinterpret_cast<void (*)(Vector3 vPos, float fRadius, col color, float fDuration, bool distanceFade)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Sphere"), 5, _(""), _("UnityEngine"))));
-	//Capsule = reinterpret_cast<void (*)(Vector3, Vector4, float, float, col, float, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Capsule"), 7, _(""), _("UnityEngine"))));
+	Sphere = reinterpret_cast<void (*)(Vector3 vPos, float fRadius, col color, float fDuration, bool distanceFade)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Sphere"), 5, _(""), _("UnityEngine"))));
+	Capsule = reinterpret_cast<void (*)(Vector3, Vector4, float, float, col, float, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Capsule"), 7, _(""), _("UnityEngine"))));
 	_retire = reinterpret_cast<void(*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Retire"), 0, _(""), _(""))));
 	Trace_All = reinterpret_cast<void(*)(uintptr_t, uintptr_t, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameTrace"), _("TraceAll"), 3, _(""), _(""))));
 

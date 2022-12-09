@@ -185,7 +185,7 @@ namespace hooks {
     if(val == 0)        \
     return
 	uintptr_t client_entities;
-
+	
 	bool flying = false, is_speeding = false, is_lagging = false, has_intialized_methods = false, wake = true, launchedmelee = false;
 	float nextActionTime = 0, period = 1.4721, last_gesture_rpc = 0.f, last_revive_rpc = 0.f, last_refill_rpc = 0.f, last_fwd_fly = 0.f;
 	Vector3 m_debugcam_toggle_pos, m_debugcam_pos, tempmelvel, tempmelpos, lastMovementLinePos;
@@ -732,7 +732,7 @@ namespace hooks {
 				break;
 
 			auto hit_entity = (BasePlayer*)hit_test->HitEntity();
-			if (layer == rust::classes::layer::Player_Server) {
+			if (layer == layer::Player_Server) {
 				if (hit_entity->is_teammate(esp::local_player)) {
 					hit_test->ignoreEntity() = hit_entity;
 					return;
@@ -780,31 +780,31 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					if (target.ent->model()->boneTransforms()) {
 						if (vars->combat.hitbox == 0
 							&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
-								(int)rust::classes::Bone_List::head)->position(), projectile->get_current_position()))
+								(int)Bone_List::head)->position(), projectile->get_current_position()))
 							test[0] = { 698017942, 2173623152 };
 						if (vars->combat.hitbox == 1
 							&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
-								(int)rust::classes::Bone_List::pelvis)->position(), projectile->get_current_position()))
+								(int)Bone_List::pelvis)->position(), projectile->get_current_position()))
 							test[0] = { 1031402764, 1750816991 };
 						if (vars->combat.hitbox == 2
 							&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
-								(int)rust::classes::Bone_List::spine4)->position(), projectile->get_current_position()))
+								(int)Bone_List::spine4)->position(), projectile->get_current_position()))
 							test[0] = { 3901657145, 1750816991 };
 						if (vars->combat.hitbox == 3
 							&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
-								(int)rust::classes::Bone_List::r_hand)->position(), projectile->get_current_position()))
+								(int)Bone_List::r_hand)->position(), projectile->get_current_position()))
 							test[0] = { 102231371, 1750816991 };
 						if (vars->combat.hitbox == 4
 							&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
-								(int)rust::classes::Bone_List::penis)->position(), projectile->get_current_position()))
+								(int)Bone_List::penis)->position(), projectile->get_current_position()))
 							test[0] = { 612182976, 2173623152 };
 						if (vars->combat.hitbox == 5
 							&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
-								(int)rust::classes::Bone_List::l_hip)->position(), projectile->get_current_position()))
+								(int)Bone_List::l_hip)->position(), projectile->get_current_position()))
 							test[0] = { 3892428003, 1750816991 };
 						if (vars->combat.hitbox == 6
 							&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
-								(int)rust::classes::Bone_List::r_foot)->position(), projectile->get_current_position()))
+								(int)Bone_List::r_foot)->position(), projectile->get_current_position()))
 							test[0] = { 920055401, 1750816991 };
 					}
 				}
@@ -898,11 +898,11 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				}
 			}
 
-			if (layer == rust::classes::layer::Deployed) {
+			if (layer == layer::Deployed) {
 				hit_test->ignoreEntity() = hit_entity;
 				return;
 			}
-			//if (layer != rust::classes::layer::Player_Server) {
+			//if (layer != layer::Player_Server) {
 			//	hit_test->ignoreEntity() = hit_entity;
 			//	return;
 			//}
@@ -1107,7 +1107,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			//else set_onLadder(model_state, false);
 
 			if (vars->misc.interactive_debug)
-				model_state->set_flag(rust::classes::ModelState_Flag::Mounted);
+				model_state->set_flag(ModelState_Flag::Mounted);
 
 
 			if (vars->misc.always_sprint) {
@@ -1118,7 +1118,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 
 			if (vars->misc.infinite_jump)
-				if (unity::GetKeyDown(rust::classes::KeyCode::Space))
+				if (unity::GetKeyDown(KeyCode::Space))
 					misc::autobot::do_jump(player_walk_movement, model_state);
 
 			auto wpn = baseplayer->GetActiveItem();
@@ -1127,7 +1127,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			if (vars->combat.always_reload
 				&& held)
 			{
-				bool fractional = held->fractionalReload();
+				//bool fractional = held->fractionalReload;
 				auto cap = held->ammo_cap();
 				auto ammo = held->ammo_left();
 				if (ammo < cap
@@ -1148,7 +1148,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				{
 					held->ServerRPC(_(L"StartReload"));
 					baseplayer->console_echo(_(L"[matrix]: ClientInput - starting reload"));
-					//baseplayer->SendSignalBroadcast(rust::classes::Signal::Reload); //does this cause animation? YES
+					//baseplayer->SendSignalBroadcast(Signal::Reload); //does this cause animation? YES
 					misc::just_shot = false;
 					misc::started_reload = false;
 					misc::last_reload_time = get_fixedTime();
@@ -1482,7 +1482,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				esp::local_player->SendProjectileUpdate((uintptr_t)ppu);
 				//orig_fn(rcx, rdx, r9, _ppa, arg5);
 
-				auto trans = ((BasePlayer*)esp::best_target.ent)->get_bone_transform(48);
+				auto trans = ((BasePlayer*)esp::best_target.ent)->get_bone_Transform(48);
 				if (!trans) break;
 				float dist = p->currentPosition().distance(trans->position());
 
@@ -1698,14 +1698,14 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 
 			//printf("before clientinput original\n");
-		//baseplayer->modelState()->remove_flag(rust::classes::ModelState_Flag::Flying);
+		//baseplayer->modelState()->remove_flag(ModelState_Flag::Flying);
 		//fakeorig_clientinput(baseplayer, state);
-		//baseplayer->modelState()->remove_flag(rust::classes::ModelState_Flag::Flying);
+		//baseplayer->modelState()->remove_flag(ModelState_Flag::Flying);
 		//printf("after clientinput recreation\n");
 		orig::baseplayer_client_input(baseplayer, state);
 
 		if (baseplayer) {
-			baseplayer->modelState()->remove_flag(rust::classes::ModelState_Flag::Flying);
+			baseplayer->modelState()->remove_flag(ModelState_Flag::Flying);
 
 			auto tick_time = baseplayer->lastSentTickTime();
 			vars->desyncTime = (unity::get_realtimesincestartup() - tick_time) - 0.03125 * 3;
@@ -1877,7 +1877,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 
 			if (vars->misc.admin_mode)
-				baseplayer->set_player_flag(rust::classes::PlayerFlags::IsAdmin);
+				baseplayer->set_player_flag(PlayerFlags::IsAdmin);
 
 			baseplayer->fov();
 
@@ -1887,13 +1887,13 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			if (held) {
 				if (!strcmp(held->get_class_name(), _("Planner"))) {
 					auto planner = reinterpret_cast<Planner*>(held);
-					if (unity::GetKeyDown(rust::classes::KeyCode::RightArrow))
+					if (unity::GetKeyDown(KeyCode::RightArrow))
 					{
 						auto v = planner->rotationoffset();
 						planner->rotationoffset(Vector3(v.x, v.y += 10, v.z));
 						baseplayer->console_echo(string::wformat(_(L"[matrix]: ClientInput - rotate building right (%d, %d, %d)"), (int)v.x, (int)v.y, (int)v.z));
 					}
-					else if (unity::GetKeyDown(rust::classes::KeyCode::LeftArrow))
+					else if (unity::GetKeyDown(KeyCode::LeftArrow))
 					{
 						auto v = planner->rotationoffset();
 						planner->rotationoffset(Vector3(v.x, v.y -= 10, v.z));
@@ -2185,7 +2185,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 				if (vars->combat.always_shoot) {
 					if (auto ModelState = baseplayer->modelState()) {
-						ModelState->set_flag(rust::classes::ModelState_Flag::OnGround);
+						ModelState->set_flag(ModelState_Flag::OnGround);
 						mem::write<float>((uint64_t)movement + 0x4C, 1); //private float <Grounded>k__BackingField; // 0x4C
 					}
 				}
@@ -2214,7 +2214,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						auto attack = [&](aim_target target, bool is_tree) {
 							auto gathering = ((BaseMelee*)baseprojectile)->gathering();
 
-							auto baseprojectile = item2->get_base_projetile();
+							auto baseprojectile = item2->GetHeldEntity<BaseProjectile>();
 
 							if (is_tree) {
 								if (!(gathering->tree()->gatherDamage() > 1)) {
@@ -2431,7 +2431,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						//Line(baseplayer->eyes()->position(), Target.pos, { 1, 1, 1, 1 }, 0.01f, false, false);
 						if (!Target.is_heli
 							&& Target.distance <= 5
-							&& HasPlayerFlag((BasePlayer*)Target.ent, rust::classes::PlayerFlags::Wounded)
+							&& HasPlayerFlag((BasePlayer*)Target.ent, PlayerFlags::Wounded)
 							&& get_fixedTime() > last_revive_rpc + .5f)
 						{
 							Target.ent->ServerRPC(_(L"RPC_Assist"));
@@ -2448,48 +2448,48 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				case 0:
 					break;
 				case 1:
-					baseplayer->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"clap"));
+					baseplayer->SendSignalBroadcast(Signal::Gesture, _(L"clap"));
 					break;
 				case 2:
-					baseplayer->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"friendly"));
+					baseplayer->SendSignalBroadcast(Signal::Gesture, _(L"friendly"));
 					break;
 				case 3:
-					baseplayer->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"thumbsdown"));
+					baseplayer->SendSignalBroadcast(Signal::Gesture, _(L"thumbsdown"));
 					break;
 				case 4:
-					baseplayer->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"thumbsup"));
+					baseplayer->SendSignalBroadcast(Signal::Gesture, _(L"thumbsup"));
 					break;
 				case 5:
-					baseplayer->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"ok"));
+					baseplayer->SendSignalBroadcast(Signal::Gesture, _(L"ok"));
 					break;
 				case 6:
-					baseplayer->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"point"));
+					baseplayer->SendSignalBroadcast(Signal::Gesture, _(L"point"));
 					break;
 				case 7:
-					baseplayer->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"shrug"));
+					baseplayer->SendSignalBroadcast(Signal::Gesture, _(L"shrug"));
 					break;
 				case 8:
-					baseplayer->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"victory"));
+					baseplayer->SendSignalBroadcast(Signal::Gesture, _(L"victory"));
 					break;
 				case 9:
-					baseplayer->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"wave"));
+					baseplayer->SendSignalBroadcast(Signal::Gesture, _(L"wave"));
 					break;
 				case 10:
-					baseplayer->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"dance.cabbagepatch"));
+					baseplayer->SendSignalBroadcast(Signal::Gesture, _(L"dance.cabbagepatch"));
 					break;
 				case 11:
-					baseplayer->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"dance.twist"));
+					baseplayer->SendSignalBroadcast(Signal::Gesture, _(L"dance.twist"));
 					break;
 				}
 				last_gesture_rpc = get_fixedTime();
 			}
 
 
-			unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::Water, !vars->misc.no_playercollision);
-			unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::Tree, vars->misc.no_playercollision);
-			unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::AI, vars->misc.no_playercollision);
-			unity::IgnoreLayerCollision(rust::classes::layer::Physics_Projectile, rust::classes::layer::Deployed, vars->misc.no_playercollision);
-			unity::IgnoreLayerCollision(rust::classes::layer::Physics_Projectile, rust::classes::layer::Tree, vars->misc.no_playercollision);
+			unity::IgnoreLayerCollision(layer::PlayerMovement, layer::Water, !vars->misc.no_playercollision);
+			unity::IgnoreLayerCollision(layer::PlayerMovement, layer::Tree, vars->misc.no_playercollision);
+			unity::IgnoreLayerCollision(layer::PlayerMovement, layer::AI, vars->misc.no_playercollision);
+			unity::IgnoreLayerCollision(layer::Physics_Projectile, layer::Deployed, vars->misc.no_playercollision);
+			unity::IgnoreLayerCollision(layer::Physics_Projectile, layer::Tree, vars->misc.no_playercollision);
 
 			draw_get();
 			if (tick_time > vars->tick_time_when_called + 10) {
@@ -2528,7 +2528,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				if (vars->visual.showcapsule)
 				{
 					auto pos = baseplayer->transform()->position();
-					pos.y += baseplayer->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked) ? vars->misc.capsuleCenterDucked : vars->misc.capsuleCenter;
+					pos.y += baseplayer->modelState()->has_flag(ModelState_Flag::Ducked) ? vars->misc.capsuleCenterDucked : vars->misc.capsuleCenter;
 					Capsule(pos,
 						baseplayer->eyes()->rotation(),
 						baseplayer->movement()->capsule()->GetRadius(),

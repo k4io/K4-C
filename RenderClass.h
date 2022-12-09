@@ -308,7 +308,7 @@ public:
 		__try {
 			if (a <= 0) return;
 			FillRectangle({ start.x, start.y }, { size.x, size.y }, D2D1::ColorF(21.f / 255.f, 27.f / 255.f, 37.f / 255.f, 255.f));
-			//fill_box(rust::classes::Rect(start.x, start.y, end.x, end.y + 1), rgba(21.f, 27.f, 37.f, 255.f));
+			//fill_box(Rect(start.x, start.y, end.x, end.y + 1), rgba(21.f, 27.f, 37.f, 255.f));
 
 			if ((a / b) > 1)
 				a = b;

@@ -465,7 +465,7 @@ namespace misc
 			//	protections::eye_penalty); 
 		}
 		else if(protections::eye_protection >= 5 && 
-			loco->modelState()->has_flag(rust::classes::ModelState_Flag::Mounted)) {
+			loco->modelState()->has_flag(ModelState_Flag::Mounted)) {
 			eye_history.push_back(pos);
 		}
 
@@ -724,10 +724,10 @@ namespace misc
 			float crawling = 0.f;
 			if (protections::speedhack_protection >= 2)
 			{
-				bool flag2 = ply->modelState()->has_flag(rust::classes::ModelState_Flag::Sprinting);
-				bool flag3 = ply->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked);
+				bool flag2 = ply->modelState()->has_flag(ModelState_Flag::Sprinting);
+				bool flag3 = ply->modelState()->has_flag(ModelState_Flag::Ducked);
 				bool flag4 = IsSwimming(ply);
-				bool flag5 = ply->modelState()->has_flag(rust::classes::ModelState_Flag::Crawling);
+				bool flag5 = ply->modelState()->has_flag(ModelState_Flag::Crawling);
 				running = (flag2 ? 1.0f : 0.f);
 				ducking = ((flag3 || flag4) ? 1.0f : 0.f);
 				crawling = (flag5 ? 1.0f : 0.f);
@@ -804,7 +804,7 @@ namespace misc
 				vector = (flag ? ticks.currentPoint
 					: matrix4x.MultiplyPoint3x4(ticks.currentPoint));
 
-				if (esp::local_player->modelState()->has_flag(rust::classes::ModelState_Flag::OnLadder))
+				if (esp::local_player->modelState()->has_flag(ModelState_Flag::OnLadder))
 					return false;
 				if (TestFlying2(lp, oldPos, vector, true))
 					return true;
@@ -1203,7 +1203,7 @@ namespace misc
 			ModelState* state,
 			float force = 10.f) {
 			if (!pwm || !state) return;
-			state->set_flag(rust::classes::ModelState_Flag::OnGround);
+			state->set_flag(ModelState_Flag::OnGround);
 			state->setjumped(true);
 			pwm->set_jump_time(get_time());
 			auto vel = pwm->get_body_velocity();
@@ -1290,25 +1290,25 @@ namespace misc
 				switch (vars->combat.aimbone)
 				{
 				case 0: //Head
-					target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::head)->position();
+					target.pos = ply->model()->boneTransforms()->get((int)Bone_List::head)->position();
 					break;
 				case 1: //Spine 4
-					target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine4)->position();
+					target.pos = ply->model()->boneTransforms()->get((int)Bone_List::spine4)->position();
 					break;
 				case 2: //Pelvis
-					target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
+					target.pos = ply->model()->boneTransforms()->get((int)Bone_List::pelvis)->position();
 					break;
 				case 3: //R arm
-					target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_forearm)->position();
+					target.pos = ply->model()->boneTransforms()->get((int)Bone_List::r_forearm)->position();
 					break;
 				case 4: //L arm
-					target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_forearm)->position();
+					target.pos = ply->model()->boneTransforms()->get((int)Bone_List::l_forearm)->position();
 					break;
 				case 5: //R leg
-					target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_knee)->position();
+					target.pos = ply->model()->boneTransforms()->get((int)Bone_List::r_knee)->position();
 					break;
 				case 6: //L leg
-					target.pos = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_knee)->position();
+					target.pos = ply->model()->boneTransforms()->get((int)Bone_List::l_knee)->position();
 					break;
 				}
 				//Sphere(target.pos, 1.f, { 1, 1, 1, 1 }, 20.f, 100.f);

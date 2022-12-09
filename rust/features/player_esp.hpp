@@ -11,43 +11,7 @@
 #include <map>
 #include <D2D1Helper.h>
 
-float r = 1.00f, g = 0.00f, b = 1.00f;
-
-void ColorConvertHSVtoRGB2(float h, float s, float v, float& out_r, float& out_g, float& out_b)
-{
-	if (s == 0.0f)
-	{
-		// gray
-		out_r = out_g = out_b = v;
-		return;
-	}
-
-	h = my_fmod(h, 1.0f) / (60.0f / 360.0f);
-	int   i = (int)h;
-	float f = h - (float)i;
-	float p = v * (1.0f - s);
-	float q = v * (1.0f - s * f);
-	float t = v * (1.0f - s * (1.0f - f));
-
-	switch (i)
-	{
-	case 0: out_r = v; out_g = t; out_b = p; break;
-	case 1: out_r = q; out_g = v; out_b = p; break;
-	case 2: out_r = p; out_g = v; out_b = t; break;
-	case 3: out_r = p; out_g = q; out_b = v; break;
-	case 4: out_r = t; out_g = p; out_b = v; break;
-	case 5: default: out_r = v; out_g = p; out_b = q; break;
-	}
-}
-
-D2D1::ColorF HSVD(float h, float s, float v, float a = 1.0f)
-{
-	float r, g, b; ColorConvertHSVtoRGB2(h, s, v, r, g, b); return D2D1::ColorF(r, g, b, a);
-}
-
-std::vector<BasePlayer*> player_list = {};
-std::map<int32_t, BasePlayer*> player_map = {};
-std::vector<RenderObject*> tempRenderList{};
+//float r = 1.00f, g = 0.00f, b = 1.00f;
 
 struct hit {
 	Vector3 position;
@@ -172,7 +136,7 @@ namespace esp {
 		if (!esp::client_entities)
 			get_client_entities();
 
-		rust::classes::list* entity_list = (rust::classes::list*)esp::client_entities;
+		rust::list* entity_list = (rust::list*)esp::client_entities;
 
 		static int cases = 0;
 		switch (cases) {
@@ -364,25 +328,25 @@ namespace esp {
 						switch (vars->combat.aimbone)
 						{
 						case 0: //Head
-							target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::head)->position();
+							target.pos = ent->model()->boneTransforms()->get((int)Bone_List::head)->position();
 							break;
 						case 1: //Spine 4
-							target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine4)->position();
+							target.pos = ent->model()->boneTransforms()->get((int)Bone_List::spine4)->position();
 							break;
 						case 2: //Pelvis
-							target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
+							target.pos = ent->model()->boneTransforms()->get((int)Bone_List::pelvis)->position();
 							break;
 						case 3: //R arm
-							target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_forearm)->position();
+							target.pos = ent->model()->boneTransforms()->get((int)Bone_List::r_forearm)->position();
 							break;
 						case 4: //L arm
-							target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_forearm)->position();
+							target.pos = ent->model()->boneTransforms()->get((int)Bone_List::l_forearm)->position();
 							break;
 						case 5: //R leg
-							target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_knee)->position();
+							target.pos = ent->model()->boneTransforms()->get((int)Bone_List::r_knee)->position();
 							break;
 						case 6: //L leg
-							target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_knee)->position();
+							target.pos = ent->model()->boneTransforms()->get((int)Bone_List::l_knee)->position();
 							break;
 						}
 						auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos); //crashes bc non game thread
@@ -518,7 +482,7 @@ namespace esp {
 						}
 						if (vars->misc.auto_upgrade) {
 							auto block = (BuildingBlock*)ent;
-							rust::classes::BuildingGrade upgrade_tier = (rust::classes::BuildingGrade)(vars->misc.upgrade_tier + 1);
+							BuildingGrade upgrade_tier = (BuildingGrade)(vars->misc.upgrade_tier + 1);
 							auto distance = esp::local_player->eyes()->position().distance(world_position);
 							if (distance < 4.2f) {
 								if (!esp::closest_building_block)
@@ -915,19 +879,19 @@ namespace esp {
 						Vector2 w2s_position = {};
 						if (esp::out_w2s(world_position, w2s_position))
 						{
-							RenderEntity* en = new RenderEntity();
-							if (vars->visual.distance) {
-								en->Dist = dist;
-								en->DistColor = visible ? vars->colors.players.details.distance.visible : vars->colors.players.details.distance.invisible;
-								en->DistPos = Vector2(w2s_position.x, w2s_position.y + 10);
-							}
-
-							en->Name = std::wstring(esp_name);
-							en->NameColor = ncol;
-							en->NamePos = w2s_position;
+							//RenderEntity* en = new RenderEntity();
+							//if (vars->visual.distance) {
+							//	en->Dist = dist;
+							//	en->DistColor = visible ? vars->colors.players.details.distance.visible : vars->colors.players.details.distance.invisible;
+							//	en->DistPos = Vector2(w2s_position.x, w2s_position.y + 10);
+							//}
+							//
+							//en->Name = std::wstring(esp_name);
+							//en->NameColor = ncol;
+							//en->NamePos = w2s_position;
 
 							//vars->RenderList.push_back(en);
-							tempRenderList.push_back(en);
+							//tempRenderList.push_back(en);
 							//float color[3] = { esp_color.x / 255.f, esp_color.w / 255.f, esp_color.z / 255.f };
 							//render->StringCenter(w2s_position, esp_name, FLOAT4TOD3DCOLOR(color));
 							//esp::draw_item(w2s_position, esp_name, esp_color);
@@ -963,7 +927,7 @@ namespace esp {
 		if (!client_entities)
 			get_client_entities();
 
-		rust::classes::list* entity_list = (rust::classes::list*)client_entities;
+		rust::list* entity_list = (rust::list*)client_entities;
 
 		auto list_value = entity_list->get_value<uintptr_t>();
 		if (!list_value) {
@@ -1104,7 +1068,7 @@ namespace esp {
 					if (esp::local_player) {
 						auto target = aim_target();
 						if (vars->combat.bodyaim)
-							target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
+							target.pos = ent->model()->boneTransforms()->get((int)Bone_List::pelvis)->position();
 						else
 							target.pos = ent->model()->boneTransforms()->get(48)->position();
 
@@ -1565,7 +1529,7 @@ namespace esp {
 	}
 
 	Transform* find_transform_by_id(unsigned int id_to_check) {
-		auto list = (rust::classes::list*)(cliententities);
+		auto list = (rust::list*)(cliententities);
 		auto value = list->get_value<uintptr_t>();
 		if (!value) return nullptr;
 		auto sz = list->get_size();

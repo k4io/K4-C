@@ -217,27 +217,27 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 				auto wid = 4;
 				Bounds cbounds = Bounds();
 
-				auto lfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_foot);
+				auto lfoott = ply->model()->boneTransforms()->get((int)Bone_List::l_foot);
 				auto lfootp = lfoott->position();
-				auto rfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_foot);
+				auto rfoott = ply->model()->boneTransforms()->get((int)Bone_List::r_foot);
 				auto rfootp = lfoott->position();
-				auto spine3 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine3)->position();
-				auto spine4 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine4)->position();
+				auto spine3 = ply->model()->boneTransforms()->get((int)Bone_List::spine3)->position();
+				auto spine4 = ply->model()->boneTransforms()->get((int)Bone_List::spine4)->position();
 				auto eyepos = spine3.midPoint(spine4);
 				Vector3 mp = Vector3(eyepos.x, eyepos.y - 1.2f, eyepos.z);//lfootp.midPoint(rfootp);
 
-				if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked)) {
+				if (ply->modelState()->has_flag(ModelState_Flag::Ducked)) {
 					//auto midpoint = ent->FindBone(_(L""))
 					cbounds.center = mp + Vector3(0.0f, 0.55f, 0.0f);
 					cbounds.extents = Vector3(0.4f, 0.65f, 0.4f);
 				}
 				else {
-					if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Crawling) || ply->modelState()->has_flag(rust::classes::ModelState_Flag::Sleeping)) {
-						cbounds.center = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
+					if (ply->modelState()->has_flag(ModelState_Flag::Crawling) || ply->modelState()->has_flag(ModelState_Flag::Sleeping)) {
+						cbounds.center = ply->model()->boneTransforms()->get((int)Bone_List::pelvis)->position();
 						cbounds.extents = Vector3(0.9f, 0.2f, 0.4f);
 					}
-					else if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked)) {
-						cbounds.center = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
+					else if (ply->modelState()->has_flag(ModelState_Flag::Ducked)) {
+						cbounds.center = ply->model()->boneTransforms()->get((int)Bone_List::pelvis)->position();
 						cbounds.size.y *= .5f;
 					}
 					else {
@@ -344,23 +344,23 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 				auto wid = 4;
 				Bounds cbounds = Bounds();
 
-				auto lfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_foot);
+				auto lfoott = ply->model()->boneTransforms()->get((int)Bone_List::l_foot);
 				auto lfootp = lfoott->position();
-				auto rfoott = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_foot);
+				auto rfoott = ply->model()->boneTransforms()->get((int)Bone_List::r_foot);
 				auto rfootp = lfoott->position();
-				auto spine3 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine3)->position();
-				auto spine4 = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine4)->position();
+				auto spine3 = ply->model()->boneTransforms()->get((int)Bone_List::spine3)->position();
+				auto spine4 = ply->model()->boneTransforms()->get((int)Bone_List::spine4)->position();
 				auto eyepos = spine3.midPoint(spine4);
 				Vector3 mp = Vector3(eyepos.x, eyepos.y - 1.25f, eyepos.z);//lfootp.midPoint(rfootp);
 
-				if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked)) {
+				if (ply->modelState()->has_flag(ModelState_Flag::Ducked)) {
 					//auto midpoint = ent->FindBone(_(L""))
 					cbounds.center = mp + Vector3(0.0f, 0.55f, 0.0f);
 					cbounds.extents = Vector3(0.4f, 0.65f, 0.4f);
 				}
 				else {
-					if (ply->modelState()->has_flag(rust::classes::ModelState_Flag::Crawling) || ply->modelState()->has_flag(rust::classes::ModelState_Flag::Sleeping)) {
-						cbounds.center = ply->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
+					if (ply->modelState()->has_flag(ModelState_Flag::Crawling) || ply->modelState()->has_flag(ModelState_Flag::Sleeping)) {
+						cbounds.center = ply->model()->boneTransforms()->get((int)Bone_List::pelvis)->position();
 						cbounds.extents = Vector3(0.9f, 0.2f, 0.4f);
 					}
 					else {
@@ -741,7 +741,7 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			}
 
 			if (vars->visual.woundedflag) {
-				if (HasPlayerFlag(ply, rust::classes::PlayerFlags::Wounded)) {
+				if (HasPlayerFlag(ply, PlayerFlags::Wounded)) {
 					render.String({ bounds.right + 9, bounds.top + 5 }, _(L"[Wounded]"), vars->visual.rainbowflags ? rainbowcolor : FLOAT4TOD3DCOLOR(vars->colors.players.details.flags.visible));
 				}
 			}
@@ -932,7 +932,7 @@ void iterate_entities() {
 	if (!esp::client_entities)
 		get_client_entities();
 
-	rust::classes::list* entity_list = (rust::classes::list*)esp::client_entities;
+	rust::list* entity_list = (rust::list*)esp::client_entities;
 
 	static int cases = 0;
 	switch (cases) {
@@ -1151,25 +1151,25 @@ void iterate_entities() {
 					switch (vars->combat.aimbone)
 					{
 					case 0: //Head
-						target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::head)->position();
+						target.pos = ent->model()->boneTransforms()->get((int)Bone_List::head)->position();
 						break;
 					case 1: //Spine 4
-						target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::spine4)->position();
+						target.pos = ent->model()->boneTransforms()->get((int)Bone_List::spine4)->position();
 						break;
 					case 2: //Pelvis
-						target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
+						target.pos = ent->model()->boneTransforms()->get((int)Bone_List::pelvis)->position();
 						break;
 					case 3: //R arm
-						target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_forearm)->position();
+						target.pos = ent->model()->boneTransforms()->get((int)Bone_List::r_forearm)->position();
 						break;
 					case 4: //L arm
-						target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_forearm)->position();
+						target.pos = ent->model()->boneTransforms()->get((int)Bone_List::l_forearm)->position();
 						break;
 					case 5: //R leg
-						target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_knee)->position();
+						target.pos = ent->model()->boneTransforms()->get((int)Bone_List::r_knee)->position();
 						break;
 					case 6: //L leg
-						target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_knee)->position();
+						target.pos = ent->model()->boneTransforms()->get((int)Bone_List::l_knee)->position();
 						break;
 					}
 					auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos); //crashes bc non game thread
@@ -1315,7 +1315,7 @@ void iterate_entities() {
 					}
 					if (vars->misc.auto_upgrade) {
 						auto block = (BuildingBlock*)ent;
-						rust::classes::BuildingGrade upgrade_tier = (rust::classes::BuildingGrade)(vars->misc.upgrade_tier + 1);
+						BuildingGrade upgrade_tier = (BuildingGrade)(vars->misc.upgrade_tier + 1);
 						auto distance = esp::local_player->eyes()->position().distance(world_position);
 						if (distance < 4.2f) {
 							if (!esp::closest_building_block)
@@ -1910,35 +1910,35 @@ void Watermark() {
 }
 
 void LoadGuiSkinmap() {
-	guiskin item = {};
-	for(int i = 0; i < SkinFileLines.size(); i++) {
-		auto line = SkinFileLines[i];
-		if (line.find(_(L"(")) != std::wstring::npos) { //is new item name
-			if (wcslen(item.ItemName.c_str()) > 1) { //will not run first time
-				if (!map_contains_key(vars->gui_skin_map, item.ItemName)) {
-					vars->gui_skin_map.insert(std::make_pair(item.ItemName, item));
-					//item = new guiskin();
-					item = {};
-				}
-			}
-			auto fpos = line.find(L"(") + 1;
-			auto zpos = line.find(L")") + 1;
-			auto ns1 = line.substr(0, fpos - 2).c_str();
-			item.ShortName = ns1;
-			item.ItemName = line.substr(fpos, (zpos - fpos) - 1);
-		}
-		else if (line.find(_(L"Skin ID")) == std::string::npos
-			&& line.find(_(L"Skin Display Name")) == std::string::npos) {
-			//gskin* ns = new gskin();
-			gskin ns;
-			auto idws = line.substr(0, line.find_first_of(_(L" ")));
-			auto ids = std::string(idws.begin(), idws.end());
-			auto id = atoi(ids.c_str());
-			ns.SkinId = id;
-			ns.DisplayName = line.substr(line.find_first_of(_(L" ")) + 1, line.size());
-			item.skins.push_back(ns);
-		}
-	}
+	//uiskin item = {};
+	//or(int i = 0; i < SkinFileLines.size(); i++) {
+	//	auto line = SkinFileLines[i];
+	//	if (line.find(_(L"(")) != std::wstring::npos) { //is new item name
+	//		if (wcslen(item.ItemName.c_str()) > 1) { //will not run first time
+	//			if (!map_contains_key(vars->gui_skin_map, item.ItemName)) {
+	//				vars->gui_skin_map.insert(std::make_pair(item.ItemName, item));
+	//				//item = new guiskin();
+	//				item = {};
+	//			}
+	//		}
+	//		auto fpos = line.find(L"(") + 1;
+	//		auto zpos = line.find(L")") + 1;
+	//		auto ns1 = line.substr(0, fpos - 2).c_str();
+	//		item.ShortName = ns1;
+	//		item.ItemName = line.substr(fpos, (zpos - fpos) - 1);
+	//	}
+	//	else if (line.find(_(L"Skin ID")) == std::string::npos
+	//		&& line.find(_(L"Skin Display Name")) == std::string::npos) {
+	//		//gskin* ns = new gskin();
+	//		gskin ns;
+	//		auto idws = line.substr(0, line.find_first_of(_(L" ")));
+	//		auto ids = std::string(idws.begin(), idws.end());
+	//		auto id = atoi(ids.c_str());
+	//		ns.SkinId = id;
+	//		ns.DisplayName = line.substr(line.find_first_of(_(L" ")) + 1, line.size());
+	//		item.skins.push_back(ns);
+	//	}
+	//
 }
 
 bool finit = false;

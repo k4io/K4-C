@@ -85,7 +85,7 @@ namespace esp {
 		if (!client_entities)
 			get_client_entities( );
 
-		rust::classes::list* entity_list = (rust::classes::list*)client_entities;
+		list* entity_list = (list*)client_entities;
 
 		auto list_value = entity_list->get_value<uintptr_t>( );
 		if (!list_value) {
@@ -450,7 +450,7 @@ namespace esp {
 										
 										if (settings::visuals::rainbow_chams) {
 											SetColor(material, _(L"_Color"), col(r, g, b, 1));
-										} else if (get_IsNpc(player->get_player_model()) && player->is_visible(local_player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position())) {
+										} else if (get_IsNpc(player->get_player_model()) && player->is_visible(local_player->get_bone_transform((int)Bone_List::head)->get_bone_position(), player->get_bone_transform((int)Bone_List::head)->get_bone_position())) {
 											SetColor(material, _(L"_Color"), col(0, 0.5, 1, 0.5));
 										} else if (get_IsNpc(player->get_player_model())) {
 											SetColor(material, _(L"_Color"), col(0, 0, 0.6, 0.5));
@@ -458,7 +458,7 @@ namespace esp {
 											SetColor(material, _(L"_Color"), col(0, 0, 0.6, 0.5));
 										} else if (player->is_teammate(local_player)) {
 											SetColor(material, _(L"_Color"), col(0, 1, 1, 1));
-										} else if (player->is_visible(local_player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position())) {
+										} else if (player->is_visible(local_player->get_bone_transform((int)Bone_List::head)->get_bone_position(), player->get_bone_transform((int)Bone_List::head)->get_bone_position())) {
 											SetColor(material, _(L"_Color"), col(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1));
 										} else {
 											SetColor(material, _(L"_Color"), col(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1));

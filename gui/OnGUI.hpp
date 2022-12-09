@@ -36,10 +36,10 @@ namespace gui {
 
 		static auto set_color = reinterpret_cast<void(*)(gui::Color)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("set_color"), -1, _(""), _("UnityEngine"))));
 
-		static auto Label = reinterpret_cast<void(*)(rust::classes::Rect position, uintptr_t content, uintptr_t style)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 3, _("content"), _("UnityEngine"), 2)));
+		static auto Label = reinterpret_cast<void(*)(Rect position, uintptr_t content, uintptr_t style)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 3, _("content"), _("UnityEngine"), 2)));
 
-		static auto _Label = reinterpret_cast<void(*)(rust::classes::Rect, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 2, _("text"), _("UnityEngine"), 2)));
-		static auto ptr_Label = reinterpret_cast<void(*)(rust::classes::Rect, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 2, _("text"), _("UnityEngine"), 2)));
+		static auto _Label = reinterpret_cast<void(*)(Rect, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 2, _("text"), _("UnityEngine"), 2)));
+		static auto ptr_Label = reinterpret_cast<void(*)(Rect, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 2, _("text"), _("UnityEngine"), 2)));
 
 		static auto set_alignment = reinterpret_cast<void(*)(uintptr_t label, uintptr_t value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUIStyle"), _("set_alignment"), -1, _(""), _("UnityEngine"))));
 
@@ -51,18 +51,18 @@ namespace gui {
 
 		static auto set_skin = reinterpret_cast<void(*)(uintptr_t skin)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("set_skin"), 0, _(""), _("UnityEngine"))));
 
-		static auto get_type = reinterpret_cast<rust::classes::EventType(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Event"), _("get_type"), 0, _(""), _("UnityEngine"))));
+		static auto get_type = reinterpret_cast<EventType(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Event"), _("get_type"), 0, _(""), _("UnityEngine"))));
 
-		static auto DrawTexture = reinterpret_cast<void (*)(rust::classes::Rect, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("DrawTexture"), 2, _("image"), _("UnityEngine"), 2)));
+		static auto DrawTexture = reinterpret_cast<void (*)(Rect, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("DrawTexture"), 2, _("image"), _("UnityEngine"), 2)));
 		
 		//Rect position, Texture image, ScaleMode scaleMode, bool alphaBlend, float imageAspect, Color color, float borderWidth, float borderRadius
-		static auto Box = reinterpret_cast<void (*)(rust::classes::Rect, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Box"), 2, _("text"), _("UnityEngine"), 2)));
+		static auto Box = reinterpret_cast<void (*)(Rect, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Box"), 2, _("text"), _("UnityEngine"), 2)));
 
 		static auto DrawLine = reinterpret_cast<void (*)(Vector3, Vector3, gui::Color)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Debug"), _("DrawLine"), 3, _("color"), _("UnityEngine"), 3)));
 
 		static auto set_gizmos_color = reinterpret_cast<void(*)(gui::Color)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Gizmos"), _("set_color"), -1, _(""), _("UnityEngine"))));
 
-		static auto HorizontalSlider = reinterpret_cast<float(*)(rust::classes::Rect position, float value, float leftValue, float rightValue)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("HorizontalSlider"), 4, _(""), _("UnityEngine"))));
+		static auto HorizontalSlider = reinterpret_cast<float(*)(Rect position, float value, float leftValue, float rightValue)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("HorizontalSlider"), 4, _(""), _("UnityEngine"))));
 	
 		
 		//gl stuff?
@@ -91,11 +91,11 @@ namespace gui {
 	uintptr_t white_texture;
 
 	void init_gui() {
-		methods::ptr_Label = reinterpret_cast<void(*)(rust::classes::Rect, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 2, _("text"), _("UnityEngine"), 2)));
+		methods::ptr_Label = reinterpret_cast<void(*)(Rect, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 2, _("text"), _("UnityEngine"), 2)));
 
 		methods::gui_content_temp_ptr = reinterpret_cast<uintptr_t(*)(uintptr_t*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUIContent"), _("Temp"), 1, _("t"), _("UnityEngine"), 1)));
 
-		methods::HorizontalSlider = reinterpret_cast<float(*)(rust::classes::Rect position, float value, float leftValue, float rightValue)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("HorizontalSlider"), 4, _(""), _("UnityEngine"))));
+		methods::HorizontalSlider = reinterpret_cast<float(*)(Rect position, float value, float leftValue, float rightValue)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("HorizontalSlider"), 4, _(""), _("UnityEngine"))));
 
 		methods::get_whiteTexture = reinterpret_cast<uintptr_t(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Texture2D"), _("get_whiteTexture"), 0, _(""), _("UnityEngine"))));
 
@@ -105,9 +105,9 @@ namespace gui {
 
 		methods::set_color = reinterpret_cast<void(*)(gui::Color)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("set_color"), -1, _(""), _("UnityEngine"))));
 
-		methods::Label = reinterpret_cast<void(*)(rust::classes::Rect position, uintptr_t content, uintptr_t style)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 3, _("content"), _("UnityEngine"), 2)));
+		methods::Label = reinterpret_cast<void(*)(Rect position, uintptr_t content, uintptr_t style)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 3, _("content"), _("UnityEngine"), 2)));
 
-		methods::_Label = reinterpret_cast<void(*)(rust::classes::Rect, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 2, _("text"), _("UnityEngine"), 2)));
+		methods::_Label = reinterpret_cast<void(*)(Rect, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 2, _("text"), _("UnityEngine"), 2)));
 
 		methods::set_alignment = reinterpret_cast<void(*)(uintptr_t label, uintptr_t value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUIStyle"), _("set_alignment"), -1, _(""), _("UnityEngine"))));
 
@@ -117,7 +117,7 @@ namespace gui {
 
 		methods::set_skin = reinterpret_cast<void(*)(uintptr_t skin)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("set_skin"), 0, _(""), _("UnityEngine"))));
 
-		methods::get_type = reinterpret_cast<rust::classes::EventType(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Event"), _("get_type"), 0, _(""), _("UnityEngine"))));
+		methods::get_type = reinterpret_cast<EventType(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Event"), _("get_type"), 0, _(""), _("UnityEngine"))));
 
 		unity::LoadAllAssets = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAllAssets"), 1, _("type"), _("UnityEngine"), 1)));
 
@@ -125,9 +125,9 @@ namespace gui {
 
 		unity::LoadAsset = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, System::string path, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAsset"), 2, _("name"), _("UnityEngine"), 1)));
 
-		methods::DrawTexture = reinterpret_cast<void (*)(rust::classes::Rect, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("DrawTexture"), 2, _("image"), _("UnityEngine"), 2)));
+		methods::DrawTexture = reinterpret_cast<void (*)(Rect, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("DrawTexture"), 2, _("image"), _("UnityEngine"), 2)));
 
-		methods::Box = reinterpret_cast<void (*)(rust::classes::Rect, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Box"), 2, _("text"), _("UnityEngine"), 2)));
+		methods::Box = reinterpret_cast<void (*)(Rect, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Box"), 2, _("text"), _("UnityEngine"), 2)));
 
 		methods::DrawLine = reinterpret_cast<void (*)(Vector3, Vector3, gui::Color)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Debug"), _("DrawLine"), 3, _("color"), _("UnityEngine"), 3)));
 
@@ -456,17 +456,17 @@ namespace gui {
 	{
 		methods::set_color(clr);
 
-		methods::DrawTexture(rust::classes::Rect(pos.x, pos.y, 1, size.y), white_texture);
-		methods::DrawTexture(rust::classes::Rect(pos.x + size.x, pos.y, 1, size.y), white_texture);
-		methods::DrawTexture(rust::classes::Rect(pos.x, pos.y, size.x, 1), white_texture);
-		methods::DrawTexture(rust::classes::Rect(pos.x, pos.y + size.y, size.x, 1), white_texture);
+		methods::DrawTexture(Rect(pos.x, pos.y, 1, size.y), white_texture);
+		methods::DrawTexture(Rect(pos.x + size.x, pos.y, 1, size.y), white_texture);
+		methods::DrawTexture(Rect(pos.x, pos.y, size.x, 1), white_texture);
+		methods::DrawTexture(Rect(pos.x, pos.y + size.y, size.x, 1), white_texture);
 	}
 
 	void horizontal_line(Vector2 pos, float size, Color clr)
 	{
 		methods::set_color(clr);
 
-		methods::DrawTexture(rust::classes::Rect(pos.x, pos.y, size, 1), white_texture);
+		methods::DrawTexture(Rect(pos.x, pos.y, size, 1), white_texture);
 	}
 
 
@@ -507,10 +507,10 @@ namespace gui {
 	{
 		methods::set_color(clr);
 
-		methods::DrawTexture(rust::classes::Rect(pos.x, pos.y, 1, size), white_texture);
+		methods::DrawTexture(Rect(pos.x, pos.y, 1, size), white_texture);
 	}
 
-	void fill_box(rust::classes::Rect pos, Color clr)
+	void fill_box(Rect pos, Color clr)
 	{
 		methods::set_color(clr);
 		methods::DrawTexture(pos, white_texture);
@@ -549,7 +549,7 @@ namespace gui {
 		methods::set_color(Color(1, 1, 1, 1));
 	}
 
-	void Label(rust::classes::Rect pos, System::string text, Color clr, bool centered = false, float size = 12) {
+	void Label(Rect pos, System::string text, Color clr, bool centered = false, float size = 12) {
 		methods::set_color(clr);
 
 		uintptr_t content = methods::gui_content_temp(&text);
@@ -564,7 +564,7 @@ namespace gui {
 		methods::Label(pos, content, label);
 	}
 
-	void Label(rust::classes::Rect pos, uintptr_t text, Color clr, bool centered = false, float size = 12) {
+	void Label(Rect pos, uintptr_t text, Color clr, bool centered = false, float size = 12) {
 		methods::set_color(clr);
 
 		methods::set_fontSize(label, size);
@@ -572,7 +572,7 @@ namespace gui {
 		methods::ptr_Label(pos, text);
 	}
 
-	void Label(rust::classes::Rect pos, System::string text, float font_size = 0) {
+	void Label(Rect pos, System::string text, float font_size = 0) {
 
 		if (!font_size)
 			methods::_Label(pos, text);
@@ -612,26 +612,26 @@ namespace gui {
 
 	int last_active_id = 0;
 
-	void tab(rust::classes::EventType event, Vector2 pos, Vector2 mouse, const wchar_t* tab_name, int id) {
-		if (event == rust::classes::EventType::MouseDown) {
-			if (rust::classes::Rect(pos.x + 2, pos.y - 4 + id * tab_size.y + 2.0f, tab_size.x, tab_size.y).Contains(mouse)) {
+	void tab(EventType event, Vector2 pos, Vector2 mouse, const wchar_t* tab_name, int id) {
+		if (event == EventType::MouseDown) {
+			if (Rect(pos.x + 2, pos.y - 4 + id * tab_size.y + 2.0f, tab_size.x, tab_size.y).Contains(mouse)) {
 				last_active_id = active_tab;
 				active_tab = id;
 				opacity = 0.0f;
 			}
 		}
-		else if (event == rust::classes::EventType::Repaint) {
+		else if (event == EventType::Repaint) {
 			if (active_tab == id) {
 				float o = (opacity / 255.f);
-				fill_box(rust::classes::Rect(pos.x, pos.y + id * tab_size.y, tab_size.x + 2, tab_size.y), rgba(21.f, 27.f, 37.f, o));
+				fill_box(Rect(pos.x, pos.y + id * tab_size.y, tab_size.x + 2, tab_size.y), rgba(21.f, 27.f, 37.f, o));
 			}
 			else if (active_tab == last_active_id) {
 				float o = ((255.f - opacity) / 255.f);
-				fill_box(rust::classes::Rect(pos.x, pos.y + id * tab_size.y, tab_size.x + 2, tab_size.y), rgba(21.f, 27.f, 37.f, o));
+				fill_box(Rect(pos.x, pos.y + id * tab_size.y, tab_size.x + 2, tab_size.y), rgba(21.f, 27.f, 37.f, o));
 			}
 
-			Label(rust::classes::Rect{ pos.x + 2, pos.y + 1 + id * tab_size.y + 1, tab_size.x, tab_size.y }, tab_name, rgba(0, 0, 0, 255.f), true, 12);
-			Label(rust::classes::Rect{ pos.x + 2, pos.y + id * tab_size.y, tab_size.x, tab_size.y }, tab_name, rgba(159.f, 163.f, 169.f, 255.f), true, 12);
+			Label(Rect{ pos.x + 2, pos.y + 1 + id * tab_size.y + 1, tab_size.x, tab_size.y }, tab_name, rgba(0, 0, 0, 255.f), true, 12);
+			Label(Rect{ pos.x + 2, pos.y + id * tab_size.y, tab_size.x, tab_size.y }, tab_name, rgba(159.f, 163.f, 169.f, 255.f), true, 12);
 		}
 	}
 
@@ -646,19 +646,19 @@ namespace gui {
 	bool _ti = false;
 	bool inputting_text = false;
 
-	bool button(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, wchar_t* name) {
+	bool button(EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, wchar_t* name) {
 		pos.x += 5;
 		current_pos.y += 5;
-		rust::classes::Rect poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 40, 14);
+		Rect poz = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 40, 14);
 		fill_box(poz, rgba(14.f, 18.f, 24.f, 255.f));
 		if (poz.Contains(mouse))
 		{
-			rust::classes::Rect poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 40, 14);
+			Rect poz = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 40, 14);
 			fill_box(poz, rgba(39, 47, 59, 255.f));
 		}
-		if (event == rust::classes::EventType::MouseDown) {
+		if (event == EventType::MouseDown) {
 			if (poz.Contains(mouse)) {
-				rust::classes::Rect poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 40, 14);
+				Rect poz = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 40, 14);
 				fill_box(poz, rgba(249.f, 130.f, 109.f, 255.f));
 				return true;
 			}
@@ -669,18 +669,18 @@ namespace gui {
 		return false;
 	}
 
-	void textbox(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, wchar_t* name, std::wstring* str) {
+	void textbox(EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, wchar_t* name, std::wstring* str) {
 
 		pos.x += 5;
 
-		rust::classes::Rect poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
+		Rect poz = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
 		fill_box(poz, rgba(14.f, 18.f, 24.f, 255.f));
 		if (poz.Contains(mouse))
 		{
-			rust::classes::Rect t = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 150, 2);
+			Rect t = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 150, 2);
 			fill_box(t, rgba(159.f, 163.f, 169.f, 255.f));
 		}
-		if (event == rust::classes::EventType::MouseDown) {
+		if (event == EventType::MouseDown) {
 			if (poz.Contains(mouse))
 				inputting_text = !inputting_text;
 			else inputting_text = false;
@@ -691,7 +691,7 @@ namespace gui {
 
 		if(inputting_text)
 		{
-			rust::classes::Rect t = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 150, 2);
+			Rect t = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 150, 2);
 			fill_box(t, rgba(249.f, 130.f, 109.f, 255.f));
 			pinputtext = str;
 			gui::Label({ poz.x + 44, poz.y, poz.wid, poz.hei }, System::string(str->c_str()), rgba(249.f, 130.f, 109.f, (opacity / 255.f)), false, 10);
@@ -702,16 +702,16 @@ namespace gui {
 		current_pos.y += 20;
 	}
 
-	void combobox(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* name, std::array<wchar_t*, 8> combo_str, std::array<bool*, 8> combo) {
+	void combobox(EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* name, std::array<wchar_t*, 8> combo_str, std::array<bool*, 8> combo) {
 		pos.x += 10;
-		rust::classes::Rect poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
+		Rect poz = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
 		fill_box(poz, rgba(14.f, 18.f, 24.f, 255.f));
 
 		if (poz.Contains(mouse))
 		{
-			poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 150, 2);
+			poz = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 150, 2);
 			fill_box(poz, rgba(181, 140, 132, (opacity / 255.f)));
-			poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
+			poz = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
 		}
 
 		gui::Label({ poz.x + 5, poz.y, poz.wid, poz.hei }, System::string(name), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), false, 13);
@@ -721,16 +721,16 @@ namespace gui {
 			gui::line({ poz.x + 130, poz.y + 13 }, { poz.x + 135, poz.y + 8 }, rgba(159.f, 163.f, 169.f, (opacity / 255.f)));
 			gui::line({ poz.x + 140, poz.y + 13 }, { poz.x + 135, poz.y + 8 }, rgba(159.f, 163.f, 169.f, (opacity / 255.f)));
 
-			poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 150, 2);
+			poz = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 150, 2);
 			fill_box(poz, rgba(249.f, 130.f, 109.f, (opacity / 255.f)));
-			poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
+			poz = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
 		}
 		else {
 			gui::line({ poz.x + 130, poz.y + 8 }, { poz.x + 135, poz.y + 13 }, rgba(159.f, 163.f, 169.f, (opacity / 255.f)));
 			gui::line({ poz.x + 140, poz.y + 8 }, { poz.x + 135, poz.y + 13 }, rgba(159.f, 163.f, 169.f, (opacity / 255.f)));
 		}
 
-		if (event == rust::classes::EventType::MouseDown) 
+		if (event == EventType::MouseDown) 
 		{
 			if (poz.Contains(mouse))
 				combo_clicked = !combo_clicked;
@@ -741,7 +741,7 @@ namespace gui {
 				{
 					for (size_t i = 1; i < 8; i++)
 					{
-						poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 15);
+						poz = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 15);
 						if (poz.Contains(mouse))
 						{
 							if (&combo[i])
@@ -760,7 +760,7 @@ namespace gui {
 		{
 			for (size_t i = 1; i < 8; i++)
 			{
-				poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 20);
+				poz = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 20);
 				fill_box(poz, rgba(14.f, 18.f, 24.f, 255.f));
 
 				auto name = combo_str[i];
@@ -780,7 +780,7 @@ namespace gui {
 
 	int* list_open = 0;
 	bool list_clicked = false;
-	void listbox(rust::classes::EventType event,
+	void listbox(EventType event,
 		Vector2 pos,
 		Vector2& current_pos,
 		Vector2 mouse,
@@ -789,7 +789,7 @@ namespace gui {
 		int* selected = 0) 
 	{
 		pos.x += 10;
-		rust::classes::Rect poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
+		Rect poz = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
 		fill_box(poz, rgba(14.f, 18.f, 24.f, 255.f));
 
 		auto sz = sizeof(str_list) / sizeof(str_list[0]);
@@ -801,9 +801,9 @@ namespace gui {
 			gui::line({ poz.x + 130, poz.y + 13 }, { poz.x + 135, poz.y + 8 }, rgba(159.f, 163.f, 169.f, (opacity / 255.f)));
 			gui::line({ poz.x + 140, poz.y + 13 }, { poz.x + 135, poz.y + 8 }, rgba(159.f, 163.f, 169.f, (opacity / 255.f)));
 
-			poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 150, 2);
+			poz = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 150, 2);
 			fill_box(poz, rgba(249.f, 130.f, 109.f, (opacity / 255.f)));
-			poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
+			poz = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
 		}
 		else
 		{
@@ -812,9 +812,9 @@ namespace gui {
 		}
 
 
-		if (event == rust::classes::EventType::MouseDown)
+		if (event == EventType::MouseDown)
 		{
-			poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
+			poz = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
 			if (poz.Contains(mouse)) {
 				list_clicked = !list_clicked;
 				if (list_open != selected)
@@ -825,7 +825,7 @@ namespace gui {
 				for (size_t i = 1; i < sz; i++)
 				{
 					if (str_list[i][0] == '\x00') continue;
-					poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 15);
+					poz = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 15);
 					if (poz.Contains(mouse))
 						if (str_list[i])
 							*selected = i;
@@ -837,7 +837,7 @@ namespace gui {
 			for (size_t i = 1; i < sz; i++)
 			{
 				if (str_list[i][0] == '\x00') continue;
-				poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 20);
+				poz = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 20);
 
 				fill_box(poz, rgba(14.f, 18.f, 24.f, 255.f));
 
@@ -853,9 +853,9 @@ namespace gui {
 
 				if (poz.Contains(mouse))
 				{
-					poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f + 2, pos.y + current_pos.y + (i * 20) + 2, 146, 16);
+					poz = Rect(pos.x + tab_size.x + 2.0f + 2, pos.y + current_pos.y + (i * 20) + 2, 146, 16);
 					fill_box(poz, rgba(22, 27, 36, 255.f));
-					poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 20);
+					poz = Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 20);
 					gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, System::string(name), rgba(181, 140, 132, (opacity / 255.f)), true, 10);
 				}
 			}
@@ -864,21 +864,21 @@ namespace gui {
 		current_pos.y += 30;
 	}
 
-	void checkbox(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* button_name, bool* checked_ref, int id, bool keybind = false, int* keybind_ref = 0, Color col = Color(255, 255, 255, 220)) {
+	void checkbox(EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* button_name, bool* checked_ref, int id, bool keybind = false, int* keybind_ref = 0, Color col = Color(255, 255, 255, 220)) {
 
 		pos.x += 5;
 		const float button_size = 20;
-		if (event == rust::classes::EventType::MouseDown && !combo_clicked && !list_clicked) {
-			if (rust::classes::Rect(pos.x + tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4 + 3 + 2.0f, 100, button_size + 3).Contains(mouse)) {
+		if (event == EventType::MouseDown && !combo_clicked && !list_clicked) {
+			if (Rect(pos.x + tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4 + 3 + 2.0f, 100, button_size + 3).Contains(mouse)) {
 				*checked_ref = !*checked_ref;
 			}
 		}
 
 		if (keybind)
 		{
-			rust::classes::Rect poz = rust::classes::Rect(pos.x + tab_size.x + 100 + 2.0f, pos.y + current_pos.y, 31, 15);
+			Rect poz = Rect(pos.x + tab_size.x + 100 + 2.0f, pos.y + current_pos.y, 31, 15);
 			fill_box(poz, rgba(14.f, 18.f, 24.f, 255.f));
-			if (event == rust::classes::EventType::MouseDown && !combo_clicked && !list_clicked) {
+			if (event == EventType::MouseDown && !combo_clicked && !list_clicked) {
 				if (poz.Contains(mouse)) {
 					getting_keybind = !getting_keybind;
 					if (getting_keybind)
@@ -890,7 +890,7 @@ namespace gui {
 			}
 			if (getting_keybind && keybind_ref == ref_clicked)
 			{
-				fill_box(rust::classes::Rect(poz.x, poz.y + 14.f, poz.wid, 2.f), rgba(249.f, 130.f, 109.f, (opacity / 255.f)));
+				fill_box(Rect(poz.x, poz.y + 14.f, poz.wid, 2.f), rgba(249.f, 130.f, 109.f, (opacity / 255.f)));
 				gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, System::string(get_keystr(*keybind_ref)), rgba(249.f, 130.f, 109.f, (opacity / 255.f)), true, 10);
 			}
 
@@ -900,20 +900,20 @@ namespace gui {
 		float o1 = (opacity / 255.f);
 		//outline_box(Vector2(pos.x + tab_size.x + 3 + 2.0f, pos.y + 7 + current_pos.y - 4), Vector2(10, 10), rgba(14.f, 18.f, 24.f, o1));
 		//outline_box(Vector2(pos.x + 2 + tab_size.x + 3 + 2.0f, pos.y + 10 + current_pos.y - 5), Vector2(7, 7), rgba(249.f, 130.f, 109.f, o1));
-		fill_box(rust::classes::Rect{ pos.x + 3 + tab_size.x + 3 + 2.0f, pos.y + 10 + current_pos.y - 4, 5, 5 }, rgba(14.f, 18.f, 24.f, (opacity / 255.f)));
+		fill_box(Rect{ pos.x + 3 + tab_size.x + 3 + 2.0f, pos.y + 10 + current_pos.y - 4, 5, 5 }, rgba(14.f, 18.f, 24.f, (opacity / 255.f)));
 
-		if (event == rust::classes::EventType::Repaint) {
-			gui::Label(rust::classes::Rect{ pos.x + 15 + tab_size.x + 3 + 2.0f + 1, pos.y + current_pos.y - 4 + 1, 200, button_size + 3 }, button_name, rgba(0, 0, 0, (opacity / 255.f)), false, 14);
+		if (event == EventType::Repaint) {
+			gui::Label(Rect{ pos.x + 15 + tab_size.x + 3 + 2.0f + 1, pos.y + current_pos.y - 4 + 1, 200, button_size + 3 }, button_name, rgba(0, 0, 0, (opacity / 255.f)), false, 14);
 			if (*checked_ref) {
-				//fill_box(rust::classes::Rect{ pos.x + tab_size.x + 3 + 2.0f, pos.y + 7 + current_pos.y - 4, 10, 10 }, rgba(14.f, 18.f, 24.f, (opacity / 255.f)));
-				fill_box(rust::classes::Rect{ pos.x + 3 + tab_size.x + 3 + 2.0f, pos.y + 10 + current_pos.y - 4, 5, 5 }, rgba(249.f, 130.f, 109.f, (opacity / 255.f)));
-				gui::Label(rust::classes::Rect{ pos.x + 15 + tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, rgba(249.f, 130.f, 109.f, (opacity / 255.f)), false, 14);
+				//fill_box(Rect{ pos.x + tab_size.x + 3 + 2.0f, pos.y + 7 + current_pos.y - 4, 10, 10 }, rgba(14.f, 18.f, 24.f, (opacity / 255.f)));
+				fill_box(Rect{ pos.x + 3 + tab_size.x + 3 + 2.0f, pos.y + 10 + current_pos.y - 4, 5, 5 }, rgba(249.f, 130.f, 109.f, (opacity / 255.f)));
+				gui::Label(Rect{ pos.x + 15 + tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, rgba(249.f, 130.f, 109.f, (opacity / 255.f)), false, 14);
 			}
 			else
-				gui::Label(rust::classes::Rect{ pos.x + 15 + tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, rgba(159.f, 163.f, 169.f, (opacity / 255.f)), false, 14);
+				gui::Label(Rect{ pos.x + 15 + tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, rgba(159.f, 163.f, 169.f, (opacity / 255.f)), false, 14);
 
 
-			//rust::classes::Rect poz = rust::classes::Rect(pos.x + tab_size.x + 100 + 2.0f, pos.y + current_pos.y - 4 + 3 + 2.0f, 23, button_size + 3);
+			//Rect poz = Rect(pos.x + tab_size.x + 100 + 2.0f, pos.y + current_pos.y - 4 + 3 + 2.0f, 23, button_size + 3);
 			//fill_box(poz, rgba(14.f, 18.f, 24.f, (opacity / 255.f)));
 			//gui::Label(poz, button_name, rgba(159.f, 163.f, 169.f, (opacity / 255.f)), false, 14);
 
@@ -921,14 +921,14 @@ namespace gui {
 		current_pos.y += button_size;
 	}
 
-	void OnKeyUp(rust::classes::KeyCode key) {
-		if (key == rust::classes::KeyCode::Insert) {
+	void OnKeyUp(KeyCode key) {
+		if (key == KeyCode::Insert) {
 			InsertPressed = false;
 		}
 	}
 
-	void OnKeyDown(rust::classes::KeyCode key) {
-		if (!InsertPressed && key == rust::classes::KeyCode::Insert) {
+	void OnKeyDown(KeyCode key) {
+		if (!InsertPressed && key == KeyCode::Insert) {
 			InsertPressed = true;
 			open = !open;
 			if (!open) getting_keybind = false;
@@ -964,67 +964,67 @@ namespace gui {
 		}
 	}
 
-	void buttonvis(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* button_name, bool* out, int id, Color col = Color(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1)) {
+	void buttonvis(EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* button_name, bool* out, int id, Color col = Color(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1)) {
 		const float button_size = 20;
-		if (event == rust::classes::EventType::MouseDown) {
-			if (rust::classes::Rect(pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 100, button_size + 3).Contains(mouse)) {
+		if (event == EventType::MouseDown) {
+			if (Rect(pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 100, button_size + 3).Contains(mouse)) {
 				*out = !*out;
 			}
 		}
 
 
-		if (event == rust::classes::EventType::Repaint) {
-			gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f + 1, pos.y + current_pos.y - 4 + 1, 200, button_size + 3 }, button_name, gui::Color(0, 0, 0, 120), false, 10);
+		if (event == EventType::Repaint) {
+			gui::Label(Rect{ pos.x + id * tab_size.x + 3 + 2.0f + 1, pos.y + current_pos.y - 4 + 1, 200, button_size + 3 }, button_name, gui::Color(0, 0, 0, 120), false, 10);
 			if (*out) {
-				gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1), false, 10);
+				gui::Label(Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1), false, 10);
 			}
 			else
-				gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1), false, 10);
+				gui::Label(Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1), false, 10);
 		}
 		current_pos.y += button_size;
 	}
 
-	void buttoninv(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* button_name, bool* out, int id, Color col = Color(vars->visual.InvRcolor, vars->visual.InvGcolor, vars->visual.InvBcolor, 1)) {
+	void buttoninv(EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* button_name, bool* out, int id, Color col = Color(vars->visual.InvRcolor, vars->visual.InvGcolor, vars->visual.InvBcolor, 1)) {
 		const float button_size = 20;
-		if (event == rust::classes::EventType::MouseDown) {
-			if (rust::classes::Rect(pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 100, button_size + 3).Contains(mouse)) {
+		if (event == EventType::MouseDown) {
+			if (Rect(pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 100, button_size + 3).Contains(mouse)) {
 				*out = !*out;
 			}
 		}
 
 
-		if (event == rust::classes::EventType::Repaint) {
-			gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f + 1, pos.y + current_pos.y - 4 + 1, 200, button_size + 3 }, button_name, gui::Color(0, 0, 0, 120), false, 10);
+		if (event == EventType::Repaint) {
+			gui::Label(Rect{ pos.x + id * tab_size.x + 3 + 2.0f + 1, pos.y + current_pos.y - 4 + 1, 200, button_size + 3 }, button_name, gui::Color(0, 0, 0, 120), false, 10);
 			if (*out) {
-				gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(vars->visual.InvRcolor, vars->visual.InvGcolor, vars->visual.InvBcolor, 1), false, 10);
+				gui::Label(Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(vars->visual.InvRcolor, vars->visual.InvGcolor, vars->visual.InvBcolor, 1), false, 10);
 			}
 			else
-				gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(vars->visual.InvRcolor, vars->visual.InvGcolor, vars->visual.InvBcolor, 1), false, 10);
+				gui::Label(Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(vars->visual.InvRcolor, vars->visual.InvGcolor, vars->visual.InvBcolor, 1), false, 10);
 		}
 		current_pos.y += button_size;
 	}
 
-	void buttonteam(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* button_name, bool* out, int id, Color col = Color(vars->visual.TeamRcolor, vars->visual.TeamGcolor, vars->visual.TeamBcolor, 1)) {
+	void buttonteam(EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* button_name, bool* out, int id, Color col = Color(vars->visual.TeamRcolor, vars->visual.TeamGcolor, vars->visual.TeamBcolor, 1)) {
 		const float button_size = 20;
-		if (event == rust::classes::EventType::MouseDown) {
-			if (rust::classes::Rect(pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 100, button_size + 3).Contains(mouse)) {
+		if (event == EventType::MouseDown) {
+			if (Rect(pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 100, button_size + 3).Contains(mouse)) {
 				*out = !*out;
 			}
 		}
 
 
-		if (event == rust::classes::EventType::Repaint) {
-			gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f + 1, pos.y + current_pos.y - 4 + 1, 200, button_size + 3 }, button_name, gui::Color(0, 0, 0, 120), false, 10);
+		if (event == EventType::Repaint) {
+			gui::Label(Rect{ pos.x + id * tab_size.x + 3 + 2.0f + 1, pos.y + current_pos.y - 4 + 1, 200, button_size + 3 }, button_name, gui::Color(0, 0, 0, 120), false, 10);
 			if (*out) {
-				gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(vars->visual.TeamRcolor, vars->visual.TeamGcolor, vars->visual.TeamBcolor, 1), false, 10);
+				gui::Label(Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(vars->visual.TeamRcolor, vars->visual.TeamGcolor, vars->visual.TeamBcolor, 1), false, 10);
 			}
 			else
-				gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(vars->visual.TeamRcolor, vars->visual.TeamGcolor, vars->visual.TeamBcolor, 1), false, 10);
+				gui::Label(Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(vars->visual.TeamRcolor, vars->visual.TeamGcolor, vars->visual.TeamBcolor, 1), false, 10);
 		}
 		current_pos.y += button_size;
 	}
 
-	void Slider(rust::classes::EventType event, Vector2 pos, Vector2 mouse, uintptr_t text, Vector2& current_pos, float& out, float max, int id, float font_size = 0, const char* fmt = _("%.1f"))
+	void Slider(EventType event, Vector2 pos, Vector2 mouse, uintptr_t text, Vector2& current_pos, float& out, float max, int id, float font_size = 0, const char* fmt = _("%.1f"))
 	{
 		pos.x += 100;
 		pos.y += 9;
@@ -1034,22 +1034,22 @@ namespace gui {
 
 		int pzx = pos.x + id + 3 + 2.0f + 1;
 
-		rust::classes::Rect pz = rust::classes::Rect(pzx, pos.y + current_pos.y - 4 + 1, wid, button_size);
+		Rect pz = Rect(pzx, pos.y + current_pos.y - 4 + 1, wid, button_size);
 
 		//if mouse within box highlight thumb
 		//if mouse down within box, set thumb to position
 
-		if (event == rust::classes::EventType::MouseDown) {
+		if (event == EventType::MouseDown) {
 			if (pz.Contains(mouse)) {
 				out = (((pos.x + 7) - mouse.x) * (max / wid)) * -1;
 			}
 		}
 
 		float val = -((wid - 1) * (out / max));
-		if (event == rust::classes::EventType::Repaint) {
+		if (event == EventType::Repaint) {
 			fill_box(pz, rgba(14.f, 18.f, 24.f, (opacity / 255.f)));
 			if (val < 0) val = val * -1;
-			rust::classes::Rect pzf = rust::classes::Rect(pz.x + 2, pz.y + 2, val, 4);
+			Rect pzf = Rect(pz.x + 2, pz.y + 2, val, 4);
 			fill_box(pzf, rgba(249.f, 130.f, 109.f, (opacity / 255.f)));
 		}
 
@@ -1057,13 +1057,13 @@ namespace gui {
 		//out = gui::methods::HorizontalSlider(pz, out, value.x, value.y);
 
 		//slider label
-		gui::Label(rust::classes::Rect{ pos.x + id + 3 + 2.0f + 6, pos.y + current_pos.y - 3 - 10, 200, 16 }, text, gui::Color(0, 0, 0, (opacity / 255.f) > 120 ? 120 : opacity), false, 10);
-		gui::Label(rust::classes::Rect{ pos.x + id + 3 + 2.0f + 5, pos.y + current_pos.y - 4 - 10, 200, 16 }, text, Color(255, 255, 255, (opacity / 255.f)), false, 10);
+		gui::Label(Rect{ pos.x + id + 3 + 2.0f + 6, pos.y + current_pos.y - 3 - 10, 200, 16 }, text, gui::Color(0, 0, 0, (opacity / 255.f) > 120 ? 120 : opacity), false, 10);
+		gui::Label(Rect{ pos.x + id + 3 + 2.0f + 5, pos.y + current_pos.y - 4 - 10, 200, 16 }, text, Color(255, 255, 255, (opacity / 255.f)), false, 10);
 
 		auto nstr = il2cpp::methods::new_string(string::format(fmt, out));
 		//slider value
-		gui::Label(rust::classes::Rect{ pos.x + id + val, pos.y + current_pos.y - 3, 200, 16 }, nstr, gui::Color(0, 0, 0, (opacity / 255.f) > 120 ? 120 : opacity), false, 8);
-		gui::Label(rust::classes::Rect{ pos.x + id + val, pos.y + current_pos.y - 4, 200, 16 }, nstr, Color(255, 255, 255, (opacity / 255.f)), false, 8);
+		gui::Label(Rect{ pos.x + id + val, pos.y + current_pos.y - 3, 200, 16 }, nstr, gui::Color(0, 0, 0, (opacity / 255.f) > 120 ? 120 : opacity), false, 8);
+		gui::Label(Rect{ pos.x + id + val, pos.y + current_pos.y - 4, 200, 16 }, nstr, Color(255, 255, 255, (opacity / 255.f)), false, 8);
 
 		current_pos.y += button_size + 8;
 	}
@@ -1071,12 +1071,12 @@ namespace gui {
 	void Progbar(Vector2 start, Vector2 end, float a, float b)
 	{
 		if (a < 0) return;
-		fill_box(rust::classes::Rect(start.x, start.y, end.x, end.y + 1), rgba(21.f, 27.f, 37.f, 255.f));
+		fill_box(Rect(start.x, start.y, end.x, end.y + 1), rgba(21.f, 27.f, 37.f, 255.f));
 
 		if ((a / b) > 1)
 			a = b;
 
-		fill_box(rust::classes::Rect(start.x + 1, start.y + 1, (end.x * (a / b)) - 1, end.y - 1), 
+		fill_box(Rect(start.x + 1, start.y + 1, (end.x * (a / b)) - 1, end.y - 1), 
 			gui::Color(vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], 1.f));
 	}
 
@@ -1191,7 +1191,7 @@ namespace gui {
 				auto block = (BuildingBlock*)esp::closest_building_block;
 
 				if (block) {
-					rust::classes::BuildingGrade upgrade_tier = (rust::classes::BuildingGrade)(vars->misc.upgrade_tier + 1);
+					BuildingGrade upgrade_tier = (BuildingGrade)(vars->misc.upgrade_tier + 1);
 
 					auto tranny = block->transform();
 					if (tranny)
@@ -1207,38 +1207,38 @@ namespace gui {
 								auto grade = block->grade();
 								if ((int)upgrade_tier == 1) {
 
-									if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Wood, local_player)
-										&& block->CanChangeToGrade(rust::classes::BuildingGrade::Wood, local_player)
-										&& grade != rust::classes::BuildingGrade::Wood)
+									if (block->CanAffordUpgrade(BuildingGrade::Wood, local_player)
+										&& block->CanChangeToGrade(BuildingGrade::Wood, local_player)
+										&& grade != BuildingGrade::Wood)
 									{
-										block->Upgrade(rust::classes::BuildingGrade::Wood, local_player);
+										block->Upgrade(BuildingGrade::Wood, local_player);
 										esp::time_last_upgrade = get_fixedTime();
 									}
 								}
 								else if ((int)upgrade_tier == 2) {
-									if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Stone, local_player)
-										&& block->CanChangeToGrade(rust::classes::BuildingGrade::Stone, local_player)
-										&& grade != rust::classes::BuildingGrade::Stone)
+									if (block->CanAffordUpgrade(BuildingGrade::Stone, local_player)
+										&& block->CanChangeToGrade(BuildingGrade::Stone, local_player)
+										&& grade != BuildingGrade::Stone)
 									{
-										block->Upgrade(rust::classes::BuildingGrade::Stone, local_player);
+										block->Upgrade(BuildingGrade::Stone, local_player);
 										esp::time_last_upgrade = get_fixedTime();
 									}
 								}
 								else if ((int)upgrade_tier == 3) {
-									if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Metal, local_player)
-										&& block->CanChangeToGrade(rust::classes::BuildingGrade::Metal, local_player)
-										&& grade != rust::classes::BuildingGrade::Metal)
+									if (block->CanAffordUpgrade(BuildingGrade::Metal, local_player)
+										&& block->CanChangeToGrade(BuildingGrade::Metal, local_player)
+										&& grade != BuildingGrade::Metal)
 									{
-										block->Upgrade(rust::classes::BuildingGrade::Metal, local_player);
+										block->Upgrade(BuildingGrade::Metal, local_player);
 										esp::time_last_upgrade = get_fixedTime();
 									}
 								}
 								else if ((int)upgrade_tier == 4) {
-									if (block->CanAffordUpgrade(rust::classes::BuildingGrade::TopTier, local_player)
-										&& block->CanChangeToGrade(rust::classes::BuildingGrade::TopTier, local_player)
-										&& grade != rust::classes::BuildingGrade::TopTier)
+									if (block->CanAffordUpgrade(BuildingGrade::TopTier, local_player)
+										&& block->CanChangeToGrade(BuildingGrade::TopTier, local_player)
+										&& grade != BuildingGrade::TopTier)
 									{
-										block->Upgrade(rust::classes::BuildingGrade::TopTier, local_player);
+										block->Upgrade(BuildingGrade::TopTier, local_player);
 										esp::time_last_upgrade = get_fixedTime();
 									}
 								}
@@ -1291,34 +1291,34 @@ namespace gui {
 		auto current = methods::get_current();
 		auto event_type = methods::get_type(current);
 		bool md = false;
-		rust::classes::KeyCode k;
+		KeyCode k;
 		if (LI_FIND(GetAsyncKeyState)(VK_RBUTTON) & 0x8000)
 		{
-			k = rust::classes::KeyCode::Mouse1;
+			k = KeyCode::Mouse1;
 			md = true;
 		}
 		if (LI_FIND(GetAsyncKeyState)(VK_MBUTTON) & 0x8000)
 		{
-			k = rust::classes::KeyCode::Mouse2;
+			k = KeyCode::Mouse2;
 			md = true;
 		}
 		if (LI_FIND(GetAsyncKeyState)(VK_XBUTTON1) & 0x8000)
 		{
-			k = rust::classes::KeyCode::Mouse3;
+			k = KeyCode::Mouse3;
 			md = true;
 		}
 		if (LI_FIND(GetAsyncKeyState)(VK_XBUTTON2) & 0x8000)
 		{
-			k = rust::classes::KeyCode::Mouse4;
+			k = KeyCode::Mouse4;
 			md = true;
 		}
 		//return;
 		
-		if (event_type == rust::classes::EventType::KeyDown || event_type == rust::classes::EventType::KeyUp
-			|| event_type == rust::classes::EventType::MouseDown || event_type == rust::classes::EventType::MouseUp
+		if (event_type == EventType::KeyDown || event_type == EventType::KeyUp
+			|| event_type == EventType::MouseDown || event_type == EventType::MouseUp
 			|| md) {
-			rust::classes::KeyCode cur = md ? k : unity::get_keyCode(current);
-			if (event_type == rust::classes::EventType::KeyDown || event_type == rust::classes::EventType::MouseDown
+			KeyCode cur = md ? k : unity::get_keyCode(current);
+			if (event_type == EventType::KeyDown || event_type == EventType::MouseDown
 				|| md)
 				OnKeyDown(cur);
 			else
@@ -1330,10 +1330,10 @@ namespace gui {
 		
 		Vector2 pos, menu_pos = window_position, menu_size = { 500, 380 }, button_size = { 200, 0 }, mouse_pos = { mouse.x, height - mouse.y };
 		
-		fill_box(rust::classes::Rect{ 10, 6, 80, 16 }, rgba(14.f, 18.f, 24.f, 255));
+		fill_box(Rect{ 10, 6, 80, 16 }, rgba(14.f, 18.f, 24.f, 255));
 		outline_box({ 10, 6 }, { 80, 16 }, rgba(249.f, 130.f, 109.f, 255.f));
-		fill_box(rust::classes::Rect{ 10, 20, 81, 3 }, rgba(249.f, 130.f, 109.f, 255));
-		gui::Label(rust::classes::Rect{ 12, 4, 80, 20 }, _(L"matrix"), gui::Color(1, 1, 1, 1), true, 12);
+		fill_box(Rect{ 10, 20, 81, 3 }, rgba(249.f, 130.f, 109.f, 255));
+		gui::Label(Rect{ 12, 4, 80, 20 }, _(L"matrix"), gui::Color(1, 1, 1, 1), true, 12);
 
 
 		if (open) {
@@ -1348,10 +1348,10 @@ namespace gui {
 				case 3: { b += 0.0015f; g -= 0.0015f; if (b >= 1) cases = 0; break; }
 				default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
 				}
-				unity::set_lockstate(rust::classes::CursorLockMode::None);
+				unity::set_lockstate(CursorLockMode::None);
 		
 				if (LI_FIND(GetAsyncKeyState)(VK_LBUTTON)) {
-					auto z = rust::classes::Rect{ window_position.x, window_position.y, menu_size.x, 30 };
+					auto z = Rect{ window_position.x, window_position.y, menu_size.x, 30 };
 		
 					if (z.Contains(mouse_pos))
 					{
@@ -1361,13 +1361,13 @@ namespace gui {
 				}
 		
 				outline_box({ menu_pos.x - 1, menu_pos.y - 1 }, { menu_size.x + 1, menu_size.y + 1 }, rgba(249.f, 130.f, 109.f, 255.f));
-				fill_box(rust::classes::Rect{ menu_pos.x, menu_pos.y + 30, menu_size.x, menu_size.y - 30 }, rgba(21.f, 27.f, 37.f, 255));
-				fill_box(rust::classes::Rect{ menu_pos.x, menu_pos.y, menu_size.x, 30 }, rgba(14.f, 18.f, 24.f, 255));
-				fill_box(rust::classes::Rect{ menu_pos.x, menu_pos.y + 30, tab_size.x + 2, menu_size.y - 30 }, rgba(14.f, 18.f, 24.f, 255));
+				fill_box(Rect{ menu_pos.x, menu_pos.y + 30, menu_size.x, menu_size.y - 30 }, rgba(21.f, 27.f, 37.f, 255));
+				fill_box(Rect{ menu_pos.x, menu_pos.y, menu_size.x, 30 }, rgba(14.f, 18.f, 24.f, 255));
+				fill_box(Rect{ menu_pos.x, menu_pos.y + 30, tab_size.x + 2, menu_size.y - 30 }, rgba(14.f, 18.f, 24.f, 255));
 		
 				//MENU TIME
 		
-				gui::Label(rust::classes::Rect{ menu_pos.x + 2.0f + 1, menu_pos.y - 4 + 1, menu_size.x, 30 }, _(L"traphouse"), gui::Color(1, 1, 1, 1), true, 16);
+				gui::Label(Rect{ menu_pos.x + 2.0f + 1, menu_pos.y - 4 + 1, menu_size.x, 30 }, _(L"traphouse"), gui::Color(1, 1, 1, 1), true, 16);
 		
 				menu_pos.y += 30;
 				menu_size.y -= 25;
@@ -1740,12 +1740,12 @@ namespace esp
 	{
 		auto label = [&](float y, wchar_t* text)
 		{
-			gui::Label(rust::classes::Rect{ w2s_position.x + 1, w2s_position.y + 3 - y, 150, 20 }, text, gui::Color(0, 0, 0, 120), false, 12);
-			gui::Label(rust::classes::Rect{ w2s_position.x, w2s_position.y + 2 - y, 150, 20 }, text, gui::Color(color.x, color.y, color.z, color.w), false, 12);
+			gui::Label(Rect{ w2s_position.x + 1, w2s_position.y + 3 - y, 150, 20 }, text, gui::Color(0, 0, 0, 120), false, 12);
+			gui::Label(Rect{ w2s_position.x, w2s_position.y + 2 - y, 150, 20 }, text, gui::Color(color.x, color.y, color.z, color.w), false, 12);
 		};
 
-		gui::Label(rust::classes::Rect{ w2s_position.x + 1, w2s_position.y + 3, 150, 20 }, new_str_text, gui::Color(0, 0, 0, 120), false, 12);
-		gui::Label(rust::classes::Rect{ w2s_position.x, w2s_position.y + 2, 150, 20 }, new_str_text, gui::Color(color.x, color.y, color.z, color.w), false, 12);
+		gui::Label(Rect{ w2s_position.x + 1, w2s_position.y + 3, 150, 20 }, new_str_text, gui::Color(0, 0, 0, 120), false, 12);
+		gui::Label(Rect{ w2s_position.x, w2s_position.y + 2, 150, 20 }, new_str_text, gui::Color(color.x, color.y, color.z, color.w), false, 12);
 		float info_y = 12;
 
 		authorizedPlayers_list->for_each([&](PlayerNameID* authorizedPlayer, int32_t idx) {
@@ -1764,8 +1764,8 @@ namespace esp
 	{
 		auto label = [&](float y, wchar_t* text)
 		{
-			gui::Label(rust::classes::Rect{ w2s_position.x + 1, w2s_position.y + 3 + y, 150, 20 }, text, gui::Color(0, 0, 0, 120), false, 14);
-			gui::Label(rust::classes::Rect{ w2s_position.x, w2s_position.y + 2 + y, 150, 20 }, text, gui::Color(color.x, color.y, color.z, color.w), false, 14);
+			gui::Label(Rect{ w2s_position.x + 1, w2s_position.y + 3 + y, 150, 20 }, text, gui::Color(0, 0, 0, 120), false, 14);
+			gui::Label(Rect{ w2s_position.x, w2s_position.y + 2 + y, 150, 20 }, text, gui::Color(color.x, color.y, color.z, color.w), false, 14);
 		};
 
 		auto timer_text = *reinterpret_cast<uintptr_t*>(crate + 0x440);
@@ -1780,20 +1780,20 @@ namespace esp
 		if (!m_Text)
 			return;
 
-		gui::Label(rust::classes::Rect{ w2s_position.x + 1, w2s_position.y + 3, 150, 20 }, _(L"Hackable Crate"), gui::Color(0, 0, 0, 120), false, 14);
-		gui::Label(rust::classes::Rect{ w2s_position.x, w2s_position.y + 2, 150, 20 }, _(L"Hackable Crate"), gui::Color(color.x, color.y, color.z, color.w), false, 14);
+		gui::Label(Rect{ w2s_position.x + 1, w2s_position.y + 3, 150, 20 }, _(L"Hackable Crate"), gui::Color(0, 0, 0, 120), false, 14);
+		gui::Label(Rect{ w2s_position.x, w2s_position.y + 2, 150, 20 }, _(L"Hackable Crate"), gui::Color(color.x, color.y, color.z, color.w), false, 14);
 		label(12, m_Text);
 	}
 
 	void draw_item(Vector2 w2s_position, uintptr_t label, Vector4 color, wchar_t* name) { // vector4 because color gui im mretard dont talk about it
 		color /= 255;
 		if (label) {
-			gui::Label(rust::classes::Rect{ w2s_position.x + 1, w2s_position.y + 3, 150, 20 }, label, gui::Color(0, 0, 0, 120), false, 12);
-			gui::Label(rust::classes::Rect{ w2s_position.x, w2s_position.y + 2, 150, 20 }, label, gui::Color(color.x, color.y, color.z, color.w), false, 12);
+			gui::Label(Rect{ w2s_position.x + 1, w2s_position.y + 3, 150, 20 }, label, gui::Color(0, 0, 0, 120), false, 12);
+			gui::Label(Rect{ w2s_position.x, w2s_position.y + 2, 150, 20 }, label, gui::Color(color.x, color.y, color.z, color.w), false, 12);
 		}
 		else {
-			gui::Label(rust::classes::Rect{ w2s_position.x + 1, w2s_position.y + 3, 150, 20 }, name, gui::Color(0, 0, 0, 120), false, 12);
-			gui::Label(rust::classes::Rect{ w2s_position.x, w2s_position.y + 2, 150, 20 }, name, gui::Color(color.x, color.y, color.z, color.w), false, 12);
+			gui::Label(Rect{ w2s_position.x + 1, w2s_position.y + 3, 150, 20 }, name, gui::Color(0, 0, 0, 120), false, 12);
+			gui::Label(Rect{ w2s_position.x, w2s_position.y + 2, 150, 20 }, name, gui::Color(color.x, color.y, color.z, color.w), false, 12);
 		}
 	}
 
@@ -1848,18 +1848,18 @@ namespace esp
 
 									gui::methods::set_color({ 1, 1, 1, 1 });
 									gui::methods::DrawTexture({ 663 + info_y, (unity::get_height() * 0.8f) + 5, rect.wid / 3.0f, rect.hei / 3.0f }, texture);
-									//gui::Label(rust::classes::Rect{ x + 2.0f + 1, info_y - 4 + 13 + 1 + (unity::get_height() * 0.75f), width - 10, height / current_item }, item_name, gui::Color(0, 0, 0, 120), true, 12);
-									//gui::Label(rust::classes::Rect{ x + 2.0f, info_y - 4 + 13 + (unity::get_height() * 0.75f), width - 10, height / current_item }, item_name, gui::Color(255, 255, 255, 220), true, 12);
+									//gui::Label(Rect{ x + 2.0f + 1, info_y - 4 + 13 + 1 + (unity::get_height() * 0.75f), width - 10, height / current_item }, item_name, gui::Color(0, 0, 0, 120), true, 12);
+									//gui::Label(Rect{ x + 2.0f, info_y - 4 + 13 + (unity::get_height() * 0.75f), width - 10, height / current_item }, item_name, gui::Color(255, 255, 255, 220), true, 12);
 
 									/*
 									gui::fill_box({ 20, 400, 200, 200 }, { 0, 0, 0, 0.12 });
 									gui::fill_box({ 20, 400, 200, 200 }, { 0, 0, 0, 0.12 });
 									gui::outline_box(vector2{ 20, 400 }, vector2{ 200, 200 }, gui::Color(1, 0, 0, 1));
 									gui::outline_box(vector2{ 20, 400 }, vector2{ 200, 200 }, gui::Color(1, 0, 0, 1));
-									gui::Label(rust::classes::Rect{ 20, 320, 200, 200 }, target.player->get_player_name(), gui::Color(1, 1, 1, 1), true, 9);
-									gui::Label(rust::classes::Rect{ 20, 320, 200, 200 }, target.player->get_player_name(), gui::Color(255, 255, 255, 220), true, 9);
-									gui::Label(rust::classes::Rect{ 20, 370 + info_y, 200, 200 }, il2cpp::methods::newstring(string::format(("(x%d) %ls"), getam, item_name)), gui::Color(1, 1, 1, 1), true, 9);
-									gui::Label(rust::classes::Rect{ 20, 370 + info_y, 200, 200 }, il2cpp::methods::newstring(string::format(("(x%d) %ls"), getam, item_name)), gui::Color(255, 255, 255, 220), true, 9);
+									gui::Label(Rect{ 20, 320, 200, 200 }, target.player->get_player_name(), gui::Color(1, 1, 1, 1), true, 9);
+									gui::Label(Rect{ 20, 320, 200, 200 }, target.player->get_player_name(), gui::Color(255, 255, 255, 220), true, 9);
+									gui::Label(Rect{ 20, 370 + info_y, 200, 200 }, il2cpp::methods::newstring(string::format(("(x%d) %ls"), getam, item_name)), gui::Color(1, 1, 1, 1), true, 9);
+									gui::Label(Rect{ 20, 370 + info_y, 200, 200 }, il2cpp::methods::newstring(string::format(("(x%d) %ls"), getam, item_name)), gui::Color(255, 255, 255, 220), true, 9);
 									*/
 									info_y += 95;
 								}
@@ -1878,8 +1878,8 @@ namespace esp
 	void draw_text(Vector2 worldpos, wchar_t* str, Vector4 col, bool outline) {
 		if (str) {
 			if(outline)
-				gui::Label(rust::classes::Rect{ worldpos.x, worldpos.y, 150, 20 }, str, gui::Color(0, 0, 0, 120), false, 10.5);
-			gui::Label(rust::classes::Rect{ worldpos.x, worldpos.y, 150, 20 }, str, gui::Color(col.x, col.y, col.z, col.w), false, 10);
+				gui::Label(Rect{ worldpos.x, worldpos.y, 150, 20 }, str, gui::Color(0, 0, 0, 120), false, 10.5);
+			gui::Label(Rect{ worldpos.x, worldpos.y, 150, 20 }, str, gui::Color(col.x, col.y, col.z, col.w), false, 10);
 		}
 	}
 
@@ -1887,8 +1887,8 @@ namespace esp
 	{
 		if (name)
 		{
-			gui::Label(rust::classes::Rect{ position.x + 2.0f + 1, position.y - 4 + 1, 150, 20 }, name, gui::Color(0, 0, 0, 120), false, 12);
-			gui::Label(rust::classes::Rect{ position.x + 2.0f, position.y - 4, 150, 20 }, name, gui::Color(255, 255, 255, 220), false, 12);
+			gui::Label(Rect{ position.x + 2.0f + 1, position.y - 4 + 1, 150, 20 }, name, gui::Color(0, 0, 0, 120), false, 12);
+			gui::Label(Rect{ position.x + 2.0f, position.y - 4, 150, 20 }, name, gui::Color(255, 255, 255, 220), false, 12);
 		}
 	}
 
@@ -1898,16 +1898,16 @@ namespace esp
 			//check if enabled
 			if (vars->visual.midname) {
 				//draw player name dropshadow
-				gui::Label(rust::classes::Rect{ 861, 442 , 200, 260 }, ((BasePlayer*)target.ent)->_displayName()->str, gui::Color(0, 0, 0, 1), true, 12);
+				gui::Label(Rect{ 861, 442 , 200, 260 }, ((BasePlayer*)target.ent)->_displayName()->str, gui::Color(0, 0, 0, 1), true, 12);
 				// draw player name
-				gui::Label(rust::classes::Rect{ 862, 441, 200, 260 }, ((BasePlayer*)target.ent)->_displayName()->str, gui::Color(1, 1, 1, 1), true, 12);
+				gui::Label(Rect{ 862, 441, 200, 260 }, ((BasePlayer*)target.ent)->_displayName()->str, gui::Color(1, 1, 1, 1), true, 12);
 			}
 			if (vars->visual.midhealth) {
 				const auto cur_health = target.ent->health();
 				//draw player health dropshadow
-				gui::Label(rust::classes::Rect{ 861 , 457, 200, 260 }, il2cpp::methods::new_string(string::format(("[%.f]"), cur_health)), gui::Color(0, 0, 0, 1), true, 10);
+				gui::Label(Rect{ 861 , 457, 200, 260 }, il2cpp::methods::new_string(string::format(("[%.f]"), cur_health)), gui::Color(0, 0, 0, 1), true, 10);
 				//draw player health
-				gui::Label(rust::classes::Rect{ 862 , 456, 200, 260 }, il2cpp::methods::new_string(string::format(("[%.f]"), cur_health)), gui::Color(1, 1, 1, 1), true, 10);
+				gui::Label(Rect{ 862 , 456, 200, 260 }, il2cpp::methods::new_string(string::format(("[%.f]"), cur_health)), gui::Color(1, 1, 1, 1), true, 10);
 			}
 		}
 	}
@@ -2475,7 +2475,7 @@ namespace esp
 			//is_visible = unity::is_visible(camera_position, bones[47].world_position, (uintptr_t)esp::local_player);
 
 			gui::Color clr = !is_teammate ? (is_visible ? visible_color : invisible_color) : teammate_color;
-			if (HasPlayerFlag(ent, rust::classes::PlayerFlags::SafeZone))
+			if (HasPlayerFlag(ent, PlayerFlags::SafeZone))
 				clr = safezone_color;
 
 			float box_width = bounds.right - bounds.left;
@@ -2524,20 +2524,20 @@ namespace esp
 				auto wid = 4;
 				Bounds cbounds = Bounds();
 
-				auto lfoott = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::l_foot);
+				auto lfoott = ent->model()->boneTransforms()->get((int)Bone_List::l_foot);
 				auto lfootp = lfoott->position();
-				auto rfoott = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::r_foot);
+				auto rfoott = ent->model()->boneTransforms()->get((int)Bone_List::r_foot);
 				auto rfootp = lfoott->position();
 				auto mp = lfootp.midPoint(rfootp);
 
-				if (ent->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked)) {
+				if (ent->modelState()->has_flag(ModelState_Flag::Ducked)) {
 					//auto midpoint = ent->FindBone(_(L""))
 					cbounds.center = mp + Vector3(0.0f, 0.55f, 0.0f);
 					cbounds.extents = Vector3(0.4f, 0.65f, 0.4f);
 				}
 				else {
-					if (ent->modelState()->has_flag(rust::classes::ModelState_Flag::Crawling) || ent->modelState()->has_flag(rust::classes::ModelState_Flag::Sleeping)) {
-						cbounds.center = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->position();
+					if (ent->modelState()->has_flag(ModelState_Flag::Crawling) || ent->modelState()->has_flag(ModelState_Flag::Sleeping)) {
+						cbounds.center = ent->model()->boneTransforms()->get((int)Bone_List::pelvis)->position();
 						cbounds.extents = Vector3(0.9f, 0.2f, 0.4f);
 					}
 					else {
@@ -2605,14 +2605,14 @@ namespace esp
 			switch (vars->visual.hpbar)
 			{
 			case 1:
-				gui::fill_box(rust::classes::Rect(bounds.left, bounds.bottom + 6, box_width + 1, 4), gui::Color(0, 0, 0, 120));
-				gui::fill_box(rust::classes::Rect(bounds.left + 1, bounds.bottom + 7, ((box_width / max_health) * cur_health) - 1, 2), health_color);
+				gui::fill_box(Rect(bounds.left, bounds.bottom + 6, box_width + 1, 4), gui::Color(0, 0, 0, 120));
+				gui::fill_box(Rect(bounds.left + 1, bounds.bottom + 7, ((box_width / max_health) * cur_health) - 1, 2), health_color);
 				break;
 			case 2:
 
 
-				gui::fill_box(rust::classes::Rect(bounds.left - 7, bounds.top - 1, 4, box_height + 3), gui::Color(0, 0, 0, 120));
-				gui::fill_box(rust::classes::Rect(bounds.left - 6, bounds.top + box_height - height + 1, 2, height), health_color);
+				gui::fill_box(Rect(bounds.left - 7, bounds.top - 1, 4, box_height + 3), gui::Color(0, 0, 0, 120));
+				gui::fill_box(Rect(bounds.left - 6, bounds.top + box_height - height + 1, 2, height), health_color);
 				break;
 			}
 #pragma endregion
@@ -2641,8 +2641,8 @@ namespace esp
 					// WEAPON NAME ESP
 					if (vars->visual.weaponesp) {
 						auto half = (bounds.right - bounds.left) / 2;
-						gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 14.f, 80.f + half * 2 + 80.f , 20 }, weapon_name, gui::Color(0, 0, 0, 120), true, 10.5);
-						gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 15.f, 80.f + half * 2 + 79.f , 20 }, weapon_name, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
+						gui::Label(Rect{ bounds.left - 80.f  , bounds.bottom + 14.f, 80.f + half * 2 + 80.f , 20 }, weapon_name, gui::Color(0, 0, 0, 120), true, 10.5);
+						gui::Label(Rect{ bounds.left - 80.f  , bounds.bottom + 15.f, 80.f + half * 2 + 79.f , 20 }, weapon_name, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
 					}
 				}
 			}
@@ -2843,12 +2843,12 @@ namespace esp
 
 						const wchar_t* woundedlol = L"Wounded";
 
-						if (HasPlayerFlag(ent, rust::classes::PlayerFlags::Wounded)) {
+						if (HasPlayerFlag(ent, PlayerFlags::Wounded)) {
 
 							//outline 
-							gui::Label(rust::classes::Rect{ bounds.left - 79.5f  , bounds.top - 32.f, 79.f + half * 2 + 79.5f , 20 }, woundedlol, gui::Color(0, 0, 0, 120), true, 9.5);
+							gui::Label(Rect{ bounds.left - 79.5f  , bounds.top - 32.f, 79.f + half * 2 + 79.5f , 20 }, woundedlol, gui::Color(0, 0, 0, 120), true, 9.5);
 							//actual text
-							gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.top - 33.f, 80.f + half * 2 + 80.f , 20 }, woundedlol, gui::Color(0.99609, 0.56640, 0, 1), true, 9);
+							gui::Label(Rect{ bounds.left - 80.f  , bounds.top - 33.f, 80.f + half * 2 + 80.f , 20 }, woundedlol, gui::Color(0.99609, 0.56640, 0, 1), true, 9);
 						}
 
 					}
@@ -2856,16 +2856,16 @@ namespace esp
 					if (vars->visual.distance)
 					{
 						auto nstr = string::wformat(_(L"[%dm]"), (int)distance);
-						gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.bottom + 1.f, 79.f + half * 2 + 80.f , 30 }, nstr, gui::Color(0, 0, 0, 120), true, 10.5);
-						gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.bottom, 80.f + half * 2 + 80.f , 30 }, nstr, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
+						gui::Label(Rect{ bounds.left - 75.f  , bounds.bottom + 1.f, 79.f + half * 2 + 80.f , 30 }, nstr, gui::Color(0, 0, 0, 120), true, 10.5);
+						gui::Label(Rect{ bounds.left - 75.f  , bounds.bottom, 80.f + half * 2 + 80.f , 30 }, nstr, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
 					}
 					//if (vars->visual.distance)
 					//	nw = string::wformat(_(L"%s\n%d"), _(L""), name, (int)distance);
 					//else
 					//	nw = string::wformat(_(L"%s"), _(L""), name);
 
-					gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.top - 23.f, 79.f + half * 2 + 80.f , 30 }, name, gui::Color(0, 0, 0, 120), true, 10.5);
-					gui::Label(rust::classes::Rect{ bounds.left - 75.f  , bounds.top - 24.f, 80.f + half * 2 + 80.f , 30 }, name, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
+					gui::Label(Rect{ bounds.left - 75.f  , bounds.top - 23.f, 79.f + half * 2 + 80.f , 30 }, name, gui::Color(0, 0, 0, 120), true, 10.5);
+					gui::Label(Rect{ bounds.left - 75.f  , bounds.top - 24.f, 80.f + half * 2 + 80.f , 30 }, name, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
 				}
 				// PLAYER NAME
 			}

@@ -1,6 +1,6 @@
 ﻿#include <vector>
 #include <string>
-
+/*
 std::vector<std::wstring> SkinFileLines = {
 	_(L"Guitar (fun.guitar)"),
 	_(L"Skin ID"),
@@ -2904,3 +2904,4 @@ std::vector<std::wstring> SkinFileLines = {
 	_(L"950184212 Wise Door"),
 	_(L"1932737376 Wolf Den Wooden Door")
 };
+*/
