@@ -3,23 +3,23 @@
 
 int _purecall(void);
 
-namespace std
-{
-	[[noreturn]] inline void __cdecl _Xbad_function_call() { MessageBoxA(0, __FUNCTION__, __FUNCTION__, 0);  }
-	[[noreturn]] inline void __cdecl _Xbad_alloc() { MessageBoxA(0, __FUNCTION__, __FUNCTION__, 0);  }
-	[[noreturn]] inline void __cdecl _Xlength_error(char const*) { MessageBoxA(0, __FUNCTION__, __FUNCTION__, 0);  }
-	[[noreturn]] inline void __cdecl _Xout_of_range(char const*) { MessageBoxA(0, __FUNCTION__, __FUNCTION__, 0);  }
-	 [[noreturn]] inline void __cdecl  __security_check_cookie() { MessageBoxA(0, __FUNCTION__, __FUNCTION__, 0);  }
-} // namespace std
+//namespace std
+//{
+//	[[noreturn]] inline void __cdecl _Xbad_function_call() { MessageBoxA(0, __FUNCTION__, __FUNCTION__, 0);  }
+//	[[noreturn]] inline void __cdecl _Xbad_alloc() { MessageBoxA(0, __FUNCTION__, __FUNCTION__, 0);  }
+//	[[noreturn]] inline void __cdecl _Xlength_error(char const*) { MessageBoxA(0, __FUNCTION__, __FUNCTION__, 0);  }
+//	[[noreturn]] inline void __cdecl _Xout_of_range(char const*) { MessageBoxA(0, __FUNCTION__, __FUNCTION__, 0);  }
+//	 [[noreturn]] inline void __cdecl  __security_check_cookie() { MessageBoxA(0, __FUNCTION__, __FUNCTION__, 0);  }
+//} // namespace std
+//
+//#ifndef _DEBUG
+//extern "C" void __chkstk() {} // Disables stack allocation size limits.
+//extern "C" void __CxxFrameHandler4() { MessageBoxA(0, __FUNCTION__, __FUNCTION__, 0);  }
+//extern "C" void __std_terminate() { MessageBoxA(0, __FUNCTION__, __FUNCTION__, 0);  }
+//extern "C" void _fltused() { MessageBoxA(0, __FUNCTION__, __FUNCTION__, 0);  }
+//#endif
 
-#ifndef _DEBUG
-extern "C" void __chkstk() {} // Disables stack allocation size limits.
-extern "C" void __CxxFrameHandler4() { MessageBoxA(0, __FUNCTION__, __FUNCTION__, 0);  }
-extern "C" void __std_terminate() { MessageBoxA(0, __FUNCTION__, __FUNCTION__, 0);  }
-extern "C" void _fltused() { MessageBoxA(0, __FUNCTION__, __FUNCTION__, 0);  }
-#endif
-
-#define _Xlength_error(x) __ud2()
+//#define _Xlength_error(x) __ud2()
 #define ABS(N) ((N<0)?(-N):(N))
 
 unsigned short lfsr = 0xACE1u;
