@@ -1697,13 +1697,13 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 #pragma endregion
 
 
-		printf("before clientinput original\n");
+		//printf("before clientinput original\n");
 		//baseplayer->modelState()->remove_flag(ModelState_Flag::Flying);
 		//fakeorig_clientinput(baseplayer, state);
 		//baseplayer->modelState()->remove_flag(ModelState_Flag::Flying);
 		//printf("after clientinput recreation\n");
 		orig::baseplayer_client_input(baseplayer, state);
-		printf("after clientinput original\n");
+		//printf("after clientinput original\n");
 
 		if (baseplayer) {
 			baseplayer->modelState()->remove_flag(ModelState_Flag::Flying);
@@ -2509,7 +2509,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		}
 		else vars->visual.snapline = 0;
 
-		printf("before end lientinput original\n");
+		//printf("before end lientinput original\n");
 		if (baseplayer)
 			{
 				if (!iii) {
@@ -2680,7 +2680,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				//printf("clientinput finish\n");
 			}
 
-		printf("clientinput hook return\n");
+		//printf("clientinput hook return\n");
 		//printf("before clientinput return\n");
 		return;
 	}
