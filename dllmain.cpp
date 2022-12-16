@@ -146,6 +146,7 @@ bool DllMain(HMODULE hmodule)
 		auto p3 = p + std::string(_("images"));
 		p = p + std::string(_("configs"));
 		CreateDirectoryA(p.c_str(), 0);
+		CreateDirectoryA(p2.c_str(), 0);
 		CreateDirectoryA(p3.c_str(), 0);
 
 		mem::game_assembly_base = LI_MODULE_SAFE_(_("GameAssembly.dll"));
