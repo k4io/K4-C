@@ -146,7 +146,7 @@ public:
 		auto heightMap = getheightmap();
 		if (heightMap) {
 			//auto RealTarget = reinterpret_cast<BasePlayerSDK*>(CheatCore::m_cheat->AimbotTarget.entity);
-			auto RealTarget = esp::best_target;
+			auto RealTarget = vars->best_target;
 			//if (memory::IsAddressValid(RealTarget))
 			if (RealTarget.ent)
 			{
@@ -545,7 +545,7 @@ public:
 		auto _this = (Projectile*)this;
 		float projectile_desync = vprojectile_desync1 - 0.05f;
 		Vector3 from = data.hitPosition;
-		Vector3 target = esp::best_target.pos;//GetBounds((uintptr_t)data.hitEntity).m_center;
+		Vector3 target = vars->best_target.pos;//GetBounds((uintptr_t)data.hitEntity).m_center;
 		Vector3 initialTarget = target;
 		Vector3 velocity = data.outVelocity;
 		float desiredTime = data.hitTime;

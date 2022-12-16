@@ -722,8 +722,8 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			}
 
 			if (vars->visual.targettedflag) {
-				if (esp::best_target.ent) {
-					if (ply->userID() == ((BasePlayer*)esp::best_target.ent)->userID()) {
+				if (vars->best_target.ent) {
+					if (ply->userID() == ((BasePlayer*)vars->best_target.ent)->userID()) {
 						render.String({ bounds.right + 9, bounds.bottom - (box_height / 2) }, _(L"[Target]"), vars->visual.rainbowflags ? rainbowcolor : FLOAT4TOD3DCOLOR(vars->colors.players.details.flags.visible));
 					}
 				}
@@ -973,7 +973,7 @@ void iterate_entities() {
 	bool flp = false;
 	bool found_a_target = false;
 	auto temptarget = aim_target();
-	printf("before ent loop\n");
+	//printf("before ent loop\n");
 	for (int i = 0; i <= size; i++) {
 		auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
 		if (!current_object || current_object <= 100000)
@@ -1086,10 +1086,10 @@ void iterate_entities() {
 					}
 
 					if (vars->visual.showpred
-						&& esp::best_target.ent)
+						&& vars->best_target.ent)
 					{
 						auto pos = esp::local_player->eyes()->position();
-						auto targetpos = esp::best_target.pos;
+						auto targetpos = vars->best_target.pos;
 						auto item = esp::local_player->GetActiveItem();
 						if (item) {
 							auto held = item->GetHeldEntity<BaseProjectile>();
@@ -1140,6 +1140,9 @@ void iterate_entities() {
 							}
 						}
 					}
+
+					if (is_friend && !vars->visual.drawfriends)
+						continue;
 
 					if (vars->wants_shoot)
 						goto draw;
@@ -1196,43 +1199,43 @@ void iterate_entities() {
 					{
 						if (unity::GetKey(vars->keybinds.locktarget))
 							goto choosetarget;
-						else if (((BasePlayer*)entity)->userID() == ((BasePlayer*)esp::best_target.ent)->userID())
+						else if (((BasePlayer*)entity)->userID() == ((BasePlayer*)vars->best_target.ent)->userID())
 							goto setandrecordtarget;
 						else
 							goto draw;
 					}
 
 				choosetarget:
-					if (target < esp::best_target
-						|| (!esp::best_target.ent->is_alive() && entity->is_alive())
-						|| (target.ent && ((BasePlayer*)target.ent)->userID() == ((BasePlayer*)esp::best_target.ent)->userID()))
+					if (target < vars->best_target
+						|| (!vars->best_target.ent->is_alive() && entity->is_alive())
+						|| (target.ent && ((BasePlayer*)target.ent)->userID() == ((BasePlayer*)vars->best_target.ent)->userID()))
 					{
 					setandrecordtarget:
-						esp::best_target.pos = target.pos;
-						esp::best_target.distance = target.distance;
-						esp::best_target.fov = target.fov;
-						esp::best_target.ent = target.ent;
-						esp::best_target.visible = visible;
+						vars->best_target.pos = target.pos;
+						vars->best_target.distance = target.distance;
+						vars->best_target.fov = target.fov;
+						vars->best_target.ent = target.ent;
+						vars->best_target.visible = visible;
 
 						auto vel = target.ent->GetWorldVelocity();
 						
-						float next_frame = esp::best_target.last_frame + get_deltaTime();
+						float next_frame = vars->best_target.last_frame + get_deltaTime();
 						if (get_fixedTime() > next_frame)
 						{
 							//new frame, record velocity, record frame
-							esp::best_target.last_frame = get_fixedTime();
-							if (esp::best_target.velocity_list.size() < 30) //0.03125 * 30 = 0.9 seconds
-								esp::best_target.velocity_list.push_back(vel);
+							vars->best_target.last_frame = get_fixedTime();
+							if (vars->best_target.velocity_list.size() < 30) //0.03125 * 30 = 0.9 seconds
+								vars->best_target.velocity_list.push_back(vel);
 							else
 							{
-								esp::best_target.velocity_list.pop_back();
-								esp::best_target.velocity_list.insert(esp::best_target.velocity_list.begin(), 1, vel);
+								vars->best_target.velocity_list.pop_back();
+								vars->best_target.velocity_list.insert(vars->best_target.velocity_list.begin(), 1, vel);
 							}
 							float avgx = 0.f;
 							float avgy = 0.f;
 							float avgz = 0.f;
 							int count = 0;
-							for (auto v : esp::best_target.velocity_list)
+							for (auto v : vars->best_target.velocity_list)
 							{
 								if (v.is_empty()) break;
 								avgx += v.x;
@@ -1241,19 +1244,19 @@ void iterate_entities() {
 								count += 1;
 							}
 							avgx /= count; avgy /= count; avgz /= count;
-							esp::best_target.avg_vel = Vector3(avgx, avgy, avgz);
+							vars->best_target.avg_vel = Vector3(avgx, avgy, avgz);
 						}
 					}
 
-					if (esp::best_target.distance > 400.f)
-						esp::best_target = aim_target();
-					if (target < esp::best_target
+					if (vars->best_target.distance > 400.f)
+						vars->best_target = aim_target();
+					if (target < vars->best_target
 						&& target.fov < vars->combat.aimbotfov) {
-						esp::best_target = target;
+						vars->best_target = target;
 						found_a_target = true;
 					}
-					if (esp::best_target.fov > vars->combat.aimbotfov)
-						esp::best_target = aim_target();
+					if (vars->best_target.fov > vars->combat.aimbotfov)
+						vars->best_target = aim_target();
 				}
 
 			draw:
@@ -1520,21 +1523,21 @@ void iterate_entities() {
 								//auto visible = esp::local_player->is_visible(esp::local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
 								//target.visible = visible;
 
-								if (target < esp::best_target)
+								if (target < vars->best_target)
 								{
-									esp::best_target = target;
-									esp::best_target.is_heli = true;
+									vars->best_target = target;
+									vars->best_target.is_heli = true;
 								}
-								else if (esp::best_target.is_heli)
-									esp::best_target.pos = target.pos;
-								else esp::best_target.is_heli = false;
+								else if (vars->best_target.is_heli)
+									vars->best_target.pos = target.pos;
+								else vars->best_target.is_heli = false;
 							}
 							else
 							{
-								esp::best_target = aim_target();
+								vars->best_target = aim_target();
 							}
 						}
-						else esp::best_target.is_heli = false;
+						else vars->best_target.is_heli = false;
 
 						if (vars->visual.heli_esp
 							&& base_heli->is_alive())
@@ -1814,21 +1817,21 @@ void iterate_entities() {
 		}
 	}
 
-	printf("after ent loop\n");
-	System::list<Item*>* belt = ((BasePlayer*)esp::best_target.ent)->get_belt_items();
+	//printf("after ent loop\n");
+	System::list<Item*>* belt = ((BasePlayer*)vars->best_target.ent)->get_belt_items();
 	if (!belt)
-		esp::best_target = aim_target();
+		vars->best_target = aim_target();
 
-	if (esp::best_target.ent
+	if (vars->best_target.ent
 		&& vars->visual.hotbar_esp
 		&& esp::local_player) {
-		DrawPlayerHotbar(esp::best_target);
+		DrawPlayerHotbar(vars->best_target);
 	}
 	else {
 		vars->target_hotbar_list = {};
 		vars->target_name = _("");
 	}
-	printf("iterate entities return\n");
+	//printf("iterate entities return\n");
 }
 
 void Crosshair1() {
@@ -1887,19 +1890,19 @@ void TargettedIndicator() {
 }
 
 void DrawSnapline() {
-	if (esp::best_target.pos.is_empty()) return;
+	if (vars->best_target.pos.is_empty()) return;
 	Vector2 start = vars->visual.snapline == 1 ? Vector2(vars->ScreenX / 2, 0) :
 		vars->visual.snapline == 2 ? Vector2(vars->ScreenX / 2, vars->ScreenY / 2) :
 		vars->visual.snapline == 3 ? Vector2(vars->ScreenX / 2, vars->ScreenY) :
 		Vector2(vars->ScreenX / 2, vars->ScreenY);
-	Vector3 o = WorldToScreen(esp::best_target.pos);
+	Vector3 o = WorldToScreen(vars->best_target.pos);
 	if (o.x != 0 && o.y != 0)
-		render.Line(start, Vector2(o.x, o.y), FLOAT4TOD3DCOLOR(esp::best_target.visible ? vars->colors.ui.snapline.visible : vars->colors.ui.snapline.invisible), 1.f, true);
+		render.Line(start, Vector2(o.x, o.y), FLOAT4TOD3DCOLOR(vars->best_target.visible ? vars->colors.ui.snapline.visible : vars->colors.ui.snapline.invisible), 1.f, true);
 }
 
 void DrawFov() {
 	float x = vars->ScreenX / 2, y = vars->ScreenY / 2;
-	render.Circle(Vector2(x, y), FLOAT4TOD3DCOLOR(esp::best_target.visible ? vars->colors.ui.fov.visible : vars->colors.ui.fov.invisible), vars->combat.aimbotfov, 0.7f);
+	render.Circle(Vector2(x, y), FLOAT4TOD3DCOLOR(vars->best_target.visible ? vars->colors.ui.fov.visible : vars->colors.ui.fov.invisible), vars->combat.aimbotfov, 0.7f);
 }
 
 void Watermark() {

@@ -486,7 +486,7 @@ namespace misc
 		}
 		auto layermask = 1218519041;
 		auto HitScan = [&](Vector3 from, bool do_ = true, int val = 0) {
-			Vector3 head_pos_ = esp::best_target.pos;//player->model()->boneTransforms()->get(48)->get_bone_position();
+			Vector3 head_pos_ = vars->best_target.pos;//player->model()->boneTransforms()->get(48)->get_bone_position();
 
 			if (vars->combat.targetbehindwall && val) {
 				if ((val % 20) == 0) {
@@ -509,11 +509,11 @@ namespace misc
 				return std::make_pair(false, head_pos_);
 
 			if (vars->combat.HitScan) {
-				if (!esp::best_target.ent) return std::make_pair(false, head_pos_);
+				if (!vars->best_target.ent) return std::make_pair(false, head_pos_);
 				for (auto bone : { 48, 3, 4, 15, 14, 26, 57 }) {
 					Vector3 TargetPosition;
 					if (bone == 48) TargetPosition = head_pos_;
-					else TargetPosition = esp::best_target.ent->model()->boneTransforms()->get(bone)->position();
+					else TargetPosition = vars->best_target.ent->model()->boneTransforms()->get(bone)->position();
 					if (PLOS(from, TargetPosition, layermask)) {
 						settings::HitScanBone = bone;
 						return std::make_pair(true, TargetPosition);
@@ -1322,7 +1322,7 @@ namespace misc
 				//only shoots at visible players anyway
 				auto visible = true;
 
-				esp::best_target = target;
+				vars->best_target = target;
 
 				auto item = lp->GetActiveItem();
 				if (item)
@@ -1455,7 +1455,7 @@ namespace misc
 		void walktoplayer(PlayerWalkMovement* pwm,
 			char* selected) {
 			auto lp = esp::local_player;
-			BasePlayer* ply = (BasePlayer*)esp::best_target.ent;
+			BasePlayer* ply = (BasePlayer*)vars->best_target.ent;
 			bool block = false;
 			for (auto p : player_map)
 				if (p.second->userID() == vars->follow_player_id)

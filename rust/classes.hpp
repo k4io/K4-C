@@ -124,6 +124,7 @@ default_t const defaultt = default_t();
 #define FIELD(offset,name,type) type& name() { \
 	NP(type) \
 	return *reinterpret_cast<type*>((uintptr_t)this + offset); }
+	//return (mem::read<type>((uintptr_t)this + offset)); }	
 
 template<typename T>
 void pop_front(std::vector<T>& vec)
@@ -917,8 +918,7 @@ public:
 	}
 
 	rust_str get_object_name() {
-		pent
-			auto obj = *reinterpret_cast<uintptr_t*>(this + 0x8);
+		auto obj = *reinterpret_cast<uintptr_t*>(this + 0x8);
 		auto nameptr = mem::read<uintptr_t>(obj + 0x60);
 		return *reinterpret_cast<rust_str*>(nameptr);
 	}
@@ -1432,7 +1432,7 @@ public:
 };
 
 class BaseProjectile : public AttackEntity {
-public:
+public:  
 	FIELD(O::BaseProjectile::reloadTime, reloadTime, float);
 	FIELD(O::BaseProjectile::nextReloadTime, nextReloadTime, float);
 	FIELD(O::BaseProjectile::recoil, recoil, RecoilProperties*);
@@ -1495,7 +1495,7 @@ public:
 		did_attack_client_side((uintptr_t)this);
 		return;
 	}
-
+	
 	int ammo_left() {
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return 0;
@@ -2114,40 +2114,6 @@ public:
 
 };
 
-class aim_target {
-public:
-	Vector3 pos;
-
-	BaseCombatEntity* ent = NULL;
-
-	float distance = 5000;
-	float fov = vars->combat.aimbotfov;
-
-	int network_id;
-
-	bool is_heli = false;
-	bool visible = false;
-	bool sleeping = false;
-	bool teammate = false;
-	bool found = false;
-
-	/*Velocity related shit*/
-	Vector3 avg_vel = Vector3(0, 0, 0);
-	std::vector<Vector3> velocity_list = {};
-	float last_frame = 0.f; // overwrite every fixedtime + deltatime
-
-	bool operator<(const aim_target& b) {
-		pent
-			if (fov == vars->combat.aimbotfov) {
-				pent
-					return distance < b.distance;
-			}
-			else {
-				return fov < b.fov;
-			}
-	}
-};
-
 float get_2d_dist(const Vector2& Src, const Vector3& Dst) {
 	pent
 		return Vector3::my_sqrt(powFFFFFFFFFFFFFFFFFFFFFF(Src.x - Dst.x) + powFFFFFFFFFFFFFFFFFFFFFF(Src.y - Dst.y));
@@ -2208,8 +2174,7 @@ public:
 	}
 
 	Vector3 EyeOffset() {
-		pent
-			auto kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyes_TypeInfo);
+		auto kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyes_TypeInfo);
 		return *reinterpret_cast<Vector3*>(kl + 0xB8); //eye offset is at + 0x0 from class
 	}
 };
@@ -2224,8 +2189,7 @@ public:
 	}
 
 	Vector3 get_aim_angles() {
-		pent
-			auto current = mem::read<uintptr_t>((uintptr_t)this + 0x10);
+		auto current = mem::read<uintptr_t>((uintptr_t)this + 0x10);
 		if (!current) return Vector3::Zero();
 		return *reinterpret_cast<Vector3*>(current + 0x18);
 	}
@@ -2306,8 +2270,7 @@ public:
 	FIELD(O::PlayerModel::_multiMesh, _multiMesh, SkinnedMultiMesh*);
 
 	bool isnpc() {
-		pent
-			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return false;
+		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return false;
 		return get_IsNpc((uintptr_t)this);
 	}
 	bool isLocalPlayer() {

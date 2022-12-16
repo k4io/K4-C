@@ -283,7 +283,11 @@
     <ClInclude Include="vars.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="kiero\minhook\dll_resources\MinHook.def" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="kiero\minhook\dll_resources\MinHook.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

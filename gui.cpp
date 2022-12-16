@@ -1240,7 +1240,6 @@ namespace Gui
 			im::Separator();
 
 			im::Checkbox(_("PSilent"), &vars->combat.psilent);
-			im::Checkbox(_("PSilent Melee"), &vars->combat.psilentmelee);
 			im::Checkbox(_("Vis check"), &vars->combat.vischeck);
 			im::SliderFloat(_("Movement pred"), &vars->combat.movementpred, 0.1f, 1.0f, _("%.2f"), 1.f);
 			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
@@ -1298,7 +1297,7 @@ namespace Gui
 			//im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			//im::Hotkey(_("M2"), &vars->keybinds.manipulator2, ImVec2(50, 15));
 			//im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
-			im::Checkbox(_("STW (many invalids)"), &vars->combat.throughwall);
+			//im::Checkbox(_("STW (many invalids)"), &vars->combat.throughwall);
 			//im::Checkbox(_("Pierce"), &vars->combat.pierce);
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
 			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
@@ -1309,7 +1308,7 @@ namespace Gui
 			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Multiplier for distance to teleport the bullet within desync time"));
 			}
-			im::Checkbox(_("Best velocity"), &vars->combat.bestvelocity);
+			//im::Checkbox(_("Best velocity"), &vars->combat.bestvelocity);
 			im::Checkbox(_("Fast bullets"), &vars->combat.fast_bullet);
 			im::Checkbox(_("Instant eoka"), &vars->combat.instaeoka);
 			//im::Checkbox(_("Fast bow"), &vars->combat.fastbow);
@@ -1336,6 +1335,7 @@ namespace Gui
 		{
 			im::Text(_("Melee"));
 			im::Separator();
+			im::Checkbox(_("PSilent melee"), &vars->combat.psilentmelee);
 			im::Checkbox(_("Silent melee"), &vars->combat.silent_melee);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("S"), &vars->keybinds.silentmelee, ImVec2(50, 14));
@@ -1388,6 +1388,7 @@ namespace Gui
 			im::Combo(_("Health bar"), &vars->visual.hpbar,
 				_("None\0Side\0Bottom\0Fill box"));
 			im::Checkbox(_("Rainbow health bar"), &vars->visual.rainbowhpbar);
+			im::Checkbox(_("Draw friends"), &vars->visual.drawfriends);
 			im::Checkbox(_("Target flag"), &vars->visual.targettedflag);
 			im::Checkbox(_("Friend flag"), &vars->visual.friendflag);
 			im::Checkbox(_("Wounded flag"), &vars->visual.woundedflag);

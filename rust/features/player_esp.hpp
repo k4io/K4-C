@@ -61,7 +61,7 @@ namespace esp {
 	uintptr_t client_entities;
 	BasePlayer* local_player;
 	VMatrix matrix;
-	aim_target best_target = aim_target();
+	//aim_target best_target = aim_target();
 	uintptr_t closest_building_block = 0;
 
 	std::vector<aim_target> visibleplayerswithin300m = {};
@@ -368,43 +368,43 @@ namespace esp {
 						{
 							if (unity::GetKey(vars->keybinds.locktarget))
 								goto choosetarget;
-							else if (((BasePlayer*)entity)->userID() == ((BasePlayer*)esp::best_target.ent)->userID())
+							else if (((BasePlayer*)entity)->userID() == ((BasePlayer*)vars->best_target.ent)->userID())
 								goto setandrecordtarget;
 							else
 								goto draw;
 						}
 
 					choosetarget:
-						if (target < esp::best_target
-							|| !esp::best_target.ent->is_alive()
-							|| (target.ent && ((BasePlayer*)target.ent)->userID() == ((BasePlayer*)esp::best_target.ent)->userID()))
+						if (target < vars->best_target
+							|| !vars->best_target.ent->is_alive()
+							|| (target.ent && ((BasePlayer*)target.ent)->userID() == ((BasePlayer*)vars->best_target.ent)->userID()))
 						{
 						setandrecordtarget:
-							esp::best_target.pos = target.pos;
-							esp::best_target.distance = target.distance;
-							esp::best_target.fov = target.fov;
-							esp::best_target.ent = target.ent;
-							esp::best_target.visible = visible;
+							vars->best_target.pos = target.pos;
+							vars->best_target.distance = target.distance;
+							vars->best_target.fov = target.fov;
+							vars->best_target.ent = target.ent;
+							vars->best_target.visible = visible;
 
 							auto vel = target.ent->GetWorldVelocity();
 
-							float next_frame = esp::best_target.last_frame + get_deltaTime();
+							float next_frame = vars->best_target.last_frame + get_deltaTime();
 							if (get_fixedTime() > next_frame)
 							{
 								//new frame, record velocity, record frame
-								esp::best_target.last_frame = get_fixedTime();
-								if (esp::best_target.velocity_list.size() < 30) //0.03125 * 30 = 0.9 seconds
-									esp::best_target.velocity_list.push_back(vel);
+								vars->best_target.last_frame = get_fixedTime();
+								if (vars->best_target.velocity_list.size() < 30) //0.03125 * 30 = 0.9 seconds
+									vars->best_target.velocity_list.push_back(vel);
 								else
 								{
-									esp::best_target.velocity_list.pop_back();
-									esp::best_target.velocity_list.insert(esp::best_target.velocity_list.begin(), 1, vel);
+									vars->best_target.velocity_list.pop_back();
+									vars->best_target.velocity_list.insert(vars->best_target.velocity_list.begin(), 1, vel);
 								}
 								float avgx = 0.f;
 								float avgy = 0.f;
 								float avgz = 0.f;
 								int count = 0;
-								for (auto v : esp::best_target.velocity_list)
+								for (auto v : vars->best_target.velocity_list)
 								{
 									if (v.is_empty()) break;
 									avgx += v.x;
@@ -413,17 +413,17 @@ namespace esp {
 									count += 1;
 								}
 								avgx /= count; avgy /= count; avgz /= count;
-								esp::best_target.avg_vel = Vector3(avgx, avgy, avgz);
+								vars->best_target.avg_vel = Vector3(avgx, avgy, avgz);
 							}
 						}
 
-						if (esp::best_target.distance > 400.f)
-							esp::best_target = aim_target();
-						if (target < esp::best_target
+						if (vars->best_target.distance > 400.f)
+							vars->best_target.Reset();
+						if (target < vars->best_target
 							&& target.fov < vars->combat.aimbotfov)
-							esp::best_target = target;
-						if (esp::best_target.fov > vars->combat.aimbotfov)
-							esp::best_target = aim_target();
+							vars->best_target = target;
+						if (vars->best_target.fov > vars->combat.aimbotfov)
+							vars->best_target.Reset();
 					}
 
 				draw:
@@ -673,21 +673,21 @@ namespace esp {
 									//auto visible = esp::local_player->is_visible(esp::local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
 									//target.visible = visible;
 
-									if (target < esp::best_target)
+									if (target < vars->best_target)
 									{
-										esp::best_target = target;
-										esp::best_target.is_heli = true;
+										vars->best_target = target;
+										vars->best_target.is_heli = true;
 									}
-									else if (esp::best_target.is_heli)
-										esp::best_target.pos = target.pos;
-									else esp::best_target.is_heli = false;
+									else if (vars->best_target.is_heli)
+										vars->best_target.pos = target.pos;
+									else vars->best_target.is_heli = false;
 								}
 								else
 								{
-									esp::best_target = aim_target();
+									vars->best_target = aim_target();
 								}
 							}
-							else esp::best_target.is_heli = false;
+							else vars->best_target.is_heli = false;
 
 							//if (vars->visual.heli_esp
 							//	&& base_heli->is_alive())
@@ -912,10 +912,10 @@ namespace esp {
 				}
 			}
 		}
-		//if (esp::best_target.ent
+		//if (vars->best_target.ent
 		//	&& vars->visual.hotbar_esp
 		//	&& esp::local_player)
-		//	DrawPlayerHotbar(esp::best_target);
+		//	DrawPlayerHotbar(vars->best_target);
 	}
 
 	void iterate_players(bool draw = true) {
@@ -1036,7 +1036,7 @@ namespace esp {
 								if (camera.get_3d_dist(world_position) >= 4.2f)
 									return;
 
-								aim_target target = esp::best_target;
+								aim_target target = vars->best_target;
 
 								attack_melee(target, baseprojectile, esp::local_player, true);
 							}
@@ -1090,35 +1090,35 @@ namespace esp {
 						//	visibleplayerswithin300m.push_back(target);
 						//}
 
-						if (target < best_target
-							|| !best_target.ent->is_alive()
-							|| (target.ent && ((BasePlayer*)target.ent)->userID() == ((BasePlayer*)best_target.ent)->userID()))
+						if (target < vars->best_target
+							|| !vars->best_target.ent->is_alive()
+							|| (target.ent && ((BasePlayer*)target.ent)->userID() == ((BasePlayer*)vars->best_target.ent)->userID()))
 						{
-							best_target.pos = target.pos;
-							best_target.distance = target.distance;
-							best_target.fov = target.fov;
-							best_target.ent = target.ent;
-							best_target.visible = visible;
+							vars->best_target.pos = target.pos;
+							vars->best_target.distance = target.distance;
+							vars->best_target.fov = target.fov;
+							vars->best_target.ent = target.ent;
+							vars->best_target.visible = visible;
 
 							auto vel = target.ent->GetWorldVelocity();
 
-							float next_frame = best_target.last_frame + get_deltaTime();
+							float next_frame = vars->best_target.last_frame + get_deltaTime();
 							if (get_fixedTime() > next_frame)
 							{
 								//new frame, record velocity, record frame
-								best_target.last_frame = get_fixedTime();
-								if (best_target.velocity_list.size() < 90) //0.03125 * 30 = 0.9 seconds
-									best_target.velocity_list.push_back(vel);
+								vars->best_target.last_frame = get_fixedTime();
+								if (vars->best_target.velocity_list.size() < 90) //0.03125 * 30 = 0.9 seconds
+									vars->best_target.velocity_list.push_back(vel);
 								else
 								{
-									best_target.velocity_list.pop_back();
-									best_target.velocity_list.insert(best_target.velocity_list.begin(), 1, vel);
+									vars->best_target.velocity_list.pop_back();
+									vars->best_target.velocity_list.insert(vars->best_target.velocity_list.begin(), 1, vel);
 								}
 								float avgx = 0.f;
 								float avgy = 0.f;
 								float avgz = 0.f;
 								int count = 0;
-								for (auto v : best_target.velocity_list)
+								for (auto v : vars->best_target.velocity_list)
 								{
 									if (v.is_empty()) break;
 									avgx += v.x;
@@ -1127,15 +1127,15 @@ namespace esp {
 									count += 1;
 								}
 								avgx /= count; avgy /= count; avgz /= count;
-								best_target.avg_vel = Vector3(avgx, avgy, avgz);
+								vars->best_target.avg_vel = Vector3(avgx, avgy, avgz);
 							}
 						}
 
-						if (target < best_target
+						if (target < vars->best_target
 							&& target.fov < vars->combat.aimbotfov)
-							best_target = target;
-						if (best_target.fov > vars->combat.aimbotfov)
-							best_target = aim_target();
+							vars->best_target = target;
+						if (vars->best_target.fov > vars->combat.aimbotfov)
+							vars->best_target = aim_target();
 					}
 
 					if (draw && vars->visual.playeresp && local_player) {
@@ -1353,21 +1353,21 @@ namespace esp {
 								auto visible = local_player->is_visible(esp::local_player->model()->boneTransforms()->get(48)->position(), target.pos);
 								target.visible = visible;
 
-								if (target < best_target)
+								if (target < vars->best_target)
 								{
-									best_target = target;
-									best_target.is_heli = true;
+									vars->best_target = target;
+									vars->best_target.is_heli = true;
 								}
-								else if (best_target.is_heli)
-									best_target.pos = target.pos;
-								else best_target.is_heli = false;
+								else if (vars->best_target.is_heli)
+									vars->best_target.pos = target.pos;
+								else vars->best_target.is_heli = false;
 							}
 							else
 							{
-								best_target = aim_target();
+								vars->best_target = aim_target();
 							}
 						}
-						else best_target.is_heli = false;
+						else vars->best_target.is_heli = false;
 
 						draw_heli(x, y, w, h);
 						continue;
@@ -1486,8 +1486,8 @@ namespace esp {
 		return;
 		
 		*/
-		esp::draw_target_hotbar(best_target);
-		esp::draw_middle(best_target);
+		esp::draw_target_hotbar(vars->best_target);
+		esp::draw_middle(vars->best_target);
 	}
 	
 	void draw_teammates() {

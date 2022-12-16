@@ -48,7 +48,7 @@ private:
 		__except (true) { return 0; }
 	}
 
-	__declspec(noinline) bool InitRender(IDXGISwapChain* SwapChain)
+	__declspec(noinline) bool InitRender(IDXGISwapChain* SwapChain, float fontsize = 14.f)
 	{
 		__try {
 			//prep d2d render & text engine
@@ -68,7 +68,7 @@ private:
 							DWRITE_FONT_WEIGHT_NORMAL,
 							DWRITE_FONT_STYLE_NORMAL,
 							DWRITE_FONT_STRETCH_NORMAL,
-							14.f,
+							fontsize,
 							_(L""),
 							&TextFormat)))
 						{

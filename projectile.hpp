@@ -244,7 +244,7 @@ public:
 	bool DoFatBulletHit(Projectile* pr, Vector3 point) {
 		float maxdist = GetHitDist();
 
-		auto target = esp::best_target;//esp::local_player->get_aimbot_target(point, maxdist);
+		auto target = vars->best_target;//esp::local_player->get_aimbot_target(point, maxdist);
 
 		if (get_isAlive((BaseProjectile*)pr) && target.ent && !target.teammate) {
 			if (!unity::is_visible(target.pos, point, (uintptr_t)esp::local_player)) {

@@ -38,13 +38,13 @@ namespace sg {
 			auto ctime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());//time(0);
 			auto next_input_time = lastinputtime + std::chrono::milliseconds(mspt);
 			if (ctime > next_input_time) {
-				if (GetAsyncKeyState(0x57)) //W pressed
+				if (GetAsyncKeyState(0x57) || GetAsyncKeyState(VK_UP)) //W pressed
 					vel.y--;
-				else if (GetAsyncKeyState(0x41)) //A pressed
+				else if (GetAsyncKeyState(0x41) || GetAsyncKeyState(VK_LEFT)) //A pressed
 					vel.x--;
-				else if (GetAsyncKeyState(0x53)) //S pressed
+				else if (GetAsyncKeyState(0x53) || GetAsyncKeyState(VK_DOWN)) //S pressed
 					vel.y++;
-				else if (GetAsyncKeyState(0x44)) //D pressed
+				else if (GetAsyncKeyState(0x44) || GetAsyncKeyState(VK_RIGHT)) //D pressed
 					vel.x++;
 				UpdateSnake();
 				vel = Vector2(0, 0);

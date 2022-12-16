@@ -1117,17 +1117,17 @@ namespace gui {
 
 		if (esp::local_player)
 		{
-			//if ((esp::best_target.ent && esp::best_target.ent->is_alive())
+			//if ((vars->best_target.ent && vars->best_target.ent->is_alive())
 			//	&& vars->visual.snapline > 1)
 			//{
 			//	Vector2 start = vars->visual.snapline == 1 ? Vector2(ScreenWidth / 2, 0) :
 			//		vars->visual.snapline == 2 ? Vector2(ScreenWidth / 2, ScreenHeight / 2) :
 			//		vars->visual.snapline == 3 ? Vector2(ScreenWidth / 2, ScreenHeight) :
 			//		Vector2(ScreenWidth / 2, 1080); // does not matter
-			//	Vector3 o = WorldToScreen(esp::best_target.pos);
+			//	Vector3 o = WorldToScreen(vars->best_target.pos);
 			//	if (o.x != 0 && o.y != 0)
 			//	{
-			//		if (esp::best_target.visible)
+			//		if (vars->best_target.visible)
 			//			gui::line(start, Vector2(o.x, o.y), gui::Color(0, 0.9, 0.2, 1), 0.1f, true);
 			//		else
 			//			gui::line(start, Vector2(o.x, o.y), gui::Color(0.9, 0, 0.2, 1), 0.1f, true);

@@ -125,6 +125,57 @@ struct _item {
 	int count;
 };
 
+class BaseCombatEntity;
+
+class aim_target {
+public:
+	Vector3 pos;
+
+	BaseCombatEntity* ent = 0;
+
+	float distance = 5000;
+	float fov = 1;
+	float maxfov = 0;
+
+	int network_id;
+
+	bool is_heli = false;
+	bool visible = false;
+	bool sleeping = false;
+	bool teammate = false;
+	bool found = false;
+
+	/*Velocity related shit*/
+	Vector3 avg_vel = Vector3(0, 0, 0);
+	std::vector<Vector3> velocity_list = {};
+	float last_frame = 0.f; // overwrite every fixedtime + deltatime
+
+	bool operator<(const aim_target& b) {
+		if (fov == maxfov) {
+			return distance < b.distance;
+		}
+		else {
+			return fov < b.fov;
+		}
+	}
+	void Reset() {
+		visible = false;
+		sleeping = false;
+		is_heli = false;
+		teammate = false;
+		found = false;
+		avg_vel = {};
+		velocity_list.clear();
+		last_frame = 0.f;
+		network_id = -1;
+		distance = 5000;
+		fov = 0;
+		ent = 0;
+		pos = {};
+	}
+};
+
+
 struct Vars
 {
 	//sol::state lua;
@@ -144,6 +195,7 @@ struct Vars
 
 	std::vector<RenderObject*> RenderList{};
 	IDXGISwapChain* pSwapChain;
+	aim_target best_target;
 
 	int follow_player_id = -1;
 
@@ -301,6 +353,7 @@ struct Vars
 		bool rainbowname = false;
 		bool rainbowbox = false;
 		bool rainbowhpbar = false;
+		bool drawfriends = true;
 		bool rainbowskeleton = false;
 		bool rainbowflags = false;
 		bool rainbowdist = false;
