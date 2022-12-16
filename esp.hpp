@@ -1953,91 +1953,6 @@ void LoadGuiSkinmap() {
 
 bool finit = false;
 
-sol::state initlua() {
-	sol::state lua;
-	lua.open_libraries(sol::lib::base, sol::lib::string, sol::lib::package, sol::lib::io);
-
-	//auto core = lua["cheat"].get_or_create<sol::table>();
-
-	lua.new_usertype<Vector2>("Vector2",
-		"x", &Vector2::x,
-		"y", &Vector2::y);
-
-	lua.new_usertype<Vector3>("Vector3",
-		"x", &Vector3::x,
-		"y", &Vector3::y,
-		"z", &Vector3::z);
-
-	lua.new_usertype<Vector4>("Vector4",
-		"x", &Vector4::x,
-		"y", &Vector4::y,
-		"z", &Vector4::z,
-		"w", &Vector4::w);
-
-	lua.new_usertype<lw::color>("color",
-		"r", &lw::color::r,
-		"g", &lw::color::g,
-		"b", &lw::color::b,
-		"a", &lw::color::a);
-
-	auto gui = lua["draw"].get_or_create<sol::table>();
-
-	gui.set_function("rect", &lw::draw::Rect);
-	gui.set_function("filledrect", &lw::draw::FillRect);
-	gui.set_function("circle", &lw::draw::Circle);
-	gui.set_function("filledcircle", &lw::draw::FillCircle);
-	gui.set_function("text", &lw::draw::Text);
-	gui.set_function("textcentered", &lw::draw::TextCentered);
-	gui.set_function("line", &lw::draw::Line);
-	gui.set_function("line3d", &lw::draw::Line3d);
-	gui.set_function("sphere3d", &lw::draw::Sphere3d);
-
-	lua.new_usertype<lw::Eyes>("PlayerEyes",
-		"getpos", &lw::Eyes::GetPosition,
-		"getrot", &lw::Eyes::GetRotation,
-		"bodyfwd", &lw::Eyes::BodyForward,
-		"bodyright", &lw::Eyes::BodyRight,
-		"getviewoffset", &lw::Eyes::GetViewOffset,
-		"setviewoffset", &lw::Eyes::SetViewOffset);
-
-	lua.new_usertype<lw::Player>("Player",
-		"settargetmovement", &lw::Player::SetTargetMovement,
-		"gettargetmovement", &lw::Player::GetTargetMovement,
-		"isalive", &lw::Player::IsAlive,
-		"gethealth", &lw::Player::GetHealth,
-		"getbonepos", &lw::Player::GetBonePos,
-		"getname", &lw::Player::GetName,
-		"isnpc", &lw::Player::IsNpc,
-		"userid", &lw::Player::GetUserId,
-		"serverrpc", &lw::Player::Rpc,
-		"islocalplayer", &lw::Player::IsLocalPlayer,
-		"isfriend", &lw::Player::IsFriend,
-		//"geteyes", &lw::Player::GetEyes,
-		"isteammate", &lw::Player::IsTeammate);
-
-	lua.new_usertype<lw::Entity>("Entity",
-		"getpos", &lw::Entity::GetPosition,
-		"classname", &lw::Entity::GetClassname,
-		"rpc", &lw::Entity::Rpc);
-
-	auto core = lua["cheat"].get_or_create<sol::table>();
-
-	core.set_function("getplayer", &lw::entities::GetPlayer);
-	core.set_function("getentity", &lw::entities::GetEntity);
-	core.set_function("lineofsight", &lw::misc::LineOfSight);
-	core.set_function("worldtoscreen", &lw::misc::w2s);
-	core.set_function("iskeydown", &lw::misc::IsKeyPressed);
-	core.set_function("playerlistsize", &lw::entities::PlayerListSize);
-	core.set_function("entitylistsize", &lw::entities::EntityListSize);
-	core.set_function("realtimesincestartup", &lw::misc::TimeSinceStartup);
-	core.set_function("fixedtime", &lw::misc::FixedTime);
-
-	core["desynctime"] = vars->desyncTime;
-	core["flyhackDistanceY"] = settings::vert_flyhack;
-	core["flyhackDistanceX"] = settings::hor_flyhack;
-	return lua;
-}
-
 void new_frame() {
 	if (!finit) {
 		//printf("unity base: %" PRIxPTR "\n", mem::unity_player_base);
@@ -2109,7 +2024,7 @@ void new_frame() {
 	//iterate_entities();
 	//printf("iterate entities\n");
 	iterate_entities();
-
+	/*
 	__try {
 		sol::state lua;
 		lua.open_libraries(sol::lib::base, sol::lib::string, sol::lib::package, sol::lib::io);
@@ -2206,6 +2121,7 @@ void new_frame() {
 		}
 	}
 	__except (true) {}
+	*/
 
 	if(lw::playerlist.size() > 0)
 		if (!vars->local_player) {

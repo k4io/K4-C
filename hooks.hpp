@@ -2669,7 +2669,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 #pragma endregion
 
 		orig::baseplayer_client_input(baseplayer, state);
-
+		/*
 		__try {
 			sol::state lua;
 			lua.open_libraries(sol::lib::base, sol::lib::string, sol::lib::package, sol::lib::io);
@@ -2767,7 +2767,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 		}
 		__except (true) {}
-
+		*/
 		return;
 	}
 }

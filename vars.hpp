@@ -1,7 +1,7 @@
 #pragma once
 #include "utils/vector.hpp"
 #include "utils/xorstr.hpp"
-#include "../sol/sol.hpp"
+//#include "../sol/sol.hpp"
 #include <string>
 #include <vector>
 #include <fstream>
