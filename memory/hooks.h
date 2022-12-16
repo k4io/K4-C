@@ -269,19 +269,19 @@ namespace hk {
 			}
 			if (vars::misc::inf_jump) {
 				if (GetAsyncKeyState(VK_SPACE)) {
-					esp::local_player->InfinityJump();
+					vars->local_player->InfinityJump();
 				}
 			}
 			BasePlayer* TargetPlayer = reinterpret_cast<BasePlayer*>(vars::stor::closestPlayer);
 			if (vars::stuff::farmassist) {
-				BaseMelee* melee = esp::local_player->GetActiveWeapon()->heldEntity<BaseMelee>();
+				BaseMelee* melee = vars->local_player->GetActiveWeapon()->heldEntity<BaseMelee>();
 				if (melee && melee != nullptr && melee->class_name_hash() == STATIC_CRC32("BaseMelee"))
 				{
-					if (closest_ply->health() > 0.0f && closest_ply->bones()->head->position.distance(esp::local_player->eyes()->get_position()) <= melee->maxDistance() + 2.0f)
+					if (closest_ply->health() > 0.0f && closest_ply->bones()->head->position.distance(vars->local_player->eyes()->get_position()) <= melee->maxDistance() + 2.0f)
 					{
 						if (!melee->HasAttackCooldown())
 						{
-							Vector3 origin = esp::local_player->eyes()->get_position();
+							Vector3 origin = vars->local_player->eyes()->get_position();
 							Vector3 playerPos = closest_ply->bones()->head->position;
 							HitTest* hit = HitTest::New();
 							hit->HitEntity1() = closest_ply;
@@ -318,7 +318,7 @@ namespace hk {
 			}
 			float desyncTime = (Time::realtimeSinceStartup() - baseplayah->lastSentTickTime()) - 0.03125 * 3;
 			//baseplayah->clientTickInterval() = 0.05f;
-			if (baseplayah->userID() == esp::local_player->userID()) {
+			if (baseplayah->userID() == vars->local_player->userID()) {
 
 				if (get_key(vars::keys::instakill)) {
 					baseplayah->clientTickInterval() = 0.99f;
@@ -339,10 +339,10 @@ namespace hk {
 
 			}
 			
-			auto localPlayer = esp::local_player;
+			auto localPlayer = vars->local_player;
 			if (vars::combat::line) {
-					DDraw::Line(esp::local_player->playerModel()->position(), esp::local_player->lastSentTick()->position(), Color(1, 0, 0, 255.f), 2.f, true, true);
-					//DDraw::Line(esp::local_player->playerModel()->position(), localPlayer->lastSentTick()->position(), Color(1, 0, 0, 255.f), 2.f, true, true);
+					DDraw::Line(vars->local_player->playerModel()->position(), vars->local_player->lastSentTick()->position(), Color(1, 0, 0, 255.f), 2.f, true, true);
+					//DDraw::Line(vars->local_player->playerModel()->position(), localPlayer->lastSentTick()->position(), Color(1, 0, 0, 255.f), 2.f, true, true);
 			}
 
 			Item* weapon = LocalPlayer::Entity( )->GetActiveWeapon( );
@@ -545,7 +545,7 @@ namespace hk {
 					}
 				}
 				if (vars::combat::tracer) {
-						DDraw::Line(esp::local_player->eyes()->get_position(), prj->currentPosition(), Color(1, 0, 0, 255), 1.f, false, true);
+						DDraw::Line(vars->local_player->eyes()->get_position(), prj->currentPosition(), Color(1, 0, 0, 255), 1.f, false, true);
 				}
 				if (vars::combat::marker) {
 						DDraw::Text(il2cpp::String::New("X"), prj->currentPosition(), Color(1, 1, 1, 255), 1.f);
@@ -694,7 +694,7 @@ namespace hk {
 			Original_DoFirstPersonCamera_hk(a1, cam);
 			
 			if (vars::stuff::Manipulator) {
-				Vector3 re_p = esp::local_player->transform()->position() + esp::local_player->transform()->up() * (PlayerEyes::EyeOffset().y + esp::local_player->eyes()->viewOffset().y);
+				Vector3 re_p = vars->local_player->transform()->position() + vars->local_player->transform()->up() * (PlayerEyes::EyeOffset().y + vars->local_player->eyes()->viewOffset().y);
 
 				cam->transform()->set_position(re_p);
 			}
@@ -703,7 +703,7 @@ namespace hk {
 			if (vars::stuff::autoshot && GetAsyncKeyState(vars::keys::manipulator)) {
 				if (btn == BUTTON::FIRE_PRIMARY) {
 					BasePlayer* TargetPlayer = reinterpret_cast<BasePlayer*>(vars::stor::closestPlayer);
-					auto held = esp::local_player->GetActiveWeapon()->heldEntity<BaseProjectile>();
+					auto held = vars->local_player->GetActiveWeapon()->heldEntity<BaseProjectile>();
 					if (held && !held->Empty() && held->class_name_hash() == STATIC_CRC32("BaseProjectile")) {
 						if (TargetPlayer != nullptr && TargetPlayer->isCached()) {
 							auto mpv = TargetPlayer->find_mpv_bone();
@@ -713,7 +713,7 @@ namespace hk {
 							else
 								target = TargetPlayer->bones()->head->position;
 
-							if (utils::LineOfSight(target, esp::local_player->eyes()->get_position()))
+							if (utils::LineOfSight(target, vars->local_player->eyes()->get_position()))
 								return true;
 						}
 					}
@@ -758,7 +758,7 @@ namespace hk {
 		//				BasePlayer* TargetPlayer = reinterpret_cast<BasePlayer*>(vars::stor::closestPlayer);
 		//				BasePlayer* player = reinterpret_cast<BasePlayer*>(entity);
 		//				if (vars::stuff::chams)
-		//					if (TargetPlayer && TargetPlayer->IsValid() && TargetPlayer->health() > 0.0f && TargetPlayer->lifestate() != BaseCombatEntity::LifeState::Dead && TargetPlayer->isCached() && TargetPlayer != esp::local_player)
+		//					if (TargetPlayer && TargetPlayer->IsValid() && TargetPlayer->health() > 0.0f && TargetPlayer->lifestate() != BaseCombatEntity::LifeState::Dead && TargetPlayer->isCached() && TargetPlayer != vars->local_player)
 		//					{
 		//						if (vars::stuff::chams && !TargetPlayer->HasPlayerFlag(PlayerFlags::Sleeping))
 		//							TargetPlayer->Chams(Color(0, 1, 1, 1), Color(1, 0, 1, 1));

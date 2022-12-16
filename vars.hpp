@@ -1,7 +1,7 @@
 #pragma once
 #include "utils/vector.hpp"
 #include "utils/xorstr.hpp"
-//#include "../sol/sol.hpp"
+#include "../sol/sol.hpp"
 #include <string>
 #include <vector>
 #include <fstream>
@@ -125,6 +125,7 @@ struct _item {
 	int count;
 };
 
+class BasePlayer;
 class BaseCombatEntity;
 
 class aim_target {
@@ -178,7 +179,6 @@ public:
 
 struct Vars
 {
-	//sol::state lua;
 	std::string data_dir = _("");
 	std::string customboxpath = _("");
 	std::string target_name = _("");
@@ -198,6 +198,15 @@ struct Vars
 	aim_target best_target;
 
 	int follow_player_id = -1;
+
+	unsigned int selected_entity_id;
+	float time_last_upgrade = 0.f;
+	float rl_time = 0.f;
+	uintptr_t client_entities;
+	BasePlayer* local_player;
+	VMatrix matrix;
+	//aim_target best_target = aim_target();
+	uintptr_t closest_building_block = 0;
 
 	bool open = false;
 	float rainbow[4] = { 0, 0, 0, 1 };
@@ -391,6 +400,7 @@ struct Vars
 	}; visual visual;
 
 	struct misc {
+		bool tooltips = true;
 		bool antideathbarrier = false;
 		bool auto_upgrade = false;
 		bool emulate_p = false;

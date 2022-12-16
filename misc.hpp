@@ -181,7 +181,7 @@ public:
 };
 
 bool PLOS(Vector3 a, Vector3 b, int layerMask = 10551296) {
-	return unity::is_visible(a, b, (uintptr_t)esp::local_player);
+	return unity::is_visible(a, b, (uintptr_t)vars->local_player);
 }
 
 struct projectileshoot_projectile {
@@ -384,7 +384,7 @@ namespace misc
 		return result;
 	}
 
-	bool TestNoClipping(BasePlayer* ply = esp::local_player,
+	bool TestNoClipping(BasePlayer* ply = vars->local_player,
 		Vector3 oldPos = Vector3(0, 0, 0),
 		Vector3 newPos = Vector3(0, 0, 0),
 		float radius = 0.01f,
@@ -409,7 +409,7 @@ namespace misc
 		Vector3 offset = Vector3(0, 0, 0))
 	{
 		bool flag = true;
-		auto loco = esp::local_player;
+		auto loco = vars->local_player;
 		auto eyepos = loco->eyes()->position() + offset;
 		float num = 1.5f;
 		float num2 = 2.f / 60.f;
@@ -440,10 +440,10 @@ namespace misc
 		//LOS from eyes.center to eyes.position on server, i think eyes.position is lastSentTick.pos
 		//if(loco->is_visible(, pos))
 		
-		if (!unity::LineOfSightRadius(cLastTickPos, eyepos, (uintptr_t)esp::local_player, .2f))
+		if (!unity::LineOfSightRadius(cLastTickPos, eyepos, (uintptr_t)vars->local_player, .2f))
 			flag = false;
 		//if (!loco->is_visible(cLastTickPos, eyepos, 0.18f)) {
-		//	esp::local_player->console_echo(_(L"[matrix]: ValidateEyePos - eye_los caught"));
+		//	vars->local_player->console_echo(_(L"[matrix]: ValidateEyePos - eye_los caught"));
 		//	flag = true;
 		//}
 
@@ -706,7 +706,7 @@ namespace misc
 		}
 		else
 		{
-			auto trans = esp::local_player->transform();
+			auto trans = vars->local_player->transform();
 			bool flag = trans ? !(!trans) : false;
 			VMatrix _mv; _mv.matrix_identity();
 
@@ -758,7 +758,7 @@ namespace misc
 			speedhackDistance = std::clamp(speedhackDistance, -num5, num5);
 			speedhackDistance = std::clamp(speedhackDistance - num2, -num5, num5);
 
-			//esp::local_player->console_echo(string::wformat(_(L"[matrix]: IsSpeeding - speedhackDistance: %d, num4: %d, speedhackPauseTime: %d"),(int)((speedhackDistance + 4) * 100), (int)(num4 * 100), (int)(speedhackPauseTime * 100)));
+			//vars->local_player->console_echo(string::wformat(_(L"[matrix]: IsSpeeding - speedhackDistance: %d, num4: %d, speedhackPauseTime: %d"),(int)((speedhackDistance + 4) * 100), (int)(num4 * 100), (int)(speedhackPauseTime * 100)));
 
 			if (speedhackDistance > num4) {
 				result = true;
@@ -778,13 +778,13 @@ namespace misc
 	}
 
 	bool IsFlying(float deltaTime) {
-		auto lp = esp::local_player;
+		auto lp = vars->local_player;
 		bool result;
 		bool flag = deltaTime > 1.f;
 
 		flyhackPauseTime = max(0.f, flyhackPauseTime - deltaTime);
 		ticks.Reset();
-		auto trans = esp::local_player->transform();
+		auto trans = vars->local_player->transform();
 
 
 		if (ticks.HasNext()) {
@@ -804,7 +804,7 @@ namespace misc
 				vector = (flag ? ticks.currentPoint
 					: matrix4x.MultiplyPoint3x4(ticks.currentPoint));
 
-				if (esp::local_player->modelState()->has_flag(ModelState_Flag::OnLadder))
+				if (vars->local_player->modelState()->has_flag(ModelState_Flag::OnLadder))
 					return false;
 				if (TestFlying2(lp, oldPos, vector, true))
 					return true;
@@ -861,9 +861,9 @@ namespace misc
 	}
 
 	void FinalizeTick(float deltatime) {
-		if (esp::local_player->is_sleeping())
+		if (vars->local_player->is_sleeping())
 			return;
-		auto lp = esp::local_player;
+		auto lp = vars->local_player;
 		tickDeltaTime += deltatime;
 		//bool flag = ticks.startPoint != ticks.endPoint;
 		bool flag = true;
@@ -893,9 +893,9 @@ namespace misc
 			//settings::speedhack = speedhackDistance + 4.0f;
 			vars->speedhack = speedhackDistance + 3.9f;
 		}
-		ticks.Reset(esp::local_player->transform()->position());
+		ticks.Reset(vars->local_player->transform()->position());
 		ValidateEyeHistory(lp);
-		//ticks.Reset(esp::local_player->eyes()->get_position());
+		//ticks.Reset(vars->local_player->eyes()->get_position());
 	}
 
 	void ServerUpdate(float deltaTime,
@@ -990,7 +990,7 @@ namespace misc
 		Vector3 current = in;
 		for (size_t i = 0; i < 100; i++)
 		{
-			if (esp::local_player->is_visible(in, current))
+			if (vars->local_player->is_visible(in, current))
 			{
 				current = Vector3(current.x, current.y -= 1.f, current.z);
 				continue;
@@ -1006,7 +1006,7 @@ namespace misc
 		int t = 0;
 		while (t++ < 100)
 		{
-			if (!esp::local_player->is_visible(v, p))
+			if (!vars->local_player->is_visible(v, p))
 				return v.distance(p);
 			p.y -= 0.1;
 		}
@@ -1102,7 +1102,7 @@ namespace misc
 			std::vector<int> indexes = { };
 			if (ref.size() < 3) return;
 			std::vector<Vector3> new_path = { ref[0], ref[1] };
-			auto lp = esp::local_player;
+			auto lp = vars->local_player;
 			Vector3 current = ref[0];
 			Vector3 next = ref[1];
 			int fi = 0;
@@ -1140,20 +1140,20 @@ namespace misc
 				//Vector3 new_point = lowest_pos(Vector3::move_towards(point, node.pos, 1.0f));
 				Vector3 new_point = Vector3::move_towards(point, node.pos, 1.0f);
 
-				if (esp::local_player->is_visible(point, new_point, 1.0f))
+				if (vars->local_player->is_visible(point, new_point, 1.0f))
 				{
-					esp::local_player->console_echo(string::wformat(_(L"[matrix]: CreatePath - visibility straight ahead (%d)"), path.size()));
+					vars->local_player->console_echo(string::wformat(_(L"[matrix]: CreatePath - visibility straight ahead (%d)"), path.size()));
 					old_point = point;
 					point = lowest_pos(new_point);
 				}
 				else
 				{
-					esp::local_player->console_echo(string::wformat(_(L"[matrix]: CreatePath - no visibility straight ahead, creating sphere (%d)"), path.size()));
+					vars->local_player->console_echo(string::wformat(_(L"[matrix]: CreatePath - no visibility straight ahead, creating sphere (%d)"), path.size()));
 
 					std::vector<Vector3> ps = {};
 
 					for (auto e : sphere1m) //create sphere if cannot find LOS straight ahead
-						if (esp::local_player->is_visible(point, point + e, 1.5f)
+						if (vars->local_player->is_visible(point, point + e, 1.5f)
 							&& (point + e).distance(node.pos) < point.distance(node.pos)
 							&& (point + e).distance(point) > 0.7f)
 						{
@@ -1162,17 +1162,17 @@ namespace misc
 
 					Vector3 best = Vector3(0, 0, 0);
 					if (ps.size() == 0) {
-						esp::local_player->console_echo(string::wformat(_(L"[matrix]: CreatePath could not create another node, path size: %i"), path.size()));
+						vars->local_player->console_echo(string::wformat(_(L"[matrix]: CreatePath could not create another node, path size: %i"), path.size()));
 						break;
 					}
 
-					esp::local_player->console_echo(string::wformat(_(L"[matrix]: CreatePath - potentials: %d"), ps.size()));
+					vars->local_player->console_echo(string::wformat(_(L"[matrix]: CreatePath - potentials: %d"), ps.size()));
 
 					for (auto e : ps)
 						if (e.distance(node.pos) < best.distance(node.pos)
 							&& dist_from_ground(e) < 1.6f)
 							best = e;
-					esp::local_player->console_echo(string::wformat(_(L"[matrix]: CreatePath - closest (best chosen) (%d, %d, %d) (%d)"), (int)best.x, (int)best.y, (int)best.z, path.size()));
+					vars->local_player->console_echo(string::wformat(_(L"[matrix]: CreatePath - closest (best chosen) (%d, %d, %d) (%d)"), (int)best.x, (int)best.y, (int)best.z, path.size()));
 					old_point = point;
 					point = best;
 				}
@@ -1212,7 +1212,7 @@ namespace misc
 
 		void checkandshoot(PlayerWalkMovement* pwm) {
 			__try {
-				auto lp = esp::local_player;
+				auto lp = vars->local_player;
 				if (!pwm || !lp) return;
 				std::vector<BasePlayer*> internal_playerlist = {};
 				auto lppos = lp->model()->boneTransforms()->get(48)->position();
@@ -1312,7 +1312,7 @@ namespace misc
 					break;
 				}
 				//Sphere(target.pos, 1.f, { 1, 1, 1, 1 }, 20.f, 100.f);
-				auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos); //crashes bc non game thread
+				auto distance = vars->local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos); //crashes bc non game thread
 				target.distance = distance;
 				auto fov = unity::get_fov(target.pos);
 				target.fov = fov;
@@ -1361,7 +1361,7 @@ namespace misc
 			Vector3 marker_pos) {
 			Vector3 vel = pwm->get_TargetMovement();
 			vel = Vector3(vel.x / vel.length() * 5.5f, vel.y, vel.z / vel.length() * 5.5f);
-			auto eyepos = esp::local_player->transform()->position();
+			auto eyepos = vars->local_player->transform()->position();
 
 			if (vars->misc.autoattack)
 				checkandshoot(pwm);
@@ -1454,7 +1454,7 @@ namespace misc
 
 		void walktoplayer(PlayerWalkMovement* pwm,
 			char* selected) {
-			auto lp = esp::local_player;
+			auto lp = vars->local_player;
 			BasePlayer* ply = (BasePlayer*)vars->best_target.ent;
 			bool block = false;
 			for (auto p : player_map)
@@ -1472,7 +1472,7 @@ namespace misc
 		void auto_farm(PlayerWalkMovement* pwm,
 			std::string classname,
 			std::string name) {
-			auto lp = esp::local_player;
+			auto lp = vars->local_player;
 			if (!lp || !pwm) return;
 
 			if(!misc::node.ent)

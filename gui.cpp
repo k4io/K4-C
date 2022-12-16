@@ -164,7 +164,7 @@ namespace Gui
 					im::Text(_("SteamId3: %d"), selected_player->userid);
 					auto before = selected_player->is_friend;
 					im::Checkbox(_("Friend"), &selected_player->is_friend);
-					if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+					if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 						im::SetTooltip(_("Adds player to cheat friends list"));
 					}
 					if (before != selected_player->is_friend) {
@@ -210,11 +210,11 @@ namespace Gui
 					}
 					//im::Checkbox(_("Target priority"), &selected_player->priority_target);
 					im::Checkbox(_("Follow player"), &selected_player->follow);
-					if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+					if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 						im::SetTooltip(_("When walk to has player selected the last player followed in player list is chosen, then target"));
 					}
 					im::Checkbox(_("Block player"), &selected_player->block);
-					if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+					if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 						im::SetTooltip(_("Walks in front of player"));
 					}
 				}
@@ -255,7 +255,7 @@ namespace Gui
 									selected_guiskin = g.second;
 							}
 						}
-						if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+						if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 							auto n = std::wstring(pair.first);
 							im::SetTooltip(std::string(n.begin(), n.end()).c_str());
 						}
@@ -1242,7 +1242,7 @@ namespace Gui
 			im::Checkbox(_("PSilent"), &vars->combat.psilent);
 			im::Checkbox(_("Vis check"), &vars->combat.vischeck);
 			im::SliderFloat(_("Movement pred"), &vars->combat.movementpred, 0.1f, 1.0f, _("%.2f"), 1.f);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Percent of average velocity to add to position when predicting."));
 			}
 			im::Combo(_("Aim bone"), &vars->combat.aimbone, _("Head\0Spine 4\0Pelvis\0Right arm\0Left arm\0Right leg\0Left leg"));
@@ -1260,18 +1260,18 @@ namespace Gui
 
 			im::Checkbox(_("No spread (quick ban)"), &vars->combat.nospread);
 			im::Checkbox(_("Remove shoot restrictions"), &vars->combat.always_shoot);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Allows things like shooting while jumping"));
 			}
 
 			im::Checkbox(_("Lock target"), &vars->combat.locktarget);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Keep target within fov locked even if other targets are closer to crosshair"));
 			}
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
 			im::Hotkey(_("L"), &vars->keybinds.locktarget, ImVec2(50, 15));
 			im::Checkbox(_("Target friends"), &vars->combat.targetfriends);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Add friends with the player list in misc"));
 			}
 			im::EndChild();
@@ -1287,7 +1287,7 @@ namespace Gui
 			im::Checkbox(_("Randomize hitboxes"), &vars->combat.randomize);
 			im::Checkbox(_("Hitscan"), &vars->combat.HitScan);
 			im::Checkbox(_("Manipulator"), &vars->combat.manipulator);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Abuses desync (0s-1s) and eye forgiveness to spawn bullets up to 10m away"));
 			}
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
@@ -1300,12 +1300,12 @@ namespace Gui
 			//im::Checkbox(_("STW (many invalids)"), &vars->combat.throughwall);
 			//im::Checkbox(_("Pierce"), &vars->combat.pierce);
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Shoots up to 9 bullets at once"));
 			}
 			im::Checkbox(_("Bullet tp"), &vars->combat.bullet_tp);
 			im::SliderFloat(_("Tp multiplier"), &vars->combat.tpmultiplier, .1f, 1.f, _("%.2f"), 1.f);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Multiplier for distance to teleport the bullet within desync time"));
 			}
 			//im::Checkbox(_("Best velocity"), &vars->combat.bestvelocity);
@@ -1316,7 +1316,7 @@ namespace Gui
 			im::Checkbox(_("Thick bullets"), &vars->combat.thick_bullet);
 			im::SliderFloat(_("Thickness"), &vars->combat.thickness, 0.1f, 2.2f, _("%.2f"), 1.f);
 			im::Checkbox(_("Autoshoot"), &vars->combat.autoshoot);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Will automatically shoot players, works with manipulator"));
 			}
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
@@ -1325,7 +1325,7 @@ namespace Gui
 			im::SliderFloat(_("Fire rate"), &vars->combat.firerate, .01f, .2f, _("%.2f"), 1.f);
 			im::Checkbox(_("Automatic"), &vars->combat.automatic);
 			im::Checkbox(_("Auto-reload"), &vars->combat.always_reload);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Will silently reload your weapon as soon as you stop firing"));
 			}
 			im::EndChild();
@@ -1366,7 +1366,7 @@ namespace Gui
 			im::Checkbox(_("Grenade prediction"), &vars->visual.grenadeprediction);
 			im::Checkbox(_("Rocket prediction"), &vars->visual.rocketprediction);
 			im::Checkbox(_("Targetted indicator"), &vars->visual.targetted);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Displays indicator above crosshair to show if you are being looked at"));
 			}
 			im::Checkbox(_("Hitpoints"), &vars->visual.hitpoint);
@@ -1436,12 +1436,12 @@ namespace Gui
 			im::SliderFloat(_("Brightness"), &vars->visual.day, 0.0f, 10.0f, _("%.0f"));
 			im::SliderFloat(_("Nightness"), &vars->visual.night, 0.0f, 10.0f, _("%.0f"));
 			im::SliderFloat(_("Rayleigh"), &vars->visual.rayleigh, 0.0f, 30.0f, _("%.1f"));
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Changes color of skybox"));
 			}
 			//im::Checkbox(_("Follow projectiles"), &vars->visual.followprojectiles);
 			im::Checkbox(_("Manipulator angles"), &vars->visual.angles);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Visualizes the positions the manipulator will check to see if it can shoot from"));
 			}
 			im::EndChild();
@@ -1463,7 +1463,7 @@ namespace Gui
 				im::SliderInt(_("Hand Material"), &vars->visual.galaxymathand, 1, 16);
 			im::Combo(_("Rocks"), &vars->visual.rock_chams,
 				_("None\0Normal\0Layered\0Galaxy"));
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("You must pick the chams on players before anything else, known crash unless done on players first"));
 			}
 			if (vars->visual.rock_chams == 3)
@@ -1517,12 +1517,12 @@ namespace Gui
 			im::Text(_("Movement"));
 			im::Separator();
 			im::Checkbox(_("Anti-flyhack"), &vars->misc.flyhack_stop);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Stops player before they get kicked for flyhacking"));
 			}
 			im::Checkbox(_("Anti-speedhack"), &vars->misc.antispeed);
 			im::Checkbox(_("Anti-deathbarrier"), &vars->misc.antideathbarrier);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Automatic cooldown and multiplier that enables you to move 2x faster"));
 			}
 			im::Checkbox(_("Omnisprint"), &vars->misc.always_sprint);
@@ -1530,7 +1530,7 @@ namespace Gui
 			im::Checkbox(_("Big jump"), &vars->misc.gravity);
 			im::Checkbox(_("Infinite jump"), &vars->misc.infinite_jump);
 			im::Checkbox(_("Fly-wall"), &vars->misc.flywall);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Will automatically fly up the wall in-front of the player, also has collision detection, controlled by rotation of player"));
 			}
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
@@ -1551,27 +1551,27 @@ namespace Gui
 			im::Separator();
 			im::Combo(_("Walk to"), &vars->misc.walkto,
 				_("None\0Map Marker\0Stone ore\0Sulfur ore\0Metal ore\0Player\0Barrels"));
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Pathfinds to map marker, ores, players from player list in misc"));
 			}
 			im::Checkbox(_("Auto-farm"), &vars->misc.silent_farm);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Essentially silent farm, works well with walk to ores"));
 			}
 			im::Checkbox(_("Auto-farm barrels"), &vars->misc.autofarmbarrel);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Auto-farm but for barrels"));
 			}
 			im::Checkbox(_("Auto-attack"), &vars->misc.autoattack);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Auto switch held item to weapon/tool when walking/farming and shoot at all visible players"));
 			}
 			im::SliderFloat(_("Max dist"), &vars->misc.autoattackdist, 0.1f, 400.f, _("%.0f"));
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Distance player has to be to get shot"));
 			}
 			im::Checkbox(_("Auto-med"), &vars->misc.automed);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Auto switch held item to med/bandage based off hp"));
 			}
 			im::Combo(_("Targetting mode"), &vars->misc.targetting_mode, 
@@ -1587,7 +1587,7 @@ namespace Gui
 			im::Text(_("Gameplay"));
 			im::Separator();
 			im::Checkbox(_("Anti-recycler"), &vars->misc.norecycler);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Turn off recyclers"));
 			}
 			//im::Checkbox(_("Auto-knock"), &vars->misc.autoknock);
@@ -1619,7 +1619,7 @@ namespace Gui
 			im::Combo(_("Upgrade tier"), &vars->misc.upgrade_tier,
 				_("Wood\0Stone\0Metal\0Armored"));
 			im::Checkbox(_("Auto refill"), &vars->misc.autorefill);
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Auto refills jackhammers when close to workbenches if in hotbar"));
 			}
 			im::Checkbox(_("Fakelag"), &vars->misc.fake_lag);
@@ -1632,7 +1632,7 @@ namespace Gui
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("T"), &vars->keybinds.timescale, ImVec2(50, 14));
 			im::SliderFloat(_("Speed"), &vars->misc.speedhackspeed, 0.1f, 10.f, _("%.1f"));
-			if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Set timescale key as hover loot key and set to 10.f for fast loot"));
 			}
 			im::Checkbox(_("Console logs"), &vars->misc.logs);
@@ -1641,11 +1641,9 @@ namespace Gui
 			im::Combo(_("Gesture spam"), &vars->misc.gesture_spam, _(" None\x00 Clap\x00 Friendly\x00 Thumbsdown\x00 Thumbsup\x00 Ok\x00 Point\x00 Shrug\x00 Victory\x00 Wave"));
 			
 			//im::Checkbox(_("Skin changer"), &vars->misc.skinchanger);
-			if(vars->misc.skinchanger)
-			{
-				SkinChanger();
-			}
+			if(vars->misc.skinchanger) { SkinChanger(); }
 
+			im::Checkbox(_("Tooltips"), &vars->misc.tooltips);
 			im::Checkbox(_("Player list"), &vars->misc.playerlist);
 			im::Checkbox(_("Snake"), &vars->misc.snake);
 			im::EndChild();
@@ -1656,6 +1654,8 @@ namespace Gui
 		if (im::BeginChild(_("Listbox"), ImVec2(480, 330), true))
 		{
 			im::Text(_("Config"));
+			im::SameLine();
+			im::Text(_("Lua"));
 			//im::SameLine();
 			//im::SetCursorPosX(im::GetCursorPosX() + 148);
 			//im::Text(_("Lua"));
@@ -1678,26 +1678,26 @@ namespace Gui
 					}
 				im::ListBoxFooter();
 			}
-			//im::SameLine();
-			//if (im::ListBoxHeader(_("##Luas"), ImVec2(190, 130)))
-			//{
-			//	int i = 0;
-			//	auto s = LI_FIND(getenv)(_("APPDATA"));
-			//	auto p = s + std::string(_("\\matrix\\scripts\\"));
-			//	for (auto& p : std::filesystem::recursive_directory_iterator(p))
-			//		if (p.path().extension() == _(".lua"))
-			//		{
-			//			i++;
-			//			auto a = p.path().stem().string();
-			//			if (vars->loaded_lua_list.count(a) == 0)
-			//				vars->loaded_lua_list.insert(std::make_pair(a, new bool{ 0 }));
-			//		}
-			//	for (auto pair : vars->loaded_lua_list) {
-			//		im::Checkbox(pair.first.c_str(), pair.second);
-			//		im::SetCursorPosY(im::GetCursorPosY() - 10);
-			//	}
-			//	im::ListBoxFooter();
-			//}
+			im::SameLine();
+			if (im::ListBoxHeader(_("##Luas"), ImVec2(190, 130)))
+			{
+				int i = 0;
+				auto s = LI_FIND(getenv)(_("APPDATA"));
+				auto p = s + std::string(_("\\matrix\\scripts\\"));
+				for (auto& p : std::filesystem::recursive_directory_iterator(p))
+					if (p.path().extension() == _(".lua"))
+					{
+						i++;
+						auto a = p.path().stem().string();
+						if (vars->loaded_lua_list.count(a) == 0)
+							vars->loaded_lua_list.insert(std::make_pair(a, new bool{ 0 }));
+					}
+				for (auto pair : vars->loaded_lua_list) {
+					im::Checkbox(pair.first.c_str(), pair.second);
+					im::SetCursorPosY(im::GetCursorPosY() - 10);
+				}
+				im::ListBoxFooter();
+			}
 			if (im::Button(_("Save config"))) { save_config(str0); }
 			im::SameLine();
 			if (im::Button(_("Load config"))) { load_config(str0); }

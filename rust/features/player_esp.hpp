@@ -54,27 +54,13 @@ void entchams(BaseEntity* ent, Shader* s = 0, Material* m = 0) {
 }
 
 namespace esp {
-	std::map<unsigned int, unsigned int> selected_entity_parent_mapping = {};
-	unsigned int selected_entity_id;
-	float time_last_upgrade = 0.f;
-	float rl_time = 0.f;
-	uintptr_t client_entities;
-	BasePlayer* local_player;
-	VMatrix matrix;
-	//aim_target best_target = aim_target();
-	uintptr_t closest_building_block = 0;
-
-	std::vector<aim_target> visibleplayerswithin300m = {};
-
-
-
 	bool out_w2s(const Vector3& position, Vector2& screen_pos) {
-		if (!matrix.m) {
+		if (!vars->matrix.m) {
 			return false;
 		}
 
 		Vector2 out;
-		const auto temp = matrix.transpose();
+		const auto temp = vars->matrix.transpose();
 
 		auto translation_vector = Vector3{ temp[3][0], temp[3][1], temp[3][2] };
 		auto up = Vector3{ temp[1][0], temp[1][1], temp[1][2] };
@@ -131,12 +117,12 @@ namespace esp {
 
 	void iterate_players_new() {
 		auto get_client_entities = [&]() {
-			esp::client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
+			vars->client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
 		};
-		if (!esp::client_entities)
+		if (!vars->client_entities)
 			get_client_entities();
 
-		rust::list* entity_list = (rust::list*)esp::client_entities;
+		rust::list* entity_list = (rust::list*)vars->client_entities;
 
 		static int cases = 0;
 		switch (cases) {
@@ -150,21 +136,21 @@ namespace esp {
 		auto list_value = entity_list->get_value<uintptr_t>();
 		if (!list_value) {
 			//get_client_entities();
-			//esp::local_player = nullptr;
+			//vars->local_player = nullptr;
 			return;
 		}
 
 		auto size = entity_list->get_size();
 		if (!size) {
 			//get_client_entities();
-			//esp::local_player = nullptr;
+			//vars->local_player = nullptr;
 			return;
 		}
 
 		auto buffer = entity_list->get_buffer<uintptr_t>();
 		if (!buffer) {
 			//get_client_entities();
-			//esp::local_player = nullptr;
+			//vars->local_player = nullptr;
 			return;
 		}
 
@@ -265,16 +251,16 @@ namespace esp {
 				if (entity->is_local_player()) {
 					//if (entity->userID() == LocalPlayer::Entity()->userID()) {
 					flp = true;
-					esp::local_player = entity;
+					vars->local_player = entity;
 				}
 				else {
-					if (esp::local_player)
+					if (vars->local_player)
 					{
 						if (vars->visual.targetted)
 						{
 							auto pl = ((BasePlayer*)ent);
 							auto playerpos = pl->model()->boneTransforms()->get(48)->position();
-							auto localpos = esp::local_player->model()->boneTransforms()->get(48)->position();
+							auto localpos = vars->local_player->model()->boneTransforms()->get(48)->position();
 							auto distance = playerpos.distance(localpos);
 							auto fwd = playerpos + (pl->eyes()->body_forward() * distance);
 							auto dist = fwd.distance(localpos);
@@ -310,7 +296,7 @@ namespace esp {
 										if (current->ply
 											&& current->weapon
 											&& !current->endposition.is_empty()) {
-											if (current->endposition.distance(esp::local_player->transform()->position()) < 4.f)
+											if (current->endposition.distance(vars->local_player->transform()->position()) < 4.f)
 												vars->grenadeclose = true;
 										}
 									}
@@ -349,7 +335,7 @@ namespace esp {
 							target.pos = ent->model()->boneTransforms()->get((int)Bone_List::l_knee)->position();
 							break;
 						}
-						auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos); //crashes bc non game thread
+						auto distance = vars->local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos); //crashes bc non game thread
 						target.distance = distance;
 
 						auto fov = unity::get_fov(target.pos);
@@ -359,7 +345,7 @@ namespace esp {
 
 						target.network_id = ent_id;
 
-						//auto visible = ent->is_visible(esp::local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
+						//auto visible = ent->is_visible(vars->local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
 						auto visible = entity->visible();
 
 						target.visible = visible;
@@ -427,7 +413,7 @@ namespace esp {
 					}
 
 				draw:
-					if (vars->visual.playeresp && esp::local_player)
+					if (vars->visual.playeresp && vars->local_player)
 					{
 						//DrawPlayer(entity, npc);
 						//offscreen indicator?
@@ -436,16 +422,16 @@ namespace esp {
 				}
 			}
 
-			if (esp::local_player)
+			if (vars->local_player)
 			{
 				//select entity			
-				//if (esp::selected_entity_id == ent_id) {
+				//if (vars->selected_entity_id == ent_id) {
 				//	Vector2 w2s_position = {};
 				//	if (esp::out_w2s(world_position, w2s_position))
 				//	{
 				//		esp_color = Vector4(54, 116, 186, 255);
 				//		w2s_position.y += 10;
-				//		if (esp::selected_entity_id == ent_id) {
+				//		if (vars->selected_entity_id == ent_id) {
 				//			render->StringCenter(w2s_position, _(L"selected"), { 54 / 255.f, 116 / 255.f, 186 / 255.f });
 				//			//esp::draw_item(w2s_position, il2cpp::methods::new_string(("[selected]")), esp_color);
 				//			w2s_position.y += 10;
@@ -483,18 +469,18 @@ namespace esp {
 						if (vars->misc.auto_upgrade) {
 							auto block = (BuildingBlock*)ent;
 							BuildingGrade upgrade_tier = (BuildingGrade)(vars->misc.upgrade_tier + 1);
-							auto distance = esp::local_player->eyes()->position().distance(world_position);
+							auto distance = vars->local_player->eyes()->position().distance(world_position);
 							if (distance < 4.2f) {
-								if (!esp::closest_building_block)
-									esp::closest_building_block = (uintptr_t)block;
+								if (!vars->closest_building_block)
+									vars->closest_building_block = (uintptr_t)block;
 								else
 								{
 									if (block->grade() != upgrade_tier) {
-										auto tranny = ((BuildingBlock*)esp::closest_building_block)->transform();
+										auto tranny = ((BuildingBlock*)vars->closest_building_block)->transform();
 										auto pos = tranny->position();
-										auto lastdist = esp::local_player->eyes()->position().distance(pos);
+										auto lastdist = vars->local_player->eyes()->position().distance(pos);
 										if (lastdist > distance)
-											esp::closest_building_block = (uintptr_t)block;
+											vars->closest_building_block = (uintptr_t)block;
 									}
 								}
 							}
@@ -505,7 +491,7 @@ namespace esp {
 				//collectibleitem stuff
 				if (vars->misc.pickup_collectibles) {
 					if (!strcmp(entity_class_name, _("CollectibleEntity"))) {
-						auto dist = world_position.distance(esp::local_player->transform()->position());
+						auto dist = world_position.distance(vars->local_player->transform()->position());
 						if (dist < 4.f)
 							ent->ServerRPC(_(L"Pickup"));
 					}
@@ -532,8 +518,8 @@ namespace esp {
 					vars->visual.block_chams > 0 ||
 					vars->visual.rock_chams > 0)
 				{
-					auto dist = world_position.distance(esp::local_player->transform()->position());
-					auto visible = esp::local_player->is_visible(esp::local_player->transform()->position(), world_position);
+					auto dist = world_position.distance(vars->local_player->transform()->position());
+					auto visible = vars->local_player->is_visible(vars->local_player->transform()->position(), world_position);
 					if (vars->visual.dist_on_items < dist) continue;
 					esp_name = _(L"");
 					float* ncol = vars->accent_color;
@@ -541,11 +527,11 @@ namespace esp {
 					if (!object_name.zpad)
 						continue;
 
-					auto m = esp::local_player->model();
+					auto m = vars->local_player->model();
 					if (m)
 					{
 						auto trans = m->boneTransforms()->get(48);
-						if (esp::local_player && vars->visual.distance && trans)
+						if (vars->local_player && vars->visual.distance && trans)
 							dist = trans->position().distance(world_position);
 					}
 
@@ -622,8 +608,8 @@ namespace esp {
 						if (esp::out_w2s(world_position, w2s_position))
 						{
 							world_position.y += 1.5f;
-							//if(esp::local_player->bones()->head->position.distance(world_position) < 50.f)
-							//if (esp::local_player->model()->boneTransforms()->get(48)->position().distance(world_position) < 50.f)
+							//if(vars->local_player->bones()->head->position.distance(world_position) < 50.f)
+							//if (vars->local_player->model()->boneTransforms()->get(48)->position().distance(world_position) < 50.f)
 							//	DrawToolcupboard(w2s_position, authorizedPlayers_list);
 							//esp::draw_tool_cupboard(w2s_position, il2cpp::methods::new_string(_("Tool Cupboard")), Vector4(255, 0, 0, 255), authorizedPlayers_list);
 						}
@@ -658,7 +644,7 @@ namespace esp {
 								auto target = aim_target();
 								target.pos = base_heli->model()->boneTransforms()->get(19)->position();
 
-								auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos);
+								auto distance = vars->local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos);
 								target.distance = distance;
 
 								auto fov = unity::get_fov(target.pos);
@@ -670,7 +656,7 @@ namespace esp {
 								{
 									target.ent = base_heli;
 
-									//auto visible = esp::local_player->is_visible(esp::local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
+									//auto visible = vars->local_player->is_visible(vars->local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
 									//target.visible = visible;
 
 									if (target < vars->best_target)
@@ -732,7 +718,7 @@ namespace esp {
 					else if (vars->misc.norecycler && *(int*)(entity_class_name) == 'yceR') {
 						esp_name = _(L"Recycler");
 						esp_color = Vector4(232, 232, 232, 255);
-						if (esp::local_player->model()->boneTransforms()->get(48)->position().distance(world_position) < 4.5f
+						if (vars->local_player->model()->boneTransforms()->get(48)->position().distance(world_position) < 4.5f
 							&& get_fixedTime() > esp::last_recycler + 0.35f)
 						{
 							ent->ServerRPC(_(L"SVSwitch"));
@@ -914,7 +900,7 @@ namespace esp {
 		}
 		//if (vars->best_target.ent
 		//	&& vars->visual.hotbar_esp
-		//	&& esp::local_player)
+		//	&& vars->local_player)
 		//	DrawPlayerHotbar(vars->best_target);
 	}
 
@@ -922,12 +908,12 @@ namespace esp {
 		//visibleplayerswithin300m.clear();
 		//best_target = ;
 		auto get_client_entities = [&]() {
-			client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
+			vars->client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
 		};
-		if (!client_entities)
+		if (!vars->client_entities)
 			get_client_entities();
 
-		rust::list* entity_list = (rust::list*)client_entities;
+		rust::list* entity_list = (rust::list*)vars->client_entities;
 
 		auto list_value = entity_list->get_value<uintptr_t>();
 		if (!list_value) {
@@ -1014,7 +1000,7 @@ namespace esp {
 			auto ent_id = ent_net->get_id();
 
 
-			esp::matrix = unity::get_view_matrix();
+			vars->matrix = unity::get_view_matrix();
 
 			//players
 			if (tag == 6)
@@ -1023,22 +1009,22 @@ namespace esp {
 
 				
 				auto hit_player = [&]() {
-					auto Item = esp::local_player->GetActiveItem();
+					auto Item = vars->local_player->GetActiveItem();
 					if (Item) {
 						auto baseprojectile = Item->GetHeldEntity<BaseProjectile>();
 						if (baseprojectile) {
 							auto class_name = baseprojectile->get_class_name();
 							if (*(int*)(class_name + 4) == 'eleM' || *(int*)(class_name + 4) == 'mmah') {
 								auto world_position = ent->model()->boneTransforms()->get(48)->position();
-								auto local = esp::local_player->ClosestPoint(world_position);
-								auto camera = esp::local_player->model()->boneTransforms()->get(48)->position();
+								auto local = vars->local_player->ClosestPoint(world_position);
+								auto camera = vars->local_player->model()->boneTransforms()->get(48)->position();
 
 								if (camera.get_3d_dist(world_position) >= 4.2f)
 									return;
 
 								aim_target target = vars->best_target;
 
-								attack_melee(target, baseprojectile, esp::local_player, true);
+								attack_melee(target, baseprojectile, vars->local_player, true);
 							}
 						}
 					}
@@ -1061,18 +1047,18 @@ namespace esp {
 
 				if (entity->is_local_player())
 				{
-					local_player = reinterpret_cast<BasePlayer*>(ent);
-					do_chams(local_player);
+					vars->local_player = reinterpret_cast<BasePlayer*>(ent);
+					do_chams(vars->local_player);
 				}
 				else {
-					if (esp::local_player) {
+					if (vars->local_player) {
 						auto target = aim_target();
 						if (vars->combat.bodyaim)
 							target.pos = ent->model()->boneTransforms()->get((int)Bone_List::pelvis)->position();
 						else
 							target.pos = ent->model()->boneTransforms()->get(48)->position();
 
-						auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos);
+						auto distance = vars->local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos);
 						target.distance = distance;
 
 						auto fov = unity::get_fov(target.pos);
@@ -1082,7 +1068,7 @@ namespace esp {
 
 						target.network_id = ent_id;
 
-						auto visible = ent->is_visible(esp::local_player->model()->boneTransforms()->get(48)->position(), target.pos);
+						auto visible = ent->is_visible(vars->local_player->model()->boneTransforms()->get(48)->position(), target.pos);
 						target.visible = visible;
 
 						//if (distance < 300.0f)
@@ -1138,7 +1124,7 @@ namespace esp {
 							vars->best_target = aim_target();
 					}
 
-					if (draw && vars->visual.playeresp && local_player) {
+					if (draw && vars->visual.playeresp && vars->local_player) {
 
 						draw_player(((BasePlayer*)ent), is_npc);
 
@@ -1155,11 +1141,11 @@ namespace esp {
 				continue;
 			}
 
-			if (local_player)
+			if (vars->local_player)
 			{
 				if (GetAsyncKeyState(0x37))
 				{
-					auto look = local_player->_lookingAtEntity();
+					auto look = vars->local_player->_lookingAtEntity();
 					if (look)
 					{
 						auto net2 = *reinterpret_cast<Networkable**>(look + 0x58);
@@ -1174,19 +1160,19 @@ namespace esp {
 							//	if (selected_entity_parent_mapping[selected_entity_id] == 0)
 							//		selected_entity_parent_mapping[selected_entity_id] = ent_id;
 
-							selected_entity_id = ent_id;
+							vars->selected_entity_id = ent_id;
 						}
 					}
 				}
 
-				if (selected_entity_id == ent_id) {
+				if (vars->selected_entity_id == ent_id) {
 
 					Vector2 w2s_position = {};
 					if (out_w2s(world_position, w2s_position))
 					{
 						esp_color = Vector4(54, 116, 186, 255);
 						w2s_position.y += 10;
-						if (selected_entity_id == ent_id) {
+						if (vars->selected_entity_id == ent_id) {
 							esp::draw_item(w2s_position, il2cpp::methods::new_string(("[selected]")), esp_color);
 							w2s_position.y += 10;
 							esp::draw_item(w2s_position, il2cpp::methods::new_string(string::format(_("[%d]"), (int)ent_id)), esp_color);
@@ -1208,12 +1194,12 @@ namespace esp {
 				{
 					if (!LI_FIND(strcmp)(entity_class_name, _("BuildingBlock")))
 					{
-						auto lpos = local_player->transform()->position();
+						auto lpos = vars->local_player->transform()->position();
 						float dist_to_new = lpos.distance(world_position);
-						if (!closest_building_block)
-							closest_building_block = (uintptr_t)ent;
-						else if (dist_to_new < lpos.distance(((BaseEntity*)closest_building_block)->transform()->position()))
-							closest_building_block = (uintptr_t)ent;
+						if (!vars->closest_building_block)
+							vars->closest_building_block = (uintptr_t)ent;
+						else if (dist_to_new < lpos.distance(((BaseEntity*)vars->closest_building_block)->transform()->position()))
+							vars->closest_building_block = (uintptr_t)ent;
 					}
 				}
 
@@ -1233,8 +1219,8 @@ namespace esp {
 					vars->visual.corpses)
 				{
 					float dist = 10.f;
-					if (esp::local_player && vars->visual.distance)
-						dist = esp::local_player->model()->boneTransforms()->get(48)->position().distance(world_position);
+					if (vars->local_player && vars->visual.distance)
+						dist = vars->local_player->model()->boneTransforms()->get(48)->position().distance(world_position);
 
 					//dropped items
 					if (*(int*)(entity_class_name) == 'porD') {
@@ -1338,7 +1324,7 @@ namespace esp {
 							auto target = aim_target();
 							target.pos = base_heli->model()->boneTransforms()->get(19)->position();
 
-							auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos);
+							auto distance = vars->local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos);
 							target.distance = distance;
 
 							auto fov = unity::get_fov(target.pos);
@@ -1350,7 +1336,7 @@ namespace esp {
 							{
 								target.ent = base_heli;
 
-								auto visible = local_player->is_visible(esp::local_player->model()->boneTransforms()->get(48)->position(), target.pos);
+								auto visible = vars->local_player->is_visible(vars->local_player->model()->boneTransforms()->get(48)->position(), target.pos);
 								target.visible = visible;
 
 								if (target < vars->best_target)
@@ -1382,7 +1368,7 @@ namespace esp {
 					else if (vars->misc.norecycler && *(int*)(entity_class_name) == 'yceR' && get_fixedTime() > last_recycler + 0.35f) {
 						esp_name = il2cpp::methods::new_string(_("Recycler"));
 						esp_color = Vector4(232, 232, 232, 255);
-						if (esp::local_player->model()->boneTransforms()->get(48)->position().distance(world_position) < 4.5f)
+						if (vars->local_player->model()->boneTransforms()->get(48)->position().distance(world_position) < 4.5f)
 						{
 							ent->ServerRPC(_(L"SVSwitch"));
 							last_recycler = get_fixedTime();
@@ -1491,10 +1477,10 @@ namespace esp {
 	}
 	
 	void draw_teammates() {
-		if (!esp::local_player)
+		if (!vars->local_player)
 			return;
 
-		auto team = mem::read<uintptr_t>((uintptr_t)local_player + clientTeam);
+		auto team = mem::read<uintptr_t>((uintptr_t)vars->local_player + clientTeam);
 
 		auto member = mem::read<uintptr_t>(team + 0x30);
 
@@ -1512,11 +1498,11 @@ namespace esp {
 
 			auto id = mem::read<unsigned long>(ent + 0x20);
 
-			if (id == esp::local_player->userID())
+			if (id == vars->local_player->userID())
 				continue;
 
 			auto position = mem::read<Vector3>(ent + 0x2C);
-			auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().distance(position);
+			auto distance = vars->local_player->model()->boneTransforms()->get(48)->position().distance(position);
 			if (distance < 350.f)
 				continue;
 

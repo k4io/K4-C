@@ -244,10 +244,10 @@ public:
 	bool DoFatBulletHit(Projectile* pr, Vector3 point) {
 		float maxdist = GetHitDist();
 
-		auto target = vars->best_target;//esp::local_player->get_aimbot_target(point, maxdist);
+		auto target = vars->best_target;//vars->local_player->get_aimbot_target(point, maxdist);
 
 		if (get_isAlive((BaseProjectile*)pr) && target.ent && !target.teammate) {
-			if (!unity::is_visible(target.pos, point, (uintptr_t)esp::local_player)) {
+			if (!unity::is_visible(target.pos, point, (uintptr_t)vars->local_player)) {
 				return false;
 			}
 
@@ -285,7 +285,7 @@ public:
 		auto material = info.material != 0 ? GetName(info.material)->str : (_(L"generic"));
 
 		bool canIgnore = true;
-		canIgnore = unity::is_visible(sentPosition(), currentPosition() + currentVelocity().Normalized() * 0.01f, 0);//(uintptr_t)esp::local_player);
+		canIgnore = unity::is_visible(sentPosition(), currentPosition() + currentVelocity().Normalized() * 0.01f, 0);//(uintptr_t)vars->local_player);
 		
 		if (!canIgnore) {
 			integrity(0);
@@ -343,7 +343,7 @@ public:
 		safe_write(ht + 0x80, (DWORD64)ow, DWORD64); //IgnoreEntity
 		safe_write(ht + 0x2C, 0, float); //Radius
 		safe_write(ht + 0x30, 0.15f, float); //Forgiveness                                        FAT BULLET
-		if (!esp::local_player || ow->userID() == esp::local_player->userID()) {
+		if (!vars->local_player || ow->userID() == vars->local_player->userID()) {
 			safe_write(ht + 0x10, 0x2, int); //Type
 		}
 		else safe_write(ht + 0x10, 0x1, int); //Type	`

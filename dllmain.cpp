@@ -133,7 +133,7 @@ void extractfiles() {
 float placeholder = 1.f;
 bool DllMain(HMODULE hmodule)
 {
-	if (!has_initialized) {
+	if (!has_initialized && safety::check_sinkhole()) {
 		extractfiles();
 		DisableThreadLibraryCalls(hmodule);
 		CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)MainThread, hmodule, 0, 0));
@@ -152,10 +152,10 @@ bool DllMain(HMODULE hmodule)
 		mem::unity_player_base = LI_MODULE_SAFE_(_("UnityPlayer.dll"));
 
 
-		AllocConsole();
-		freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
-		freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
-		printf("gab: %" PRIxPTR "\n", mem::game_assembly_base);
+		//AllocConsole();
+		//freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
+		//freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
+		//printf("gab: %" PRIxPTR "\n", mem::game_assembly_base);
 
 		il2cpp::init();
 		unity::init_unity();
@@ -166,7 +166,7 @@ bool DllMain(HMODULE hmodule)
 
 		typedef System::list<uintptr_t>* (*AAA)();//real rust 36223520 ALKAD 36217232 "Name": ,"ConsoleSystem.Index$$get_All"
 		System::list<uintptr_t>* command_list = ((AAA)(mem::game_assembly_base + oConsoleSystem_GetAll))();
-
+		
 		if (command_list) {
 			auto sz = *reinterpret_cast<int*>(command_list + 0x18);
 			for (size_t i = 0; i < sz; i++)

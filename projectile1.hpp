@@ -1,6 +1,6 @@
 #include "misc.hpp"
 
-uintptr_t pools_offset = 0xBC7090;
+uintptr_t pools_offset = 0xBC7980;
 /*
  /* GenericInstMethod :
 	|
@@ -89,7 +89,7 @@ public:
 		if (!_this)
 			return false;
 
-		esp::local_player->console_echo(string::wformat(_(L"[matrix]: IsAlive - integrity: %d, traveledtime * 100: %d"), (int)(_this->integrity() * 100), (int)(_this->traveledTime() * 100)));
+		vars->local_player->console_echo(string::wformat(_(L"[matrix]: IsAlive - integrity: %d, traveledtime * 100: %d"), (int)(_this->integrity() * 100), (int)(_this->traveledTime() * 100)));
 		return (_this->integrity() > 0.f && _this->traveledTime() < 8.f);
 	}
 
@@ -311,7 +311,7 @@ public:
 		if (!ht)
 			return false;
 
-		esp::local_player->console_echo(string::wformat(_(L"[matrix]: DoHit - Called")));
+		vars->local_player->console_echo(string::wformat(_(L"[matrix]: DoHit - Called")));
 		if (ht && at) {
 			//ht->DidHit() = true;
 			ht->set_did_hit(true);
@@ -329,7 +329,7 @@ public:
 				//ht->HitPoint() = Transform->InverseTransformPoint(point);
 				//auto v = trans->InverseTransformPoint(point);
 				auto v = _InverseTransformPoint(trans, point);
-				esp::local_player->console_echo(string::wformat(_(L"[matrix]: DoHit - Point: (%d, %d, %d)"), v.x, v.y, v.z));
+				vars->local_player->console_echo(string::wformat(_(L"[matrix]: DoHit - Point: (%d, %d, %d)"), v.x, v.y, v.z));
 				if(!v.is_empty() && !v.is_nan())
 					ht->set_hit_point(v);
 				//ht->HitMaterial() = Il2CppString::create(_("flesh"));
@@ -438,9 +438,9 @@ public:
 
 	static uint64_t CreatePlayerProjectileUpdate()
 	{
-		esp::local_player->console_echo(_(L"[matrix]: CreatePlayerProjectileUpdate - Called"));
+		vars->local_player->console_echo(_(L"[matrix]: CreatePlayerProjectileUpdate - Called"));
 		typedef uint64_t(__stdcall* PoolGet)(uint64_t);
-		uint64_t update = *reinterpret_cast<uint64_t*>(mem::game_assembly_base + 56671192); //"Method$Facepunch.Pool.Get<PlayerProjectileUpdate>()",
+		uint64_t update = *reinterpret_cast<uint64_t*>(mem::game_assembly_base + 56715248); //"Method$Facepunch.Pool.Get<PlayerProjectileUpdate>()",
 
 		if (!update)
 			return 0;
@@ -463,7 +463,7 @@ public:
 		auto cl = ((AAA)(mem::game_assembly_base + 0x132D330))();
 		if (!cl)
 			return;
-		esp::local_player->console_echo(_(L"[matrix]: SendPlayerProjectileUpdate - Called"));
+		vars->local_player->console_echo(_(L"[matrix]: SendPlayerProjectileUpdate - Called"));
 		
 		//public NetWrite get_write() { }
 		typedef uintptr_t(*AA)(uintptr_t);
@@ -484,7 +484,7 @@ public:
 			((netwrite_packetid)(mem::game_assembly_base + 0x249CF30))(write, (UINT)MessageType::RPCMessage);
 			//write->PacketID((UINT)MessageType::RPCMessage);
 
-			auto net = *reinterpret_cast<uintptr_t*>((uintptr_t)esp::local_player + 0x58);
+			auto net = *reinterpret_cast<uintptr_t*>((uintptr_t)vars->local_player + 0x58);
 			if (!net) return;
 			//auto Network = CheatCore::m_cheat->LocalPlayer->net();
 			//if (!memory::IsAddressValid(Network))
@@ -534,14 +534,14 @@ public:
 			//public void Send(SendInfo info) { }
 			typedef void(*netwrite_send)(uintptr_t, uintptr_t);
 			((netwrite_send)(mem::game_assembly_base + 0x249D1E0))(write, si);
-			esp::local_player->console_echo(_(L"[matrix]: SendPlayerProjectileUpdate - Finished"));
+			vars->local_player->console_echo(_(L"[matrix]: SendPlayerProjectileUpdate - Finished"));
 			//write->Send(sendInfo);
 		}
 	}
 
 	bool SilentCat(TraceResult1& data, Vector3 LOSPoint)
 	{
-		esp::local_player->console_echo(_(L"[matrix]: SilentCat - Called"));
+		vars->local_player->console_echo(_(L"[matrix]: SilentCat - Called"));
 		auto _this = (Projectile*)this;
 		float projectile_desync = vprojectile_desync1 - 0.05f;
 		Vector3 from = data.hitPosition;
@@ -691,7 +691,7 @@ public:
 
 	void DoRealMovement()
 	{
-		esp::local_player->console_echo(_(L"[matrix]: DoRealMovement - Called"));
+		vars->local_player->console_echo(_(L"[matrix]: DoRealMovement - Called"));
 		auto _this = (Projectile*)this;
 		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
 		if (!_this) return;
@@ -724,7 +724,7 @@ public:
 
 		if (maxTime >= 7.95f)
 		{
-			esp::local_player->console_echo(string::wformat(_(L"[matrix]: UpdateVelocity - MaxTime > 7.95f, Integrity: %d"), (int)(_this->integrity() * 100)));
+			vars->local_player->console_echo(string::wformat(_(L"[matrix]: UpdateVelocity - MaxTime > 7.95f, Integrity: %d"), (int)(_this->integrity() * 100)));
 			_this->integrity(0.f);
 			return;
 		}
@@ -735,7 +735,7 @@ public:
 		if (result.didHit)
 		{
 		HIT:
-			esp::local_player->console_echo(_(L"[matrix]: DoRealMovement - didHit"));
+			vars->local_player->console_echo(_(L"[matrix]: DoRealMovement - didHit"));
 			_this->traveledDistance(result.hitDist);
 
 			result.hitPosition = result.hitEntity->model()->boneTransforms()->get(47)->position();
@@ -753,7 +753,7 @@ public:
 		else if (result.silentCat && result.hitEntity)
 		{
 			bool canHit = SilentCat(result, position);
-			esp::local_player->console_echo(string::wformat(_(L"[matrix]: DoRealMovement - SilentCat: %d"), (int)canHit));
+			vars->local_player->console_echo(string::wformat(_(L"[matrix]: DoRealMovement - SilentCat: %d"), (int)canHit));
 			if (canHit && abs(result.hitTime - maxTime) <= projectile_desync) {
 				float maxTravelDst = _this->initialDistance() + startVelocityLen * min(result.hitTime, maxTime) * projectile_forgiviness;
 				if ((result.hitDist = startPosition.distance(result.hitPosition)) < maxTravelDst) {
@@ -767,7 +767,7 @@ public:
 		Vector3 vel = _this->previousVelocity();
 
 		Vector3 newPos = prev + vel * num;
-		esp::local_player->console_echo(string::wformat(_(L"[matrix]: DoRealMovement - Pos: (%d, %d, %d), newPos: (%d, %d, %d)"),
+		vars->local_player->console_echo(string::wformat(_(L"[matrix]: DoRealMovement - Pos: (%d, %d, %d), newPos: (%d, %d, %d)"),
 			(int)position.x,
 			(int)position.y,
 			(int)position.z,
@@ -786,7 +786,7 @@ public:
 		_this->currentVelocity(_this->previousVelocity());
 
 		if (flag && !(hitPosition.x == hitPosition.y && hitPosition.x == hitPosition.z && hitPosition.x == -1)) {
-			esp::local_player->console_echo(_(L"[matrix]: DoRealMovement - Hit 1"));
+			vars->local_player->console_echo(_(L"[matrix]: DoRealMovement - Hit 1"));
 			_this->currentPosition(hitPosition);
 		}
 		else {
@@ -794,14 +794,14 @@ public:
 		}
 
 		if (flag) {
-			esp::local_player->console_echo(_(L"[matrix]: DoRealMovement - Hit 2"));
+			vars->local_player->console_echo(_(L"[matrix]: DoRealMovement - Hit 2"));
 			_this->integrity(0.f);
 		}
 	}
 
 	void UpdateVelocity()
 	{
-		esp::local_player->console_echo(_(L"[matrix]: UpdateVelocity - Called"));
+		vars->local_player->console_echo(_(L"[matrix]: UpdateVelocity - Called"));
 		auto _this = (Projectile*)this;
 		auto Transform = _this->transform();
 
@@ -873,7 +873,7 @@ public:
 		if (!_this)
 			return;
 
-		auto LocalPlayer = esp::local_player;
+		auto LocalPlayer = vars->local_player;
 		//auto LocalPlayer = CheatCore::m_cheat->LocalPlayer;
 		if (!LocalPlayer)
 		//if (!memory::IsAddressValid(_this))
@@ -899,7 +899,7 @@ public:
 	void Update() {
 		do
 		{
-			esp::local_player->console_echo(_(L"[matrix]: Update - Called"));
+			vars->local_player->console_echo(_(L"[matrix]: Update - Called"));
 			auto _this = (Projectile*)this;
 			if (!_this)
 				break;
@@ -908,7 +908,7 @@ public:
 			if (!owner)
 				break;
 
-			auto LocalPlayer = esp::local_player;
+			auto LocalPlayer = vars->local_player;
 			if (!LocalPlayer)
 				break;
 
@@ -922,14 +922,14 @@ public:
 			if (_this->authoritative() && vars->combat.targetbehindwall) {
 				while (this->IsAlive()) {
 					float time = unity::get_realtimesincestartup();//unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
-					esp::local_player->console_echo(_(L"[matrix]: Update - updating"));
+					vars->local_player->console_echo(_(L"[matrix]: Update - updating"));
 					if (time - _this->launchTime() < _this->traveledTime() + bulletUpdateRate) {
-						//esp::local_player->console_echo(string::wformat(_(L"[matrix]: Update - breaking, time: %d, launchTime: %d, traveled: %d"), (int)(time * 100), (int)(_this->launchTime() * 100), (int)(_this->traveledTime() * 100)));
+						//vars->local_player->console_echo(string::wformat(_(L"[matrix]: Update - breaking, time: %d, launchTime: %d, traveled: %d"), (int)(time * 100), (int)(_this->launchTime() * 100), (int)(_this->traveledTime() * 100)));
 						break;
 					}
 					UpdateVelocity();
 				}
-				esp::local_player->console_echo(string::wformat(_(L"[matrix]: Update - Not alive, integrity: %d"), (int)_this->integrity()));
+				vars->local_player->console_echo(string::wformat(_(L"[matrix]: Update - Not alive, integrity: %d"), (int)_this->integrity()));
 			}
 			else
 				return _update((Projectile*)this);
@@ -937,7 +937,7 @@ public:
 
 		} while (0);
 
-		esp::local_player->console_echo(_(L"[matrix]: Update - Sending normal update"));
+		vars->local_player->console_echo(_(L"[matrix]: Update - Sending normal update"));
 		return _update((Projectile*)this);//hooks::orig::_update((Projectile*)this);//Hooks::ProjectileUpdateHk.get_original<decltype(&Hooks::_Update)>()(this);
 	}
 
@@ -945,7 +945,7 @@ public:
 		if (!target)
 			return 0.f;
 
-		auto LocalPlayerBase = esp::local_player;//CheatCore::m_cheat->LocalPlayer;
+		auto LocalPlayerBase = vars->local_player;//CheatCore::m_cheat->LocalPlayer;
 		if (!LocalPlayerBase)
 			return 0.f;
 

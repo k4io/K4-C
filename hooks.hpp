@@ -281,15 +281,15 @@ namespace hooks {
 		int simulations = 0;
 		bool ismelee = false;
 		do {
-			if (!esp::local_player)
+			if (!vars->local_player)
 				break;
 
-			auto Item = esp::local_player->GetActiveItem();
+			auto Item = vars->local_player->GetActiveItem();
 
 			if (!Item)
 				break;
 
-			auto baseprojectile = esp::local_player->GetActiveItem()->GetHeldEntity<BaseProjectile>();
+			auto baseprojectile = vars->local_player->GetActiveItem()->GetHeldEntity<BaseProjectile>();
 			if (!baseprojectile)
 				break;
 
@@ -302,10 +302,10 @@ namespace hooks {
 				else break;
 			}
 
-			esp::matrix = unity::get_view_matrix();
+			vars->matrix = unity::get_view_matrix();
 			auto camera_pos = unity::get_camera_pos();
 
-			//aim_target target = esp::local_player->get_aimbot_target(camera_pos);
+			//aim_target target = vars->local_player->get_aimbot_target(camera_pos);
 			aim_target target = vars->best_target;
 
 			/*
@@ -417,7 +417,7 @@ namespace hooks {
 					auto b = rpc_position;
 					if (misc::best_lean != Vector3(0, 0, 0))
 					{
-						// rpc_position += misc::manipulate(esp::local_player, target.pos);
+						// rpc_position += misc::manipulate(vars->local_player, target.pos);
 						//rpc_position += (misc::best_lean);
 						rpc_position = misc::best_lean;
 						if (vars->visual.angles)
@@ -492,7 +492,7 @@ namespace hooks {
 								auto b = rpc_position;
 								if (misc::best_lean != Vector3(0, 0, 0))
 								{
-									// rpc_position += misc::manipulate(esp::local_player, target.pos);
+									// rpc_position += misc::manipulate(vars->local_player, target.pos);
 									//rpc_position += (misc::best_lean);
 									rpc_position = misc::best_lean;
 									if (vars->visual.angles)
@@ -549,11 +549,11 @@ namespace hooks {
 							Vector3 n = rpc_position + (aimbot_velocity * (vars->desyncTime * vars->combat.tpmultiplier));
 							Sphere(n, 0.1f, { 1, 1, 1, 1 }, 10.f, false);
 							p->traveledTime(vars->desyncTime);
-							p->SetInitialDistance(r.distance(n) - 1);
+							p->SetInitialDistance((r.distance(n) * vars->combat.tpmultiplier) - 1);
 						}
 						else p->SetInitialDistance(0);
 
-						esp::local_player->console_echo(string::wformat(_(L"[matrix]: ProjectileShoot (bullet tp) spawned bullet at distance %dm"), (int)p->initialDistance()));
+						vars->local_player->console_echo(string::wformat(_(L"[matrix]: ProjectileShoot (bullet tp) spawned bullet at distance %dm"), (int)p->initialDistance()));
 					}
 
 					if (vars->combat.psilent || unity::GetKey(vars->keybinds.psilent)) {
@@ -634,7 +634,7 @@ namespace hooks {
 				misc::autoshot = false;
 		} while (0);
 
-		esp::local_player->console_echo(string::wformat(_(L"[matrix]: ProjectileShoot (prediction) simulated %i times before hit!"), simulations));
+		vars->local_player->console_echo(string::wformat(_(L"[matrix]: ProjectileShoot (prediction) simulated %i times before hit!"), simulations));
 		reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(hooks::orig::serverrpc_projectileshoot)(rcx, rdx, r9, projectileShoot, arg5);
 		//pppid++;
 		//calls base.serverrpc<projectileshoot>("clproject", x) ^^
@@ -713,7 +713,7 @@ namespace hooks {
 			return orig_fn(rcx, rdx, r9, _ppa, arg5);
 
 		do {
-			if (!esp::local_player)
+			if (!vars->local_player)
 				break;
 
 			auto hit_test = projectile->get_hit_test();
@@ -726,14 +726,14 @@ namespace hooks {
 			auto layer = hit_test->gameObject()->get_layer();
 			auto prefab_name = hit_test->gameObject()->get_prefab_name();
 
-			aim_target target = vars->best_target;//esp::local_player->get_aimbot_target(camera_pos);
+			aim_target target = vars->best_target;//vars->local_player->get_aimbot_target(camera_pos);
 
 			if (!target.ent)
 				break;
 
 			auto hit_entity = (BasePlayer*)hit_test->HitEntity();
 			if (layer == layer::Player_Server) {
-				if (hit_entity->is_teammate(esp::local_player)) {
+				if (hit_entity->is_teammate(vars->local_player)) {
 					hit_test->ignoreEntity() = hit_entity;
 					return;
 				}
@@ -779,31 +779,31 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				if (target.ent->model()) {
 					if (target.ent->model()->boneTransforms()) {
 						if (vars->combat.hitbox == 0
-							&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
+							&& vars->local_player->is_visible(target.ent->model()->boneTransforms()->get(
 								(int)Bone_List::head)->position(), projectile->get_current_position()))
 							test[0] = { 698017942, 2173623152 };
 						if (vars->combat.hitbox == 1
-							&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
+							&& vars->local_player->is_visible(target.ent->model()->boneTransforms()->get(
 								(int)Bone_List::pelvis)->position(), projectile->get_current_position()))
 							test[0] = { 1031402764, 1750816991 };
 						if (vars->combat.hitbox == 2
-							&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
+							&& vars->local_player->is_visible(target.ent->model()->boneTransforms()->get(
 								(int)Bone_List::spine4)->position(), projectile->get_current_position()))
 							test[0] = { 3901657145, 1750816991 };
 						if (vars->combat.hitbox == 3
-							&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
+							&& vars->local_player->is_visible(target.ent->model()->boneTransforms()->get(
 								(int)Bone_List::r_hand)->position(), projectile->get_current_position()))
 							test[0] = { 102231371, 1750816991 };
 						if (vars->combat.hitbox == 4
-							&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
+							&& vars->local_player->is_visible(target.ent->model()->boneTransforms()->get(
 								(int)Bone_List::penis)->position(), projectile->get_current_position()))
 							test[0] = { 612182976, 2173623152 };
 						if (vars->combat.hitbox == 5
-							&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
+							&& vars->local_player->is_visible(target.ent->model()->boneTransforms()->get(
 								(int)Bone_List::l_hip)->position(), projectile->get_current_position()))
 							test[0] = { 3892428003, 1750816991 };
 						if (vars->combat.hitbox == 6
-							&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
+							&& vars->local_player->is_visible(target.ent->model()->boneTransforms()->get(
 								(int)Bone_List::r_foot)->position(), projectile->get_current_position()))
 							test[0] = { 920055401, 1750816991 };
 					}
@@ -920,10 +920,10 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(
 				hooks::orig::createbuilding);
 
-		if(!esp::local_player)
+		if(!vars->local_player)
 			return orig_fn(rcx, rdx, r9, _ppa, arg5);
 
-		auto held = esp::local_player->GetActiveItem()->GetHeldEntity<Planner>();
+		auto held = vars->local_player->GetActiveItem()->GetHeldEntity<Planner>();
 		if (!held)
 			return orig_fn(rcx, rdx, r9, _ppa, arg5);
 		
@@ -941,10 +941,10 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 			if (GetAsyncKeyState(0x39))
 			{
-				*reinterpret_cast<unsigned int*>(_ppa + 0x14) = esp::local_player->net()->get_id();
+				*reinterpret_cast<unsigned int*>(_ppa + 0x14) = vars->local_player->net()->get_id();
 			}
 			else
-				*reinterpret_cast<unsigned int*>(_ppa + 0x14) = esp::selected_entity_id;
+				*reinterpret_cast<unsigned int*>(_ppa + 0x14) = vars->selected_entity_id;
 
 
 			auto build_id = *reinterpret_cast<unsigned int*>(_ppa + 0x14);
@@ -955,9 +955,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				*reinterpret_cast<Vector3*>(_ppa + 0x20) = ((Transform*)tranny)->InverseTransformPoint(position);
 				*reinterpret_cast<Vector3*>(_ppa + 0x2C) = ((Transform*)tranny)->InverseTransformDirection(normal);
 
-				esp::local_player->console_echo(string::wformat(_(L"[matrix] DoPlace - Spoofed %d to %d with position (%d, %d, %d)"), 
+				vars->local_player->console_echo(string::wformat(_(L"[matrix] DoPlace - Spoofed %d to %d with position (%d, %d, %d)"), 
 					(int)ogid,
-					(int)esp::selected_entity_id,
+					(int)vars->selected_entity_id,
 					(int)position.x,
 					(int)position.y,
 					(int)position.z
@@ -969,7 +969,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 	 
 	void hk_playerwalkmovement_ClientInput(PlayerWalkMovement* player_walk_movement, uintptr_t inputstate, ModelState* model_state) {
 
-		auto baseplayer = esp::local_player;
+		auto baseplayer = vars->local_player;
 		//__try {
 		//	player_walk_movement->ClientInput((InputState*)inputstate, model_state);
 		orig::playerwalkmovement_client_input(player_walk_movement, inputstate, model_state);
@@ -1545,7 +1545,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				{
 					auto net2 = *reinterpret_cast<Networkable**>(look + 0x58);
 					auto look_id = net2->get_id();
-					esp::selected_entity_id = look_id;
+					vars->selected_entity_id = look_id;
 				}
 			}
 
@@ -2041,7 +2041,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								const auto item_id = item->info()->itemid;
 
 								if (item_id == 1079279582 || item_id == -2072273936) {
-									esp::matrix = unity::get_view_matrix();
+									vars->matrix = unity::get_view_matrix();
 									auto camera_pos = unity::get_camera_pos();
 
 									auto target = vars->best_target; //baseplayer->get_aimbot_target(camera_pos);
@@ -2074,8 +2074,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 									if (*(int*)(wep_class_name) == 'nilF'
 										&& vars->combat.instaeoka) {
-										mem::write<float>((uint64_t)baseprojectile + 0x378, 1.f); //eoka success fraction
-										mem::write<bool>((uint64_t)baseprojectile + 0x388, true); //eoka _didSparkThisFrame
+										mem::write<float>((uint64_t)baseprojectile + 0x3A0, 1.f); //eoka success fraction
+										mem::write<bool>((uint64_t)baseprojectile + 0x3B0, true); //eoka _didSparkThisFrame
 									}
 									else {
 										if (vars->combat.rapidfire)
@@ -2362,7 +2362,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 	void hk_projectile_launchprojectile(BaseProjectile* p)
 	{
-		//auto held = esp::local_player->GetActiveItem()->GetHeldEntity<BaseProjectile>();
+		//auto held = vars->local_player->GetActiveItem()->GetHeldEntity<BaseProjectile>();
 		//if (vars->combat.doubletap
 		//	&& !vars->combat.rapidfire)
 		//{
@@ -2373,7 +2373,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		//	int r = vars->desyncTime / m;
 		//	if (r > 1)
 		//	{
-		//		esp::local_player->console_echo(string::wformat(_(L"[matrix]: Launching %d projectiles!"), r));
+		//		vars->local_player->console_echo(string::wformat(_(L"[matrix]: Launching %d projectiles!"), r));
 		//		for (size_t i = 0; i < r; i++)
 		//		{
 		//			orig::baseprojectile_launchprojectile((uintptr_t)p);
@@ -2445,7 +2445,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				if (!g_UpdateReusable)
 					g_UpdateReusable = Projectile1::CreatePlayerProjectileUpdate();
 
-				_update((Projectile*)pr);
+				//_update((Projectile*)pr);
 
 				auto ppu = (protobuf::PlayerProjectileUpdate*)g_UpdateReusable;
 
@@ -2453,7 +2453,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				ppu->traveltime = p->traveledTime() + p->currentPosition().distance(hitInfo->point()) / traveledThisUpdate.length();
 				ppu->position = hitInfo->point() - (dir * .1f);
 				ppu->velocity = p->currentVelocity();
-				esp::local_player->SendProjectileUpdate((uintptr_t)ppu);
+				vars->local_player->SendProjectileUpdate((uintptr_t)ppu);
 				//orig_fn(rcx, rdx, r9, _ppa, arg5);
 
 				auto trans = ((BasePlayer*)vars->best_target.ent)->get_bone_Transform(48);
@@ -2635,12 +2635,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		}
 		if (!serverrpc_playerprojectileattack) {
 			auto method_serverrpc_playerprojectileattack = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileAttack___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
-
+		
 			if (method_serverrpc_playerprojectileattack) {
 				serverrpc_playerprojectileattack = **(uintptr_t***)(method_serverrpc_playerprojectileattack + 0x30);
-
+		
 				hooks::orig::playerprojectileattack = *serverrpc_playerprojectileattack;
-
+		
 				*serverrpc_playerprojectileattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
 			}
 		}
@@ -2668,19 +2668,106 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		//}
 #pragma endregion
 
+		orig::baseplayer_client_input(baseplayer, state);
 
-		//printf("before clientinput original\n");
-		//baseplayer->modelState()->remove_flag(ModelState_Flag::Flying);
-		//fakeorig_clientinput(baseplayer, state);
-		//baseplayer->modelState()->remove_flag(ModelState_Flag::Flying);
-		//printf("after clientinput recreation\n");
-		return orig::baseplayer_client_input(baseplayer, state);
-		//printf("after clientinput original\n");
+		__try {
+			sol::state lua;
+			lua.open_libraries(sol::lib::base, sol::lib::string, sol::lib::package, sol::lib::io);
 
+			//auto core = lua["cheat"].get_or_create<sol::table>();
 
+			lua.new_usertype<Vector2>("Vector2",
+				"x", &Vector2::x,
+				"y", &Vector2::y);
 
-		//printf("clientinput hook return\n");
-		//printf("before clientinput return\n");
+			lua.new_usertype<Vector3>("Vector3",
+				"x", &Vector3::x,
+				"y", &Vector3::y,
+				"z", &Vector3::z);
+
+			lua.new_usertype<Vector4>("Vector4",
+				"x", &Vector4::x,
+				"y", &Vector4::y,
+				"z", &Vector4::z,
+				"w", &Vector4::w);
+
+			lua.new_usertype<lw::color>("color",
+				"r", &lw::color::r,
+				"g", &lw::color::g,
+				"b", &lw::color::b,
+				"a", &lw::color::a);
+
+			auto gui = lua["draw"].get_or_create<sol::table>();
+
+			gui.set_function("rect", &lw::draw::Rect);
+			gui.set_function("filledrect", &lw::draw::FillRect);
+			gui.set_function("circle", &lw::draw::Circle);
+			gui.set_function("filledcircle", &lw::draw::FillCircle);
+			gui.set_function("text", &lw::draw::Text);
+			gui.set_function("textcentered", &lw::draw::TextCentered);
+			gui.set_function("line", &lw::draw::Line);
+			gui.set_function("line3d", &lw::draw::Line3d);
+			gui.set_function("sphere3d", &lw::draw::Sphere3d);
+
+			lua.new_usertype<lw::Eyes>("PlayerEyes",
+				"getpos", &lw::Eyes::GetPosition,
+				"getrot", &lw::Eyes::GetRotation,
+				"bodyfwd", &lw::Eyes::BodyForward,
+				"bodyright", &lw::Eyes::BodyRight,
+				"getviewoffset", &lw::Eyes::GetViewOffset,
+				"setviewoffset", &lw::Eyes::SetViewOffset);
+
+			lua.new_usertype<lw::Player>("Player",
+				"settargetmovement", &lw::Player::SetTargetMovement,
+				"gettargetmovement", &lw::Player::GetTargetMovement,
+				"isalive", &lw::Player::IsAlive,
+				"gethealth", &lw::Player::GetHealth,
+				"getbonepos", &lw::Player::GetBonePos,
+				"getname", &lw::Player::GetName,
+				"isnpc", &lw::Player::IsNpc,
+				"userid", &lw::Player::GetUserId,
+				"serverrpc", &lw::Player::Rpc,
+				"islocalplayer", &lw::Player::IsLocalPlayer,
+				"isfriend", &lw::Player::IsFriend,
+				//"geteyes", &lw::Player::GetEyes,
+				"isteammate", &lw::Player::IsTeammate);
+
+			lua.new_usertype<lw::Entity>("Entity",
+				"getpos", &lw::Entity::GetPosition,
+				"classname", &lw::Entity::GetClassname,
+				"rpc", &lw::Entity::Rpc);
+
+			auto core = lua["cheat"].get_or_create<sol::table>();
+
+			core.set_function("getplayer", &lw::entities::GetPlayer);
+			core.set_function("getentity", &lw::entities::GetEntity);
+			core.set_function("lineofsight", &lw::misc::LineOfSight);
+			core.set_function("worldtoscreen", &lw::misc::w2s);
+			core.set_function("iskeydown", &lw::misc::IsKeyPressed);
+			core.set_function("playerlistsize", &lw::entities::PlayerListSize);
+			core.set_function("entitylistsize", &lw::entities::EntityListSize);
+			core.set_function("realtimesincestartup", &lw::misc::TimeSinceStartup);
+			core.set_function("fixedtime", &lw::misc::FixedTime);
+
+			core["desynctime"] = vars->desyncTime;
+			core["flyhackDistanceY"] = settings::vert_flyhack;
+			core["flyhackDistanceX"] = settings::hor_flyhack;
+
+			for (auto pair : vars->loaded_lua_list) {
+				if (*pair.second) {
+
+					auto filename = vars->data_dir + _("scripts\\") + pair.first + _(".lua");
+					lua.script_file(filename);
+
+					sol::protected_function func = lua[_("clientinput")];
+					//func.set_error_handler(lua[_("errorhandler")]);
+					if(func.valid())
+						auto f = (std::function<void()>)func();
+				}
+			}
+		}
+		__except (true) {}
+
 		return;
 	}
 }

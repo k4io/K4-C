@@ -2,11 +2,11 @@
 #include "lua_wrapper.hpp"
 
 void DrawOnRadar(Vector3 worldpos, wchar_t* entityname, bool visible = false) {
-	if (!esp::local_player) return;
-	auto local = esp::local_player->transform()->position();
+	if (!vars->local_player) return;
+	auto local = vars->local_player->transform()->position();
 	float dist = local.distance(worldpos);
 	const float x = local.z - worldpos.z, y = local.x - worldpos.x;
-	auto euler = EulerAngles(esp::local_player->eyes()->rotation());
+	auto euler = EulerAngles(vars->local_player->eyes()->rotation());
 	const float n = Vector3::my_atan2(y, x) * 57.29578f - 270.f - euler.y;
 	float px = dist * Vector3::my_cos(n * 0.0174532924f);
 	float py = dist * Vector3::my_sin(n * 0.0174532924f);
@@ -34,7 +34,7 @@ void DrawOnRadar(Vector3 worldpos, wchar_t* entityname, bool visible = false) {
 void DrawPlayer(BasePlayer* ply, bool npc)
 {
 	if (!ply) return;
-	if (!esp::local_player) return;
+	if (!vars->local_player) return;
 	if (npc && !vars->visual.npc_esp) return;
 
 	auto player_id = ply->userID();
@@ -76,7 +76,7 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 		bone_t{ Vector3{}, 76, false, Vector3{}, false }  // r_ulna
 	};
 
-	bool is_visible = false, is_teammate = ply->is_teammate(esp::local_player);
+	bool is_visible = false, is_teammate = ply->is_teammate(vars->local_player);
 	auto camera_position = unity::get_camera_pos();
 
 
@@ -130,13 +130,13 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 		DrawOnRadar(ply->transform()->position(), ply->get_player_name(), ply->visible());
 
 	if (get_bounds(bounds, 4)) {
-		//is_visible = unity::is_visible(camera_position, bones[48].world_position, (uintptr_t)esp::local_player);
+		//is_visible = unity::is_visible(camera_position, bones[48].world_position, (uintptr_t)vars->local_player);
 		is_visible = ply->visible();
 		//if (vars->combat.vischeck) {
 		//	__try {
 		//		for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
 		//			if (is_visible) break;
-		//			is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
+		//			is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)vars->local_player);
 		//		}
 		//	}
 		//	__except (true) {}
@@ -710,7 +710,7 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 
 			auto position = Transform->position();
 
-			auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().distance(position);
+			auto distance = vars->local_player->model()->boneTransforms()->get(48)->position().distance(position);
 
 			auto name_color = is_visible ? vars->colors.players.details.name.visible : vars->colors.players.details.name.invisible;
 			auto half = (bounds.right - bounds.left) / 2;
@@ -927,12 +927,12 @@ void DrawRadarBackground() {
 
 void iterate_entities() {
 	auto get_client_entities = [&]() {
-		esp::client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
+		vars->client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
 	};
-	if (!esp::client_entities)
+	if (!vars->client_entities)
 		get_client_entities();
 
-	rust::list* entity_list = (rust::list*)esp::client_entities;
+	rust::list* entity_list = (rust::list*)vars->client_entities;
 
 	static int cases = 0;
 	switch (cases) {
@@ -946,21 +946,21 @@ void iterate_entities() {
 	auto list_value = entity_list->get_value<uintptr_t>();
 	if (!list_value) {
 		//get_client_entities();
-		esp::local_player = nullptr;
+		vars->local_player = nullptr;
 		return;
 	}
 
 	auto size = entity_list->get_size();
 	if (!size) {
 		//get_client_entities();
-		esp::local_player = nullptr;
+		vars->local_player = nullptr;
 		return;
 	}
 
 	auto buffer = entity_list->get_buffer<uintptr_t>();
 	if (!buffer) {
 		//get_client_entities();
-		esp::local_player = nullptr;
+		vars->local_player = nullptr;
 		return;
 	}
 
@@ -1046,15 +1046,19 @@ void iterate_entities() {
 				player_map.insert(std::make_pair(ent_id, entity));
 			
 				gplayer* p = new gplayer(entity->get_player_name(), entity->userID(), 0, 0, 0, 0);
-				vars->gui_player_map.insert(std::make_pair(entity->userID(), p));
-				vars->chams_player_map.insert(std::make_pair(entity->userID(), 0));
-				vars->handchams_player_map.insert(std::make_pair(entity->userID(), 0));
+
+				if(!map_contains_key(vars->gui_player_map, entity->userID()))
+					vars->gui_player_map.insert(std::make_pair(entity->userID(), p));
 			}
-			lw::playerlist.push_back(entity);
+			if (!map_contains_key(vars->chams_player_map, entity->userID()))
+				vars->chams_player_map.insert(std::make_pair(entity->userID(), 0));
+			if (!map_contains_key(vars->handchams_player_map, entity->userID()))
+				vars->handchams_player_map.insert(std::make_pair(entity->userID(), 0));
+			
 
 			bool is_friend = false, follow = false, block = false;
 			if (map_contains_key(vars->gui_player_map, entity->userID())) {
-				is_friend = vars->gui_player_map[entity->userID()]->is_friend || entity->is_teammate(esp::local_player);
+				is_friend = vars->gui_player_map[entity->userID()]->is_friend || entity->is_teammate(vars->local_player);
 				follow = vars->gui_player_map[entity->userID()]->follow;
 				block = vars->gui_player_map[entity->userID()]->block;
 			}
@@ -1062,16 +1066,17 @@ void iterate_entities() {
 			//local player chams, player average velocity
 			if (entity->is_local_player()) {
 				flp = true;
-				esp::local_player = entity;
-			}
-			else {
-				if (esp::local_player)
+				vars->local_player = entity;
+			} else {
+				if (vars->local_player)
 				{
+					if (std::count(lw::playerlist.begin(), lw::playerlist.end(), entity) < 1)
+						lw::playerlist.push_back(entity);
 					if (vars->visual.targetted)
 					{
 						auto pl = ((BasePlayer*)ent);
 						auto playerpos = pl->model()->boneTransforms()->get(48)->position();
-						auto localpos = esp::local_player->model()->boneTransforms()->get(48)->position();
+						auto localpos = vars->local_player->model()->boneTransforms()->get(48)->position();
 						auto distance = playerpos.distance(localpos);
 						auto fwd = playerpos + (pl->eyes()->body_forward() * distance);
 
@@ -1088,9 +1093,9 @@ void iterate_entities() {
 					if (vars->visual.showpred
 						&& vars->best_target.ent)
 					{
-						auto pos = esp::local_player->eyes()->position();
+						auto pos = vars->local_player->eyes()->position();
 						auto targetpos = vars->best_target.pos;
-						auto item = esp::local_player->GetActiveItem();
+						auto item = vars->local_player->GetActiveItem();
 						if (item) {
 							auto held = item->GetHeldEntity<BaseProjectile>();
 							if (held) {
@@ -1130,7 +1135,7 @@ void iterate_entities() {
 									if (current->ply
 										&& current->weapon
 										&& !current->endposition.is_empty()) {
-										if (current->endposition.distance(esp::local_player->transform()->position()) < 4.f) {
+										if (current->endposition.distance(vars->local_player->transform()->position()) < 4.f) {
 											//std::string on();
 											auto ws = string::wformat(_(L"Grenade from %s"), entity->get_player_name());
 											render.StringCenter({ vars->ScreenX / 2, (vars->ScreenY / 2) - 50 }, ws, { 227 / 255.f, 32 / 255.f, 61 / 255.f, 1 });
@@ -1175,7 +1180,7 @@ void iterate_entities() {
 						target.pos = ent->model()->boneTransforms()->get((int)Bone_List::l_knee)->position();
 						break;
 					}
-					auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos); //crashes bc non game thread
+					auto distance = vars->local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos); //crashes bc non game thread
 					target.distance = distance;
 
 					auto fov = unity::get_fov(target.pos);
@@ -1185,7 +1190,7 @@ void iterate_entities() {
 
 					target.network_id = ent_id;
 
-					//auto visible = ent->is_visible(esp::local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
+					//auto visible = ent->is_visible(vars->local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
 					auto visible = entity->visible();
 
 					target.visible = visible;
@@ -1249,18 +1254,18 @@ void iterate_entities() {
 					}
 
 					if (vars->best_target.distance > 400.f)
-						vars->best_target = aim_target();
+						vars->best_target.Reset();
 					if (target < vars->best_target
 						&& target.fov < vars->combat.aimbotfov) {
 						vars->best_target = target;
 						found_a_target = true;
 					}
 					if (vars->best_target.fov > vars->combat.aimbotfov)
-						vars->best_target = aim_target();
+						vars->best_target.Reset();
 				}
 
 			draw:
-				if (vars->visual.playeresp && esp::local_player)
+				if (vars->visual.playeresp && vars->local_player)
 				{
 					DrawPlayer(entity, npc);
 					//offscreen indicator?
@@ -1269,19 +1274,20 @@ void iterate_entities() {
 			}
 		}
 
-		if (esp::local_player)
+		if (vars->local_player)
 		{
-			lw::entitylist.push_back(ent);
+			if (std::count(lw::entitylist.begin(), lw::entitylist.end(), ent) < 1)
+				lw::entitylist.push_back(ent);
 
 			//select entity			
-			if (esp::selected_entity_id == ent_id) {
+			if (vars->selected_entity_id == ent_id) {
 
 				Vector2 w2s_position = {};
 				if (esp::out_w2s(world_position, w2s_position))
 				{
 					esp_color = Vector4(54, 116, 186, 255);
 					w2s_position.y += 10;
-					if (esp::selected_entity_id == ent_id) {
+					if (vars->selected_entity_id == ent_id) {
 						render.StringCenter(w2s_position, _(L"selected"), { 54 / 255.f, 116 / 255.f, 186 / 255.f });
 						//esp::draw_item(w2s_position, il2cpp::methods::new_string(("[selected]")), esp_color);
 						w2s_position.y += 10;
@@ -1319,18 +1325,18 @@ void iterate_entities() {
 					if (vars->misc.auto_upgrade) {
 						auto block = (BuildingBlock*)ent;
 						BuildingGrade upgrade_tier = (BuildingGrade)(vars->misc.upgrade_tier + 1);
-						auto distance = esp::local_player->eyes()->position().distance(world_position);
+						auto distance = vars->local_player->eyes()->position().distance(world_position);
 						if (distance < 4.2f) {
-							if (!esp::closest_building_block)
-								esp::closest_building_block = (uintptr_t)block;
+							if (!vars->closest_building_block)
+								vars->closest_building_block = (uintptr_t)block;
 							else
 							{
 								if (block->grade() != upgrade_tier) {
-									auto tranny = ((BuildingBlock*)esp::closest_building_block)->transform();
+									auto tranny = ((BuildingBlock*)vars->closest_building_block)->transform();
 									auto pos = tranny->position();
-									auto lastdist = esp::local_player->eyes()->position().distance(pos);
+									auto lastdist = vars->local_player->eyes()->position().distance(pos);
 									if (lastdist > distance)
-										esp::closest_building_block = (uintptr_t)block;
+										vars->closest_building_block = (uintptr_t)block;
 								}
 							}
 						}
@@ -1341,7 +1347,7 @@ void iterate_entities() {
 			//collectibleitem stuff
 			if (vars->misc.pickup_collectibles) {
 				if (!strcmp(entity_class_name, _("CollectibleEntity"))) {
-					auto dist = world_position.distance(esp::local_player->transform()->position());
+					auto dist = world_position.distance(vars->local_player->transform()->position());
 					if (dist < 4.f)
 						ent->ServerRPC(_(L"Pickup"));
 				}
@@ -1352,7 +1358,7 @@ void iterate_entities() {
 				if (unity::GetKey(vars->keybinds.stash)) {
 					if (!strcmp(ent->get_class_name(), _("StashContainer"))) {
 						if (ent->transform()->position().distance(
-							esp::local_player->transform()->position()) < .9f) {
+							vars->local_player->transform()->position()) < .9f) {
 							ent->ServerRPC(_(L"RPC_OpenLoot"));
 						}
 					}
@@ -1380,18 +1386,18 @@ void iterate_entities() {
 				vars->visual.block_chams > 0 ||
 				vars->visual.rock_chams > 0)
 			{
-				auto dist = world_position.distance(esp::local_player->transform()->position());
+				auto dist = world_position.distance(vars->local_player->transform()->position());
 				if (vars->visual.dist_on_items < dist) continue;
 				esp_name = _(L"");
 				auto object_name = *reinterpret_cast<rust_str*>(object_name_ptr);
 				if (!object_name.zpad)
 					continue;
 
-				auto m = esp::local_player->model();
+				auto m = vars->local_player->model();
 				if (m)
 				{
 					auto trans = m->boneTransforms()->get(48);
-					if (esp::local_player && vars->visual.distance && trans)
+					if (vars->local_player && vars->visual.distance && trans)
 						dist = trans->position().distance(world_position);
 				}
 
@@ -1473,8 +1479,8 @@ void iterate_entities() {
 					if (esp::out_w2s(world_position, w2s_position))
 					{
 						world_position.y += 1.5f;
-						//if(esp::local_player->bones()->head->position.distance(world_position) < 50.f)
-						if (esp::local_player->model()->boneTransforms()->get(48)->position().distance(world_position) < 50.f)
+						//if(vars->local_player->bones()->head->position.distance(world_position) < 50.f)
+						if (vars->local_player->model()->boneTransforms()->get(48)->position().distance(world_position) < 50.f)
 							DrawToolcupboard(w2s_position, authorizedPlayers_list);
 						//esp::draw_tool_cupboard(w2s_position, il2cpp::methods::new_string(_("Tool Cupboard")), Vector4(255, 0, 0, 255), authorizedPlayers_list);
 					}
@@ -1508,7 +1514,7 @@ void iterate_entities() {
 							auto target = aim_target();
 							target.pos = base_heli->model()->boneTransforms()->get(19)->position();
 
-							auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos);
+							auto distance = vars->local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos);
 							target.distance = distance;
 
 							auto fov = unity::get_fov(target.pos);
@@ -1520,7 +1526,7 @@ void iterate_entities() {
 							{
 								target.ent = base_heli;
 
-								//auto visible = esp::local_player->is_visible(esp::local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
+								//auto visible = vars->local_player->is_visible(vars->local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
 								//target.visible = visible;
 
 								if (target < vars->best_target)
@@ -1534,7 +1540,7 @@ void iterate_entities() {
 							}
 							else
 							{
-								vars->best_target = aim_target();
+								vars->best_target.Reset();
 							}
 						}
 						else vars->best_target.is_heli = false;
@@ -1584,7 +1590,7 @@ void iterate_entities() {
 				else if (vars->misc.norecycler && *(int*)(entity_class_name) == 'yceR' && get_fixedTime() > esp::last_recycler + 0.35f) {
 					esp_name = _(L"Recycler");
 					esp_color = Vector4(232, 232, 232, 255);
-					if (esp::local_player->model()->boneTransforms()->get(48)->position().distance(world_position) < 4.5f)
+					if (vars->local_player->model()->boneTransforms()->get(48)->position().distance(world_position) < 4.5f)
 					{
 						ent->ServerRPC(_(L"SVSwitch"));
 						esp::last_recycler = get_fixedTime();
@@ -1820,11 +1826,11 @@ void iterate_entities() {
 	//printf("after ent loop\n");
 	System::list<Item*>* belt = ((BasePlayer*)vars->best_target.ent)->get_belt_items();
 	if (!belt)
-		vars->best_target = aim_target();
+		vars->best_target.Reset();
 
 	if (vars->best_target.ent
 		&& vars->visual.hotbar_esp
-		&& esp::local_player) {
+		&& vars->local_player) {
 		DrawPlayerHotbar(vars->best_target);
 	}
 	else {
@@ -1890,7 +1896,8 @@ void TargettedIndicator() {
 }
 
 void DrawSnapline() {
-	if (vars->best_target.pos.is_empty()) return;
+	if (vars->best_target.pos.is_empty()
+		|| !vars->best_target.ent) return;
 	Vector2 start = vars->visual.snapline == 1 ? Vector2(vars->ScreenX / 2, 0) :
 		vars->visual.snapline == 2 ? Vector2(vars->ScreenX / 2, vars->ScreenY / 2) :
 		vars->visual.snapline == 3 ? Vector2(vars->ScreenX / 2, vars->ScreenY) :
@@ -1945,7 +1952,7 @@ void LoadGuiSkinmap() {
 }
 
 bool finit = false;
-/*
+
 sol::state initlua() {
 	sol::state lua;
 	lua.open_libraries(sol::lib::base, sol::lib::string, sol::lib::package, sol::lib::io);
@@ -2005,7 +2012,7 @@ sol::state initlua() {
 		"serverrpc", &lw::Player::Rpc,
 		"islocalplayer", &lw::Player::IsLocalPlayer,
 		"isfriend", &lw::Player::IsFriend,
-		"geteyes", &lw::Player::GetEyes,
+		//"geteyes", &lw::Player::GetEyes,
 		"isteammate", &lw::Player::IsTeammate);
 
 	lua.new_usertype<lw::Entity>("Entity",
@@ -2030,7 +2037,7 @@ sol::state initlua() {
 	core["flyhackDistanceX"] = settings::hor_flyhack;
 	return lua;
 }
-*/
+
 void new_frame() {
 	if (!finit) {
 		//printf("unity base: %" PRIxPTR "\n", mem::unity_player_base);
@@ -2049,40 +2056,43 @@ void new_frame() {
 	//lw::entitylist.clear();
 	//printf("crosshairs\n");
 	//Draw crosshairs
-	if (vars->visual.crosshair1)
-		Crosshair1();
-	if (vars->visual.crosshair2)
-		Crosshair2();
-	if (vars->visual.crosshair3)
-		Crosshair3();
 
-	//printf("indicators\n");
-	//Draw indicators
-	if (vars->visual.desync_indicator)
-		IndicatorDesync();
-	if (vars->combat.always_reload)
-		IndicatorReload();
-	if (vars->visual.speedhack_indicator)
-		IndicatorSpeedhack();
-	if (vars->misc.tp)
-		IndicatorTp();
-	if (vars->visual.snapline > 0)
-		DrawSnapline();
+	if (vars->local_player) {
+		if (vars->visual.crosshair1)
+			Crosshair1();
+		if (vars->visual.crosshair2)
+			Crosshair2();
+		if (vars->visual.crosshair3)
+			Crosshair3();
 
-	if (vars->visual.flyhack_indicator)
-		IndicatorFlyhack();
+		//printf("indicators\n");
+		//Draw indicators
+		if (vars->visual.desync_indicator)
+			IndicatorDesync();
+		if (vars->combat.always_reload)
+			IndicatorReload();
+		if (vars->visual.speedhack_indicator)
+			IndicatorSpeedhack();
+		if (vars->misc.tp)
+			IndicatorTp();
+		if (vars->visual.snapline > 0)
+			DrawSnapline();
 
-	//printf("fov\n");
-	//Draw FOV
-	if (vars->visual.show_fov)
-		DrawFov();
+		if (vars->visual.flyhack_indicator)
+			IndicatorFlyhack();
 
-	if (vars->visual.radar)
-		DrawRadarBackground();
+		//printf("fov\n");
+		//Draw FOV
+		if (vars->visual.show_fov)
+			DrawFov();
+
+		if (vars->visual.radar)
+			DrawRadarBackground();
+	}
 	//printf("watermark\n");
 	//Draw watermark
 	Watermark();
-	if (esp::local_player
+	if (vars->local_player
 		&& vars->visual.hitpoint) {
 		int rindex = -1;
 		for (size_t i = 0; i < hitpoints.size(); i++)
@@ -2100,43 +2110,124 @@ void new_frame() {
 	//printf("iterate entities\n");
 	iterate_entities();
 
-	//__try {
-	//	auto lua = initlua();
-	//	for (auto pair : vars->loaded_lua_list) {
-	//		if (*pair.second) {
-	//
-	//			auto filename = vars->data_dir + _("scripts\\") + pair.first + _(".lua");
-	//			lua.script_file(filename);
-	//
-	//			sol::protected_function func = lua[_("entityloop")];
-	//			func.set_error_handler(lua[_("errorhandler")]);
-	//			auto f = (std::function<void()>)func();
-	//		}
-	//	}
-	//}
-	//__except (true) {}
+	__try {
+		sol::state lua;
+		lua.open_libraries(sol::lib::base, sol::lib::string, sol::lib::package, sol::lib::io);
 
-	//if(lw::entities::playerlist.size() > 0)
-	//if (!esp::local_player) {
-	//	lw::playerlist.clear();
-	//	lw::entitylist.clear();
-	//}
-	//for (auto v : lw::playerlist)
-	//	if (!v)
-	//		lw::playerlist.erase(
-	//			std::remove(
-	//				lw::playerlist.begin(),
-	//				lw::playerlist.end(),
-	//				v),
-	//			lw::playerlist.end());
-	//for (auto v : lw::entitylist)
-	//	if (!v)
-	//		lw::playerlist.erase(
-	//			std::remove(
-	//				lw::playerlist.begin(),
-	//				lw::playerlist.end(),
-	//				v),
-	//			lw::playerlist.end());
+		//auto core = lua["cheat"].get_or_create<sol::table>();
+
+		lua.new_usertype<Vector2>("Vector2",
+			"x", &Vector2::x,
+			"y", &Vector2::y);
+
+		lua.new_usertype<Vector3>("Vector3",
+			"x", &Vector3::x,
+			"y", &Vector3::y,
+			"z", &Vector3::z);
+
+		lua.new_usertype<Vector4>("Vector4",
+			"x", &Vector4::x,
+			"y", &Vector4::y,
+			"z", &Vector4::z,
+			"w", &Vector4::w);
+
+		lua.new_usertype<lw::color>("color",
+			"r", &lw::color::r,
+			"g", &lw::color::g,
+			"b", &lw::color::b,
+			"a", &lw::color::a);
+
+		auto gui = lua["draw"].get_or_create<sol::table>();
+
+		gui.set_function("rect", &lw::draw::Rect);
+		gui.set_function("filledrect", &lw::draw::FillRect);
+		gui.set_function("circle", &lw::draw::Circle);
+		gui.set_function("filledcircle", &lw::draw::FillCircle);
+		gui.set_function("text", &lw::draw::Text);
+		gui.set_function("textcentered", &lw::draw::TextCentered);
+		gui.set_function("line", &lw::draw::Line);
+		gui.set_function("line3d", &lw::draw::Line3d);
+		gui.set_function("sphere3d", &lw::draw::Sphere3d);
+
+		lua.new_usertype<lw::Eyes>("PlayerEyes",
+			"getpos", &lw::Eyes::GetPosition,
+			"getrot", &lw::Eyes::GetRotation,
+			"bodyfwd", &lw::Eyes::BodyForward,
+			"bodyright", &lw::Eyes::BodyRight,
+			"getviewoffset", &lw::Eyes::GetViewOffset,
+			"setviewoffset", &lw::Eyes::SetViewOffset);
+
+		lua.new_usertype<lw::Player>("Player",
+			"settargetmovement", &lw::Player::SetTargetMovement,
+			"gettargetmovement", &lw::Player::GetTargetMovement,
+			"isalive", &lw::Player::IsAlive,
+			"gethealth", &lw::Player::GetHealth,
+			"getbonepos", &lw::Player::GetBonePos,
+			"getname", &lw::Player::GetName,
+			"isnpc", &lw::Player::IsNpc,
+			"userid", &lw::Player::GetUserId,
+			"serverrpc", &lw::Player::Rpc,
+			"islocalplayer", &lw::Player::IsLocalPlayer,
+			"isfriend", &lw::Player::IsFriend,
+			//"geteyes", &lw::Player::GetEyes,
+			"isteammate", &lw::Player::IsTeammate);
+
+		lua.new_usertype<lw::Entity>("Entity",
+			"getpos", &lw::Entity::GetPosition,
+			"classname", &lw::Entity::GetClassname,
+			"rpc", &lw::Entity::Rpc);
+
+		auto core = lua["cheat"].get_or_create<sol::table>();
+
+		core.set_function("getplayer", &lw::entities::GetPlayer);
+		core.set_function("getentity", &lw::entities::GetEntity);
+		core.set_function("lineofsight", &lw::misc::LineOfSight);
+		core.set_function("worldtoscreen", &lw::misc::w2s);
+		core.set_function("iskeydown", &lw::misc::IsKeyPressed);
+		core.set_function("playerlistsize", &lw::entities::PlayerListSize);
+		core.set_function("entitylistsize", &lw::entities::EntityListSize);
+		core.set_function("realtimesincestartup", &lw::misc::TimeSinceStartup);
+		core.set_function("fixedtime", &lw::misc::FixedTime);
+
+		core["desynctime"] = vars->desyncTime;
+		core["flyhackDistanceY"] = settings::vert_flyhack;
+		core["flyhackDistanceX"] = settings::hor_flyhack;
+
+		for (auto pair : vars->loaded_lua_list) {
+			if (*pair.second) {
+				auto filename = vars->data_dir + _("scripts\\") + pair.first + _(".lua");
+				lua.script_file(filename);
+	
+				sol::protected_function func = lua[_("entityloop")];
+				//func.set_error_handler(lua[_("errorhandler")]);
+				if (func.valid())
+					auto f = (std::function<void()>)func();
+			}
+		}
+	}
+	__except (true) {}
+
+	if(lw::playerlist.size() > 0)
+		if (!vars->local_player) {
+			lw::playerlist.clear();
+			lw::entitylist.clear();
+		}
+	for (auto v : lw::playerlist)
+		if (!v)
+			lw::playerlist.erase(
+				std::remove(
+					lw::playerlist.begin(),
+					lw::playerlist.end(),
+					v),
+				lw::playerlist.end());
+	for (auto v : lw::entitylist)
+		if (!v)
+			lw::entitylist.erase(
+				std::remove(
+					lw::entitylist.begin(),
+					lw::entitylist.end(),
+					v),
+				lw::entitylist.end());
 	
 	//printf("new_frame return\n");
 	return;

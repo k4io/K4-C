@@ -3,7 +3,7 @@
 
 inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlayer, InputState* input)	
 {
-	auto LocalPlayer = esp::local_player;//CheatCore::m_cheat->LocalPlayer;
+	auto LocalPlayer = vars->local_player;//CheatCore::m_cheat->LocalPlayer;
 
 	if (!LocalPlayer)
 		return false;
@@ -389,7 +389,7 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 
 		if (LastLocalEye != ManipulationPosition)
 		{
-			esp::local_player->console_echo(string::wformat(_(L"[matrix]: CanManipulate - RealGangstaShit: (%d, %d, %d), FatHitPosition: (%d, %d, %d), distance: %d"),
+			vars->local_player->console_echo(string::wformat(_(L"[matrix]: CanManipulate - RealGangstaShit: (%d, %d, %d), FatHitPosition: (%d, %d, %d), distance: %d"),
 				(int)ManipulationPosition.x,
 				(int)ManipulationPosition.y,
 				(int)ManipulationPosition.z,

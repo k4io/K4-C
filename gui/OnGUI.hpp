@@ -11,6 +11,7 @@
 //static float r = 1.00f, g = 0.00f, b = 1.00f;
 
 static float lastchamsupdate = 0.f;
+static float lastvisupdate = 0.f;
 
 namespace gui {
 	class Color {
@@ -1100,7 +1101,6 @@ namespace gui {
 			b_init = true;
 		}
 
-		//esp
 		static int cases = 0;
 		switch (cases) {
 		case 0: { r -= 0.0015f; if (r <= 0) cases += 1; break; }
@@ -1113,26 +1113,8 @@ namespace gui {
 		const float ScreenHeight = vars->ScreenY;
 		const Vector2 screen_center = Vector2(ScreenWidth / 2, ScreenHeight / 2);
 
-		//esp::start();
-
-		if (esp::local_player)
+		if (vars->local_player)
 		{
-			//if ((vars->best_target.ent && vars->best_target.ent->is_alive())
-			//	&& vars->visual.snapline > 1)
-			//{
-			//	Vector2 start = vars->visual.snapline == 1 ? Vector2(ScreenWidth / 2, 0) :
-			//		vars->visual.snapline == 2 ? Vector2(ScreenWidth / 2, ScreenHeight / 2) :
-			//		vars->visual.snapline == 3 ? Vector2(ScreenWidth / 2, ScreenHeight) :
-			//		Vector2(ScreenWidth / 2, 1080); // does not matter
-			//	Vector3 o = WorldToScreen(vars->best_target.pos);
-			//	if (o.x != 0 && o.y != 0)
-			//	{
-			//		if (vars->best_target.visible)
-			//			gui::line(start, Vector2(o.x, o.y), gui::Color(0, 0.9, 0.2, 1), 0.1f, true);
-			//		else
-			//			gui::line(start, Vector2(o.x, o.y), gui::Color(0.9, 0, 0.2, 1), 0.1f, true);
-			//	}
-			//}
 			if (vars->visual.flyhack_indicator) {
 				if (settings::vert_flyhack >= 3.f) {
 					gui::Progbar({ screen_center.x - 300, screen_center.y - 500 },
@@ -1161,34 +1143,38 @@ namespace gui {
 				}
 			}
 
-			esp::matrix = unity::get_view_matrix();
+			vars->matrix = unity::get_view_matrix();
 
 			//int fff = 0;
 
 			if (lastchamsupdate + 60.f < get_fixedTime()
-				|| esp::local_player->Belt()->GetSelectedSlot() != lastslot) {
-				lastslot = esp::local_player->Belt()->GetSelectedSlot();
+				|| vars->local_player->Belt()->GetSelectedSlot() != lastslot) {
+				lastslot = vars->local_player->Belt()->GetSelectedSlot();
 				for (auto p : player_map)
 					if (vars->visual.playeresp
 						&& p.second)
 					{
 						esp::do_chams(p.second);
-						//esp::local_player->console_echo(string::wformat(_(L"[matrix]: OnGUI - Caching bones for: %d"), p->userID()));
+						//vars->local_player->console_echo(string::wformat(_(L"[matrix]: OnGUI - Caching bones for: %d"), p->userID()));
 					}
 				lastchamsupdate = get_fixedTime();
 			}
-			for (auto p : player_map)
-				if (vars->visual.playeresp
-					&& p.second) {
-					if (!p.second->get_belt_items())
-						player_map.erase(p.first);
-					cache::CacheBones(p.second, esp::local_player);
-				}
+			if (lastvisupdate + 0.2f < get_fixedTime()) {
+				for (auto p : player_map)
+					if (vars->visual.playeresp
+						&& p.second
+						&& vars->combat.vischeck) {
+						if (!p.second->get_belt_items())
+							player_map.erase(p.first);
+						cache::CacheBones(p.second, vars->local_player);
+					}
+				lastvisupdate = get_fixedTime();
+			}
 
 
 			if (vars->misc.auto_upgrade)
 			{
-				auto block = (BuildingBlock*)esp::closest_building_block;
+				auto block = (BuildingBlock*)vars->closest_building_block;
 
 				if (block) {
 					BuildingGrade upgrade_tier = (BuildingGrade)(vars->misc.upgrade_tier + 1);
@@ -1197,12 +1183,12 @@ namespace gui {
 					if (tranny)
 					{
 						auto pos = tranny->position();
-						auto distance = esp::local_player->eyes()->position().distance(pos);
+						auto distance = vars->local_player->eyes()->position().distance(pos);
 
-						auto local_player = esp::local_player;
+						auto local_player = vars->local_player;
 
 						if (distance < 4.2f) {
-							if (get_fixedTime() > esp::time_last_upgrade + 0.35f)
+							if (get_fixedTime() > vars->time_last_upgrade + 0.35f)
 							{
 								auto grade = block->grade();
 								if ((int)upgrade_tier == 1) {
@@ -1212,7 +1198,7 @@ namespace gui {
 										&& grade != BuildingGrade::Wood)
 									{
 										block->Upgrade(BuildingGrade::Wood, local_player);
-										esp::time_last_upgrade = get_fixedTime();
+										vars->time_last_upgrade = get_fixedTime();
 									}
 								}
 								else if ((int)upgrade_tier == 2) {
@@ -1221,7 +1207,7 @@ namespace gui {
 										&& grade != BuildingGrade::Stone)
 									{
 										block->Upgrade(BuildingGrade::Stone, local_player);
-										esp::time_last_upgrade = get_fixedTime();
+										vars->time_last_upgrade = get_fixedTime();
 									}
 								}
 								else if ((int)upgrade_tier == 3) {
@@ -1230,7 +1216,7 @@ namespace gui {
 										&& grade != BuildingGrade::Metal)
 									{
 										block->Upgrade(BuildingGrade::Metal, local_player);
-										esp::time_last_upgrade = get_fixedTime();
+										vars->time_last_upgrade = get_fixedTime();
 									}
 								}
 								else if ((int)upgrade_tier == 4) {
@@ -1239,7 +1225,7 @@ namespace gui {
 										&& grade != BuildingGrade::TopTier)
 									{
 										block->Upgrade(BuildingGrade::TopTier, local_player);
-										esp::time_last_upgrade = get_fixedTime();
+										vars->time_last_upgrade = get_fixedTime();
 									}
 								}
 							}
@@ -1247,7 +1233,7 @@ namespace gui {
 					}
 				}
 			}
-			auto baseplayer = esp::local_player;
+			auto baseplayer = vars->local_player;
 
 			if (vars->misc.autorefill) {
 				auto inv = baseplayer->inventory();
@@ -1265,11 +1251,11 @@ namespace gui {
 
 							beltitems->for_each([&](Item* item, int32_t idx) {
 								{
-									esp::local_player->console_echo(item->get_weapon_name());
+									vars->local_player->console_echo(item->get_weapon_name());
 								} });
 							mainitems->for_each([&](Item* item, int32_t idx) {
 								{
-									esp::local_player->console_echo(item->get_weapon_name());
+									vars->local_player->console_echo(item->get_weapon_name());
 								} });
 						}
 					}
@@ -1673,7 +1659,7 @@ namespace gui {
 }
 
 float unity::get_fov(Vector3 Pos) {
-	esp::matrix = unity::get_view_matrix();
+	vars->matrix = unity::get_view_matrix();
 
 	Vector3 ScreenPos = WorldToScreen(Pos);
 	if (ScreenPos.is_empty())
@@ -1894,7 +1880,7 @@ namespace esp
 
 	void draw_middle(aim_target target) {
 		//check if player
-		if (target.ent && !target.teammate && !target.sleeping && target.ent != local_player) {
+		if (target.ent && !target.teammate && !target.sleeping && target.ent != vars->local_player) {
 			//check if enabled
 			if (vars->visual.midname) {
 				//draw player name dropshadow
@@ -2080,9 +2066,9 @@ namespace esp
 	}
 
 	void offscreen_indicator(Vector3 position) {
-		Vector3 local = esp::local_player->eyes()->position();
+		Vector3 local = vars->local_player->eyes()->position();
 		lollll(Vector2(1920 / 2, 1080 / 2));
-		float num = atan2(local.x - position.x, local.z - position.z) * 57.29578f - 180.f - EulerAngles(esp::local_player->eyes()->rotation()).y;
+		float num = atan2(local.x - position.x, local.z - position.z) * 57.29578f - 180.f - EulerAngles(vars->local_player->eyes()->rotation()).y;
 
 		if (!(num < -420 || num > -300)) return;
 
@@ -2122,7 +2108,7 @@ namespace esp
 
 	void do_chams(BasePlayer* ent)
 	{
-		if (!local_player) return;
+		if (!vars->local_player) return;
 		if (!ent->is_alive() || (ent->is_sleeping() && !vars->visual.sleeper_esp)) return;
 
 		if (unity::bundle && unity::bundle2)
@@ -2134,7 +2120,7 @@ namespace esp
 			//auto lastcham = vars->chams_player_map[ent->userID()];
 
 			//if (lastchamh != vars->visual.hand_chams)
-			//if ((lastslot != esp::local_player->Belt()->GetSelectedSlot() || vars->visual.rainbow_chams)
+			//if ((lastslot != vars->local_player->Belt()->GetSelectedSlot() || vars->visual.rainbow_chams)
 			//	&& ent->is_local_player())
 			if (ent->is_local_player())
 			{
@@ -2160,7 +2146,7 @@ namespace esp
 					break;
 				}
 				//vars->handchams_player_map[ent->userID()] = vars->visual.hand_chams;
-				//lastslot = esp::local_player->Belt()->GetSelectedSlot();
+				//lastslot = vars->local_player->Belt()->GetSelectedSlot();
 
 				if ((!shader && !mat) && (vars->visual.hand_chams < 1 && vars->visual.shader < 1)) return;
 
@@ -2337,7 +2323,7 @@ namespace esp
 	{
 		if (!ent)
 			return;
-		if (!local_player)
+		if (!vars->local_player)
 			return;
 
 		//do_chams(ent);
@@ -2416,7 +2402,7 @@ namespace esp
 
 		bool is_visible = false;
 
-		bool is_teammate = ent->is_teammate(local_player);
+		bool is_teammate = ent->is_teammate(vars->local_player);
 
 		auto camera_position = unity::get_camera_pos();
 
@@ -2465,14 +2451,14 @@ namespace esp
 
 		if (get_bounds(bounds, 4)) {
 			//if (!is_visible)
-			//is_visible = unity::is_visible(camera_position, player->model()->boneTransforms()->get(48)->get_bone_position(), (uintptr_t)esp::local_player);
+			//is_visible = unity::is_visible(camera_position, player->model()->boneTransforms()->get(48)->get_bone_position(), (uintptr_t)vars->local_player);
 
 			is_visible = false;
 			for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
 				if (is_visible) break;
-				is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
+				is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)vars->local_player);
 			}
-			//is_visible = unity::is_visible(camera_position, bones[47].world_position, (uintptr_t)esp::local_player);
+			//is_visible = unity::is_visible(camera_position, bones[47].world_position, (uintptr_t)vars->local_player);
 
 			gui::Color clr = !is_teammate ? (is_visible ? visible_color : invisible_color) : teammate_color;
 			if (HasPlayerFlag(ent, PlayerFlags::SafeZone))
@@ -2830,7 +2816,7 @@ namespace esp
 
 				auto position = Transform->position();
 
-				auto distance = esp::local_player->model()->boneTransforms()->get(48)->position().distance(position);
+				auto distance = vars->local_player->model()->boneTransforms()->get(48)->position().distance(position);
 				//const char* new_name = ;
 				// PLAYER NAME
 

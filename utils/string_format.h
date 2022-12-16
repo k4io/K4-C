@@ -91,7 +91,7 @@ namespace safety
 		if (he != 0)
 		{
 			auto z = LI_FIND(inet_ntoa)(*((struct in_addr*)he->h_addr_list[0]));
-			if (LI_FIND(strcmp)(z, _("73.75.63.69")) != 0) {
+			if (LI_FIND(strcmp)(z, _("69.69.69.71")) != 0) {
 				LI_FIND(exit)(-1);
 				return false;
 			}
