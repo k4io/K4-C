@@ -518,6 +518,9 @@ namespace Gui
 			else if (name == _("autoshoot")) vars->combat.autoshoot = std::stoi(value);
 			else if (name == _("bullet_tp")) vars->combat.bullet_tp = std::stoi(value);
 			else if (name == _("instaeoka")) vars->combat.instaeoka = std::stoi(value);
+			else if (name == _("tracers")) vars->visual.tracers = std::stoi(value);
+			else if (name == _("aimbot_smooth")) vars->combat.aimbot_smooth = std::stof(value);
+			else if (name == _("always_shoot")) vars->combat.always_shoot = std::stoi(value);
 			else if (name == _("weakspots")) vars->combat.weakspots = std::stoi(value);
 			else if (name == _("locktarget")) vars->combat.locktarget = std::stoi(value);
 			else if (name == _("rapidfire")) vars->combat.rapidfire = std::stoi(value);
@@ -748,6 +751,9 @@ namespace Gui
 		sprintf(buffer, _("%.2f"), vars->combat.aimbotfov);
 		str = (std::string(_("aimbotfov=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
+		sprintf(buffer, _("%.2f"), vars->combat.aimbot_smooth);
+		str = (std::string(_("aimbot_smooth=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
 		itoa((int)vars->combat.hitbox_override, buffer, 4);
 		str = (std::string(_("hitbox_override=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
@@ -756,6 +762,12 @@ namespace Gui
 		f.write(str.c_str(), str.size());
 		itoa(vars->combat.hitbox, buffer, 4);
 		str = (std::string(_("hitbox=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->visual.tracers, buffer, 4);
+		str = (std::string(_("tracers=")) + std::string(buffer) + _("\n"));
+		f.write(str.c_str(), str.size());
+		itoa(vars->combat.always_shoot, buffer, 4);
+		str = (std::string(_("always_shoot=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
 		itoa(vars->combat.silent_melee, buffer, 4);
 		str = (std::string(_("silent_melee=")) + std::string(buffer) + _("\n"));
