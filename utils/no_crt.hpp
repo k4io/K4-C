@@ -5,23 +5,23 @@ int _purecall(void);
 
 #define pout freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin); freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout); printf(__FUNCTION__ "\n");
 
-namespace std
-{
-	[[noreturn]] inline void __cdecl _Xbad_function_call() { pout }
-	[[noreturn]] inline void __cdecl _Xbad_alloc() { pout }
-	[[noreturn]] inline void __cdecl _Xlength_error(char const*) { pout }
-	[[noreturn]] inline void __cdecl _Xout_of_range(char const*) { pout }
-	 [[noreturn]] inline void __cdecl  __security_check_cookie() { pout }
-} // namespace std
-
-#ifndef _DEBUG
-extern "C" void __chkstk() {} // Disables stack allocation size limits.
-extern "C" void __CxxFrameHandler4() { pout }
-extern "C" void __std_terminate() { pout }
-extern "C" void _fltused() { pout }
-#endif
-
-#define _Xlength_error(x) pout
+//namespace std
+//{
+//	[[noreturn]] inline void __cdecl _Xbad_function_call() { pout }
+//	[[noreturn]] inline void __cdecl _Xbad_alloc() { pout }
+//	[[noreturn]] inline void __cdecl _Xlength_error(char const*) { pout }
+//	[[noreturn]] inline void __cdecl _Xout_of_range(char const*) { pout }
+//	 [[noreturn]] inline void __cdecl  __security_check_cookie() { pout }
+//} // namespace std
+//
+//#ifndef _DEBUG
+//extern "C" void __chkstk() {} // Disables stack allocation size limits.
+//extern "C" void __CxxFrameHandler4() { pout }
+//extern "C" void __std_terminate() { pout }
+//extern "C" void _fltused() { pout }
+//#endif
+//
+//#define _Xlength_error(x) pout
 #define ABS(N) ((N<0)?(-N):(N))
 
 unsigned short lfsr = 0xACE1u;

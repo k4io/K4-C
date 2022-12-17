@@ -1383,7 +1383,319 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				}
 			}
 		}
+	}
+
+	void hk_projectile_launchprojectile(BaseProjectile* p)
+	{
+		//auto held = vars->local_player->GetActiveItem()->GetHeldEntity<BaseProjectile>();
+		//if (vars->combat.doubletap
+		//	&& !vars->combat.rapidfire)
+		//{
+		//
+		//
+		//	auto m = held->repeatDelay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
+		//
+		//	int r = vars->desyncTime / m;
+		//	if (r > 1)
+		//	{
+		//		vars->local_player->console_echo(string::wformat(_(L"[matrix]: Launching %d projectiles!"), r));
+		//		for (size_t i = 0; i < r; i++)
+		//		{
+		//			orig::baseprojectile_launchprojectile((uintptr_t)p);
+		//			held->remove_ammo();
+		//		}
+		//
+		//		//auto mag = *reinterpret_cast<int*>((uintptr_t)held + 0x2C0);//p->primaryMagazine();
+				//auto c = *reinterpret_cast<int*>((uintptr_t)mag + 0x1C); //0x1C = public int contents;
+				//*reinterpret_cast<int*>((uintptr_t)mag + 0x1C) = (c - r);
+		//		return;
+		//	}
+		//}
+		//orig::baseprojectile_launchprojectile((uintptr_t)p);
+		//if (misc::manual || misc::autoshot) {
+		//	//auto mag = *reinterpret_cast<int*>((uintptr_t)held + 0x2C0);//p->primaryMagazine();
+			//auto c = *reinterpret_cast<int*>((uintptr_t)mag + 0x1C); //0x1C = public int contents;
+			//*reinterpret_cast<int*>((uintptr_t)mag + 0x1C) = (c - 1);
+		//
+		//	held->remove_ammo();
+		//	misc::manual = false;
+		//	misc::autoshot = false;
+		//}
+		//
+
+
+		return orig::baseprojectile_launchprojectile((uintptr_t)p);;
+	}
+
+	void hk_projectile_update(uintptr_t pr) {
+		if (launchedmelee) {
+			((Projectile*)pr)->currentVelocity(tempmelvel);
+			((Projectile*)pr)->currentPosition(tempmelpos);
+			((Projectile*)pr)->transform()->setposition(tempmelpos);
+
+			((Projectile*)pr)->transform()->SetLocalScale(((Projectile*)pr)->transform()->GetLocalScale() * vars->visual.visthickness);
+			((BaseProjectile*)pr)->set_projectile_thickness(vars->combat.thickness);
+			tempmelvel = {};
+			tempmelpos = {};
+			launchedmelee = false;
+			return _update((Projectile*)pr);
+		}
+		if (vars->combat.throughwall)
+		{
+			for (size_t i = 0; i <= 0; i++)
+			{
+				auto p = (Projectile*)pr;
+				if (!p->hitTest()) break;
+				if (p->penetrationPower() <= .5f) break;
+
+				Vector3 vel = p->currentVelocity();
+				Vector3 dir = vel.normalize();
+				Vector3 traveledThisUpdate = vel * get_deltaTime();
+
+				DWORD64 sistat = il2cpp::init_class(_("RaycastHit"), _("UnityEngine"));
+				RaycastHit* hitInfo = (RaycastHit*)il2cpp::methods::object_new(sistat);
+				if (!hitInfo) break;
+				//RaycastHit hitInfo;
+
+				//Sphere(p->currentPosition(), .05f, { 1, 1, 1, 1 }, 10.f, false);
+
+				if (!GamePhysics::Trace(
+					Ray(p->currentPosition(), dir),
+					0.f,
+					hitInfo,
+					traveledThisUpdate.length() + 1.f,
+					8388608 | 2097152 | 65536, 0))
+					break;
+
+				if (!g_UpdateReusable)
+					g_UpdateReusable = Projectile1::CreatePlayerProjectileUpdate();
+
+				//_update((Projectile*)pr);
+
+				auto ppu = (protobuf::PlayerProjectileUpdate*)g_UpdateReusable;
+
+				ppu->projectileID = p->projectileID();
+				ppu->traveltime = p->traveledTime() + p->currentPosition().distance(hitInfo->point()) / traveledThisUpdate.length();
+				ppu->position = hitInfo->point() - (dir * .1f);
+				ppu->velocity = p->currentVelocity();
+				vars->local_player->SendProjectileUpdate((uintptr_t)ppu);
+				//orig_fn(rcx, rdx, r9, _ppa, arg5);
+
+				auto trans = ((BasePlayer*)vars->best_target.ent)->get_bone_Transform(48);
+				if (!trans) break;
+				float dist = p->currentPosition().distance(trans->position());
+
+				p->traveledDistance(p->traveledDistance() + dist);
+				p->traveledTime(p->traveledTime() + (dist / p->currentVelocity().Length()));
+
+				auto ht = (HitTest*)p->hitTest();
+
+				p->integrity(1);
+				Sphere(hitInfo->point(), 0.1f, { r, g, b, 1 }, 10.f, false);
+
+				ht->HitTransform() = trans;
+				ht->HitEntity() = vars->best_target.ent;
+				ht->AttackRay() = Ray(hitInfo->point(), dir.Normalized());
+				ht->HitPoint() = trans->InverseTransformPoint(trans->position());
+				ht->HitNormal() = Vector3(0, 0, 0);
+				ht->DidHit() = true;
+				ht->HitDistance() = dist;
+				ht->MaxDistance() = 999.f;
+				_DoHit(p, ht, trans->position(), Vector3(0, 0, 0));
+				
+			}
+		}
+		if (vars->combat.targetbehindwall) {
+			//return _update((Projectile*)pr);
+			((Projectile1*)pr)->Update();
+		}
+		else
+			return _update((Projectile*)pr);
+	}
+
+	void hk_performance_update(void* instance) {
+		if (wake) {
+			__go = il2cpp::methods::object_new(il2cpp::init_class(_("GameObject"), _("UnityEngine")));
+			create(__go, _(L""));
+			add_component(__go, il2cpp::type_object(_(""), _("DevControls")));
+			dont_destroy_on_load(__go);
+			wake = false;
+		}
+		PerformanceUI_Update(instance);
+	}
+
+	void fakeorig_clientinput(BasePlayer* self, InputState* state) {
+		//printf("clientinput recreation start\n");
+		orig::pifu(self->input());
+		self->modelState()->setaiming(false);
+		self->modelState()->setducked(false);
+		self->modelState()->setsprinting(false);
+		self->modelState()->setjumped(false);
+		self->modelState()->setwaterlevel(self->WaterFactor());
+		self->voiceRecorder()->ClientInput(state);
+		//printf("clientinput recreation middle\n");
+		if (self->HasLocalControls() && !NeedsKeyboard::AnyActive()) {
+			self->Belt()->ClientInput(state);
+		}
+		else {
+			UIInventory::Close();
+			MapInterface::SetOpen(false);
+		}
+		if (self->Frozen()) return;
+		self->HeldEntityInput();
+		//TimeWarning::New(_(L"movement.ClientInput"), 0.1f);
+		self->movement()->ClientInput(state, self->modelState());
+		hk_playerwalkmovement_ClientInput(self->movement(), (uintptr_t)input, self->modelState());
+			//if ()
+				//self->movement()->ClientInput(state, self->modelState());
+		//TimeWarning::New(_(L"UseAction"), 0.1f);
+		self->UseAction(state);
+		if (Buttons::Chat()->IsDown)
+		{
+			typedef void(*AA)();
+			((AA)(mem::game_assembly_base + oChatOpen))();
+		}
+
+		//typedef void(*AA)(bool);
+		//((AA)(mem::game_assembly_base + oSetGestureMenuOpen))(Buttons::Gestures()->IsDown);
+
+		//TimeWarning::New(_(L"MapInterface Update"), 0.1f);
+		MapInterface::SetOpen(Buttons::Map()->IsDown);
+
+		//printf("clientinput recreation end\n");
+		return;
+		//rust.gc.reset(1f);
+		//using (TimeWarning.New("MapInterface Update", 0.1f))
+		//{
+		//	MapInterface.DoPlayerUpdate();
+		//	MapInterface.SetOpen(Buttons.Map.IsDown);
+		//}
+	}
+
+	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
+	{
+		//printf("clientinput start\n");
+		int echocount = 0;
+		//printf("clientinput start\n");
+		if (!hooks::client_input_ptr)
+			hooks::client_input_ptr = mem::hook_virtual_function(_("PlayerWalkMovement"), _("ClientInput"), &hooks::hk_playerwalkmovement_ClientInput);
+
+		//if(!do_fixed_update_ptr)
+			//do_fixed_update_ptr = mem::hook_virtual_function(_("PlayerWalkMovement"), _("DoFixedUpdate"), &hk_dofixedupdate);
+
+		//printf("clientinput\n");
+		//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
+
+		//static uintptr_t* serverrpc_projecshoot = 0;
+			//if (!serverrpc_projecshoot) {
+			//	auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot); //Method$BaseEntity.ServerRPC<ProjectileShoot>()
+			//	typedef void(*CALL)(uintptr_t*, int64_t);
+			//	((CALL)(mem::game_assembly_base + 0x2D9300))(&method_serverrpc_projecshoot, 0);
+			//	if (method_serverrpc_projecshoot) {
+			//		serverrpc_projecshoot = **(uintptr_t***)(method_serverrpc_projecshoot + 0x30);
+			//
+			//		hooks::orig::serverrpc_projectileshoot = *serverrpc_projecshoot;
+			//
+			//		*serverrpc_projecshoot = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_projectileshoot);
+			//	}
+			//}
+			//static uintptr_t* serverrpc_projecattack = 0;
+			//if (!serverrpc_projecattack) {
+			//	auto method_serverrpc_projecattack = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileAttack___); //Method$BaseEntity.ServerRPC<ProjectileShoot>()
+			//	typedef void(*CALL)(uintptr_t*, int64_t);
+			//	((CALL)(mem::game_assembly_base + 0x2D9300))(&method_serverrpc_projecattack, 0);
+			//	if (method_serverrpc_projecattack) {
+			//		serverrpc_projecattack = **(uintptr_t***)(method_serverrpc_projecattack + 0x30);
+			//
+			//		hooks::orig::playerprojectileattack = *serverrpc_projecattack;
+			//
+			//		*serverrpc_projecattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
+			//	}
+			//}
+			//
+			//static uintptr_t* serverrpc_projecupdate = 0;
+			//if (!serverrpc_projecupdate) {
+			//	auto method_serverrpc_projecupdate = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___); //Method$BaseEntity.ServerRPC<ProjectileShoot>()
+			//	typedef void(*CALL)(uintptr_t*, int64_t);
+			//	((CALL)(mem::game_assembly_base + 0x2D9300))(&method_serverrpc_projecupdate, 0);
+			//	if (method_serverrpc_projecupdate) {
+			//		serverrpc_projecupdate = **(uintptr_t***)(method_serverrpc_projecupdate + 0x30);
+			//
+			//		hooks::orig::playerprojectileupdate = *serverrpc_projecupdate;
+			//
+			//		*serverrpc_projecupdate = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileupdate);
+			//	}
+			//}
+
+		if (!has_intialized_methods) {
+			auto il2cpp_codegen_initialize_method = reinterpret_cast<void (*)(unsigned int)>(il2cpp::methods::intialize_method);
+			//56229 for real rust or 56204 for cracked rust
+			for (int i = 0; i <
+				56229//56204 //56229 = real rust
+				; i++) {
+				il2cpp_codegen_initialize_method(i);
+			}
+			has_intialized_methods = true;
+
+			//HERE UNTIL THEY REMOVE IT AGAIN /S
+
+			fired_projectile placeholder = { nullptr, 0, 1 };
+			for (size_t i = 0; i < 32; i++)
+				misc::fired_projectiles[i] = placeholder;
+		}
+
+#pragma region static_method_hooks
+		//static uintptr_t* serverrpc_createbuilding;
+		if (!serverrpc_projecshoot) {
+			//auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot);
+			auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileShoot___);
+
+			if (method_serverrpc_projecshoot) {
+				serverrpc_projecshoot = **(uintptr_t***)(method_serverrpc_projecshoot + 0x30);
+
+				hooks::orig::serverrpc_projectileshoot = *serverrpc_projecshoot;
+
+				*serverrpc_projecshoot = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_projectileshoot);
+			}
+		}
+		if (!serverrpc_playerprojectileattack) {
+			auto method_serverrpc_playerprojectileattack = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileAttack___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
 		
+			if (method_serverrpc_playerprojectileattack) {
+				serverrpc_playerprojectileattack = **(uintptr_t***)(method_serverrpc_playerprojectileattack + 0x30);
+		
+				hooks::orig::playerprojectileattack = *serverrpc_playerprojectileattack;
+		
+				*serverrpc_playerprojectileattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
+			}
+		}
+		//if (!serverrpc_playerprojectileupdate) {
+		//	auto method_serverrpc_playerprojectileupdate = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
+		//
+		//	if (method_serverrpc_playerprojectileupdate) {
+		//		serverrpc_playerprojectileupdate = **(uintptr_t***)(method_serverrpc_playerprojectileupdate + 0x30);
+		//
+		//		hooks::orig::playerprojectileupdate = *serverrpc_playerprojectileupdate;
+		//
+		//		*serverrpc_playerprojectileupdate = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileupdate);
+		//	}
+		//}
+		//if (!serverrpc_createbuilding) {
+		//	auto method_serverrpc_createbuilding = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_CreateBuilding___);
+		//
+		//	if (method_serverrpc_createbuilding) {
+		//		serverrpc_createbuilding = **(uintptr_t***)(method_serverrpc_createbuilding + 0x30);
+		//
+		//		hooks::orig::createbuilding = *serverrpc_createbuilding;
+		//
+		//		*serverrpc_createbuilding = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_doplace);
+		//	}
+		//}
+#pragma endregion
+
+		orig::baseplayer_client_input(baseplayer, state);
+
+
 		if (baseplayer) {
 			baseplayer->modelState()->remove_flag(ModelState_Flag::Flying);
 
@@ -1730,7 +2042,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						}
 					}
 				}
-				if (vars->visual.rocketprediction) {
+				if (vars->visual.rocketprediction
+					&& vars->local_player->is_alive()) {
 					if (!strcmp(held->get_class_name(), _("BaseLauncher"))) {
 						auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)held + 0x2C0); //public BaseProjectile.Magazine primaryMagazine; // 0x2C0
 						auto ammo = *reinterpret_cast<uintptr_t*>((uintptr_t)mag + 0x20); //public ItemDefinition ammoType; // 0x20
@@ -2183,7 +2496,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				if (misc::node.pos != Vector3(0, 0, 0))
 				{
 					auto dir = (misc::node.pos - baseplayer->eyes()->position()).Normalized();
-					((InputState*)inputstate)->set_aim_angles(dir);
+					((InputState*)state)->set_aim_angles(dir);
 				}
 			}
 		}
@@ -2224,7 +2537,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			if (baseplayer->is_sleeping()) return;
 			auto model_state = baseplayer->modelState();
 
-			Vector3 real_angles = safe_read(inputstate + 0x18, Vector3);
+			Vector3 real_angles = safe_read(state + 0x18, Vector3);
 			Vector3 spin_angles = Vector3::Zero();
 			bool targeted = vars->targetted;
 			int jitter_speed = 10;
@@ -2355,320 +2668,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 
 			if (spin_angles != Vector3::Zero())
-				((InputState*)inputstate)->set_aim_angles(spin_angles);
+				((InputState*)state)->set_aim_angles(spin_angles);
 			vars->targetted = false;
 		}
-	}
-
-	void hk_projectile_launchprojectile(BaseProjectile* p)
-	{
-		//auto held = vars->local_player->GetActiveItem()->GetHeldEntity<BaseProjectile>();
-		//if (vars->combat.doubletap
-		//	&& !vars->combat.rapidfire)
-		//{
-		//
-		//
-		//	auto m = held->repeatDelay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
-		//
-		//	int r = vars->desyncTime / m;
-		//	if (r > 1)
-		//	{
-		//		vars->local_player->console_echo(string::wformat(_(L"[matrix]: Launching %d projectiles!"), r));
-		//		for (size_t i = 0; i < r; i++)
-		//		{
-		//			orig::baseprojectile_launchprojectile((uintptr_t)p);
-		//			held->remove_ammo();
-		//		}
-		//
-		//		//auto mag = *reinterpret_cast<int*>((uintptr_t)held + 0x2C0);//p->primaryMagazine();
-				//auto c = *reinterpret_cast<int*>((uintptr_t)mag + 0x1C); //0x1C = public int contents;
-				//*reinterpret_cast<int*>((uintptr_t)mag + 0x1C) = (c - r);
-		//		return;
-		//	}
-		//}
-		//orig::baseprojectile_launchprojectile((uintptr_t)p);
-		//if (misc::manual || misc::autoshot) {
-		//	//auto mag = *reinterpret_cast<int*>((uintptr_t)held + 0x2C0);//p->primaryMagazine();
-			//auto c = *reinterpret_cast<int*>((uintptr_t)mag + 0x1C); //0x1C = public int contents;
-			//*reinterpret_cast<int*>((uintptr_t)mag + 0x1C) = (c - 1);
-		//
-		//	held->remove_ammo();
-		//	misc::manual = false;
-		//	misc::autoshot = false;
-		//}
-		//
-
-
-		return orig::baseprojectile_launchprojectile((uintptr_t)p);;
-	}
-
-	void hk_projectile_update(uintptr_t pr) {
-		if (launchedmelee) {
-			((Projectile*)pr)->currentVelocity(tempmelvel);
-			((Projectile*)pr)->currentPosition(tempmelpos);
-			((Projectile*)pr)->transform()->setposition(tempmelpos);
-
-			((Projectile*)pr)->transform()->SetLocalScale(((Projectile*)pr)->transform()->GetLocalScale() * vars->visual.visthickness);
-			((BaseProjectile*)pr)->set_projectile_thickness(vars->combat.thickness);
-			tempmelvel = {};
-			tempmelpos = {};
-			launchedmelee = false;
-			return _update((Projectile*)pr);
-		}
-		if (vars->combat.throughwall)
-		{
-			for (size_t i = 0; i <= 0; i++)
-			{
-				auto p = (Projectile*)pr;
-				if (!p->hitTest()) break;
-				if (p->penetrationPower() <= .5f) break;
-
-				Vector3 vel = p->currentVelocity();
-				Vector3 dir = vel.normalize();
-				Vector3 traveledThisUpdate = vel * get_deltaTime();
-
-				DWORD64 sistat = il2cpp::init_class(_("RaycastHit"), _("UnityEngine"));
-				RaycastHit* hitInfo = (RaycastHit*)il2cpp::methods::object_new(sistat);
-				if (!hitInfo) break;
-				//RaycastHit hitInfo;
-
-				//Sphere(p->currentPosition(), .05f, { 1, 1, 1, 1 }, 10.f, false);
-
-				if (!GamePhysics::Trace(
-					Ray(p->currentPosition(), dir),
-					0.f,
-					hitInfo,
-					traveledThisUpdate.length() + 1.f,
-					8388608 | 2097152 | 65536, 0))
-					break;
-
-				if (!g_UpdateReusable)
-					g_UpdateReusable = Projectile1::CreatePlayerProjectileUpdate();
-
-				//_update((Projectile*)pr);
-
-				auto ppu = (protobuf::PlayerProjectileUpdate*)g_UpdateReusable;
-
-				ppu->projectileID = p->projectileID();
-				ppu->traveltime = p->traveledTime() + p->currentPosition().distance(hitInfo->point()) / traveledThisUpdate.length();
-				ppu->position = hitInfo->point() - (dir * .1f);
-				ppu->velocity = p->currentVelocity();
-				vars->local_player->SendProjectileUpdate((uintptr_t)ppu);
-				//orig_fn(rcx, rdx, r9, _ppa, arg5);
-
-				auto trans = ((BasePlayer*)vars->best_target.ent)->get_bone_Transform(48);
-				if (!trans) break;
-				float dist = p->currentPosition().distance(trans->position());
-
-				p->traveledDistance(p->traveledDistance() + dist);
-				p->traveledTime(p->traveledTime() + (dist / p->currentVelocity().Length()));
-
-				auto ht = (HitTest*)p->hitTest();
-
-				p->integrity(1);
-				Sphere(hitInfo->point(), 0.1f, { r, g, b, 1 }, 10.f, false);
-
-				ht->HitTransform() = trans;
-				ht->HitEntity() = vars->best_target.ent;
-				ht->AttackRay() = Ray(hitInfo->point(), dir.Normalized());
-				ht->HitPoint() = trans->InverseTransformPoint(trans->position());
-				ht->HitNormal() = Vector3(0, 0, 0);
-				ht->DidHit() = true;
-				ht->HitDistance() = dist;
-				ht->MaxDistance() = 999.f;
-				_DoHit(p, ht, trans->position(), Vector3(0, 0, 0));
-				
-			}
-		}
-		if (vars->combat.targetbehindwall) {
-			//return _update((Projectile*)pr);
-			((Projectile1*)pr)->Update();
-		}
-		else
-			return _update((Projectile*)pr);
-	}
-
-	void hk_performance_update(void* instance) {
-		if (wake) {
-			__go = il2cpp::methods::object_new(il2cpp::init_class(_("GameObject"), _("UnityEngine")));
-			create(__go, _(L""));
-			add_component(__go, il2cpp::type_object(_(""), _("DevControls")));
-			dont_destroy_on_load(__go);
-			wake = false;
-		}
-		PerformanceUI_Update(instance);
-	}
-
-	void fakeorig_clientinput(BasePlayer* self, InputState* state) {
-		//printf("clientinput recreation start\n");
-		orig::pifu(self->input());
-		self->modelState()->setaiming(false);
-		self->modelState()->setducked(false);
-		self->modelState()->setsprinting(false);
-		self->modelState()->setjumped(false);
-		self->modelState()->setwaterlevel(self->WaterFactor());
-		self->voiceRecorder()->ClientInput(state);
-		//printf("clientinput recreation middle\n");
-		if (self->HasLocalControls() && !NeedsKeyboard::AnyActive()) {
-			self->Belt()->ClientInput(state);
-		}
-		else {
-			UIInventory::Close();
-			MapInterface::SetOpen(false);
-		}
-		if (self->Frozen()) return;
-		self->HeldEntityInput();
-		//TimeWarning::New(_(L"movement.ClientInput"), 0.1f);
-		self->movement()->ClientInput(state, self->modelState());
-		hk_playerwalkmovement_ClientInput(self->movement(), (uintptr_t)input, self->modelState());
-			//if ()
-				//self->movement()->ClientInput(state, self->modelState());
-		//TimeWarning::New(_(L"UseAction"), 0.1f);
-		self->UseAction(state);
-		if (Buttons::Chat()->IsDown)
-		{
-			typedef void(*AA)();
-			((AA)(mem::game_assembly_base + oChatOpen))();
-		}
-
-		//typedef void(*AA)(bool);
-		//((AA)(mem::game_assembly_base + oSetGestureMenuOpen))(Buttons::Gestures()->IsDown);
-
-		//TimeWarning::New(_(L"MapInterface Update"), 0.1f);
-		MapInterface::SetOpen(Buttons::Map()->IsDown);
-
-		//printf("clientinput recreation end\n");
-		return;
-		//rust.gc.reset(1f);
-		//using (TimeWarning.New("MapInterface Update", 0.1f))
-		//{
-		//	MapInterface.DoPlayerUpdate();
-		//	MapInterface.SetOpen(Buttons.Map.IsDown);
-		//}
-	}
-
-	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
-	{
-		//printf("clientinput start\n");
-		int echocount = 0;
-		//printf("clientinput start\n");
-		if (!hooks::client_input_ptr)
-			hooks::client_input_ptr = mem::hook_virtual_function(_("PlayerWalkMovement"), _("ClientInput"), &hooks::hk_playerwalkmovement_ClientInput);
-
-		//if(!do_fixed_update_ptr)
-			//do_fixed_update_ptr = mem::hook_virtual_function(_("PlayerWalkMovement"), _("DoFixedUpdate"), &hk_dofixedupdate);
-
-		//printf("clientinput\n");
-		//baseplayer->console_echo(string::wformat(_(L"echocount %d"), echocount++));
-
-		//static uintptr_t* serverrpc_projecshoot = 0;
-			//if (!serverrpc_projecshoot) {
-			//	auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot); //Method$BaseEntity.ServerRPC<ProjectileShoot>()
-			//	typedef void(*CALL)(uintptr_t*, int64_t);
-			//	((CALL)(mem::game_assembly_base + 0x2D9300))(&method_serverrpc_projecshoot, 0);
-			//	if (method_serverrpc_projecshoot) {
-			//		serverrpc_projecshoot = **(uintptr_t***)(method_serverrpc_projecshoot + 0x30);
-			//
-			//		hooks::orig::serverrpc_projectileshoot = *serverrpc_projecshoot;
-			//
-			//		*serverrpc_projecshoot = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_projectileshoot);
-			//	}
-			//}
-			//static uintptr_t* serverrpc_projecattack = 0;
-			//if (!serverrpc_projecattack) {
-			//	auto method_serverrpc_projecattack = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileAttack___); //Method$BaseEntity.ServerRPC<ProjectileShoot>()
-			//	typedef void(*CALL)(uintptr_t*, int64_t);
-			//	((CALL)(mem::game_assembly_base + 0x2D9300))(&method_serverrpc_projecattack, 0);
-			//	if (method_serverrpc_projecattack) {
-			//		serverrpc_projecattack = **(uintptr_t***)(method_serverrpc_projecattack + 0x30);
-			//
-			//		hooks::orig::playerprojectileattack = *serverrpc_projecattack;
-			//
-			//		*serverrpc_projecattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
-			//	}
-			//}
-			//
-			//static uintptr_t* serverrpc_projecupdate = 0;
-			//if (!serverrpc_projecupdate) {
-			//	auto method_serverrpc_projecupdate = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___); //Method$BaseEntity.ServerRPC<ProjectileShoot>()
-			//	typedef void(*CALL)(uintptr_t*, int64_t);
-			//	((CALL)(mem::game_assembly_base + 0x2D9300))(&method_serverrpc_projecupdate, 0);
-			//	if (method_serverrpc_projecupdate) {
-			//		serverrpc_projecupdate = **(uintptr_t***)(method_serverrpc_projecupdate + 0x30);
-			//
-			//		hooks::orig::playerprojectileupdate = *serverrpc_projecupdate;
-			//
-			//		*serverrpc_projecupdate = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileupdate);
-			//	}
-			//}
-
-		if (!has_intialized_methods) {
-			auto il2cpp_codegen_initialize_method = reinterpret_cast<void (*)(unsigned int)>(il2cpp::methods::intialize_method);
-			//56229 for real rust or 56204 for cracked rust
-			for (int i = 0; i <
-				56229//56204 //56229 = real rust
-				; i++) {
-				il2cpp_codegen_initialize_method(i);
-			}
-			has_intialized_methods = true;
-
-			//HERE UNTIL THEY REMOVE IT AGAIN /S
-
-			fired_projectile placeholder = { nullptr, 0, 1 };
-			for (size_t i = 0; i < 32; i++)
-				misc::fired_projectiles[i] = placeholder;
-		}
-
-#pragma region static_method_hooks
-		//static uintptr_t* serverrpc_createbuilding;
-		if (!serverrpc_projecshoot) {
-			//auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot);
-			auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileShoot___);
-
-			if (method_serverrpc_projecshoot) {
-				serverrpc_projecshoot = **(uintptr_t***)(method_serverrpc_projecshoot + 0x30);
-
-				hooks::orig::serverrpc_projectileshoot = *serverrpc_projecshoot;
-
-				*serverrpc_projecshoot = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_projectileshoot);
-			}
-		}
-		if (!serverrpc_playerprojectileattack) {
-			auto method_serverrpc_playerprojectileattack = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileAttack___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
-		
-			if (method_serverrpc_playerprojectileattack) {
-				serverrpc_playerprojectileattack = **(uintptr_t***)(method_serverrpc_playerprojectileattack + 0x30);
-		
-				hooks::orig::playerprojectileattack = *serverrpc_playerprojectileattack;
-		
-				*serverrpc_playerprojectileattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
-			}
-		}
-		//if (!serverrpc_playerprojectileupdate) {
-		//	auto method_serverrpc_playerprojectileupdate = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
-		//
-		//	if (method_serverrpc_playerprojectileupdate) {
-		//		serverrpc_playerprojectileupdate = **(uintptr_t***)(method_serverrpc_playerprojectileupdate + 0x30);
-		//
-		//		hooks::orig::playerprojectileupdate = *serverrpc_playerprojectileupdate;
-		//
-		//		*serverrpc_playerprojectileupdate = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileupdate);
-		//	}
-		//}
-		//if (!serverrpc_createbuilding) {
-		//	auto method_serverrpc_createbuilding = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_CreateBuilding___);
-		//
-		//	if (method_serverrpc_createbuilding) {
-		//		serverrpc_createbuilding = **(uintptr_t***)(method_serverrpc_createbuilding + 0x30);
-		//
-		//		hooks::orig::createbuilding = *serverrpc_createbuilding;
-		//
-		//		*serverrpc_createbuilding = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_doplace);
-		//	}
-		//}
-#pragma endregion
-
-		orig::baseplayer_client_input(baseplayer, state);
 		/*
 		__try {
 			sol::state lua;

@@ -1070,8 +1070,8 @@ void iterate_entities() {
 			} else {
 				if (vars->local_player)
 				{
-					if (std::count(lw::playerlist.begin(), lw::playerlist.end(), entity) < 1)
-						lw::playerlist.push_back(entity);
+					//if (std::count(lw::playerlist.begin(), lw::playerlist.end(), entity) < 1)
+					//	lw::playerlist.push_back(entity);
 					if (vars->visual.targetted)
 					{
 						auto pl = ((BasePlayer*)ent);
@@ -1108,7 +1108,8 @@ void iterate_entities() {
 						}
 					}
 
-					if (vars->visual.grenadeprediction) {
+					if (vars->visual.grenadeprediction
+						&& vars->local_player->is_alive()) {
 						auto item = entity->GetActiveItem();
 						if (item) {
 							auto h = item->GetHeldEntity<ThrownWeapon>();
@@ -1276,8 +1277,8 @@ void iterate_entities() {
 
 		if (vars->local_player)
 		{
-			if (std::count(lw::entitylist.begin(), lw::entitylist.end(), ent) < 1)
-				lw::entitylist.push_back(ent);
+			//if (std::count(lw::entitylist.begin(), lw::entitylist.end(), ent) < 1)
+			//	lw::entitylist.push_back(ent);
 
 			//select entity			
 			if (vars->selected_entity_id == ent_id) {
@@ -2024,6 +2025,7 @@ void new_frame() {
 	//iterate_entities();
 	//printf("iterate entities\n");
 	iterate_entities();
+	return;
 	/*
 	__try {
 		sol::state lua;
@@ -2123,30 +2125,29 @@ void new_frame() {
 	__except (true) {}
 	*/
 
-	if(lw::playerlist.size() > 0)
-		if (!vars->local_player) {
-			lw::playerlist.clear();
-			lw::entitylist.clear();
-		}
-	for (auto v : lw::playerlist)
-		if (!v)
-			lw::playerlist.erase(
-				std::remove(
-					lw::playerlist.begin(),
-					lw::playerlist.end(),
-					v),
-				lw::playerlist.end());
-	for (auto v : lw::entitylist)
-		if (!v)
-			lw::entitylist.erase(
-				std::remove(
-					lw::entitylist.begin(),
-					lw::entitylist.end(),
-					v),
-				lw::entitylist.end());
+	//if(lw::playerlist.size() > 0)
+	//	if (!vars->local_player) {
+	//		lw::playerlist.clear();
+	//		lw::entitylist.clear();
+	//	}
+	//for (auto v : lw::playerlist)
+	//	if (!v)
+	//		lw::playerlist.erase(
+	//			std::remove(
+	//				lw::playerlist.begin(),
+	//				lw::playerlist.end(),
+	//				v),
+	//			lw::playerlist.end());
+	//for (auto v : lw::entitylist)
+	//	if (!v)
+	//		lw::entitylist.erase(
+	//			std::remove(
+	//				lw::entitylist.begin(),
+	//				lw::entitylist.end(),
+	//				v),
+	//			lw::entitylist.end());
 	
 	//printf("new_frame return\n");
-	return;
 	//does it make the object 3 times? it lags and flickers lots.
 	for (auto o : vars->RenderList) {
 		if (o->HasBeenDrawn) {
