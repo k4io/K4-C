@@ -265,6 +265,7 @@ struct Vars
 		bool targetbehindwall = false;
 		float recoilx = 1.f;
 		float recoily = 1.f;
+		float spread = .5f;
 
 		bool shoot_at_fatbullet = false;
 		
@@ -402,6 +403,7 @@ struct Vars
 	struct misc {
 		bool tooltips = true;
 		bool antideathbarrier = false;
+		bool weaponspam = false;
 		bool auto_upgrade = false;
 		bool emulate_p = false;
 		bool flywall = false;
@@ -493,6 +495,7 @@ struct Vars
 		int timescale = 0;
 		int silentwalk = 0;
 		int suicide = 0;
+		int weaponspam = 0;
 		int neck = 0;
 		int zoom = 0;
 		int bullettp = 0;

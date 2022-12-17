@@ -1610,12 +1610,12 @@ namespace misc
 				if (worldvel.is_empty()) //player has stopped moving so override average velocity
 					wv = Vector3(0, 0, 0);
 
-				Vector3 player_velocity = Vector3(wv.x, 0, wv.z) * (target.is_heli ? 0.75f : vars->combat.movementpred);
+				Vector3 player_velocity = Vector3(wv.x, target.is_heli ? wv.y : 0, wv.z) * (target.is_heli ? 0.75f : vars->combat.movementpred);
 
 
 				Vector3 final_vel = player_velocity * travel_t;
 				Vector3 actual = target_pos += final_vel;
-				Sphere(actual, 0.1f, { 1, 1, 1, 1 }, 10.f, 0);
+				//Sphere(actual, 0.1f, { 1, 1, 1, 1 }, 10.f, 0);
 
 				auto travel = 0.f;
 				auto vel = (getmodifiedaimcone(0, rpc_position - actual, true)).Normalized() * original_vel.length();
@@ -1653,6 +1653,7 @@ namespace misc
 
 						if (misc::LineCircleIntersection(actual, 0.1f, origin, pos, offset))
 						{
+							_aimdir = getmodifiedaimcone(vars->combat.spread, vt - rpc_position, true);
 							//Line(actual, pos, col(0, 1, 0, 1), 10.f, false, true);
 							aimbot_velocity = (_aimdir).Normalized() * original_vel.length();
 							////emulate 1 tick has already passed

@@ -1173,6 +1173,11 @@ public:
 	//FIELD(_("BaseEntity"), _("model"), model, Model*);
 	FIELD(O::BaseEntity::_name, name, System::string*);
 
+	void SendSignalBroadcast(Signal signal, wchar_t* str = _(L""))
+	{
+		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
+		return SendSignal((uintptr_t)this, signal, System::string(str));
+	}
 	Model* model() {
 		pent
 			return *reinterpret_cast<Model**>((uintptr_t)this + 0x130);
@@ -2536,12 +2541,6 @@ public:
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return false;
 		return this->playerModel()->isnpc();
-	}
-
-	void SendSignalBroadcast(Signal signal, wchar_t* str = _(L""))
-	{
-		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
-		return SendSignal((uintptr_t)this, signal, System::string(str));
 	}
 
 	void fov() {

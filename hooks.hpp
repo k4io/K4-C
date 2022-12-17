@@ -1893,6 +1893,11 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					}
 				}
 
+				if (vars->misc.weaponspam) {
+					if (unity::GetKey(vars->keybinds.weaponspam)) {
+						held->SendSignalBroadcast(Signal::Attack);
+					}
+				}
 				//skin changer stuff?
 
 				if (vars->misc.skinchanger) {

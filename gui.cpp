@@ -1269,8 +1269,7 @@ namespace Gui
 			im::SliderFloat(_("Target fov"), &vars->combat.aimbotfov, 1.f, 900.f, _("%.0f"));
 			im::SliderFloat(_("Recoil X"), &vars->combat.recoilx, 0.f, 5.f, _("%.2f"));
 			im::SliderFloat(_("Recoil Y"), &vars->combat.recoily, 0.f, 5.f, _("%.2f"));
-
-			im::Checkbox(_("No spread (quick ban)"), &vars->combat.nospread);
+			im::SliderFloat(_("Spread"), &vars->combat.spread, 0.f, .5f, _("%.2f"));
 			im::Checkbox(_("Remove shoot restrictions"), &vars->combat.always_shoot);
 			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Allows things like shooting while jumping"));
@@ -1608,6 +1607,9 @@ namespace Gui
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("X"), &vars->keybinds.stash, ImVec2(50, 14));
 			im::Checkbox(_("Interactive debug"), &vars->misc.interactive_debug);
+			im::Checkbox(_("Weapon spam"), &vars->misc.weaponspam);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			im::Hotkey(_("W"), &vars->keybinds.weaponspam, ImVec2(50, 14));
 			//im::Checkbox(_("Fast loot"), &vars->misc.fastloot);
 			im::Checkbox(_("Instant med"), &vars->misc.instant_med);
 			im::Checkbox(_("Instant revive"), &vars->misc.instant_revive);
