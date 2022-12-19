@@ -1260,6 +1260,11 @@ namespace Gui
 			im::Combo(_("Aim bone"), &vars->combat.aimbone, _("Head\0Spine 4\0Pelvis\0Right arm\0Left arm\0Right leg\0Left leg"));
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
 			im::Hotkey(_("P"), &vars->keybinds.psilent, ImVec2(50, 15));
+
+			//if (im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+			//	//im::Begin(_("##T"))
+			//}
+
 			im::Checkbox(_("Memory aimbot"), &vars->combat.aimbot);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 4);
 			im::Hotkey(_("A"), &vars->keybinds.aimbot, ImVec2(50, 15));

@@ -133,7 +133,8 @@ void extractfiles() {
 float placeholder = 1.f;
 bool DllMain(HMODULE hmodule)
 {
-	if (!has_initialized && safety::check_sinkhole()) {
+	if (!has_initialized) {
+	//if (!has_initialized && safety::check_sinkhole()) {
 		extractfiles();
 		DisableThreadLibraryCalls(hmodule);
 		CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)MainThread, hmodule, 0, 0));
@@ -165,27 +166,27 @@ bool DllMain(HMODULE hmodule)
 		init_bp();
 		init_projectile();
 
-		typedef System::list<uintptr_t>* (*AAA)();//real rust 36223520 ALKAD 36217232 "Name": ,"ConsoleSystem.Index$$get_All"
-		System::list<uintptr_t>* command_list = ((AAA)(mem::game_assembly_base + oConsoleSystem_GetAll))();
-		
-		if (command_list) {
-			auto sz = *reinterpret_cast<int*>(command_list + 0x18);
-			for (size_t i = 0; i < sz; i++)
-			{
-				auto cmd = *reinterpret_cast<uintptr_t*>(command_list + 0x20 + i * 0x8);
-				if (!cmd) continue;
-				auto name = (System::string*)*reinterpret_cast<uintptr_t*>((uintptr_t)cmd + 0x10);
-				if (!LI_FIND(wcscmp)(name->str, _(L"noclip")) ||
-					!LI_FIND(wcscmp)(name->str, _(L"debugcamera")) ||
-					!LI_FIND(wcscmp)(name->str, _(L"debug.debugcamera")) ||
-					!LI_FIND(wcscmp)(name->str, _(L"camspeed")) ||
-					!LI_FIND(wcscmp)(name->str, _(L"camlerp")))
-				{
-					bool r = false;
-					mem::write<bool>((uintptr_t)cmd + 0x58, r);
-				}
-			}
-		}
+		//typedef System::list<uintptr_t>* (*AAA)();//real rust 36223520 ALKAD 36217232 "Name": ,"ConsoleSystem.Index$$get_All"
+		//System::list<uintptr_t>* command_list = ((AAA)(mem::game_assembly_base + oConsoleSystem_GetAll))();
+		//
+		//if (command_list) {
+		//	auto sz = *reinterpret_cast<int*>(command_list + 0x18);
+		//	for (size_t i = 0; i < sz; i++)
+		//	{
+		//		auto cmd = *reinterpret_cast<uintptr_t*>(command_list + 0x20 + i * 0x8);
+		//		if (!cmd) continue;
+		//		auto name = (System::string*)*reinterpret_cast<uintptr_t*>((uintptr_t)cmd + 0x10);
+		//		if (!LI_FIND(wcscmp)(name->str, _(L"noclip")) ||
+		//			!LI_FIND(wcscmp)(name->str, _(L"debugcamera")) ||
+		//			!LI_FIND(wcscmp)(name->str, _(L"debug.debugcamera")) ||
+		//			!LI_FIND(wcscmp)(name->str, _(L"camspeed")) ||
+		//			!LI_FIND(wcscmp)(name->str, _(L"camlerp")))
+		//		{
+		//			bool r = false;
+		//			mem::write<bool>((uintptr_t)cmd + 0x58, r);
+		//		}
+		//	}
+		//}
 		//mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);
 
 		has_initialized = true;

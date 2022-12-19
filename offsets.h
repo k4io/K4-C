@@ -23,7 +23,7 @@ namespace offsets {
 */
 #define oButtons_TypeInfo 56959632
 #define oLineOfSightRadius 9214032
-#define oChatOpen 0x653360 //public static void open() { } <- inside 'ConVar::Chat'
+#define oChatOpen 0x5FA9C0 //public static void open() { } <- inside 'ConVar::Chat'
 #define oSetGestureMenuOpen 0x5B4BD0 //private void SetGestureMenuOpen(bool wantsOpen) { }
 #define oSphereCast 0x253DC40
 #define oGetWorldVelocity 0xC9F9D0
