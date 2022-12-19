@@ -1237,9 +1237,11 @@ public:
 
 
 	bool is_alive() {
-		pent
+		__try {
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return false;
-		return this->lifestate() == BaseCombatEntity_LifeState::Alive;
+			return this->lifestate() == BaseCombatEntity_LifeState::Alive;
+		}
+		__except (true) { return false; }
 	}
 };
 
