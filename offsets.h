@@ -23,12 +23,12 @@ namespace offsets {
 */
 #define oButtons_TypeInfo 56959632
 #define oLineOfSightRadius 9214032
-#define oChatOpen 0x5FA9C0 //public static void open() { } <- inside 'ConVar::Chat'
+#define oChatOpen 0x653360 //public static void open() { } <- inside 'ConVar::Chat'
 #define oSetGestureMenuOpen 0x5B4BD0 //private void SetGestureMenuOpen(bool wantsOpen) { }
-#define oSphereCast 0x253DC40
-#define oGetWorldVelocity 0xC9F9D0
-#define oSetRayleigh 0xC32350 //public static void set_atmosphere_rayleigh(float value) { }
-#define oConsoleSystem_GetAll 39099728 //"ConsoleSystem.Index$$get_All"
+#define oSphereCast 0x253DD60
+#define oGetWorldVelocity 0xC9FAE0
+#define oSetRayleigh 0xC32460 //public static void set_atmosphere_rayleigh(float value) { }
+#define oConsoleSystem_GetAll 39100016 //"ConsoleSystem.Index$$get_All"
 #define oConvar 56967448
 #define oConvarClient 56959376
 #define oTerrainMeta_TypeInfo 56967824
