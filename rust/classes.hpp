@@ -1327,6 +1327,10 @@ public:
 		pent
 			* reinterpret_cast<float*>((uintptr_t)this + 0x34) = max_dist;
 	}
+	void set_hit_distance(float max_dist) {
+		pent
+			* reinterpret_cast<float*>((uintptr_t)this + 0xA8) = max_dist;
+	}
 
 	void set_hit_entity(BasePlayer* entity) {
 		pent

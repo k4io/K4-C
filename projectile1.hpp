@@ -1,6 +1,6 @@
 #include "misc.hpp"
 
-uintptr_t pools_offset = 0xBC7980;
+uintptr_t pools_offset = 0xBC7A90;
 /*
  /* GenericInstMethod :
 	|

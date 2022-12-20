@@ -655,12 +655,13 @@ namespace hooks {
 		tppu = ppu;
 		const auto orig_fn =
 			reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(
-				hooks::orig::playerprojectileattack);
+				hooks::orig::playerprojectileupdate);
 
 		//call fake domovement? after called set current position etc
 		//projectile->DoMovement(misc::tickDeltaTime, projectile);
 		//return;
-
+		printf(_("ppu called\n"));
+		Sphere(projectile->currentPosition(), 0.1f, { 1, 1, 0, 1 }, 5.f, 100.f);
 
 
 		return orig_fn(rcx, rdx, r9, _ppa, arg5);
@@ -908,7 +909,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			//}
 		} while (0);
 
-
+		printf("ppa called\n");
 
 		return orig_fn(rcx, rdx, r9, _ppa, arg5);
 	}
@@ -1385,7 +1386,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		}
 	}
 
-	void hk_projectile_launchprojectile(BaseProjectile* p)
+	void hk_projectile_launchprojectile(BaseProjectile* pr)
 	{
 		//auto held = vars->local_player->GetActiveItem()->GetHeldEntity<BaseProjectile>();
 		//if (vars->combat.doubletap
@@ -1422,12 +1423,38 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		//	misc::autoshot = false;
 		//}
 		//
+		if (vars->combat.shoot_at_fatbullet) {
+			auto p = (Projectile*)pr;
+			auto pos = p->transform()->position();
+			auto vel = p->currentVelocity();
+			auto nextupdatepos = pos;
+			auto nextupdatevel = vel;
 
+			Vector3 lastposition;
+			for (float travelTime = p->traveledTime(); travelTime < 8.f; travelTime += 0.03125f)
+			{
+				nextupdatepos += nextupdatevel * 0.03125f;
+				if (!unity::is_visible(nextupdatepos, lastposition, 0))
+					break;
+				if(!lastposition.is_empty())
+					Line(nextupdatepos, lastposition, { 1, 1, 1, 1 }, 5.f, false, false);
 
-		return orig::baseprojectile_launchprojectile((uintptr_t)p);;
+				if (nextupdatepos.distance(vars->best_target.pos) <= 1.f)
+					Line(nextupdatepos, vars->best_target.pos, { 0, 1, 0, 1 }, 5.f, false, false);
+
+				nextupdatevel.y -= 9.81f * p->gravityModifier() * 0.03125f;	
+				nextupdatevel -= nextupdatevel * p->drag() * 0.03125f;
+				lastposition = nextupdatepos;
+			}
+
+		}
+
+		return orig::baseprojectile_launchprojectile((uintptr_t)pr);
 	}
 
 	void hk_projectile_update(uintptr_t pr) {
+		printf("projectile update called\n");
+
 		if (launchedmelee) {
 			((Projectile*)pr)->currentVelocity(tempmelvel);
 			((Projectile*)pr)->currentPosition(tempmelpos);
@@ -1452,10 +1479,10 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				Vector3 dir = vel.normalize();
 				Vector3 traveledThisUpdate = vel * get_deltaTime();
 
-				DWORD64 sistat = il2cpp::init_class(_("RaycastHit"), _("UnityEngine"));
-				RaycastHit* hitInfo = (RaycastHit*)il2cpp::methods::object_new(sistat);
-				if (!hitInfo) break;
-				//RaycastHit hitInfo;
+				//DWORD64 sistat = il2cpp::init_class(_("RaycastHit"), _("UnityEngine"));
+				//RaycastHit* hitInfo = (RaycastHit*)il2cpp::methods::object_new(sistat);
+				//if (!hitInfo) break;
+				RaycastHit* hitInfo;
 
 				//Sphere(p->currentPosition(), .05f, { 1, 1, 1, 1 }, 10.f, false);
 
@@ -1491,16 +1518,28 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				auto ht = (HitTest*)p->hitTest();
 
 				p->integrity(1);
-				Sphere(hitInfo->point(), 0.1f, { r, g, b, 1 }, 10.f, false);
+				Sphere(hitInfo->point(), 0.1f, { 1, 1, 1, 1 }, 10.f, false);
+				Sphere(ppu->position, 0.1f, { 0, 0, 1, 1 }, 10.f, false);
 
-				ht->HitTransform() = trans;
-				ht->HitEntity() = vars->best_target.ent;
-				ht->AttackRay() = Ray(hitInfo->point(), dir.Normalized());
-				ht->HitPoint() = trans->InverseTransformPoint(trans->position());
-				ht->HitNormal() = Vector3(0, 0, 0);
-				ht->DidHit() = true;
-				ht->HitDistance() = dist;
-				ht->MaxDistance() = 999.f;
+				ht->set_hit_Transform(trans);
+				ht->set_hit_entity((BasePlayer*)vars->best_target.ent);
+				ht->set_attack_ray(Ray(hitInfo->point(), dir.Normalized()));
+				auto v = trans->InverseTransformPoint(trans->position());
+				Sphere(v, 0.1f, { 0, 1, 1, 1 }, 10.f, false);
+				ht->set_hit_point(v);
+				ht->set_hit_normal(Vector3(0, 0, 0));
+				ht->set_did_hit(true);
+				ht->set_hit_distance(dist);
+				ht->set_max_distance(999.f);
+
+				//ht->HitTransform() = trans;
+				//ht->HitEntity() = vars->best_target.ent;
+				//ht->AttackRay() = ;
+				//ht->HitPoint() = trans->InverseTransformPoint(trans->position());
+				//ht->HitNormal() = Vector3(0, 0, 0);
+				//ht->DidHit() = true;
+				//ht->HitDistance() = dist;
+				//ht->MaxDistance() = 999.f;
 				_DoHit(p, ht, trans->position(), Vector3(0, 0, 0));
 				
 			}
@@ -1669,17 +1708,17 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				*serverrpc_playerprojectileattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
 			}
 		}
-		//if (!serverrpc_playerprojectileupdate) {
-		//	auto method_serverrpc_playerprojectileupdate = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
-		//
-		//	if (method_serverrpc_playerprojectileupdate) {
-		//		serverrpc_playerprojectileupdate = **(uintptr_t***)(method_serverrpc_playerprojectileupdate + 0x30);
-		//
-		//		hooks::orig::playerprojectileupdate = *serverrpc_playerprojectileupdate;
-		//
-		//		*serverrpc_playerprojectileupdate = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileupdate);
-		//	}
-		//}
+		if (!serverrpc_playerprojectileupdate) {
+			auto method_serverrpc_playerprojectileupdate = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
+		
+			if (method_serverrpc_playerprojectileupdate) {
+				serverrpc_playerprojectileupdate = **(uintptr_t***)(method_serverrpc_playerprojectileupdate + 0x30);
+		
+				hooks::orig::playerprojectileupdate = *serverrpc_playerprojectileupdate;
+		
+				*serverrpc_playerprojectileupdate = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileupdate);
+			}
+		}
 		//if (!serverrpc_createbuilding) {
 		//	auto method_serverrpc_createbuilding = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_CreateBuilding___);
 		//
