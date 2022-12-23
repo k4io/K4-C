@@ -9,11 +9,6 @@
 //#include "gui/OnGUI.hpp"
 #define CALLED_BY(func,off) (reinterpret_cast<std::uint64_t>(_ReturnAddress()) > func && reinterpret_cast<std::uint64_t>(_ReturnAddress()) < func + off)
 
-static auto dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
-
-static auto create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
-
-static auto add_component = reinterpret_cast<Component*(*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_AddComponentWithType"), 0, _(""), _("UnityEngine"))));
 
 void dhook(void* func, void** og, void* dtr) {
 	if (MH_Initialize() != MH_OK && MH_Initialize() != MH_ERROR_ALREADY_INITIALIZED) {
@@ -103,9 +98,6 @@ namespace hooks {
 		orig::pifu = reinterpret_cast<void(*)(PlayerInput*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerInput"), _("FrameUpdate"), 0, _(""), _(""))));
 		orig::createeffect = reinterpret_cast<GameObject * (*)(System::string, Effect*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("EffectLibrary"), _("CreateEffect"), 2, _(""), _(""))));
 		ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string funcName, unsigned int arg1, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
-		dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
-		create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
-		add_component = reinterpret_cast<Component*(*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_AddComponentWithType"), 0, _(""), _("UnityEngine"))));
 
 		orig::IsConnected = reinterpret_cast<bool (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("IsConnected"), 0, _(""), _("Network"))));
 		orig::OnNetworkMessage = reinterpret_cast<void (*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("OnNetworkMessage"), 1, _(""), _(""))));
@@ -519,7 +511,7 @@ namespace hooks {
 				if (target.ent && (target.visible || manipulated || misc::autoshot) && !target.teammate) {
 					*reinterpret_cast<Vector3*>(projectile + 0x24) = aimbot_velocity; //startvel
 					*reinterpret_cast<Vector3*>(projectile + 0x18) = rpc_position; //startpos
-					Sphere(target_pos, 0.05f, { r, g, b, 1 }, 5.f, 100.f);
+					//Sphere(target_pos, 0.05f, { r, g, b, 1 }, 5.f, 100.f);
 				}
 			}
 			if (!ismelee) {
@@ -547,11 +539,9 @@ namespace hooks {
 							Vector3 r = rpc_position;
 							Vector3 v = aimbot_velocity;
 							Vector3 n = rpc_position + (aimbot_velocity * (vars->desyncTime * vars->combat.tpmultiplier));
-							Sphere(n, 0.1f, { 1, 1, 1, 1 }, 10.f, false);
 							p->traveledTime(vars->desyncTime);
 							p->SetInitialDistance((r.distance(n) * vars->combat.tpmultiplier) - 1);
 						}
-						else p->SetInitialDistance(0);
 
 						vars->local_player->console_echo(string::wformat(_(L"[matrix]: ProjectileShoot (bullet tp) spawned bullet at distance %dm"), (int)p->initialDistance()));
 					}
@@ -660,8 +650,8 @@ namespace hooks {
 		//call fake domovement? after called set current position etc
 		//projectile->DoMovement(misc::tickDeltaTime, projectile);
 		//return;
-		printf(_("ppu called\n"));
-		Sphere(projectile->currentPosition(), 0.1f, { 1, 1, 0, 1 }, 5.f, 100.f);
+		//printf(_("ppu called\n"));
+		//Sphere(projectile->currentPosition(), 0.1f, { 1, 1, 0, 1 }, 5.f, 100.f);
 
 
 		return orig_fn(rcx, rdx, r9, _ppa, arg5);
@@ -909,7 +899,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			//}
 		} while (0);
 
-		printf("ppa called\n");
+		//printf("ppa called\n");
 
 		return orig_fn(rcx, rdx, r9, _ppa, arg5);
 	}
@@ -1044,9 +1034,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						ov = Vector3(ov.x, curr.y < old.y ? (curr.y - 0.3f) : old.y, ov.z);
 					if (settings::hor_flyhack >= 6.f)
 						ov = Vector3(old.x, ov.y, old.z);
-
-
-					if (settings::vert_flyhack >= 2.9f) {
+					
+					if (settings::vert_flyhack >= 2.8f) {
 						if (ov != curr) //disallow positive movement on Y
 						{
 							if (ov.y > 0) {
@@ -1128,13 +1117,13 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			if (vars->combat.always_reload
 				&& held)
 			{
-				//bool fractional = held->fractionalReload;
 				auto cap = held->ammo_cap();
 				auto ammo = held->ammo_left();
 				if (ammo < cap
 					&& !misc::started_reload
 					&& misc::did_reload
-					&& misc::time_since_last_shot < 0.2f)
+					&& misc::time_since_last_shot < 0.2f
+					&& held->primaryMagazine()->CanReload(baseplayer))
 				{
 					misc::started_reload = true;
 					misc::did_reload = false;
@@ -1157,11 +1146,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 
 				float reloadtime = *reinterpret_cast<float*>((uintptr_t)held + 0x2B8);//held->reloadTime();
-				//if (fractional)
-				//	reloadtime = *reinterpret_cast<float*>((uintptr_t)held + 0x2D0); //reloadFractionDuration
-				vars->reload = reloadtime;
+				vars->reload = reloadtime - .3f;
 
-				if (misc::time_since_last_shot > reloadtime + 0.2f//-10% for faster reloads than normal >:)
+				if (misc::time_since_last_shot > reloadtime//-10% for faster reloads than normal >:)
 					&& !misc::did_reload)
 				{
 					baseplayer->console_echo(_(L"[matrix]: ClientInput - finishing reload"));
@@ -1388,72 +1375,63 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 	void hk_projectile_launchprojectile(BaseProjectile* pr)
 	{
-		//auto held = vars->local_player->GetActiveItem()->GetHeldEntity<BaseProjectile>();
-		//if (vars->combat.doubletap
-		//	&& !vars->combat.rapidfire)
-		//{
-		//
-		//
-		//	auto m = held->repeatDelay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
-		//
-		//	int r = vars->desyncTime / m;
-		//	if (r > 1)
-		//	{
-		//		vars->local_player->console_echo(string::wformat(_(L"[matrix]: Launching %d projectiles!"), r));
-		//		for (size_t i = 0; i < r; i++)
-		//		{
-		//			orig::baseprojectile_launchprojectile((uintptr_t)p);
-		//			held->remove_ammo();
-		//		}
-		//
-		//		//auto mag = *reinterpret_cast<int*>((uintptr_t)held + 0x2C0);//p->primaryMagazine();
-				//auto c = *reinterpret_cast<int*>((uintptr_t)mag + 0x1C); //0x1C = public int contents;
-				//*reinterpret_cast<int*>((uintptr_t)mag + 0x1C) = (c - r);
-		//		return;
-		//	}
-		//}
-		//orig::baseprojectile_launchprojectile((uintptr_t)p);
-		//if (misc::manual || misc::autoshot) {
-		//	//auto mag = *reinterpret_cast<int*>((uintptr_t)held + 0x2C0);//p->primaryMagazine();
-			//auto c = *reinterpret_cast<int*>((uintptr_t)mag + 0x1C); //0x1C = public int contents;
-			//*reinterpret_cast<int*>((uintptr_t)mag + 0x1C) = (c - 1);
-		//
-		//	held->remove_ammo();
-		//	misc::manual = false;
-		//	misc::autoshot = false;
-		//}
-		//
-		if (vars->combat.shoot_at_fatbullet) {
-			auto p = (Projectile*)pr;
-			auto pos = p->transform()->position();
-			auto vel = p->currentVelocity();
-			auto nextupdatepos = pos;
-			auto nextupdatevel = vel;
-
-			Vector3 lastposition;
-			for (float travelTime = p->traveledTime(); travelTime < 8.f; travelTime += 0.03125f)
+		auto held = vars->local_player->GetActiveItem()->GetHeldEntity<BaseProjectile>();
+		if (vars->combat.doubletap
+			&& !vars->combat.rapidfire
+			&& held)
+		{
+			auto m = held->repeatDelay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
+		
+			int r = vars->desyncTime / m;
+			if (r > 1)
 			{
-				nextupdatepos += nextupdatevel * 0.03125f;
-				if (!unity::is_visible(nextupdatepos, lastposition, 0))
-					break;
-				if(!lastposition.is_empty())
-					Line(nextupdatepos, lastposition, { 1, 1, 1, 1 }, 5.f, false, false);
-
-				if (nextupdatepos.distance(vars->best_target.pos) <= 1.f)
-					Line(nextupdatepos, vars->best_target.pos, { 0, 1, 0, 1 }, 5.f, false, false);
-
-				nextupdatevel.y -= 9.81f * p->gravityModifier() * 0.03125f;	
-				nextupdatevel -= nextupdatevel * p->drag() * 0.03125f;
-				lastposition = nextupdatepos;
+				vars->local_player->console_echo(string::wformat(_(L"[matrix]: Launching %d projectiles!"), r));
+				for (size_t i = 0; i < r; i++)
+				{
+					orig::baseprojectile_launchprojectile((uintptr_t)pr);
+					held->remove_ammo();
+				}
+				return;
 			}
-
 		}
+		//orig::baseprojectile_launchprojectile((uintptr_t)pr);
+		if (misc::manual || misc::autoshot) {
+			held->remove_ammo();
+			misc::manual = false;
+			misc::autoshot = false;
+		}
+		//
+		//if (vars->combat.shoot_at_fatbullet) {
+		//	auto p = (Projectile*)pr;
+		//	auto pos = p->transform()->position();
+		//	auto vel = p->currentVelocity();
+		//	auto nextupdatepos = pos;
+		//	auto nextupdatevel = vel;
+		//
+		//	Vector3 lastposition;
+		//	for (float travelTime = p->traveledTime(); travelTime < 8.f; travelTime += 0.03125f)
+		//	{
+		//		nextupdatepos += nextupdatevel * 0.03125f;
+		//		if (!unity::is_visible(nextupdatepos, lastposition, 0))
+		//			break;
+		//		if(!lastposition.is_empty())
+		//			Line(nextupdatepos, lastposition, { 1, 1, 1, 1 }, 5.f, false, false);
+		//
+		//		if (nextupdatepos.distance(vars->best_target.pos) <= 1.f)
+		//			Line(nextupdatepos, vars->best_target.pos, { 0, 1, 0, 1 }, 5.f, false, false);
+		//
+		//		nextupdatevel.y -= 9.81f * p->gravityModifier() * 0.03125f;	
+		//		nextupdatevel -= nextupdatevel * p->drag() * 0.03125f;
+		//		lastposition = nextupdatepos;
+		//	}
+		//
+		//}
 
 		return orig::baseprojectile_launchprojectile((uintptr_t)pr);
 	}
 
 	void hk_projectile_update(uintptr_t pr) {
-		printf("projectile update called\n");
+		//printf("projectile update called\n");
 
 		if (launchedmelee) {
 			((Projectile*)pr)->currentVelocity(tempmelvel);
@@ -1479,10 +1457,10 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				Vector3 dir = vel.normalize();
 				Vector3 traveledThisUpdate = vel * get_deltaTime();
 
-				//DWORD64 sistat = il2cpp::init_class(_("RaycastHit"), _("UnityEngine"));
-				//RaycastHit* hitInfo = (RaycastHit*)il2cpp::methods::object_new(sistat);
-				//if (!hitInfo) break;
-				RaycastHit* hitInfo;
+				DWORD64 sistat = il2cpp::init_class(_("RaycastHit"), _("UnityEngine"));
+				RaycastHit* hitInfo = (RaycastHit*)il2cpp::methods::object_new(sistat);
+				if (!hitInfo) break;
+				//RaycastHit* hitInfo;
 
 				//Sphere(p->currentPosition(), .05f, { 1, 1, 1, 1 }, 10.f, false);
 
@@ -1570,7 +1548,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		self->modelState()->setducked(false);
 		self->modelState()->setsprinting(false);
 		self->modelState()->setjumped(false);
-		self->modelState()->setwaterlevel(self->WaterFactor());
+		self->modelState()->set_water_level(self->WaterFactor());
 		self->voiceRecorder()->ClientInput(state);
 		//printf("clientinput recreation middle\n");
 		if (self->HasLocalControls() && !NeedsKeyboard::AnyActive()) {
@@ -1610,6 +1588,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		//	MapInterface.SetOpen(Buttons.Map.IsDown);
 		//}
 	}
+
+	float o_capsuleHeight = 0;
+	float o_capsuleCenter = 0;
+	float o_capsuleHeightDucked = 0;
+	float o_capsuleCenterDucked = 0;
+	float o_capsuleradius = 0;
 
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
 	{
@@ -1675,16 +1659,10 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				il2cpp_codegen_initialize_method(i);
 			}
 			has_intialized_methods = true;
-
-			//HERE UNTIL THEY REMOVE IT AGAIN /S
-
-			fired_projectile placeholder = { nullptr, 0, 1 };
-			for (size_t i = 0; i < 32; i++)
-				misc::fired_projectiles[i] = placeholder;
 		}
 
 #pragma region static_method_hooks
-		//static uintptr_t* serverrpc_createbuilding;
+		static uintptr_t* serverrpc_createbuilding;
 		if (!serverrpc_projecshoot) {
 			//auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot);
 			auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileShoot___);
@@ -1719,17 +1697,17 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				*serverrpc_playerprojectileupdate = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileupdate);
 			}
 		}
-		//if (!serverrpc_createbuilding) {
-		//	auto method_serverrpc_createbuilding = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_CreateBuilding___);
-		//
-		//	if (method_serverrpc_createbuilding) {
-		//		serverrpc_createbuilding = **(uintptr_t***)(method_serverrpc_createbuilding + 0x30);
-		//
-		//		hooks::orig::createbuilding = *serverrpc_createbuilding;
-		//
-		//		*serverrpc_createbuilding = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_doplace);
-		//	}
-		//}
+		if (!serverrpc_createbuilding) {
+			auto method_serverrpc_createbuilding = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_CreateBuilding___);
+		
+			if (method_serverrpc_createbuilding) {
+				serverrpc_createbuilding = **(uintptr_t***)(method_serverrpc_createbuilding + 0x30);
+		
+				hooks::orig::createbuilding = *serverrpc_createbuilding;
+		
+				*serverrpc_createbuilding = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_doplace);
+			}
+		}
 #pragma endregion
 
 		orig::baseplayer_client_input(baseplayer, state);
@@ -1766,6 +1744,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			else if (!is_lagging && !is_speeding)
 				baseplayer->clientTickInterval() = 0.05f;
 
+			//printf("%.2f", baseplayer->modelState()->get_water_level());
+
 			if (vars->best_target.ent && held && wpn)
 			{
 				//old manip
@@ -1794,12 +1774,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								&& vars->combat.psilentmelee)
 								((BaseMelee*)held)->DoThrow();
 							else {
-								auto m = held->repeatDelay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
-								int r = vars->desyncTime / m; r = r < 1 ? 1 : r;
-								for (int i = 0; i <= r; i++) {
-									held->LaunchProjectile();
-									held->remove_ammo();
-								}
+								hk_projectile_launchprojectile(held);
 							}
 							misc::best_target = Vector3(0, 0, 0);
 							baseplayer->SendClientTick();
@@ -1826,12 +1801,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								baseplayer->console_echo(string::wformat(_(L"[matrix]: ClientInput - manipulator attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(vars->desyncTime * 100.f)));
 
 								misc::manual = true;
-								auto m = held->repeatDelay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
-								int r = vars->desyncTime / m; r = r < 1 ? 1 : r;
-								for (int i = 0; i <= r; i++) {
-									held->LaunchProjectile();
-									held->remove_ammo();
-								}
+								hk_projectile_launchprojectile(held);
 								baseplayer->SendClientTick();
 							}
 					}
@@ -1851,12 +1821,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					{
 						misc::autoshot = true;
 						misc::autobot::wants_shoot = false;
-						auto m = held->repeatDelay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
-						int r = vars->desyncTime / m; r = r < 1 ? 1 : r;
-						for (int i = 0; i <= r; i++) {
-							held->LaunchProjectile();
-							held->remove_ammo();
-						}
+						hk_projectile_launchprojectile(held);
 						baseplayer->SendClientTick();
 					}
 					else if (!baseplayer->is_visible(baseplayer->model()->boneTransforms()->get(48)->position(), target)
@@ -2555,18 +2520,33 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				vars->misc.capsuleHeightDucked = baseplayer->movement()->capsuleHeightDucked();
 				vars->misc.capsuleCenterDucked = baseplayer->movement()->capsuleCenterDucked();
 				vars->misc.capsuleradius = baseplayer->movement()->capsule()->GetRadius();
+				o_capsuleHeight = baseplayer->movement()->capsuleHeight();
+				o_capsuleCenter = baseplayer->movement()->capsuleCenter();
+				o_capsuleHeightDucked = baseplayer->movement()->capsuleHeightDucked();
+				o_capsuleCenterDucked = baseplayer->movement()->capsuleCenterDucked();
+				o_capsuleradius = baseplayer->movement()->capsule()->GetRadius();
 
 				iii = true;
 			}
-			baseplayer->movement()->capsuleHeight() = vars->misc.capsuleHeight;
-			baseplayer->movement()->capsuleCenter() = vars->misc.capsuleCenter;
-			baseplayer->movement()->capsuleHeightDucked() = vars->misc.capsuleHeightDucked;
-			baseplayer->movement()->capsuleCenterDucked() = vars->misc.capsuleCenterDucked;
-			baseplayer->movement()->capsule()->SetRadius(vars->misc.capsuleradius);
+			if (unity::GetKey(vars->keybinds.capsule)) {
+				baseplayer->movement()->capsuleHeight() = vars->misc.capsuleHeight;
+				baseplayer->movement()->capsuleCenter() = vars->misc.capsuleCenter;
+				baseplayer->movement()->capsuleHeightDucked() = vars->misc.capsuleHeightDucked;
+				baseplayer->movement()->capsuleCenterDucked() = vars->misc.capsuleCenterDucked;
+				baseplayer->movement()->capsule()->SetRadius(vars->misc.capsuleradius);
+			}
+			else {
+				baseplayer->movement()->capsuleHeight() = o_capsuleHeight;
+				baseplayer->movement()->capsuleCenter() = o_capsuleCenter;
+				baseplayer->movement()->capsuleHeightDucked() = o_capsuleHeightDucked;
+				baseplayer->movement()->capsuleCenterDucked() = o_capsuleCenterDucked;
+				baseplayer->movement()->capsule()->SetRadius(o_capsuleradius);
+			}
 
 			if (vars->visual.showcapsule)
 			{
 				auto pos = baseplayer->transform()->position();
+				pos.y += 0.7f;
 				pos.y += baseplayer->modelState()->has_flag(ModelState_Flag::Ducked) ? vars->misc.capsuleCenterDucked : vars->misc.capsuleCenter;
 				Capsule(pos,
 					baseplayer->eyes()->rotation(),

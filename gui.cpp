@@ -42,6 +42,10 @@ namespace Gui
 	guiskin selected_guiskin;
 	gskin selected_gskin;
 
+	bool searchstr(const char* source, const char* want) {
+		return std::string(want).find(source) != std::string::npos;
+	}
+
 	void SnakeStuff() {
 		im::SetNextWindowSize({ 301, 395 });
 		im::Begin(_("Snake game"), 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
@@ -137,25 +141,37 @@ namespace Gui
 			{
 				im::Text(_("Players"));
 				im::Separator();
-				if (im::ListBoxHeader(_("##PlayerList"), ImVec2(270, 128)))
+				if (im::ListBoxHeader(_("##PlayerList"), ImVec2(270, 98)))
 				{
+					std::vector<gplayer*> temp = {};
 					for (auto pair : vars->gui_player_map)
 					{
-						auto name = pair.second->name;
+						auto c = std::string(pair.second->name.begin(), pair.second->name.end());
+						if (searchstr(vars->misc.playernamesearch, c.c_str())
+							|| strlen(vars->misc.playernamesearch) == 0)
+							temp.push_back(pair.second);
+					}
+
+
+					for (auto gp : temp)
+					{
+						auto name = gp->name;
 						if (im::Selectable(std::string(name.begin(), name.end()).c_str()))
 						{
 							for (auto g : vars->gui_player_map)
 								if (g.second->name == name)
 									selected_player = g.second;
 						}
-						if (pair.second->follow)
-							vars->follow_player_id = pair.second->userid;
+						if (gp->follow)
+							vars->follow_player_id = gp->userid;
 					}
 					im::ListBoxFooter();
 				}
+				im::InputText(_("Search"), vars->misc.playernamesearch, 32);
 				im::EndChild();
 			}
 			im::SameLine();
+			im::SetCursorPosY(im::GetCursorPosY());
 			if (im::BeginChild(_("Controls"), { 185, 166 }, true))
 			{
 				if (selected_player) {
@@ -1441,6 +1457,7 @@ namespace Gui
 			im::Checkbox(_("Bullet tracers"), &vars->visual.tracers);
 			im::Checkbox(_("Visual thick bullet"), &vars->visual.visthick);
 			im::SliderFloat(_("Size"), &vars->visual.visthickness, 1.f, 10.f, _("%.1f"));
+			im::Checkbox(_("Visual turret radius"), &vars->visual.turretradius);
 			im::Checkbox(_("Crosshair 1"), &vars->visual.crosshair1);
 			im::Checkbox(_("Crosshair 2"), &vars->visual.crosshair2);
 			im::Checkbox(_("Crosshair 3"), &vars->visual.crosshair3);
@@ -1634,6 +1651,9 @@ namespace Gui
 			im::SliderFloat(_("Capsule Height Ducked"), &vars->misc.capsuleHeightDucked, 0.f, 5.f, _("%.2f"));
 			im::SliderFloat(_("Capsule Center Ducked"), &vars->misc.capsuleCenterDucked, 0.f, 5.f, _("%.2f"));
 			im::SliderFloat(_("Capsule Radius"), &vars->misc.capsuleradius, 0.f, 5.f, _("%.2f"));
+			im::Text(_("Capsule key"));
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			im::Hotkey(_("C"), &vars->keybinds.capsule, ImVec2(50, 14));
 			im::Checkbox(_("Auto upgrade"), &vars->misc.auto_upgrade);
 			im::Combo(_("Upgrade tier"), &vars->misc.upgrade_tier,
 				_("Wood\0Stone\0Metal\0Armored"));
@@ -1901,7 +1921,19 @@ namespace Gui
 			if (vars->misc.snake)
 				SnakeStuff();
 		}
-
+		im::PushStyleColor(ImGuiCol_CheckMark, { vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], vars->accent_color[3] });
+		im::PushStyleColor(ImGuiCol_SliderGrab, { vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], vars->accent_color[3] });
+		im::PushStyleColor(ImGuiCol_SeparatorActive, { vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], vars->accent_color[3] });
+		im::PushStyleColor(ImGuiCol_ResizeGripActive, { vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], vars->accent_color[3] });
+		im::PushStyleColor(ImGuiCol_TextSelectedBg, { vars->accent_color[0], vars->accent_color[1], vars->accent_color[2], vars->accent_color[3] });
+		im::PushStyleColor(ImGuiCol_Separator, { 0.43f, 0.43f, 0.50f, 0.65f });
+		im::PushStyleVar(ImGuiStyleVar_TabRounding, vars->menu.TabRounding);
+		im::PushStyleVar(ImGuiStyleVar_GrabRounding, vars->menu.GrabRounding);
+		im::PushStyleVar(ImGuiStyleVar_ScrollbarRounding, vars->menu.ScrollbarRounding);
+		im::PushStyleVar(ImGuiStyleVar_FrameRounding, vars->menu.FrameRounding);
+		im::PushStyleVar(ImGuiStyleVar_PopupRounding, vars->menu.PopupRounding);
+		im::PushStyleVar(ImGuiStyleVar_ChildRounding, vars->menu.ChildRounding);
+		im::PushStyleVar(ImGuiStyleVar_WindowRounding, vars->menu.WindowRounding);
 		if (vars->visual.hotbar_esp)
 		{
 			Vector2 screen = { 0, 0 };

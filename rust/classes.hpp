@@ -276,6 +276,8 @@ class Renderer;
 class PlayerBelt;
 class Terrain;
 class Projectile;
+class PlayerInventory;
+class Magazine;
 class TerrainHeightMap;
 class TerrainCollision;
 class TerrainMeta;
@@ -310,6 +312,14 @@ typedef struct Str
 //static auto ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
 
 //static auto setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
+static auto dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
+
+static auto create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
+
+static auto add_component = reinterpret_cast<Component * (*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_AddComponentWithType"), 0, _(""), _("UnityEngine"))));
+
+static auto hasammo = reinterpret_cast<bool(*)(PlayerInventory*, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerInventory"), _("HasAmmo"), 0, _(""), _(""))));
+
 static auto getrenderers = reinterpret_cast<System::list<Renderer*>*(*)(SkinnedMultiMesh*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
 
 static auto setmaterial = reinterpret_cast<void(*)(Renderer*, Material*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("set_material"), 0, _(""), _("UnityEngine"))));
@@ -603,6 +613,11 @@ float current_time;
 void init_bp() {
 	//setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
 	//ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
+	dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
+	create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
+	add_component = reinterpret_cast<Component * (*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_AddComponentWithType"), 0, _(""), _("UnityEngine"))));
+
+	hasammo = reinterpret_cast<bool(*)(PlayerInventory*, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerInventory"), _("HasAmmo"), 0, _(""), _(""))));
 	getrenderers = reinterpret_cast<System::list<Renderer*>*(*)(SkinnedMultiMesh*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
 	setmaterial = reinterpret_cast<void(*)(Renderer*, Material*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("set_material"), 0, _(""), _("UnityEngine"))));
 	getmaterial = reinterpret_cast<Material * (*)(Renderer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("get_material"), 0, _(""), _("UnityEngine"))));
@@ -1440,6 +1455,12 @@ public:
 	FIELD(0x18, capacity, int);
 	FIELD(0x1C, contents, int);
 	FIELD(0x20, ammoType, ItemDefinition*);
+
+	bool CanReload(BasePlayer* owner) {
+		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return 0;
+		typedef bool(*A)(Magazine*, BasePlayer*);
+		return ((A)(mem::game_assembly_base + oCanReload))(this, owner);
+	}
 };
 
 class BaseProjectile : public AttackEntity {
@@ -1650,7 +1671,6 @@ public:
 		}
 
 		switch (weapon_id) {
-			pent
 		case spear_wooden:
 			velocity = 25;
 			scale_velocity = false;
@@ -1660,6 +1680,104 @@ public:
 			break;
 		case spear_stone:
 			velocity = 30;
+			scale_velocity = false;
+			gravity_modifier = 2;
+			drag = .1f;
+			distance = .25f;
+			break;
+		case hatchet:
+			velocity = 25;
+			scale_velocity = false;
+			gravity_modifier = 2;
+			drag = .1f;
+			distance = .25f;
+			break;
+		case stonehatchet:
+			velocity = 25;
+			scale_velocity = false;
+			gravity_modifier = 2;
+			drag = .1f;
+			distance = .25f;
+			break;
+		case pickaxe:
+			velocity = 25;
+			scale_velocity = false;
+			gravity_modifier = 2;
+			drag = .1f;
+			distance = .25f;
+			break;
+		case stonepickaxe:
+			velocity = 25;
+			scale_velocity = false;
+			gravity_modifier = 2;
+			drag = .1f;
+			distance = .25f;
+			break;
+		case salvageaxe:
+			velocity = 25;
+			scale_velocity = false;
+			gravity_modifier = 2;
+			drag = .1f;
+			distance = .25f;
+			break;
+		case cleaver:
+			velocity = 25;
+			scale_velocity = false;
+			gravity_modifier = 2;
+			drag = .1f;
+			distance = .25f;
+			break;
+		case hammer:
+			velocity = 25;
+			scale_velocity = false;
+			gravity_modifier = 2;
+			drag = .1f;
+			distance = .25f;
+			break;
+		case icepick:
+			velocity = 25;
+			scale_velocity = false;
+			gravity_modifier = 2;
+			drag = .1f;
+			distance = .25f;
+			break;
+		case sword:
+			velocity = 25;
+			scale_velocity = false;
+			gravity_modifier = 2;
+			drag = .1f;
+			distance = .25f;
+			break;
+		case boneknife:
+			velocity = 25;
+			scale_velocity = false;
+			gravity_modifier = 2;
+			drag = .1f;
+			distance = .25f;
+			break;
+		case butcherknife:
+			velocity = 25;
+			scale_velocity = false;
+			gravity_modifier = 2;
+			drag = .1f;
+			distance = .25f;
+			break;
+		case combatknife:
+			velocity = 25;
+			scale_velocity = false;
+			gravity_modifier = 2;
+			drag = .1f;
+			distance = .25f;
+			break;
+		case rock:
+			velocity = 15;
+			scale_velocity = false;
+			gravity_modifier = 2;
+			drag = .1f;
+			distance = .25f;
+			break;
+		case snowball:
+			velocity = 25;
 			scale_velocity = false;
 			gravity_modifier = 2;
 			drag = .1f;
@@ -1867,8 +1985,15 @@ public:
 
 class ModelState {
 public:
+	float get_water_level() {
+		pent
+			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return 0;
+		return *reinterpret_cast<float*>((uintptr_t)this + 0x14);
+	}
+
 	void set_water_level(float water_level) {
 		pent
+			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
 			* reinterpret_cast<float*>((uintptr_t)this + 0x14) = water_level;
 	}
 
@@ -1894,12 +2019,6 @@ public:
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
 		return set_ducked((uintptr_t)this, j);
-	}
-
-	void setwaterlevel(float f) {
-		pent
-			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
-		*reinterpret_cast<float*>((uintptr_t)this + 0x14) = f;
 	}
 
 	void remove_flag(ModelState_Flag flag) {
@@ -2318,6 +2437,12 @@ public:
 	FIELD(O::PlayerInventory::containerWear, containerWear, ItemContainer*);
 	FIELD(O::PlayerInventory::crafting, crafting, ItemCrafter*);
 	FIELD(O::PlayerInventory::loot, loot, PlayerLoot*);
+
+
+	bool HasAmmo(int ammotype) {
+		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return false;
+		return hasammo(this, ammotype);
+	}
 };
 
 class weapon {
@@ -2853,6 +2978,8 @@ auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base +
 		auto closest_entity_distance = 9999;
 		bool is_code_lock = false;/*iscodelock/is_tree*/
 
+		aim_target result = aim_target();
+
 		for (int i = 0; i <= size; i++) {
 			pent
 				auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
@@ -2917,11 +3044,12 @@ auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base +
 
 			auto game_object = *reinterpret_cast<uintptr_t*>(object + 0x30);
 
-			auto Transform = *reinterpret_cast<uintptr_t*>(game_object + 0x8);
+			auto transform = *reinterpret_cast<uintptr_t*>(game_object + 0x8);
 
-			auto visual_state = *reinterpret_cast<uintptr_t*>(Transform + 0x38);
+			auto visual_state = *reinterpret_cast<uintptr_t*>(transform + 0x38);
 
 			auto world_position = *reinterpret_cast<Vector3*>(visual_state + 0x90);
+			//auto world_position = ((Transform*)transform)->position();
 
 			auto bone_pos = this->get_bone_Transform(48)->position();
 
@@ -2929,9 +3057,7 @@ auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base +
 
 			if (distance < 2.f
 				&& !strcmp(entity_class_name, _("TreeMarker"))) {
-				pent
-
-					aim_target new_target;
+				aim_target new_target;
 				new_target.pos = world_position;//this->ClosestPoint(world_position);
 				new_target.ent = (BaseCombatEntity*)ent;
 				new_target.distance = distance;
@@ -2941,10 +3067,8 @@ auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base +
 			}
 			else if (distance < 2.f
 				&& !strcmp(entity_class_name, _("TreeEntity"))) {
-				pent
-
-					aim_target new_target;
-				world_position.y += 1.f;
+				aim_target new_target;
+				world_position.y = vars->local_player->eyes()->position().y;
 				new_target.pos = world_position;//this->ClosestPoint(world_position);
 				new_target.ent = (BaseCombatEntity*)ent;
 				new_target.distance = distance;
@@ -2954,9 +3078,7 @@ auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base +
 			}
 			else if (distance < 2.f
 				&& !strcmp(entity_class_name, _("OreHotSpot"))) {
-				pent
-
-					aim_target new_target;
+				aim_target new_target;
 				new_target.pos = world_position;//this->ClosestPoint(world_position);
 				new_target.ent = (BaseCombatEntity*)ent;
 				new_target.distance = distance;
@@ -2964,39 +3086,10 @@ auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base +
 				new_target.found = true;
 				return { new_target, false };
 			}
-
-			if (distance < closest_entity_distance && distance < max_distance) {
-				pent
-					auto object_class = *reinterpret_cast<uintptr_t*>(object + 0x30);
-				if (!object_class)
-					continue;
-
-				auto entity = *reinterpret_cast<uintptr_t*>(object_class + 0x18);
-				if (!entity)
-					continue;
-
-				auto baseentity = *reinterpret_cast<uintptr_t*>(entity + 0x28);
-				if (!baseentity)
-					continue;
-
-				auto player = reinterpret_cast<BasePlayer*>(baseentity);
-
-				aim_target new_target;
-
-				auto local = this->ClosestPoint(world_position);
-				if (local.get_3d_dist(world_position) >= max_distance)
-					continue;
-
-				new_target.pos = this->ClosestPoint(world_position);
-				new_target.ent = (BaseCombatEntity*)ent;
-				new_target.distance = distance;
-				new_target.visible = /*unity::is_visible(bone_pos, world_position)*/true;
-				new_target.found = true;
-
-				closest_entity_distance = distance;
-				closest_entity = new_target;
-			}
 		}
+
+		if (result.found)
+			return { result, true };
 
 		return { closest_entity , is_code_lock };
 	}
@@ -3882,6 +3975,13 @@ class TerrainMeta {
 
 };
 
+class SphereEntity : public BaseEntity {
+public:
+	member(float, currentRadius, 0x168);
+	member(float, lerpRadius, 0x16C);
+	member(float, lerpSpeed, 0x170);
+};
+
 class Skin {
 public:
 	member(System::string*, manifestName, 0x10);
@@ -3922,7 +4022,7 @@ void attack_melee(aim_target target, BaseProjectile* melee, BasePlayer* lp, bool
 		Transform* trans = target.ent->transform();
 
 
-		auto v = trans->InverseTransformPoint(target.pos);//_InverseTransformPoint(trans, target.pos);
+		auto v = trans->InverseTransformPoint(lp->ClosestPoint(target.pos));//_InverseTransformPoint(trans, target.pos);
 
 		if (!trans)
 			return;

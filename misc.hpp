@@ -651,7 +651,8 @@ namespace misc
 			Vector3 vec2 = vec + Vector3(0.f, radius - extrusion, 0.f);
 			Vector3 vec3 = vec + Vector3(0.f, height - radius, 0.f);
 			float radius2 = radius - margin;
-			isInAir = !unity::CheckCapsule(vec2, vec3, radius2, 1503731969, 1);
+			isInAir = !unity::CheckCapsule(vec2, vec3, radius2, 1503731969, 1)
+				&& ply->modelState()->get_water_level() == 0;
 
 			if (isInAir)
 			{
@@ -1477,6 +1478,9 @@ namespace misc
 
 			if(!misc::node.ent)
 				misc::node.ent = (BaseEntity*)lp->find_closest((Networkable*)lp, 200.f, classname.c_str(), name.c_str());
+
+			if (!misc::node.ent)
+				return;
 
 			Vector3 vel = pwm->get_TargetMovement();
 			vel = Vector3(vel.x / vel.length() * 5.5f, vel.y, vel.z / vel.length() * 5.5f);

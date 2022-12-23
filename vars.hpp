@@ -381,6 +381,7 @@ struct Vars
 		bool woundedflag = false;
 		bool distance = false;
 		bool weaponesp = false;
+		bool turretradius = false;
 		bool friendflag = false;
 		bool targettedflag = false;
 		bool desync_indicator = false;
@@ -479,6 +480,7 @@ struct Vars
 		float capsuleHeightDucked = 0.5f;
 		float capsuleCenterDucked = 0.5f;
 		float capsuleradius = 0.5f;
+		char playernamesearch[32];
 
 		int gesture_spam = 0;
 	}; misc misc;
@@ -503,6 +505,7 @@ struct Vars
 		int tp = 0;
 		int locktarget = 0;
 		int stash = 0;
+		int capsule = 0;
 	}; keybinds keybinds;
 
 	struct colors {

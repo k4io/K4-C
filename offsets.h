@@ -24,6 +24,7 @@ namespace offsets {
 #define oButtons_TypeInfo 56959632
 #define oLineOfSightRadius 9214032
 #define oChatOpen 0x653360 //public static void open() { } <- inside 'ConVar::Chat'
+#define oCanReload 0x912860 // public bool CanReload(BasePlayer owner) { }
 #define oSetGestureMenuOpen 0x5B4BD0 //private void SetGestureMenuOpen(bool wantsOpen) { }
 #define oSphereCast 0x253DD60
 #define oGetWorldVelocity 0xC9FAE0

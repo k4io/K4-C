@@ -67,7 +67,7 @@ struct weapon_stats_t {
 	float initial_distance;
 };
 
-enum ammo_types : int32_t {
+enum AmmoType : int32_t {
 	shotgun = -1685290200,
 	shotgun_slug = -727717969,
 	shotgun_fire = -1036635990,
@@ -96,7 +96,21 @@ enum ammo_types : int32_t {
 
 enum weapon_types : int32_t {
 	spear_stone = 1602646136,
-	spear_wooden = 1540934679
+	spear_wooden = 1540934679,
+	hatchet = -1252059217,
+	stonehatchet = -1583967946,
+	pickaxe = -1302129395,
+	stonepickaxe = 171931394,
+	salvageaxe = -262590403,
+	cleaver = -1978999529,
+	hammer = -1506397857,
+	icepick = -1780802565,
+	sword = 1326180354,
+	boneknife = 1814288539,
+	butcherknife = -194509282,
+	combatknife = 2040726127,
+	rock = 963906841,
+	snowball = -363689972
 };
 
 class Vector3

@@ -56,12 +56,14 @@ namespace System {
 		T get(uint32_t idx)
 		{
 			const auto internal_list = reinterpret_cast<uintptr_t>(this + 0x20);
+			if (!internal_list) return 0;
 			return *reinterpret_cast<T*>(internal_list + idx * sizeof(T));
 		}
 
 		T get_value(uint32_t idx)
 		{
 			const auto list = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x10);
+			if (!list) return 0;
 			const auto internal_list = list + 0x20;
 			return *reinterpret_cast<T*>(internal_list + idx * sizeof(T));
 		}

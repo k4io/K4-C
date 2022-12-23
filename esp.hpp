@@ -751,14 +751,13 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			{
 				auto dist_color = is_visible ? vars->colors.players.details.distance.visible : vars->colors.players.details.distance.invisible;
 				auto nstr = string::wformat(_(L"[%dm]"), (int)distance);
-				render.StringCenter({ bounds.center, bounds.bottom + 9 }, nstr, vars->visual.rainbowdist ? rainbowcolor : FLOAT4TOD3DCOLOR(dist_color));
+				render.StringCenter({ bounds.center, bounds.bottom + 9 + (vars->visual.hpbar == 3 ? 0 : 10) }, nstr, vars->visual.rainbowdist ? rainbowcolor : FLOAT4TOD3DCOLOR(dist_color));
 			}
 
 			//name
 			if (vars->visual.nameesp) {
 				render.StringCenter({ bounds.center, bounds.top - 8 }, name, vars->visual.rainbowname ? D2D1::ColorF{ r, g, b, 1 } : FLOAT4TOD3DCOLOR(name_color));
 			}
-			// PLAYER NAME
 		}
 	}
 }
@@ -1356,14 +1355,23 @@ void iterate_entities() {
 
 			//silent stash stuff
 			if (vars->misc.openstash) {
-				if (unity::GetKey(vars->keybinds.stash)) {
-					if (!strcmp(ent->get_class_name(), _("StashContainer"))) {
+				if (!strcmp(ent->get_class_name(), _("StashContainer"))) {
+					if (unity::GetKey(vars->keybinds.stash)) {
 						if (ent->transform()->position().distance(
 							vars->local_player->transform()->position()) < .9f) {
 							ent->ServerRPC(_(L"RPC_OpenLoot"));
 						}
 					}
 				}
+			}
+
+			if (vars->visual.turretradius) {
+				auto object_name = *reinterpret_cast<rust_str*>(object_name_ptr);
+				if (!object_name.zpad)
+					continue;
+				if (vars->visual.traps && (*(int*)(object_name.zpad + 36) == 'terr' || *(int*)(object_name.zpad + 43) == 'tnug' || *(int*)(object_name.zpad + 38) == 'rtra'))
+					if (*(int*)(object_name.zpad + 36) == 'terr')
+						Sphere(world_position, 30.f, col(r, g, b, 1), 0.01f, false);
 			}
 
 			//misc esp
