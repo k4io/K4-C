@@ -1287,7 +1287,8 @@ void iterate_entities() {
 				{
 					esp_color = Vector4(54, 116, 186, 255);
 					w2s_position.y += 10;
-					if (vars->selected_entity_id == ent_id) {
+					if (vars->selected_entity_id == ent_id
+						&& vars->selected_entity_id != -1) {
 						render.StringCenter(w2s_position, _(L"selected"), { 54 / 255.f, 116 / 255.f, 186 / 255.f });
 						//esp::draw_item(w2s_position, il2cpp::methods::new_string(("[selected]")), esp_color);
 						w2s_position.y += 10;

@@ -38,16 +38,28 @@ namespace System {
 		}
 	};
 
-	template<typename T = void*>
+	template<typename T = void*, typename K = void*>
 	class ListDictionary
 	{
 	public:
-		T get(uint32_t idx) {
-			auto listcontent = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x18);
-			return *reinterpret_cast<T*>(listcontent + 0x20 + (idx * 8));
+		K get_value(uint32_t idx) {
+			auto listhead = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x10);
+			if (idx > 0) {
+				auto n = *reinterpret_cast<uintptr_t*>(listhead + (idx * 0x20));
+				return *reinterpret_cast<K*>(n + 0x18);
+			}
+			return mem::read<K>(listhead + 0x18);
+		}
+		T get_key(uint32_t idx) {
+			auto listhead = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x10);
+			if (idx > 0) {
+				auto n = *reinterpret_cast<uintptr_t*>(listhead + (idx * 0x20));
+				return *reinterpret_cast<T*>(n + 0x10);
+			}
+			return mem::read<T>(listhead + 0x10);
 		}
 		int32_t size() {
-			return *reinterpret_cast<int32_t*>((uintptr_t)this + 0x10);
+			return *reinterpret_cast<int32_t*>((uintptr_t)this + 0x1C);
 		}
 	};
 	template<typename T>

@@ -457,6 +457,7 @@ struct Vars
 		bool instant_revive = false;
 		bool fastloot = false;
 		bool skinchanger = false;
+		bool hammerspam = false;
 		bool no_playercollision = false;
 		char* playerselected = _("~");
 		//int playerselected = 0;
@@ -504,6 +505,7 @@ struct Vars
 		int fakelag = 0;
 		int tp = 0;
 		int locktarget = 0;
+		int hammerspam = 0;
 		int stash = 0;
 		int capsule = 0;
 	}; keybinds keybinds;

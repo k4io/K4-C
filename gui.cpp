@@ -633,7 +633,7 @@ namespace Gui
 			else if (name == _("eyeoffset")) vars->misc.eyeoffset = std::stoi(value);
 			else if (name == _("PlayerEyes")) vars->misc.PlayerEyes = std::stof(value);
 			else if (name == _("spinbot")) vars->misc.spinbot = std::stoi(value);
-			else if (name == _("always_shoot")) vars->misc.always_shoot = std::stoi(value);
+			else if (name == _("always_shoot")) vars->combat.always_shoot = std::stoi(value);
 			else if (name == _("attack_on_mountables")) vars->misc.attack_on_mountables = std::stoi(value);
 			else if (name == _("speedhack")) vars->misc.speedhack = std::stoi(value);
 			else if (name == _("hitsound")) vars->misc.hitsound = std::stoi(value);
@@ -1121,7 +1121,7 @@ namespace Gui
 		itoa(vars->misc.spinbot, buffer, 4);
 		str = (std::string(_("spinbot=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
-		itoa(vars->misc.always_shoot, buffer, 4);
+		itoa(vars->combat.always_shoot, buffer, 4);
 		str = (std::string(_("always_shoot=")) + std::string(buffer) + _("\n"));
 		f.write(str.c_str(), str.size());
 		itoa(vars->misc.attack_on_mountables, buffer, 4);
@@ -1329,7 +1329,7 @@ namespace Gui
 			//im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			//im::Hotkey(_("M2"), &vars->keybinds.manipulator2, ImVec2(50, 15));
 			//im::Checkbox(_("Target behind wall"), &vars->combat.shoot_at_fatbullet);
-			//im::Checkbox(_("STW (many invalids)"), &vars->combat.throughwall);
+			im::Checkbox(_("STW (many invalids)"), &vars->combat.throughwall);
 			//im::Checkbox(_("Pierce"), &vars->combat.pierce);
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
 			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
@@ -1611,7 +1611,7 @@ namespace Gui
 				_("Closest (distance)\0Lowest hp"));
 			//vars->playersnamesstr.clear();
 			im::EndChild();
-		}
+		}	
 		//im::SetCursorPosX(im::GetCursorPosX() + 245);
 		im::SameLine();
 		im::SetCursorPosY(im::GetCursorPosY() - 166);
@@ -1632,6 +1632,9 @@ namespace Gui
 			im::Checkbox(_("Weapon spam"), &vars->misc.weaponspam);
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("W"), &vars->keybinds.weaponspam, ImVec2(50, 14));
+			im::Checkbox(_("Hammer spam"), &vars->misc.hammerspam);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			im::Hotkey(_("H"), &vars->keybinds.hammerspam, ImVec2(50, 14));
 			//im::Checkbox(_("Fast loot"), &vars->misc.fastloot);
 			im::Checkbox(_("Instant med"), &vars->misc.instant_med);
 			im::Checkbox(_("Instant revive"), &vars->misc.instant_revive);

@@ -941,7 +941,7 @@ public:
 		return _update((Projectile*)this);//hooks::orig::_update((Projectile*)this);//Hooks::ProjectileUpdateHk.get_original<decltype(&Hooks::_Update)>()(this);
 	}
 
-	float GetHitDist(float travel, BasePlayer* target, bool ent) {
+	static float GetHitDist(float travel, BasePlayer* target, bool ent) {
 		if (!target)
 			return 0.f;
 

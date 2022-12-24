@@ -312,6 +312,8 @@ typedef struct Str
 //static auto ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
 
 //static auto setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
+static auto bmdoattack = reinterpret_cast<void(*)(BaseMelee*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("DoAttack"), 0, _(""), _(""))));
+
 static auto dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
 
 static auto create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
@@ -613,6 +615,7 @@ float current_time;
 void init_bp() {
 	//setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
 	//ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
+	bmdoattack = reinterpret_cast<void(*)(BaseMelee*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("DoAttack"), 0, _(""), _(""))));
 	dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
 	create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
 	add_component = reinterpret_cast<Component * (*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_AddComponentWithType"), 0, _(""), _("UnityEngine"))));
@@ -1442,6 +1445,11 @@ public:
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
 		return basemeldothrow(this);
 	}
+
+	void DoAttack() {
+		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
+		bmdoattack(this);
+	}
 };
 
 class MapNote {
@@ -1880,7 +1888,7 @@ public:
 
 		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return 0;
 		const auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x2C0);
-		if (!mag || mag < 0xFFFF) return 0;
+		if (!mag || mag < 0xFFFF || mag > 0xFFFF000000000000) return 0;
 		const auto ammo = *reinterpret_cast<int*>(mag + 0x18);
 		return ammo;
 	}
@@ -3972,6 +3980,10 @@ public:
 };
 
 class TerrainMeta {
+
+};
+
+class Hammer : public BaseMelee {
 
 };
 

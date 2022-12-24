@@ -453,7 +453,7 @@ void save_config() {
 	itoa(vars->misc.spinbot, buffer, 4);
 	str = (std::string(_("spinbot=")) + std::string(buffer) + _("\n"));
 	f.write(str.c_str(), str.size());
-	itoa(vars->misc.always_shoot, buffer, 4);
+	itoa(vars->combat.always_shoot, buffer, 4);
 	str = (std::string(_("always_shoot=")) + std::string(buffer) + _("\n"));
 	f.write(str.c_str(), str.size());
 	itoa(vars->misc.attack_on_mountables, buffer, 4);

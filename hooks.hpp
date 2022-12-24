@@ -930,16 +930,17 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			
 			auto ogid = *reinterpret_cast<unsigned int*>(_ppa + 0x14);
 
+			auto build_id = *reinterpret_cast<unsigned int*>(_ppa + 0x14);
+			auto tranny = esp::find_transform_by_id(build_id);
 			if (GetAsyncKeyState(0x39))
 			{
 				*reinterpret_cast<unsigned int*>(_ppa + 0x14) = vars->local_player->net()->get_id();
+				tranny = vars->local_player->transform();
 			}
 			else
 				*reinterpret_cast<unsigned int*>(_ppa + 0x14) = vars->selected_entity_id;
 
 
-			auto build_id = *reinterpret_cast<unsigned int*>(_ppa + 0x14);
-			auto tranny = esp::find_transform_by_id(build_id);
 			if (tranny) {
 				//transform* tr = get_transform((base_player*)FindEntity);
 				//transform* Traaa = get_transform//FindEntity->_get_transform();
@@ -1146,7 +1147,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 
 				float reloadtime = *reinterpret_cast<float*>((uintptr_t)held + 0x2B8);//held->reloadTime();
-				vars->reload = reloadtime - .3f;
 
 				if (misc::time_since_last_shot > reloadtime//-10% for faster reloads than normal >:)
 					&& !misc::did_reload)
@@ -1447,6 +1447,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		}
 		if (vars->combat.throughwall)
 		{
+			_update((Projectile*)pr);
 			for (size_t i = 0; i <= 0; i++)
 			{
 				auto p = (Projectile*)pr;
@@ -1471,6 +1472,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					traveledThisUpdate.length() + 1.f,
 					8388608 | 2097152 | 65536, 0))
 					break;
+
+				Line(hitInfo->point(), p->currentPosition(), { 1, 0, 0, 1 }, 10.f, false, false);
+				Line(hitInfo->point(), vars->best_target.pos, { 1, 0, 0, 1 }, 10.f, false, false);
 
 				if (!g_UpdateReusable)
 					g_UpdateReusable = Projectile1::CreatePlayerProjectileUpdate();
@@ -1521,6 +1525,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				_DoHit(p, ht, trans->position(), Vector3(0, 0, 0));
 				
 			}
+			return;
 		}
 		if (vars->combat.targetbehindwall) {
 			//return _update((Projectile*)pr);
@@ -1729,7 +1734,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			bool IsMounted = baseplayer->GetMounted() ? 1 : 0;
 			float maxVelocity = get_maxspeed(baseplayer);
 			if (IsMounted)
-				maxVelocity *= 4;
+				maxVelocity *= 3;
 			float _timeSinceLastTick = unity::get_realtimesincestartup() - baseplayer->lastSentTickTime();
 			float timeSinceLastTickClamped = max(0.f, min(_timeSinceLastTick, 1.f));
 			float mm_eye = 0.1f + (timeSinceLastTickClamped + 2.f / 60.f) * 1.5f * maxVelocity;
@@ -1848,7 +1853,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				}
 			}
 
-			if (vars->misc.always_shoot) {
+			if (vars->combat.always_shoot) {
 				auto mountable = baseplayer->mounted();
 				if (mountable)
 					mountable->canwielditem() = true;
@@ -1903,9 +1908,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					}
 				}
 				//skin changer stuff?
-
 				if (vars->misc.skinchanger) {
-					auto kl = mem::read<uintptr_t>(mem::game_assembly_base + 56902440);
+					/*
+					auto kl = mem::read<uintptr_t>(mem::game_assembly_base + 57026592);
 					auto fieldz = mem::read<uintptr_t>(kl + 0xB8);
 					auto all = mem::read<System::Array<Skinnable*>*>(fieldz);
 
@@ -1914,13 +1919,13 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					//for (int i = 0; i < sz; i++)
 
 					//skinnable loop
-					for (int i = 0; i > sz; i++)
+					for (int i = 0; i < sz; i++)
 					{
 						auto c = all->get(i);
 						if (c) {
 							auto gp = mem::read<System::Array<SkinnableGroup*>*>((uintptr_t)c + 0x60);
 							auto gpsz = gp->size();
-							wprintf(_(L"------------------------------------------\nName: "));
+							wprintf(_(L"---------------------(%d)---------------------\nName: "));
 							wprintf(c->Name()->str);
 							wprintf(_(L"\nObject name: "));
 							wprintf(c->get_name()->str);
@@ -1928,8 +1933,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							wprintf(c->ItemName()->str);
 							wprintf(_(L"\nViewModelPrefabName: "));
 							wprintf(c->ViewmodelPrefabName()->str);
-
-
+							
+							
 							wprintf(_(L"\nMesh download paths:"));
 							auto as = mem::read< System::Array<System::string*>*>((uintptr_t)c + 0x50);
 							if (as) {
@@ -1939,7 +1944,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 										wprintf(L"\t[%d]: %ls\n", k, c2->str);
 								}
 							}
-
+							
 							wprintf(_(L"\nEntityPrefabName: "));
 							wprintf(c->EntityPrefabName()->str);
 							wprintf(L"\nGROUP SIZE: %d\n", gpsz);
@@ -1962,6 +1967,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								for (int i = 0; i < sz; i++) {
 									auto renderer = *reinterpret_cast<Renderer**>(renderers + 0x20 + i * 0x8);
 									if (!renderer) return;
+									if (c->_sourceMaterials->size() >= i)
+										renderer->SetMaterial(c->_sourceMaterials->get(i));
 									//renderer->SetMaterials(c->_sourceMaterials);
 								}
 							}
@@ -1969,44 +1976,36 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							wprintf(_(L"------------------------------------------\n"));
 						}
 					}
-
+					*/
 					//workshopskin cache loop //Rust_Workshop_WorkshopSkin_c*
-							//kl = mem::read<uintptr_t>(mem::game_assembly_base + 56900000);
-							//fieldz = mem::read<uintptr_t>(kl + 0xb8);
+					
+					typedef Skin* (*A)(unsigned long);
+					auto sk = ((A)(mem::game_assembly_base + 0x10587B0))(2249370680);
 
-					//public static bool AllowApply; // 0x0
-					//auto o = mem::read<uintptr_t>(mem::game_assembly_base + 56900000);
-					//auto field = mem::read<uintptr_t>(o + 0xb8);
-					//mem::write<bool>(field + 0x0, true);
-					//
-					////typedef Skin* (*A)(ULONG); //public static Skin GetSkin(ulong workshopId) { }
-					//auto skin = ((A)(mem::game_assembly_base + 0x102C030))(1750654242); //1750654242 = azul ak47
-					//
-					////wprintf(_(L"1: %ls\n2: %ls\n"), skin->manifestName->str, skin->manifestContent->str);
-					//typedef void(*AA)(Skin*, GameObject*); //internal void Apply(GameObject gameObject) { }
-							//((AA)(mem::game_assembly_base + 0x101AA20))(skin, ((Component*)(get_activemodel()))->GetComponent<GameObject>(unity::GetType(_("UnityEngine"), _("GameObject"))));
-							//((AA)(mem::game_assembly_base + 0x101AA20))(skin, held->GetComponent<GameObject>(unity::GetType(_("UnityEngine"), _("GameObject"))));
-					//
-					//auto obj = ((Component*)(get_activemodel()))->GetComponent<GameObject>(unity::GetType(_("UnityEngine"), _("GameObject")));
-					//
-					////wprintf(L"%ls\n", wpn->info()->shortname()->str);
-					//wprintf(L"%ls\n", wpn->get_weapon_name());
-					//printf("%s\n", held->get_object_name().zpad);
-					//uintptr_t ob;
-					//ob = il2cpp::methods::object_new(il2cpp::init_class(_("Action"), _("System")));
-					//create(ob, _(L""));
-					//
-					//typedef void(*R)(GameObject*, ULONG, uintptr_t);
-					//((R)(mem::game_assembly_base + 0x102B880))(obj, 1750654242, ob);
-
-					//typedef void(*R)(GameObject*, System::Array<Material*>*, System::Array<Material*>*);
-					//((R)(mem::game_assembly_base + 0x101A840))(obj, skin->skinnable->_sourceMaterials, skin->materials);
-
-
-					//wprintf(_(L"END\n"));
+					typedef void* (*B)(Skin*, GameObject*);
+					((B)(mem::game_assembly_base + 0x10471A0))(sk, held->GetComponent<GameObject>(unity::GetType(_("UnityEngine"), _("GameObject"))));
+				
+					auto model = get_activemodel();
+					auto renderers = ((Networkable*)model)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
+					if (renderers)
+					{
+						auto sz = *reinterpret_cast<int*>(renderers + 0x18);
+						auto mats = sk->materials;
+						auto matsz = mats->size();
+						for (int i = 0; i < sz; i++) {
+							auto renderer = *reinterpret_cast<Renderer**>(renderers + 0x20 + i * 0x8);
+							if (!renderer) return;
+							if (matsz >= i)
+								renderer->SetMaterial(mats->get(i));
+						}
+					}
 				}
-
-
+				if (vars->misc.hammerspam) {
+					if (unity::GetKey(vars->keybinds.hammerspam)
+						&& !strcmp(held->get_class_name(), _("Hammer"))) {
+						((BaseMelee*)held)->DoAttack();
+					}
+				}
 				if (vars->visual.grenadeprediction) {
 					auto w = ((ThrownWeapon*)held);
 					auto eyepos = baseplayer->eyes()->position();
