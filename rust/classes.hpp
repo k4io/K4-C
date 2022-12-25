@@ -911,6 +911,12 @@ public:
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return nullptr;
 		return objgetname(this);
 	}
+	char* get_class_name() {
+		pent
+			auto bp = *reinterpret_cast<uintptr_t*>(this);
+		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return _("");
+		return (char*)*reinterpret_cast<uintptr_t*>(bp + 0x10);
+	}
 };
 
 class Component : public Object {
@@ -928,12 +934,6 @@ public:
 		}
 	}
 
-	char* get_class_name() {
-		pent
-			auto bp = *reinterpret_cast<uintptr_t*>(this);
-		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return _("");
-		return (char*)*reinterpret_cast<uintptr_t*>(bp + 0x10);
-	}
 
 	rust_str get_object_name() {
 		auto obj = *reinterpret_cast<uintptr_t*>(this + 0x8);

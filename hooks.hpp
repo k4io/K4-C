@@ -652,7 +652,36 @@ namespace hooks {
 		//return;
 		//printf(_("ppu called\n"));
 		//Sphere(projectile->currentPosition(), 0.1f, { 1, 1, 0, 1 }, 5.f, 100.f);
-
+		if (vars->combat.pierce) {
+			auto ht = (HitTest*)projectile->hitTest();
+			if(!ht)
+				return orig_fn(rcx, rdx, r9, _ppa, arg5);
+			auto gameobj = ht->gameObject();
+			if(!gameobj)
+				return orig_fn(rcx, rdx, r9, _ppa, arg5);
+			if (!strcmp(gameobj->get_class_name(), _("CargoShip"))
+				|| !strcmp(gameobj->get_class_name(), _("BaseOven"))
+				|| !strcmp(gameobj->get_class_name(), _("TreeEntity"))
+				|| !strcmp(gameobj->get_class_name(), _("OreResourceEntity"))
+				|| !strcmp(gameobj->get_class_name(), _("CH47HelicopterAIController"))
+				|| !strcmp(gameobj->get_class_name(), _("MiniCopter"))
+				|| !strcmp(gameobj->get_class_name(), _("BoxStorage"))
+				|| !strcmp(gameobj->get_class_name(), _("Workbench"))
+				|| !strcmp(gameobj->get_class_name(), _("VendingMachine"))
+				|| !strcmp(gameobj->get_class_name(), _("Barricade"))
+				|| !strcmp(gameobj->get_class_name(), _("BuildingPrivlidge"))
+				|| !strcmp(gameobj->get_class_name(), _("LootContainer"))
+				|| !strcmp(gameobj->get_class_name(), _("HackableLockedCrate"))
+				|| !strcmp(gameobj->get_class_name(), _("ResourceEntity"))
+				|| !strcmp(gameobj->get_class_name(), _("RidableHorse"))
+				|| !strcmp(gameobj->get_class_name(), _("MotorRowboat"))
+				|| !strcmp(gameobj->get_class_name(), _("ScrapTransportHelicopter"))
+				|| !strcmp(gameobj->get_class_name(), _("JunkPile"))
+				|| !strcmp(gameobj->get_class_name(), _("MiningQuarry"))
+				|| !strcmp(gameobj->get_class_name(), _("WaterCatcher"))
+				|| !strcmp(gameobj->get_class_name(), _("RHIB")))
+				return;
+		}
 
 		return orig_fn(rcx, rdx, r9, _ppa, arg5);
 	}
@@ -713,6 +742,37 @@ namespace hooks {
 
 			if (!hit_test->gameObject())
 				break;
+
+			if (vars->combat.pierce) {
+				auto ht = (HitTest*)projectile->get_hit_test();
+				if (!ht)
+					return orig_fn(rcx, rdx, r9, _ppa, arg5);
+				auto gameobj = ht->gameObject();
+				if (!gameobj)
+					return orig_fn(rcx, rdx, r9, _ppa, arg5);
+				if (!strcmp(gameobj->get_class_name(), _("CargoShip"))
+					|| !strcmp(gameobj->get_class_name(), _("BaseOven"))
+					|| !strcmp(gameobj->get_class_name(), _("TreeEntity"))
+					|| !strcmp(gameobj->get_class_name(), _("OreResourceEntity"))
+					|| !strcmp(gameobj->get_class_name(), _("CH47HelicopterAIController"))
+					|| !strcmp(gameobj->get_class_name(), _("MiniCopter"))
+					|| !strcmp(gameobj->get_class_name(), _("BoxStorage"))
+					|| !strcmp(gameobj->get_class_name(), _("Workbench"))
+					|| !strcmp(gameobj->get_class_name(), _("VendingMachine"))
+					|| !strcmp(gameobj->get_class_name(), _("Barricade"))
+					|| !strcmp(gameobj->get_class_name(), _("BuildingPrivlidge"))
+					|| !strcmp(gameobj->get_class_name(), _("LootContainer"))
+					|| !strcmp(gameobj->get_class_name(), _("HackableLockedCrate"))
+					|| !strcmp(gameobj->get_class_name(), _("ResourceEntity"))
+					|| !strcmp(gameobj->get_class_name(), _("RidableHorse"))
+					|| !strcmp(gameobj->get_class_name(), _("MotorRowboat"))
+					|| !strcmp(gameobj->get_class_name(), _("ScrapTransportHelicopter"))
+					|| !strcmp(gameobj->get_class_name(), _("JunkPile"))
+					|| !strcmp(gameobj->get_class_name(), _("MiningQuarry"))
+					|| !strcmp(gameobj->get_class_name(), _("WaterCatcher"))
+					|| !strcmp(gameobj->get_class_name(), _("RHIB")))
+					return;
+			}
 
 			auto layer = hit_test->gameObject()->get_layer();
 			auto prefab_name = hit_test->gameObject()->get_prefab_name();
@@ -888,6 +948,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					attack->hitNormalLocal = { .9f, -.4f, .1f };
 				}
 			}
+
 
 			if (layer == layer::Deployed) {
 				hit_test->ignoreEntity() = hit_entity;
@@ -1432,7 +1493,10 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 	void hk_projectile_update(uintptr_t pr) {
 		//printf("projectile update called\n");
-
+		if (vars->combat.pierce) {
+			auto p = (Projectile*)pr;
+			p->integrity(999.f);
+		}
 		if (launchedmelee) {
 			((Projectile*)pr)->currentVelocity(tempmelvel);
 			((Projectile*)pr)->currentPosition(tempmelpos);
@@ -1447,7 +1511,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		}
 		if (vars->combat.throughwall)
 		{
-			_update((Projectile*)pr);
 			for (size_t i = 0; i <= 0; i++)
 			{
 				auto p = (Projectile*)pr;
@@ -1483,9 +1546,10 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 				auto ppu = (protobuf::PlayerProjectileUpdate*)g_UpdateReusable;
 
+				auto newpos = hitInfo->point() - (dir * .1f);
 				ppu->projectileID = p->projectileID();
 				ppu->traveltime = p->traveledTime() + p->currentPosition().distance(hitInfo->point()) / traveledThisUpdate.length();
-				ppu->position = hitInfo->point() - (dir * .1f);
+				ppu->position = newpos;
 				ppu->velocity = p->currentVelocity();
 				vars->local_player->SendProjectileUpdate((uintptr_t)ppu);
 				//orig_fn(rcx, rdx, r9, _ppa, arg5);
@@ -1502,6 +1566,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				p->integrity(1);
 				Sphere(hitInfo->point(), 0.1f, { 1, 1, 1, 1 }, 10.f, false);
 				Sphere(ppu->position, 0.1f, { 0, 0, 1, 1 }, 10.f, false);
+				Sphere(newpos, 0.1f, { 0, 0, 1, 1 }, 10.f, false);
 
 				ht->set_hit_Transform(trans);
 				ht->set_hit_entity((BasePlayer*)vars->best_target.ent);
@@ -1525,7 +1590,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				_DoHit(p, ht, trans->position(), Vector3(0, 0, 0));
 				
 			}
-			return;
 		}
 		if (vars->combat.targetbehindwall) {
 			//return _update((Projectile*)pr);
