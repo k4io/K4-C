@@ -1528,6 +1528,8 @@ namespace misc
 		Vector3& actualposition,
 		bool skip_draw = false,
 		int simulationsmax = 100,
+		float o_speed = 0.f,
+		Vector3 o_dir = Vector3::Zero(),
 		float offset = -.5f,
 		float offsetstep = .05f) 
 	{
@@ -1541,6 +1543,7 @@ namespace misc
 		if (target.ent) {
 			auto travel = 0.f;
 			auto vel = (getmodifiedaimcone(0, rpc_position - target_pos, true)).Normalized() * original_vel.length();
+
 			auto grav = gravityModifier;
 			auto gravity = get_gravity();
 			auto deltatime = get_deltaTime();
@@ -1657,7 +1660,12 @@ namespace misc
 
 						if (misc::LineCircleIntersection(actual, 0.1f, origin, pos, offset))
 						{
-							_aimdir = getmodifiedaimcone(vars->combat.spread, vt - rpc_position, true);
+
+							float spread = vars->combat.spread;
+							auto h = vars->local_player->GetActiveItem()->GetHeldEntity<BaseProjectile>();
+							if (h && h->get_item_mod_projectile())
+								spread = getrandomvel((uintptr_t)h->get_item_mod_projectile());
+							_aimdir = getmodifiedaimcone(spread, vt - rpc_position, true);
 							//Line(actual, pos, col(0, 1, 0, 1), 10.f, false, true);
 							aimbot_velocity = (_aimdir).Normalized() * original_vel.length();
 							////emulate 1 tick has already passed
@@ -1711,26 +1719,75 @@ namespace misc
 		bool skip_draw = false,
 		int simulations = 100) {
 
-		auto velocitymin = 0.9f;
-		auto velocitymax = 1.5f;
+		GenerateBuilletDropPredictionData(drag, gravityModifier);
 
-		for (size_t i = velocitymax; i > velocitymin; i -= 0.02f)
+		float bulletDropMaxVelocity = 1.5f;
+		float bulletDropMinVelocity = .5f;
+
+		Vector2 angle = CalcAngle(rpc_position, target_pos);
+
+		float yRad = DEG2RAD(angle.y);
+
+		int currentIndex = 0;
+		for (float pitch = 35.f; pitch <= 85.f; pitch += 1.f)
 		{
-			if (get_prediction(target,
-				rpc_position,
-				target_pos,
-				(original_vel * i),
-				aimbot_velocity,
-				_aimdir,
-				travel_t,
-				partialTime,
-				drag,
-				gravityModifier,
-				actualposition,
-				skip_draw,
-				50))
-				return;
-		}
+			float pitchRad = DEG2RAD(pitch);
 
+			Vector3 dir = {
+				(float)(sinf(yRad) * cosf(pitchRad)),
+				(float)sinf(pitchRad),
+				(float)(cosf(yRad) * cosf(pitchRad))
+			};
+
+			float heightDiff = target_pos.y - rpc_position.y;
+			float dist2D = target_pos.distancexz(rpc_position);
+
+			BulletDropPredictionData& predData = bulletDropData[currentIndex++];
+			float idealSpeed = dist2D / predData.distCoeff;
+			float yTravel = (predData.startY + (idealSpeed - 30.f) * predData.yCoeff);
+
+			auto v1 = rpc_position + (dir.Normalized() * 1.f);
+			Line(rpc_position, v1, { 1, 1, 1, 1 }, 10.f, true, true);
+
+			if (idealSpeed <= bulletDropMaxVelocity &&
+				idealSpeed >= bulletDropMinVelocity &&
+				yTravel < heightDiff)
+			{
+				
+			}
+
+			Vector3 pos = rpc_position;
+			Vector3 lastpos = pos;
+			Vector3 vel = (dir * idealSpeed);
+			Vector3 ovel = vel;
+			Vector3 velmax = original_vel * 1.5f;
+			Vector3 velmin = original_vel * .5f;
+			float offset = 0.f;
+			const float step = 0.03125f;
+			for (float travel = 0; travel < 8.f; travel += step) {
+				pos += vel * step;
+				if (!unity::is_visible(lastpos, pos, (uintptr_t)vars->local_player)) 
+					break;
+				if (LineCircleIntersection(target_pos, 0.1f, lastpos, pos, offset)
+					|| pos.distance(target_pos) < 0.2f) {
+					aimbot_velocity = ovel;
+
+					float spread = vars->combat.spread;
+					auto h = vars->local_player->GetActiveItem()->GetHeldEntity<BaseProjectile>();
+					if (h && h->get_item_mod_projectile())
+						spread = getrandomvel((uintptr_t)h->get_item_mod_projectile());
+					_aimdir = getmodifiedaimcone(spread, target_pos - rpc_position, true);
+					//Line(actual, pos, col(0, 1, 0, 1), 10.f, false, true);
+					//aimbot_velocity = (_aimdir).Normalized() * original_vel.length();
+					return;
+				}
+				if(pos.distance(target_pos) <= 1.f)
+					Line(pos, lastpos, { 0, 1, 0, 1 }, 10.f, false, false);
+				else Line(pos, lastpos, { 1, 1, 1, 1 }, 10.f, false, false);
+				vel.y -= 9.81f * gravityModifier * step;
+				vel -= vel * drag * step;
+				lastpos = pos;
+			}
+		}
 	}
 }

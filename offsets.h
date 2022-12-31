@@ -52,6 +52,9 @@ namespace offsets {
 
     constexpr auto Method$BaseEntity_ServerRPC_uintstring = 57186976;// "Address":,"Method$BaseEntity.ServerRPC<uint, System::string(>()" //both addresses
     constexpr auto BaseEntity$$ServerRPC_uintstring_ = 18421584;// method address
+
+    constexpr auto Method$BaseEntity_ServerRPCList = 57185896;//  Method$BaseEntity.ServerRPCList<Vector3, uint, int, uint, int, int>(
+    constexpr auto BaseEntity$$ServerRPCList_ = 18413520;// method address
 }
 
 /*

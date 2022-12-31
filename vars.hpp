@@ -475,6 +475,7 @@ struct Vars
 		bool snake = false;
 		bool playerlist = false;
 		bool interactive_debug = false;
+		bool wireplay = false;
 
 		float capsuleHeight = 0.5f;
 		float capsuleCenter = 0.5f;
@@ -497,6 +498,7 @@ struct Vars
 		int desync_ok = 0;
 		int timescale = 0;
 		int silentwalk = 0;
+		int wireplay = 0;
 		int suicide = 0;
 		int weaponspam = 0;
 		int neck = 0;

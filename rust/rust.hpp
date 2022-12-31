@@ -20,6 +20,21 @@ struct Ray {
 	}
 };
 
+enum WireColour
+{
+	Default,
+	Red,
+	Green,
+	Blue,
+	Yellow,
+	Pink,
+	Purple,
+	Orange,
+	White,
+	LightBlue,
+	Count
+};
+
 namespace System {
 	template<typename T = void*>
 	class Array {

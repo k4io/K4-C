@@ -4,17 +4,9 @@
 
 #include "rust.hpp"
 
-class RaycastHit {
-public:
-	Vector3 point() {
-		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return Vector3::Zero();
-		return *reinterpret_cast<Vector3*>(this);
-	}
-	Vector3 normal() {
-		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return Vector3::Zero();
-		return *reinterpret_cast<Vector3*>(this + 0xC);
-	}
-};
+
+
+
 
 uintptr_t skymask_material = il2cpp::value(_("TOD_Scattering"), _("skyMaskMaterial"));
 
@@ -164,7 +156,7 @@ namespace unity {
 	bool LineOfSightRadius(Vector3 source, Vector3 destination, uintptr_t ent, float p1 = 0.18f) {
 		__try {
 			//auto layer = (int)Layers::ProjectileLineOfSightCheck | (int)Layers::Terrain | (int)Layers::z;
-			int layer = 1218519041;
+			int layer = vars->combat.pierce ? 10551296 : 1218519041;
 			//typedef bool (*AAA)(Vector3, Vector3, Layers, float, uintptr_t);
 			//if (destination.is_empty() || source.is_empty()) return false;
 			//return ((AAA)(mem::game_assembly_base + oLineOfSightRadius))(source, destination, (Layers)layer, p1, ent);

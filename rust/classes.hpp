@@ -102,7 +102,7 @@ struct BulletDropPredictionData
 	float startY;
 	float yCoeff;
 };
-BulletDropPredictionData bulletDropData[11];
+BulletDropPredictionData bulletDropData[51];
 
 struct rust_str
 {
@@ -312,6 +312,8 @@ typedef struct Str
 //static auto ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
 
 //static auto setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
+static auto raycasthit_get_transform = reinterpret_cast<Transform * (*)(RaycastHit*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("RaycastHit"), _("get_transform"), 0, _(""), _("UnityEngine"))));
+
 static auto bmdoattack = reinterpret_cast<void(*)(BaseMelee*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("DoAttack"), 0, _(""), _(""))));
 
 static auto dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
@@ -615,6 +617,7 @@ float current_time;
 void init_bp() {
 	//setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
 	//ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
+	raycasthit_get_transform = reinterpret_cast<Transform * (*)(RaycastHit*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("RaycastHit"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 	bmdoattack = reinterpret_cast<void(*)(BaseMelee*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("DoAttack"), 0, _(""), _(""))));
 	dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
 	create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
@@ -846,57 +849,7 @@ void init_bp() {
 #pragma endregion
 }
 
-Vector3 GetEndPointForTrajectory(float speed, float angle, float drag, float gravityMod, bool draw = false, Vector3 addto = Vector3::Zero())
-{
-	float pitchRad = DEG2RAD(angle);
 
-	Vector3 dir = {
-		(float)(sinf(90.f) * cosf(pitchRad)),
-		(float)sinf(pitchRad),
-		(float)(cosf(90.f) * cosf(pitchRad))
-	};
-
-	Vector3 position = Vector3();
-	Vector3 lastposition = position;
-	Vector3 velCheck = dir * speed;
-
-	const float stepSize = 0.03125f;
-
-	for (float travelTime = 0.f; travelTime < 8.f; travelTime += stepSize)
-	{
-		position += velCheck * stepSize;
-		if (!unity::is_visible(position, lastposition, 0) && draw)
-			return lastposition;
-		if (draw)
-			Line(addto + position, addto + lastposition, { 1, 1, 1, 1 }, 0.02f, false, false);
-		velCheck.y -= 9.81f * gravityMod * stepSize;
-		velCheck -= velCheck * drag * stepSize;
-		lastposition = position;
-	}
-
-	return position;
-}
-
-Vector2 CalcAngle(const Vector3& src, const Vector3& dst) {
-	Vector3 d = src - dst;
-	return Vector2(RAD2DEG(Vector3::my_asin(d.y / d.length())), RAD2DEG(-Vector3::my_atan2(d.x, -d.z)));
-};
-
-void GenerateBuilletDropPredictionData(float drag, float gravityMod)
-{
-	int currentIndex = 0;
-	for (float angle = 35.f; angle <= 85.f; angle += 5.f)
-	{
-		BulletDropPredictionData& predData = bulletDropData[currentIndex++];
-
-		Vector3 a1 = GetEndPointForTrajectory(30.f, angle, drag, gravityMod);
-		Vector3 a2 = GetEndPointForTrajectory(50.f, angle, drag, gravityMod);
-
-		predData.distCoeff = a2.length_2d() / 50.f;
-		predData.startY = a1.y;
-		predData.yCoeff = (a2.y - a1.y) / 20.f;
-	}
-}
 
 #define COMPONENT(space, type) type* { \
 	NP(type) \
@@ -1355,7 +1308,8 @@ public:
 			* reinterpret_cast<BasePlayer**>((uintptr_t)this + 0x88) = entity;
 	}
 
-	BasePlayer*& get_hit_entity() {
+	BasePlayer* get_hit_entity() {
+		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0x1000000000000000) return nullptr;
 		pent
 			return *reinterpret_cast<BasePlayer**>((uintptr_t)this + 0x88);
 	}
@@ -1538,11 +1492,13 @@ public:
 	
 	int ammo_left() {
 		pent
+			__try {
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return 0;
-		const auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x2C0);
-		if (!mag || mag < 0xFFFF) return 0;
-		const auto ammo = *reinterpret_cast<int*>(mag + 0x1C);
-		return ammo;
+			const auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x2C0);
+			if (!mag || mag < 0xFFFF) return 0;
+			const auto ammo = *reinterpret_cast<int*>(mag + 0x1C);
+			return ammo;
+		} __except (true) { return 0; }
 	}
 
 	uintptr_t get_damage_properties() {
@@ -1888,7 +1844,7 @@ public:
 
 		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return 0;
 		const auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x2C0);
-		if (!mag || mag < 0xFFFF || mag > 0xFFFF000000000000) return 0;
+		if (!mag || mag < 0xFFFF || mag > 0x1000000000000000) return 0;
 		const auto ammo = *reinterpret_cast<int*>(mag + 0x18);
 		return ammo;
 	}
@@ -1911,6 +1867,22 @@ public:
 	unsigned long get_user_id()
 	{
 		return *reinterpret_cast<unsigned long*>((uintptr_t)this + 0x20);
+	}
+};
+
+class RaycastHit {
+public:
+	Vector3 point() {
+		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return Vector3::Zero();
+		return *reinterpret_cast<Vector3*>(this);
+	}
+	Vector3 normal() {
+		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return Vector3::Zero();
+		return *reinterpret_cast<Vector3*>(this + 0xC);
+	}
+	Transform* transform() {
+		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0x1000000000000000) return nullptr;
+		return raycasthit_get_transform(this);
 	}
 };
 
@@ -2946,7 +2918,9 @@ auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base +
 
 	Transform* get_bone_Transform(int bone_id) {
 		pent
-			uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x130); //public Model model; // 
+		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0x1000000000000000) return nullptr;
+		uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x130); //public Model model; // 
+		if (!entity_model || (uintptr_t)entity_model < 0xFFFFFFFF || (uintptr_t)entity_model > 0x1000000000000000) return nullptr;
 		if (!entity_model) return nullptr;
 		uintptr_t bone_dict = *reinterpret_cast<uintptr_t*>(entity_model + 0x48);
 		if (!bone_dict) return nullptr;
@@ -3283,6 +3257,7 @@ auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base +
 
 	GameObject* get_game_object()
 	{
+		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0x1000000000000000) return nullptr;
 		if (!(uintptr_t)this)
 			return nullptr;
 
@@ -4303,5 +4278,59 @@ namespace cache {
 			else
 				cachedBones[pid] = bones;
 		}
+	}
+}
+
+Vector3 GetEndPointForTrajectory(float speed, float angle, float drag, float gravityMod, bool draw = false, Vector3 addto = Vector3::Zero())
+{
+	float pitchRad = DEG2RAD(angle);
+
+	Vector3 dir = {
+		(float)(sinf(90.f) * cosf(pitchRad)),
+		(float)sinf(pitchRad),
+		(float)(cosf(90.f) * cosf(pitchRad))
+	};
+
+	Vector3 position = Vector3();
+	Vector3 lastposition = position;
+	Vector3 velCheck = dir * speed;
+
+	const float stepSize = 0.03125f;
+
+	for (float travelTime = 0.f; travelTime < 8.f; travelTime += stepSize)
+	{
+		position += velCheck * stepSize;
+		//if (!unity::is_visible(position, lastposition, 0) && draw)
+		//	return lastposition;
+		//if (draw)
+		//	Line(addto + position, addto + lastposition, { 1, 1, 1, 1 }, 10.f, false, false);
+		velCheck.y -= 9.81f * gravityMod * stepSize;
+		velCheck -= velCheck * drag * stepSize;
+		lastposition = position;
+	}
+
+	return position;
+}
+
+Vector2 CalcAngle(const Vector3& src, const Vector3& dst) {
+	Vector3 d = src - dst;
+	return Vector2(RAD2DEG(Vector3::my_asin(d.y / d.length())), RAD2DEG(-Vector3::my_atan2(d.x, -d.z)));
+};
+
+void GenerateBuilletDropPredictionData(float drag, float gravityMod)
+{
+	int currentIndex = 0;
+	Vector3 l1;
+	Vector3 l2;
+	for (float angle = 35.f; angle <= 85.f; angle += 1.f)
+	{
+		BulletDropPredictionData& predData = bulletDropData[currentIndex++];
+
+		Vector3 a1 = GetEndPointForTrajectory(30.f, angle, drag, gravityMod, true, vars->local_player->GetBonePos(48));
+		Vector3 a2 = GetEndPointForTrajectory(50.f, angle, drag, gravityMod, true, vars->local_player->GetBonePos(48));
+
+		predData.distCoeff = a2.length_2d() / 50.f;
+		predData.startY = a1.y;
+		predData.yCoeff = (a2.y - a1.y) / 20.f;
 	}
 }

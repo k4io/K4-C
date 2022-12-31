@@ -86,6 +86,8 @@ namespace hooks {
 
 	static auto ServerRPC_int = reinterpret_cast<void (*)(BaseProjectile*, System::string funcName, unsigned int arg1, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uint_);
 	
+	static auto serverrpclist = reinterpret_cast<void (*)(BaseEntity*, System::string funcName, uintptr_t, UINT, int, UINT, int, int, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPCList_);
+	
 	static auto ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string funcName, unsigned int arg1, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
 	
 	//static auto get_resourcePath = reinterpret_cast<System::string (*)(uintptr_t)>(mem::game_assembly_base + offsets::Method$ResourceRef_method);
@@ -98,7 +100,7 @@ namespace hooks {
 		orig::pifu = reinterpret_cast<void(*)(PlayerInput*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerInput"), _("FrameUpdate"), 0, _(""), _(""))));
 		orig::createeffect = reinterpret_cast<GameObject * (*)(System::string, Effect*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("EffectLibrary"), _("CreateEffect"), 2, _(""), _(""))));
 		ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string funcName, unsigned int arg1, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
-
+		serverrpclist = reinterpret_cast<void (*)(BaseEntity*, System::string funcName, uintptr_t, UINT, int, UINT, int, int, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPCList_);
 		orig::IsConnected = reinterpret_cast<bool (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("IsConnected"), 0, _(""), _("Network"))));
 		orig::OnNetworkMessage = reinterpret_cast<void (*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("OnNetworkMessage"), 1, _(""), _(""))));
 		orig::BaseProjectile_OnSignal = reinterpret_cast<void (*)(BaseProjectile*, int, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("OnSignal"), 2, _(""), _(""))));
@@ -569,7 +571,7 @@ namespace hooks {
 					if (vars->visual.visthick)
 						projectile->transform()->SetLocalScale(p->transform()->GetLocalScale() * vars->visual.visthickness);
 
-					//p->integrity(1.f);
+					p->integrity(1.f);
 					//float t = p->traveledTime();
 
 					//create and SEND FAKE copy of projectile so game only updates original
@@ -586,18 +588,18 @@ namespace hooks {
 					//		break;
 					//	}
 
-					if (!vars->combat.bullet_tp)
-						p->SetInitialDistance(0);
+					//if (!vars->combat.bullet_tp)
+					//	p->SetInitialDistance(0);
 
-					//p->currentVelocity(original_vel);
-					//p->initialVelocity(original_vel);
-					//p->previousVelocity(original_vel);
-					//p->currentPosition(rpc_position);
-					//p->previousPosition(rpc_position);
-					//p->sentPosition(rpc_position);
-					//p->prevSentVelocity(rpc_position); //?
+					p->currentVelocity(original_vel);
+					p->initialVelocity(original_vel);
+					p->previousVelocity(original_vel);
+					p->currentPosition(rpc_position);
+					p->previousPosition(rpc_position);
+					p->sentPosition(rpc_position);
+					p->prevSentVelocity(rpc_position); //?
 					//p->launchTime(get_fixedTime());
-					//p->traveledTime(0);
+					p->traveledTime(0);
 					////p->projectileID(fp++);
 					//if (vars->combat.manipulator2
 					//	&& (unity::GetKey(vars->keybinds.manipulator)
@@ -652,36 +654,46 @@ namespace hooks {
 		//return;
 		//printf(_("ppu called\n"));
 		//Sphere(projectile->currentPosition(), 0.1f, { 1, 1, 0, 1 }, 5.f, 100.f);
-		if (vars->combat.pierce) {
-			auto ht = (HitTest*)projectile->hitTest();
-			if(!ht)
-				return orig_fn(rcx, rdx, r9, _ppa, arg5);
-			auto gameobj = ht->gameObject();
-			if(!gameobj)
-				return orig_fn(rcx, rdx, r9, _ppa, arg5);
-			if (!strcmp(gameobj->get_class_name(), _("CargoShip"))
-				|| !strcmp(gameobj->get_class_name(), _("BaseOven"))
-				|| !strcmp(gameobj->get_class_name(), _("TreeEntity"))
-				|| !strcmp(gameobj->get_class_name(), _("OreResourceEntity"))
-				|| !strcmp(gameobj->get_class_name(), _("CH47HelicopterAIController"))
-				|| !strcmp(gameobj->get_class_name(), _("MiniCopter"))
-				|| !strcmp(gameobj->get_class_name(), _("BoxStorage"))
-				|| !strcmp(gameobj->get_class_name(), _("Workbench"))
-				|| !strcmp(gameobj->get_class_name(), _("VendingMachine"))
-				|| !strcmp(gameobj->get_class_name(), _("Barricade"))
-				|| !strcmp(gameobj->get_class_name(), _("BuildingPrivlidge"))
-				|| !strcmp(gameobj->get_class_name(), _("LootContainer"))
-				|| !strcmp(gameobj->get_class_name(), _("HackableLockedCrate"))
-				|| !strcmp(gameobj->get_class_name(), _("ResourceEntity"))
-				|| !strcmp(gameobj->get_class_name(), _("RidableHorse"))
-				|| !strcmp(gameobj->get_class_name(), _("MotorRowboat"))
-				|| !strcmp(gameobj->get_class_name(), _("ScrapTransportHelicopter"))
-				|| !strcmp(gameobj->get_class_name(), _("JunkPile"))
-				|| !strcmp(gameobj->get_class_name(), _("MiningQuarry"))
-				|| !strcmp(gameobj->get_class_name(), _("WaterCatcher"))
-				|| !strcmp(gameobj->get_class_name(), _("RHIB")))
-				return;
-		}
+		//if (vars->combat.pierce) {
+		//	auto ht = (HitTest*)projectile->hitTest();
+		//	if(!ht)
+		//		return orig_fn(rcx, rdx, r9, _ppa, arg5);
+		//	auto ent = ht->get_hit_entity();
+		//	if(!ent)
+		//		return orig_fn(rcx, rdx, r9, _ppa, arg5);
+		//	auto gameobj = ent->get_game_object();
+		//	if(!gameobj)
+		//		return orig_fn(rcx, rdx, r9, _ppa, arg5);
+		//	vars->local_player->console_echo(_(L"[matrix]: PlayerProjectileUpdate - classname"));
+		//	auto s = std::string(gameobj->get_class_name());
+		//	vars->local_player->console_echo(std::wstring(s.begin(), s.end()).c_str());
+		//	if (!strcmp(gameobj->get_class_name(), _("CargoShip"))
+		//		|| !strcmp(gameobj->get_class_name(), _("BaseOven"))
+		//		|| !strcmp(gameobj->get_class_name(), _("TreeEntity"))
+		//		|| !strcmp(gameobj->get_class_name(), _("OreResourceEntity"))
+		//		|| !strcmp(gameobj->get_class_name(), _("CH47HelicopterAIController"))
+		//		|| !strcmp(gameobj->get_class_name(), _("MiniCopter"))
+		//		|| !strcmp(gameobj->get_class_name(), _("BoxStorage"))
+		//		|| !strcmp(gameobj->get_class_name(), _("Workbench"))
+		//		|| !strcmp(gameobj->get_class_name(), _("BuildingBlock"))
+		//		|| !strcmp(gameobj->get_class_name(), _("VendingMachine"))
+		//		|| !strcmp(gameobj->get_class_name(), _("Barricade"))
+		//		|| !strcmp(gameobj->get_class_name(), _("BuildingPrivlidge"))
+		//		|| !strcmp(gameobj->get_class_name(), _("LootContainer"))
+		//		|| !strcmp(gameobj->get_class_name(), _("HackableLockedCrate"))
+		//		|| !strcmp(gameobj->get_class_name(), _("ResourceEntity"))
+		//		|| !strcmp(gameobj->get_class_name(), _("RidableHorse"))
+		//		|| !strcmp(gameobj->get_class_name(), _("MotorRowboat"))
+		//		|| !strcmp(gameobj->get_class_name(), _("ScrapTransportHelicopter"))
+		//		|| !strcmp(gameobj->get_class_name(), _("JunkPile"))
+		//		|| !strcmp(gameobj->get_class_name(), _("MiningQuarry"))
+		//		|| !strcmp(gameobj->get_class_name(), _("WaterCatcher"))
+		//		|| !strcmp(gameobj->get_class_name(), _("RHIB"))) {
+		//		projectile->integrity(1);
+		//		vars->local_player->console_echo(_(L"[matrix]: PlayerProjectileUpdate - returned for pierce!"));
+		//		return;
+		//	}
+		//}
 
 		return orig_fn(rcx, rdx, r9, _ppa, arg5);
 	}
@@ -739,15 +751,22 @@ namespace hooks {
 			auto hit_test = projectile->get_hit_test();
 			if (!hit_test)
 				break;
-
+			 
 			if (!hit_test->gameObject())
 				break;
+
+			//if (vars->combat.throughwall)
+			//	attack->hitMaterialID = 3711166224;
+				//attack->hitMaterialID = 3711166224;
 
 			if (vars->combat.pierce) {
 				auto ht = (HitTest*)projectile->get_hit_test();
 				if (!ht)
 					return orig_fn(rcx, rdx, r9, _ppa, arg5);
-				auto gameobj = ht->gameObject();
+				auto ent = ht->get_hit_entity();
+				if (!ent)
+					return orig_fn(rcx, rdx, r9, _ppa, arg5);
+				auto gameobj = ent;// ->get_game_object();
 				if (!gameobj)
 					return orig_fn(rcx, rdx, r9, _ppa, arg5);
 				if (!strcmp(gameobj->get_class_name(), _("CargoShip"))
@@ -766,12 +785,15 @@ namespace hooks {
 					|| !strcmp(gameobj->get_class_name(), _("ResourceEntity"))
 					|| !strcmp(gameobj->get_class_name(), _("RidableHorse"))
 					|| !strcmp(gameobj->get_class_name(), _("MotorRowboat"))
+					|| !strcmp(gameobj->get_class_name(), _("BuildingBlock"))
 					|| !strcmp(gameobj->get_class_name(), _("ScrapTransportHelicopter"))
 					|| !strcmp(gameobj->get_class_name(), _("JunkPile"))
 					|| !strcmp(gameobj->get_class_name(), _("MiningQuarry"))
 					|| !strcmp(gameobj->get_class_name(), _("WaterCatcher"))
-					|| !strcmp(gameobj->get_class_name(), _("RHIB")))
+					|| !strcmp(gameobj->get_class_name(), _("RHIB"))) {
+					projectile->set_integrity(1);
 					return;
+				}
 			}
 
 			auto layer = hit_test->gameObject()->get_layer();
@@ -1509,6 +1531,71 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			launchedmelee = false;
 			return _update((Projectile*)pr);
 		}
+		if (vars->combat.thickness > 1.f) {
+			for (;;) {
+				auto p = (Projectile*)pr;
+				if (!p->hitTest()) break;
+				if (p->penetrationPower() <= .5f) break;
+				auto pos = p->currentPosition();
+				auto target = vars->best_target.pos;
+				Vector3 vel = p->currentVelocity();
+				Vector3 dir = vel.normalize();
+				Vector3 traveledThisUpdate = vel * get_deltaTime();
+				Vector3 newpos = pos + traveledThisUpdate;
+				Line(pos, newpos, { 0, 1, 0, 1 }, 10.f, true, true);
+				float offset = 0.f;
+				float thick = vars->combat.thickness;
+
+				if (misc::LineCircleIntersection(target, (thick > 1.f ? thick : 1.f), pos, newpos, offset)) {
+					for (float i = 0; i < 1.f; i += 0.01f) {
+						auto n = pos.Lerp(newpos, i);
+						auto dist = n.distance(target);
+						if (dist < (thick > 1.f ? thick : 1.f)
+							&& unity::is_visible(n, target, 0)) {
+							//calculate velocity, traveltime at this point
+							float travel = 0.f;
+							const float step = 0.003;
+							auto vpos = pos;
+							auto vvel = vel;
+							for (; travel < 0.3f; travel += step) {
+								vpos += vvel * step;
+								vvel.y -= 9.81f * p->gravityModifier() * step;
+								vvel -= vvel * p->drag() * step;
+								if (vpos.distance(target) < thick) {
+									p->transform()->setposition(vpos);
+									Line(pos, vpos, { 0, 1, 1, 1 }, 10.f, true, true);
+									Line(vpos, target, { 0, 1, 0, 1 }, 10.f, true, true);
+									
+									g_UpdateReusable = Projectile1::CreatePlayerProjectileUpdate();
+									((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->position = vpos;
+									((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->projectileID = p->projectileID();
+									((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->traveltime = p->traveledTime() + travel;
+									((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->velocity = vvel;
+									vars->local_player->SendProjectileUpdate((uintptr_t)g_UpdateReusable);
+
+									auto hitpos = vpos;
+									if (vpos.distance(target) > 1.f)
+										hitpos.MoveTowards(target, hitpos, thick - 1.f);
+									p->transform()->setposition(hitpos);
+									auto bonetrans = ((BasePlayer*)vars->best_target.ent)->get_bone_Transform(48);
+									HitTest* ht = (HitTest*)p->hitTest();
+									ht->DidHit() = true;
+									ht->HitEntity() = vars->best_target.ent;
+									ht->HitTransform() = bonetrans;
+									ht->HitPoint() = bonetrans->InverseTransformPoint(hitpos);
+									ht->HitNormal() = bonetrans->InverseTransformDirection(hitpos);
+									Ray r(p->transform()->position(), hitpos);
+									safe_write(ht + 0x14, r, Ray);
+									_DoHit(p, ht, vpos, HitNormalWorld((uintptr_t)ht));
+									break;
+								}
+							}
+						}
+					}
+				}
+				break;
+			}
+		}
 		if (vars->combat.throughwall)
 		{
 			for (size_t i = 0; i <= 0; i++)
@@ -1517,6 +1604,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				if (!p->hitTest()) break;
 				if (p->penetrationPower() <= .5f) break;
 
+				auto headtrans = ((BasePlayer*)vars->best_target.ent)->get_bone_Transform(48);
+				if (!headtrans) break;
 				Vector3 vel = p->currentVelocity();
 				Vector3 dir = vel.normalize();
 				Vector3 traveledThisUpdate = vel * get_deltaTime();
@@ -1554,9 +1643,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				vars->local_player->SendProjectileUpdate((uintptr_t)ppu);
 				//orig_fn(rcx, rdx, r9, _ppa, arg5);
 
-				auto trans = ((BasePlayer*)vars->best_target.ent)->get_bone_Transform(48);
+				auto trans = vars->best_target.ent->transform();//((BasePlayer*)vars->best_target.ent)->get_bone_Transform(48);
 				if (!trans) break;
-				float dist = p->currentPosition().distance(trans->position());
+				float dist = p->currentPosition().distance(headtrans->position());
 
 				p->traveledDistance(p->traveledDistance() + dist);
 				p->traveledTime(p->traveledTime() + (dist / p->currentVelocity().Length()));
@@ -1564,14 +1653,16 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				auto ht = (HitTest*)p->hitTest();
 
 				p->integrity(1);
-				Sphere(hitInfo->point(), 0.1f, { 1, 1, 1, 1 }, 10.f, false);
-				Sphere(ppu->position, 0.1f, { 0, 0, 1, 1 }, 10.f, false);
-				Sphere(newpos, 0.1f, { 0, 0, 1, 1 }, 10.f, false);
+				Sphere(hitInfo->point(), 0.02f, { 1, 1, 1, 1 }, 10.f, false);
+				Sphere(ppu->position, 0.02f, { 0, 1, 0, 1 }, 10.f, false);
+				Sphere(newpos, 0.02f, { 0, 0, 1, 1 }, 10.f, false);
 
-				ht->set_hit_Transform(trans);
+				auto btrans = hitInfo->transform();
+
+				ht->set_hit_Transform(headtrans);
 				ht->set_hit_entity((BasePlayer*)vars->best_target.ent);
 				ht->set_attack_ray(Ray(hitInfo->point(), dir.Normalized()));
-				auto v = trans->InverseTransformPoint(trans->position());
+				auto v = btrans->InverseTransformPoint(headtrans->position());
 				Sphere(v, 0.1f, { 0, 1, 1, 1 }, 10.f, false);
 				ht->set_hit_point(v);
 				ht->set_hit_normal(Vector3(0, 0, 0));
@@ -1587,8 +1678,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				//ht->DidHit() = true;
 				//ht->HitDistance() = dist;
 				//ht->MaxDistance() = 999.f;
-				_DoHit(p, ht, trans->position(), Vector3(0, 0, 0));
-				
+				_DoHit(p, ht, headtrans->position(), Vector3(0, 0, 0));
+				g_UpdateReusable = 0;
 			}
 		}
 		if (vars->combat.targetbehindwall) {
@@ -1663,6 +1754,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 	float o_capsuleHeightDucked = 0;
 	float o_capsuleCenterDucked = 0;
 	float o_capsuleradius = 0;
+
+	bool wireplaced = false;
 
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
 	{
@@ -1755,17 +1848,17 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				*serverrpc_playerprojectileattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
 			}
 		}
-		if (!serverrpc_playerprojectileupdate) {
-			auto method_serverrpc_playerprojectileupdate = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
-		
-			if (method_serverrpc_playerprojectileupdate) {
-				serverrpc_playerprojectileupdate = **(uintptr_t***)(method_serverrpc_playerprojectileupdate + 0x30);
-		
-				hooks::orig::playerprojectileupdate = *serverrpc_playerprojectileupdate;
-		
-				*serverrpc_playerprojectileupdate = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileupdate);
-			}
-		}
+		//if (!serverrpc_playerprojectileupdate) {
+		//	auto method_serverrpc_playerprojectileupdate = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
+		//
+		//	if (method_serverrpc_playerprojectileupdate) {
+		//		serverrpc_playerprojectileupdate = **(uintptr_t***)(method_serverrpc_playerprojectileupdate + 0x30);
+		//
+		//		hooks::orig::playerprojectileupdate = *serverrpc_playerprojectileupdate;
+		//
+		//		*serverrpc_playerprojectileupdate = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileupdate);
+		//	}
+		//}
 		if (!serverrpc_createbuilding) {
 			auto method_serverrpc_createbuilding = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_CreateBuilding___);
 		
@@ -1964,6 +2057,59 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						planner->rotationoffset(Vector3(v.x, v.y -= 10, v.z));
 						baseplayer->console_echo(string::wformat(_(L"[matrix]: ClientInput - rotate building left (%d, %d, %d)"), (int)v.x, (int)v.y, (int)v.z));
 					}
+				}
+
+				if (vars->misc.wireplay) {
+					if (unity::GetKey(vars->keybinds.wireplay)) {
+						if (!strcmp(held->get_class_name(), _("WireTool"))) {
+							if (!wireplaced) {
+								auto playerpos = vars->best_target.pos;
+
+								//typedef void(*A)(uintptr_t, Vector3);
+								//((A)(mem::game_assembly_base + 0xB136C0))((uintptr_t)held, playerpos);
+
+								playerpos.y += .5f;
+
+								auto pendingline = mem::read<uintptr_t>((uintptr_t)held + 0x248); //private ClientIOLine pendingLine
+
+								if (pendingline) {
+									Vector3 p1 = playerpos + Vector3(1, 1, 0);
+									Vector3 p2 = playerpos + Vector3(0, 0, 0);
+									Vector3 p3 = playerpos + Vector3(0, 2, 0);
+									Vector3 p4 = playerpos + Vector3(0, 0, 0);
+									Vector3 p5 = playerpos + Vector3(-1, 1, 0);
+
+									//auto createlist = [&]() {
+									//	typedef uint64_t(__stdcall* PoolGet)(uint64_t);
+									//	uint64_t update = *reinterpret_cast<uint64_t*>(mem::game_assembly_base + 57069704); //"Method$Facepunch.Pool.GetList<Vector3>"
+									//	if (!update)
+									//		return (System::list<Vector3>*)0;
+									//	uint64_t p = ((PoolGet)(mem::game_assembly_base + poollist_offset))(update);
+									//	if (!p)
+									//		return (System::list<Vector3>*)0;
+									//	return (System::list<Vector3>*)p;
+									//};
+									//
+									//auto lst = createlist();
+									//lst->add(0, p1);
+									//lst->add(1, p2);
+									//lst->add(2, p3);
+									//lst->add(3, p4);
+									//lst->add(4, p5);
+
+									typedef void(*B)(uintptr_t, Vector3);
+									((B)(mem::game_assembly_base + 0x9AB6A0))(pendingline, p1);
+									((B)(mem::game_assembly_base + 0x9AB6A0))(pendingline, p2);
+									((B)(mem::game_assembly_base + 0x9AB6A0))(pendingline, p3);
+									((B)(mem::game_assembly_base + 0x9AB6A0))(pendingline, p4);
+									((B)(mem::game_assembly_base + 0x9AB6A0))(pendingline, p5);
+								}
+								wireplaced = true;
+							}
+						}
+						else wireplaced = false;
+					}
+					else wireplaced = false;
 				}
 
 				if (vars->misc.weaponspam) {

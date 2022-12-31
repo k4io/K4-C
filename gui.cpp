@@ -1290,7 +1290,7 @@ namespace Gui
 			im::SliderFloat(_("Target fov"), &vars->combat.aimbotfov, 1.f, 900.f, _("%.0f"));
 			im::SliderFloat(_("Recoil X"), &vars->combat.recoilx, 0.f, 5.f, _("%.2f"));
 			im::SliderFloat(_("Recoil Y"), &vars->combat.recoily, 0.f, 5.f, _("%.2f"));
-			im::SliderFloat(_("Spread"), &vars->combat.spread, 0.f, .5f, _("%.2f"));
+			im::SliderFloat(_("Spread"), &vars->combat.spread, 0.f, 1.f, _("%.2f"));
 			im::Checkbox(_("Remove shoot restrictions"), &vars->combat.always_shoot);
 			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Allows things like shooting while jumping"));
@@ -1330,7 +1330,7 @@ namespace Gui
 			//im::Hotkey(_("M2"), &vars->keybinds.manipulator2, ImVec2(50, 15));
 			//im::Checkbox(_("Target behind wall"), &vars->combat.shoot_at_fatbullet);
 			//im::Checkbox(_("STW (many invalids)"), &vars->combat.throughwall);
-			//im::Checkbox(_("Pierce"), &vars->combat.pierce);
+			im::Checkbox(_("Pierce"), &vars->combat.pierce);
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
 			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Shoots up to 9 bullets at once"));
@@ -1340,7 +1340,7 @@ namespace Gui
 			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Multiplier for distance to teleport the bullet within desync time"));
 			}
-			//im::Checkbox(_("Best velocity"), &vars->combat.bestvelocity);
+			im::Checkbox(_("Best velocity"), &vars->combat.bestvelocity);
 			im::Checkbox(_("Fast bullets"), &vars->combat.fast_bullet);
 			im::Checkbox(_("Instant eoka"), &vars->combat.instaeoka);
 			//im::Checkbox(_("Fast bow"), &vars->combat.fastbow);
@@ -1374,7 +1374,6 @@ namespace Gui
 			im::SliderFloat(_("Range"), &vars->combat.melee_range, 1.f, 4.f, _("%.2f"), 1.f);
 			im::EndChild();
 		}
-
 	}
 	void visual() {
 		if (im::BeginChild(_("Indicators"), ImVec2(235, 170), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove))
@@ -1684,6 +1683,10 @@ namespace Gui
 			
 			//im::Checkbox(_("Skin changer"), &vars->misc.skinchanger);
 			if(vars->misc.skinchanger) { SkinChanger(); }
+
+			im::Checkbox(_("Wireplay"), &vars->misc.wireplay);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			im::Hotkey(_("P"), &vars->keybinds.wireplay, ImVec2(50, 14));
 
 			im::Checkbox(_("Tooltips"), &vars->misc.tooltips);
 			im::Checkbox(_("Player list"), &vars->misc.playerlist);
