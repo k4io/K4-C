@@ -1484,7 +1484,7 @@ namespace gui {
 					pos.y += 30;
 					//checkbox(event_type, menu_pos, pos, mouse_pos, _(L""), &vars->combat.random_hitbox, weapon_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Rapid fire"), &vars->combat.rapidfire, weapon_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fast bullet"), &vars->combat.fast_bullet, weapon_tab);
+					//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fast bullet"), &vars->combat.fast_bullet, weapon_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Bullet tp"), &vars->combat.bullet_tp, weapon_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Autoshoot"), &vars->combat.autoshoot, weapon_tab, true, &vars->keybinds.autoshoot);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Manipulator"), &vars->combat.manipulator, weapon_tab, true, &vars->keybinds.manipulator);

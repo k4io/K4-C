@@ -282,12 +282,15 @@ class TerrainHeightMap;
 class TerrainCollision;
 class TerrainMeta;
 class InputState;
+class ViewModel;
 class SkinnedMultiMesh;
 class Collider;
 class CapsuleCollider;
 class PlayerVoiceRecorder;
 class BaseMovement;
 class RaycastHit;
+class BaseMountable;
+class BaseVehicle;
 class TimeWarning;
 class col;
 
@@ -312,6 +315,16 @@ typedef struct Str
 //static auto ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
 
 //static auto setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
+static auto viewmodelplay = reinterpret_cast<void(*)(uintptr_t, System::string, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ViewModel"), _("Play"), 2, _(""), _(""))));
+
+static auto set_ambientintensity = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("RenderSettings"), _("set_ambientIntensity"), 1, _(""), _("UnityEngine"))));
+
+static auto set_ambientlight = reinterpret_cast<void(*)(uintptr_t, col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Sky"), _("set_AmbientColor"), 1, _(""), _(""))));
+
+static auto getmountedvehicle = reinterpret_cast<BaseVehicle * (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMountedVehicle"), 0, _(""), _(""))));
+
+static auto getmounted = reinterpret_cast<BaseMountable * (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMounted"), 0, _(""), _(""))));
+
 static auto raycasthit_get_transform = reinterpret_cast<Transform * (*)(RaycastHit*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("RaycastHit"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 
 static auto bmdoattack = reinterpret_cast<void(*)(BaseMelee*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("DoAttack"), 0, _(""), _(""))));
@@ -411,6 +424,8 @@ static auto thmgetheight = reinterpret_cast<float(*)(TerrainHeightMap*, Vector3)
 static auto transgetpos = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
 
 static auto transgetrot = reinterpret_cast<Vector4(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
+
+static auto transsetrot = reinterpret_cast<void(*)(Transform*, Vector4)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_rotation"), 0, _(""), _("UnityEngine"))));
 
 static auto transsetpos = reinterpret_cast<void(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 0, _(""), _("UnityEngine"))));
 
@@ -617,6 +632,12 @@ float current_time;
 void init_bp() {
 	//setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
 	//ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
+	viewmodelplay = reinterpret_cast<void(*)(uintptr_t, System::string, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ViewModel"), _("Play"), 2, _(""), _(""))));
+	set_ambientintensity = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("RenderSettings"), _("set_ambientIntensity"), 1, _(""), _("UnityEngine"))));
+	set_ambientlight = reinterpret_cast<void(*)(uintptr_t, col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Sky"), _("set_AmbientColor"), 1, _(""), _(""))));
+	transsetrot = reinterpret_cast<void(*)(Transform*, Vector4)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_rotation"), 0, _(""), _("UnityEngine"))));
+	getmountedvehicle = reinterpret_cast<BaseVehicle * (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMountedVehicle"), 0, _(""), _(""))));
+	getmounted = reinterpret_cast<BaseMountable * (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMounted"), 0, _(""), _(""))));
 	raycasthit_get_transform = reinterpret_cast<Transform * (*)(RaycastHit*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("RaycastHit"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 	bmdoattack = reinterpret_cast<void(*)(BaseMelee*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("DoAttack"), 0, _(""), _(""))));
 	dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
@@ -849,8 +870,6 @@ void init_bp() {
 #pragma endregion
 }
 
-
-
 #define COMPONENT(space, type) type* { \
 	NP(type) \
 	static auto ret = ((Component*)this)->GetComponent<type*>(unity::GetType(_(space), _(#type))); \
@@ -999,6 +1018,13 @@ public:
 			if (!(uintptr_t)this)
 				return {};
 		return transgetrot(this);
+	}
+
+	void set_rotation(Vector4 v) {
+		pent
+			if (!(uintptr_t)this)
+				return;
+		return transsetrot(this, v);
 	}
 
 	Vector3 InverseTransformPoint(Vector3 point) {
@@ -1217,7 +1243,8 @@ public:
 };
 
 class HeldEntity : public BaseEntity {
-
+public:
+	FIELD(O::HeldEntity::viewModel, viewModel, ViewModel*);
 };
 
 class BaseHelicopter_Weakspot {
@@ -2224,6 +2251,18 @@ public:
 
 };
 
+namespace Convar {
+	class Admin {
+	public:
+		static void Set_admintime(float f) {
+			pent
+				auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oConvarAdmin);
+			auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+			mem::write<float>(fieldz + 0x0, f);
+		}
+	};
+}
+
 float get_2d_dist(const Vector2& Src, const Vector3& Dst) {
 	pent
 		return Vector3::my_sqrt(powFFFFFFFFFFFFFFFFFFFFFF(Src.x - Dst.x) + powFFFFFFFFFFFFFFFFFFFFFF(Src.y - Dst.y));
@@ -2289,8 +2328,15 @@ public:
 	}
 };
 
+class InputMessage {
+public:
+	FIELD(0x24, mouseDelta, Vector3);
+};
+
 class InputState {
 public:
+	FIELD(0x10, current, InputMessage*)
+
 	void set_aim_angles(Vector3 aim_angle) {
 		pent
 			auto current = mem::read<uintptr_t>((uintptr_t)this + 0x10);
@@ -2479,6 +2525,24 @@ public:
 	}
 };
 
+class BaseVehicle : public BaseMountable {
+public:
+
+};
+
+class BaseHelicopterVehicle : public BaseVehicle {
+public:
+	FIELD(0x49C, currentThrottle, float);
+};
+
+class MiniCopter : public BaseHelicopterVehicle {
+public:
+	FIELD(0x5D4, cachedPitch, float);
+	FIELD(0x5D8, cachedYaw, float);
+	FIELD(0x5DC, cachedRoll, float);
+	FIELD(0x5D0, rotorSpeed, float);
+};
+
 class BasePlayer : public BaseCombatEntity {
 public:
 	FIELD(O::BasePlayer::playerModel, playerModel, PlayerModel*);
@@ -2517,7 +2581,13 @@ public:
 	BaseMountable* GetMounted() {
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return nullptr;
-		return mem::read<BaseMountable*>((uintptr_t)this + 0x608);
+		return getmounted(this);
+	}
+
+	BaseVehicle* GetMountedVehicle() {
+		pent
+			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return nullptr;
+		return getmountedvehicle(this);
 	}
 
 	void HeldEntityInput() {
@@ -3892,31 +3962,67 @@ public:
 		pent
 			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
 		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-		return mem::read<ConButton*>(fieldz + 0x50);
+		return mem::read<ConButton*>(fieldz + 0x50 + 0x10);
+	}
+	static bool SetForward(bool b) {
+		pent
+			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
+		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+		auto p = mem::read<uintptr_t>(fieldz + 0x8);
+		typedef void(*A)(uintptr_t, bool);
+		((A)(mem::game_assembly_base + 0x5BC4A0))(p, b);
+		return 1;
+	}
+	static bool SetRight(bool b) {
+		pent
+			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
+		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+		auto p = mem::read<uintptr_t>(fieldz + 0x20);
+		typedef void(*A)(uintptr_t, bool);
+		((A)(mem::game_assembly_base + 0x5BC4A0))(p, b);
+		return 1;
+	}
+	static bool SetLeft(bool b) {
+		pent
+			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
+		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+		auto p = mem::read<uintptr_t>(fieldz + 0x18);
+		typedef void(*A)(uintptr_t, bool);
+		((A)(mem::game_assembly_base + 0x5BC4A0))(p, b);
+		return 1;
+	}
+	static bool SetBackwards(bool b) {
+		pent
+			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
+		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+		auto p = mem::read<uintptr_t>(fieldz + 0x10);
+		typedef void(*A)(uintptr_t, bool);
+		((A)(mem::game_assembly_base + 0x5BC4A0))(p, b);
+		return 1;
 	}
 	static ConButton* Gestures() {
 		pent
 			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
 		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-		return mem::read<ConButton*>(fieldz + 0x188);
+		return mem::read<ConButton*>(fieldz + 0x188 + 0x10);
 	}
 	static ConButton* Map() {
 		pent
 			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
 		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-		return mem::read<ConButton*>(fieldz + 0xF0);
+		return mem::read<ConButton*>(fieldz + 0xF0 + 0x10);
 	}
 	static ConButton* Hoverloot() {
 		pent
 			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
 		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-		return mem::read<ConButton*>(fieldz + 0x78);
+		return mem::read<ConButton*>(fieldz + 0x78 + 0x10);
 	}
 	static ConButton* Inventory() {
 		pent
 			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
 		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-		return mem::read<ConButton*>(fieldz + 0x48);
+		return mem::read<ConButton*>(fieldz + 0x48 + 0x10);
 	}
 };
 
@@ -3978,7 +4084,15 @@ public:
 	member(System::Array<Material*>*, materials, 0x50);
 };
 
-
+class RenderSettings {
+public:
+	static void set_ambientIntensity(float f) {
+		set_ambientintensity(f);
+	}
+	static void set_ambientLight(uintptr_t todsky, col c) {
+		set_ambientlight(todsky, c);
+	}
+};
 
 void attack_melee(aim_target target, BaseProjectile* melee, BasePlayer* lp, bool is_player = false) {
 	pent
@@ -4291,7 +4405,7 @@ Vector3 GetEndPointForTrajectory(float speed, float angle, float drag, float gra
 		(float)(cosf(90.f) * cosf(pitchRad))
 	};
 
-	Vector3 position = Vector3();
+	Vector3 position = Vector3::Zero();
 	Vector3 lastposition = position;
 	Vector3 velCheck = dir * speed;
 

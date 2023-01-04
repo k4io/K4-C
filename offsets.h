@@ -32,6 +32,7 @@ namespace offsets {
 #define oConsoleSystem_GetAll 39100016 //"ConsoleSystem.Index$$get_All"
 #define oConvar 56967448
 #define oConvarClient 56959376
+#define oConvarAdmin 56954176
 #define oTerrainMeta_TypeInfo 56967824
 #define oPlayerEyes_TypeInfo 56849160
 #define oPlayerBelt_TypeInfo 56952008

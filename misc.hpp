@@ -1526,6 +1526,7 @@ namespace misc
 		float drag,
 		float gravityModifier,
 		Vector3& actualposition,
+		bool vischeck = false,
 		bool skip_draw = false,
 		int simulationsmax = 100,
 		float o_speed = 0.f,
@@ -1658,6 +1659,9 @@ namespace misc
 						velocity -= velocity * drag * num;
 						travel_t += num;
 
+						if (vischeck)
+							if (!unity::is_visible(origin, pos, 0)) break;
+
 						if (misc::LineCircleIntersection(actual, 0.1f, origin, pos, offset))
 						{
 
@@ -1718,7 +1722,39 @@ namespace misc
 		Vector3 actualposition,
 		bool skip_draw = false,
 		int simulations = 100) {
+		auto taimdir = _aimdir;
+		auto taimbot_vel = aimbot_velocity;
+		for (float i = 0.51f; i < 1.51f; i += 0.1f) {
+			auto vel = original_vel * i;
+			aimbot_velocity = taimbot_vel;
+			_aimdir = taimdir;
+			travel_t = 0;
+			if (get_prediction(
+				target,
+				rpc_position,
+				target_pos,
+				vel,
+				aimbot_velocity,
+				_aimdir,
+				travel_t,
+				partialTime,
+				drag,
+				gravityModifier,
+				actualposition,
+				true,
+				false,
+				100,
+				0.f,
+				Vector3::Zero(),
+				-5.f, 0.5f)) {
+				// :^)
+				return;
+			}
+		}
 
+		return;
+
+		//old patched poo poo :()
 		GenerateBuilletDropPredictionData(drag, gravityModifier);
 
 		float bulletDropMaxVelocity = 1.5f;
@@ -1769,7 +1805,7 @@ namespace misc
 				if (!unity::is_visible(lastpos, pos, (uintptr_t)vars->local_player)) 
 					break;
 				if (LineCircleIntersection(target_pos, 0.1f, lastpos, pos, offset)
-					|| pos.distance(target_pos) < 0.2f) {
+					|| pos.distance(target_pos) < vars->combat.thickness) {
 					aimbot_velocity = ovel;
 
 					float spread = vars->combat.spread;

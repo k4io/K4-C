@@ -361,7 +361,7 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 				else {
 					if (ply->modelState()->has_flag(ModelState_Flag::Crawling) || ply->modelState()->has_flag(ModelState_Flag::Sleeping)) {
 						cbounds.center = ply->model()->boneTransforms()->get((int)Bone_List::pelvis)->position();
-						cbounds.extents = Vector3(0.9f, 0.2f, 0.4f);
+						cbounds.extents = Vector3(0.4f, 0.2f, 0.4f);
 					}
 					else {
 						cbounds.center = mp + Vector3(0.0f, 0.8f, 0.0f);

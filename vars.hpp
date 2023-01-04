@@ -125,6 +125,12 @@ struct _item {
 	int count;
 };
 
+enum FlyMode {
+	None = 0,
+	Hover = 1,
+	ToTarget = 2
+};
+
 class BasePlayer;
 class BaseCombatEntity;
 
@@ -254,7 +260,7 @@ struct Vars
 		bool HitScan = false;
 		bool norecoil = false;
 		bool nospread = false;
-		bool fast_bullet = false;
+		float fast_bullet = 1.f;
 		bool bestvelocity = false;
 		bool instaeoka = false;
 		bool pierce = false;
@@ -287,7 +293,11 @@ struct Vars
 		bool crosshair1 = false;
 		bool crosshair2 = false;
 		bool crosshair3 = false;
+		bool customtime = false;
 		int text_background_box = 0;
+		float ambient = 1.f;
+		float ambcol[4] = { 1, 1, 1, 1 };
+		float time = 12.f;
 		float day = 1.f;
 		float night = 1.f;
 		float dist_on_items = 100.f;
@@ -403,6 +413,14 @@ struct Vars
 
 	struct misc {
 		bool tooltips = true;
+		bool automini = false;
+		struct minicfg {
+			float speed = 1.f;
+			Vector3 target = Vector3::Zero();
+			int mode = 0;
+			float maxheight = 150;
+			bool visualize = false;
+		}; minicfg minicfg;
 		bool antideathbarrier = false;
 		bool weaponspam = false;
 		bool auto_upgrade = false;

@@ -309,6 +309,35 @@ namespace Gui
 		im::End();
 	}
 
+	void AutoMini() {
+		im::SetNextWindowSize({ 255, 128 });
+		im::Begin(_("##AutoMiniConfig"), 0, ImGuiWindowFlags_NoCollapse);
+		{
+			im::Text(_("Auto minicopter"));
+			im::Separator();
+			/*
+			float speed;
+			Vector3 target;
+			FlyMode mode;
+			float maxheight;
+			bool visualize;*/
+			im::SliderFloat(_("Max speed"), &vars->misc.minicfg.speed, 0.f, 1.f, _("%.2f"));
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Percent of the maximum speed the mini will fly."));
+			}
+			im::Combo(_("Fly mode"), &vars->misc.minicfg.mode, _("None\00Hover\00ToTarget"));
+			im::SliderFloat(_("Fly height"), &vars->misc.minicfg.maxheight, 0.f, 200.f, _("%.0f"));
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Height that the mini will fly or hover."));
+			}
+			im::Checkbox(_("Visualize"), &vars->misc.minicfg.visualize);
+			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+				im::SetTooltip(_("Visualization of the path and/or target."));
+			}
+		}
+		im::End();
+	}
+
 	struct it {
 		wchar_t* name;
 		int count;
@@ -1324,12 +1353,12 @@ namespace Gui
 			}
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(50, 15));
-			//im::Checkbox(_("Manipulator2"), &vars->combat.manipulator2);
-			//
-			//im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
-			//im::Hotkey(_("M2"), &vars->keybinds.manipulator2, ImVec2(50, 15));
+			im::Checkbox(_("Manipulator2"), &vars->combat.manipulator2);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			im::Hotkey(_("M2"), &vars->keybinds.manipulator2, ImVec2(50, 15));
 			//im::Checkbox(_("Target behind wall"), &vars->combat.shoot_at_fatbullet);
-			//im::Checkbox(_("STW (many invalids)"), &vars->combat.throughwall);
+			im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
+			im::Checkbox(_("STW (many invalids)"), &vars->combat.throughwall);
 			im::Checkbox(_("Pierce"), &vars->combat.pierce);
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
 			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
@@ -1341,12 +1370,12 @@ namespace Gui
 				im::SetTooltip(_("Multiplier for distance to teleport the bullet within desync time"));
 			}
 			im::Checkbox(_("Best velocity"), &vars->combat.bestvelocity);
-			im::Checkbox(_("Fast bullets"), &vars->combat.fast_bullet);
+			im::SliderFloat(_("Bullet velocity"), &vars->combat.fast_bullet, .5f, 1.5f, _("%.1f"));
 			im::Checkbox(_("Instant eoka"), &vars->combat.instaeoka);
 			//im::Checkbox(_("Fast bow"), &vars->combat.fastbow);
 			im::Checkbox(_("Heli-weakspot"), &vars->combat.weakspots);
 			im::Checkbox(_("Thick bullets"), &vars->combat.thick_bullet);
-			im::SliderFloat(_("Thickness"), &vars->combat.thickness, 0.1f, 2.2f, _("%.2f"), 1.f);
+			im::SliderFloat(_("Thickness"), &vars->combat.thickness, 0.1f, 2.f, _("%.2f"), 1.f);
 			im::Checkbox(_("Autoshoot"), &vars->combat.autoshoot);
 			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Will automatically shoot players, works with manipulator"));
@@ -1467,7 +1496,11 @@ namespace Gui
 			im::SliderFloat(_("Stars"), &vars->visual.staramount, 1.f, 1000.f, _("%.0f"));
 			im::SliderFloat(_("Brightness"), &vars->visual.day, 0.0f, 10.0f, _("%.0f"));
 			im::SliderFloat(_("Nightness"), &vars->visual.night, 0.0f, 10.0f, _("%.0f"));
+			//im::ColorEdit4(_("Ambient color"), vars->visual.ambcol, ImGuiColorEditFlags_NoInputs);
+			//im::SliderFloat(_("Ambient intensity"), &vars->visual.ambient, 0.0f, 5.f, _("%.1f"));
 			im::SliderFloat(_("Rayleigh"), &vars->visual.rayleigh, 0.0f, 30.0f, _("%.1f"));
+			im::Checkbox(_("Custom time"), &vars->visual.customtime);
+			im::SliderFloat(_("Time"), &vars->visual.time, 0.0f, 24.0f, _("%.0f"));
 			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Changes color of skybox"));
 			}
@@ -1689,6 +1722,8 @@ namespace Gui
 			im::Hotkey(_("P"), &vars->keybinds.wireplay, ImVec2(50, 14));
 
 			im::Checkbox(_("Tooltips"), &vars->misc.tooltips);
+			im::Checkbox(_("Auto-minicopter"), &vars->misc.automini);
+			if (vars->misc.automini) { AutoMini(); }
 			im::Checkbox(_("Player list"), &vars->misc.playerlist);
 			im::Checkbox(_("Snake"), &vars->misc.snake);
 			im::EndChild();

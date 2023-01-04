@@ -213,46 +213,54 @@ namespace hooks {
 
 				if (!m_skydome)
 				{
-					if (tag == 20011) {
-						uint64_t p = mem::read<uint64_t>(current_tagged_obj + 0x30);
-						uint64_t p1 = mem::read<uint64_t>(p + 0x18);
-						uint64_t tod_sky = mem::read<uint64_t>(p1 + 0x28);
+					m_skydome = mem::read<uintptr_t>(current_tagged_obj + 0x18);
+				}
 
-						const auto TOD_Day = *reinterpret_cast<uintptr_t*>(tod_sky + 0x50);
-						const auto TOD_Night = *reinterpret_cast<uintptr_t*>(tod_sky + 0x58);
-						const auto TOD_Stars = *reinterpret_cast<uintptr_t*>(tod_sky + 0x70);
+				if (tag == 20011) {
+					uint64_t p = mem::read<uint64_t>(current_tagged_obj + 0x30);
+					uint64_t p1 = mem::read<uint64_t>(p + 0x18);
+					uint64_t tod_sky = mem::read<uint64_t>(p1 + 0x28);
 
-						const auto tod_component = *reinterpret_cast<uintptr_t*>(tod_sky + 0xA8);
+					const auto TOD_Day = *reinterpret_cast<uintptr_t*>(tod_sky + 0x50);
+					const auto TOD_Night = *reinterpret_cast<uintptr_t*>(tod_sky + 0x58);
+					const auto TOD_Stars = *reinterpret_cast<uintptr_t*>(tod_sky + 0x70);
 
-						Vector4 sun_color = Vector4(vars->colors.sun[0], 
-							vars->colors.sun[1], 
-							vars->colors.sun[2], 
-							vars->colors.sun[3]);
-						Vector4 moon_color = Vector4(vars->colors.moon[0], 
-							vars->colors.moon[1], 
-							vars->colors.moon[2], 
-							vars->colors.moon[3]);
+					const auto tod_component = *reinterpret_cast<uintptr_t*>(tod_sky + 0xA8);
 
-						//*(Vector4**)(mem::read<uintptr_t>(TOD_Day + 0x10) + 0x10) = &sun_color;
-						//*(Vector4**)(mem::read<uintptr_t>(TOD_Day + 0x18) + 0x10) = &sun_color;
-						//*(Vector4**)(mem::read<uintptr_t>(TOD_Day + 0x20) + 0x10) = &sun_color;
-						//*(Vector4**)(mem::read<uintptr_t>(TOD_Day + 0x28) + 0x10) = &sun_color;
+					Vector4 sun_color = Vector4(vars->colors.sun[0],
+						vars->colors.sun[1],
+						vars->colors.sun[2],
+						vars->colors.sun[3]);
+					Vector4 moon_color = Vector4(vars->colors.moon[0],
+						vars->colors.moon[1],
+						vars->colors.moon[2],
+						vars->colors.moon[3]);
 
-						//*(Vector4**)(mem::read<uintptr_t>(TOD_Night + 0x10) + 0x10) = &moon_color;
-						//*(Vector4**)(mem::read<uintptr_t>(TOD_Night + 0x18) + 0x10) = &moon_color;
-						//*(Vector4**)(mem::read<uintptr_t>(TOD_Night + 0x20) + 0x10) = &moon_color;
-						//*(Vector4**)(mem::read<uintptr_t>(TOD_Night + 0x28) + 0x10) = &moon_color;
+					//*(Vector4**)(mem::read<uintptr_t>(TOD_Day + 0x10) + 0x10) = &sun_color;
+					//*(Vector4**)(mem::read<uintptr_t>(TOD_Day + 0x18) + 0x10) = &sun_color;
+					//*(Vector4**)(mem::read<uintptr_t>(TOD_Day + 0x20) + 0x10) = &sun_color;
+					//*(Vector4**)(mem::read<uintptr_t>(TOD_Day + 0x28) + 0x10) = &sun_color;
 
-						*(float*)(TOD_Night + 0x50) = vars->visual.night;
-						*(float*)(TOD_Night + 0x54) = vars->visual.night;
-						*(float*)(TOD_Day + 0x50) = vars->visual.day;
-						*(float*)(TOD_Day + 0x54) = vars->visual.day;
-						*(float*)(TOD_Stars + 0x14) = vars->visual.staramount;
+					//*(Vector4**)(mem::read<uintptr_t>(TOD_Night + 0x10) + 0x10) = &moon_color;
+					//*(Vector4**)(mem::read<uintptr_t>(TOD_Night + 0x18) + 0x10) = &moon_color;
+					//*(Vector4**)(mem::read<uintptr_t>(TOD_Night + 0x20) + 0x10) = &moon_color;
+					//*(Vector4**)(mem::read<uintptr_t>(TOD_Night + 0x28) + 0x10) = &moon_color;
+
+					* (float*)(TOD_Night + 0x50) = vars->visual.night;
+					*(float*)(TOD_Night + 0x54) = vars->visual.night;
+					*(float*)(TOD_Day + 0x50) = vars->visual.day;
+					*(float*)(TOD_Day + 0x54) = vars->visual.day;
+					*(float*)(TOD_Stars + 0x14) = vars->visual.staramount;
 
 
+					RenderSettings::set_ambientLight(tod_sky,
+						{
+							vars->visual.ambcol[0],
+							vars->visual.ambcol[1],
+							vars->visual.ambcol[2],
+							vars->visual.ambcol[3]
+						});
 
-						m_skydome = mem::read<uintptr_t>(current_tagged_obj + 0x18);
-					}
 				}
 				last_object = current_tagged_obj;
 				current_tagged_base = mem::read<uintptr_t>(current_tagged_base + 0x8);
@@ -510,7 +518,7 @@ namespace hooks {
 						}
 					}
 				}
-				if (target.ent && (target.visible || manipulated || misc::autoshot) && !target.teammate) {
+				if (target.ent && vars->combat.vischeck ? (target.visible || manipulated || misc::autoshot) : true && !target.teammate) {
 					*reinterpret_cast<Vector3*>(projectile + 0x24) = aimbot_velocity; //startvel
 					*reinterpret_cast<Vector3*>(projectile + 0x18) = rpc_position; //startpos
 					//Sphere(target_pos, 0.05f, { r, g, b, 1 }, 5.f, 100.f);
@@ -571,7 +579,7 @@ namespace hooks {
 					if (vars->visual.visthick)
 						projectile->transform()->SetLocalScale(p->transform()->GetLocalScale() * vars->visual.visthickness);
 
-					p->integrity(1.f);
+					//p->integrity(1.f);
 					//float t = p->traveledTime();
 
 					//create and SEND FAKE copy of projectile so game only updates original
@@ -598,36 +606,42 @@ namespace hooks {
 					p->previousPosition(rpc_position);
 					p->sentPosition(rpc_position);
 					p->prevSentVelocity(rpc_position); //?
-					//p->launchTime(get_fixedTime());
+					p->launchTime(unity::get_realtimesincestartup());
 					p->traveledTime(0);
-					////p->projectileID(fp++);
-					//if (vars->combat.manipulator2
-					//	&& (unity::GetKey(vars->keybinds.manipulator)
-					//		&& settings::RealGangstaShit != Vector3(0, 0, 0)))
-					//{
-					//	p->currentVelocity(aimbot_velocity);
-					//	p->initialVelocity(aimbot_velocity);
-					//	p->previousVelocity(aimbot_velocity);
-					//}
-					//
-					//if (vars->combat.targetbehindwall)
-					//{
-					//	((Projectile1*)p)->Launch1();
-					//}
+					if (vars->combat.manipulator2
+						&& (unity::GetKey(vars->keybinds.manipulator)
+							&& settings::RealGangstaShit != Vector3(0, 0, 0)))
+					{
+						p->currentVelocity(aimbot_velocity);
+						p->initialVelocity(aimbot_velocity);
+						p->previousVelocity(aimbot_velocity);
+					}
+
+					if (vars->combat.targetbehindwall)
+					{
+						//p->projectileID(p->projectileID() - 1);
+						reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(hooks::orig::serverrpc_projectileshoot)(rcx, rdx, r9, projectileShoot, arg5);
+
+
+						typedef void(*cclear)(uintptr_t);
+						((cclear)(mem::game_assembly_base + 15604800))((uintptr_t)baseprojectile + 0x398); //"System.Collections.Generic.List<Projectile>$$Clear",
+
+						misc::fixed_time_last_shot = get_fixedTime();
+						misc::just_shot = true;
+						misc::did_reload = false;
+						if (misc::autoshot)
+							misc::autoshot = false;
+						return;
+					}
 				}
-			}
-			if (vars->combat.targetbehindwall)
-			{
-				typedef void(*cclear)(uintptr_t);
-				((cclear)(mem::game_assembly_base + 15440112))((uintptr_t)baseprojectile + 0x398); //"System.Collections.Generic.List<Projectile>$$Clear",
 			}
 
 			if (misc::autoshot)
 				misc::autoshot = false;
 		} while (0);
+		reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(hooks::orig::serverrpc_projectileshoot)(rcx, rdx, r9, projectileShoot, arg5);
 
 		vars->local_player->console_echo(string::wformat(_(L"[matrix]: ProjectileShoot (prediction) simulated %i times before hit!"), simulations));
-		reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(hooks::orig::serverrpc_projectileshoot)(rcx, rdx, r9, projectileShoot, arg5);
 		//pppid++;
 		//calls base.serverrpc<projectileshoot>("clproject", x) ^^
 		//loops through created projectiles and launches with
@@ -1480,6 +1494,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		//orig::baseprojectile_launchprojectile((uintptr_t)pr);
 		if (misc::manual || misc::autoshot) {
 			held->remove_ammo();
+			auto viewmodel = get_activemodel();
+			viewmodelplay((uintptr_t)held->viewModel(), _(L"attack"), 0);
+
 			misc::manual = false;
 			misc::autoshot = false;
 		}
@@ -1540,9 +1557,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				auto target = vars->best_target.pos;
 				Vector3 vel = p->currentVelocity();
 				Vector3 dir = vel.normalize();
-				Vector3 traveledThisUpdate = vel * get_deltaTime();
+				Vector3 traveledThisUpdate = vel * (get_deltaTime() * 2.f);
 				Vector3 newpos = pos + traveledThisUpdate;
-				Line(pos, newpos, { 0, 1, 0, 1 }, 10.f, true, true);
+				Line(pos, newpos, { r, g, b, 1 }, 10.f, true, true);
 				float offset = 0.f;
 				float thick = vars->combat.thickness;
 
@@ -1562,7 +1579,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								vvel.y -= 9.81f * p->gravityModifier() * step;
 								vvel -= vvel * p->drag() * step;
 								if (vpos.distance(target) < thick) {
-									p->transform()->setposition(vpos);
+									//p->transform()->setposition(vpos);
+									Sphere(vpos, .5f, { r, g, b, 1 }, 10.f, false);
 									Line(pos, vpos, { 0, 1, 1, 1 }, 10.f, true, true);
 									Line(vpos, target, { 0, 1, 0, 1 }, 10.f, true, true);
 									
@@ -1878,6 +1896,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		if (baseplayer) {
 			baseplayer->modelState()->remove_flag(ModelState_Flag::Flying);
 
+			auto mountable = baseplayer->GetMounted();
 			auto tick_time = baseplayer->lastSentTickTime();
 			vars->desyncTime = (unity::get_realtimesincestartup() - tick_time) - 0.03125 * 3;
 			auto fixed_time = get_fixedTime();
@@ -1896,13 +1915,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			float timeSinceLastTickClamped = max(0.f, min(_timeSinceLastTick, 1.f));
 			float mm_eye = 0.1f + (timeSinceLastTickClamped + 2.f / 60.f) * 1.5f * maxVelocity;
 
-
 			//desync on key
 			if (unity::GetKey(vars->keybinds.desync_ok)
 				|| ((vars->combat.manipulator2 || vars->combat.manipulator)
 					&& (unity::GetKey(vars->keybinds.manipulator)
 						|| misc::manipulate_vis)))
-				baseplayer->clientTickInterval() = 1.0f;
+				baseplayer->clientTickInterval() = .99f;
 			else if (!is_lagging && !is_speeding)
 				baseplayer->clientTickInterval() = 0.05f;
 
@@ -2010,10 +2028,128 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				}
 			}
 
-			if (vars->combat.always_shoot) {
-				auto mountable = baseplayer->mounted();
-				if (mountable)
+			if (mountable) {
+				if (vars->combat.always_shoot) {
 					mountable->canwielditem() = true;
+				}
+			}
+			if (vars->misc.automini) {
+				auto mountedvehicle = baseplayer->GetMountedVehicle();
+				if(mountedvehicle) {
+					auto maxspeed = vars->misc.minicfg.speed;
+					auto target = vars->misc.minicfg.target;
+					auto mode = vars->misc.minicfg.mode;
+					auto height = vars->misc.minicfg.maxheight;
+
+					if (!strcmp(mountedvehicle->get_class_name(), _("MiniCopter"))) {
+
+						//if speed == 0 || max, disregard max speed
+						//if mode == hover, hover in current position
+						//if mode == flyto, fly to target at height & speed, hover above target when within 10m of X,Z
+
+						auto mini = (MiniCopter*)mountedvehicle;
+
+						printf("cachedPitch: %.2f\n", mini->cachedPitch());
+						printf("cachedYaw: %.2f\n", mini->cachedYaw());
+						printf("cachedRoll: %.2f\n", mini->cachedRoll());
+
+						printf("get_rotation.x: %.2f\n", baseplayer->transform()->get_rotation().x);
+						printf("get_rotation.y: %.2f\n", baseplayer->transform()->get_rotation().y);
+						printf("get_rotation.z: %.2f\n", baseplayer->transform()->get_rotation().z);
+						printf("get_rotation.w: %.2f\n", baseplayer->transform()->get_rotation().w);
+
+						printf("rotorSpeed: %.2f\n", mini->rotorSpeed());
+						printf("currentThrottle: %.2f\n", mini->currentThrottle());
+
+						printf("targetmovement: (%.2f, %.2f, %.2f)\n",
+							baseplayer->movement()->get_TargetMovement().x,
+							baseplayer->movement()->get_TargetMovement().y,
+							baseplayer->movement()->get_TargetMovement().z
+						);
+
+						printf("mouseDelta: (%.2f, %.2f, %.2f)\n",
+							state->current()->mouseDelta().x,
+							state->current()->mouseDelta().y,
+							state->current()->mouseDelta().z
+							);
+
+						auto cmd = state->current()->mouseDelta();
+
+						auto levelout = [&]() {
+							auto current_pitch = baseplayer->transform()->get_rotation().z;
+							auto current_yaw = baseplayer->transform()->get_rotation().y;
+							auto current_roll = baseplayer->transform()->get_rotation().x;
+
+							if (current_yaw > 0) {
+								Buttons::SetLeft(false);
+								Buttons::SetRight(true);
+							} else if (current_yaw > 0) {
+								Buttons::SetLeft(true);
+								Buttons::SetRight(false);
+							}
+
+							if (current_pitch > 0) //tilt backwards
+								state->current()->mouseDelta() = Vector3(cmd.x, cmd.y - .3f, cmd.z);
+							else if (current_pitch < 0) //tilt forwards
+								state->current()->mouseDelta() = Vector3(cmd.x, cmd.y + .3f, cmd.z);
+							else state->current()->mouseDelta() = Vector3(0, 0, 0);
+							
+							if (current_roll > 0) //tilt right
+								state->current()->mouseDelta() = Vector3(cmd.x - .3f, cmd.y, cmd.z);
+							else if (current_roll < 0) //tilt left
+								state->current()->mouseDelta() = Vector3(cmd.x + .3f, cmd.y, cmd.z);
+							else state->current()->mouseDelta() = Vector3(0, 0, 0);
+						};
+
+						switch (mode) {
+						case (int)FlyMode::Hover:
+						{
+							if (!mini->transform()) break;
+							auto mpos = mini->transform()->position();
+							auto targetpos = Vector3(mpos.x, vars->misc.minicfg.maxheight, mpos.z);
+
+							if (mpos.y < targetpos.y) {
+								Buttons::SetBackwards(false);
+								Buttons::SetForward(true);
+							}
+							else {
+								Buttons::SetForward(false);
+								Buttons::SetBackwards(true);
+							}
+
+							if (mpos.distance(targetpos) < 1.f) {
+								Buttons::SetBackwards(false);
+								Buttons::SetForward(false);
+							}
+
+							if (vars->misc.minicfg.visualize) {
+								Line(mpos, targetpos, { r * 100, g * 100, b * 100, 255 }, 0.01f, true, true);
+								Capsule(mpos, mini->transform()->get_rotation(), 1.f, 1.f, { r, g, b, 255 }, 0.01f, true);
+							}
+
+							levelout();
+							break;
+						}
+						case (int)FlyMode::ToTarget:
+						{
+							//record position
+							//attempt to fly within 10m of position X,Z
+
+							break;
+						}
+						case (int)FlyMode::None:
+						{
+							//reset recorded position
+							Buttons::SetForward(0);
+							Buttons::SetBackwards(0);
+							Buttons::SetRight(0);
+							Buttons::SetLeft(0);
+							break;
+						}
+						}
+
+					}
+				}
 			}
 
 			if (unity::GetKey(0x37))//(GetAsyncKeyState(0x37))
@@ -2041,6 +2177,11 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 			typedef void(*_set_rayleigh)(float);
 			((_set_rayleigh)(mem::game_assembly_base + oSetRayleigh))(vars->visual.rayleigh);
+
+			if (vars->visual.customtime)
+				Convar::Admin::Set_admintime(vars->visual.time);
+
+			//RenderSettings::set_ambientIntensity(vars->visual.ambient);
 
 			if (held) {
 				if (!strcmp(held->get_class_name(), _("Planner"))) {
@@ -2073,6 +2214,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								auto pendingline = mem::read<uintptr_t>((uintptr_t)held + 0x248); //private ClientIOLine pendingLine
 
 								if (pendingline) {
+									auto _line = mem::read<uintptr_t>(pendingline + 0x20);
+									//set first position to playerpos or sum
+
 									Vector3 p1 = playerpos + Vector3(1, 1, 0);
 									Vector3 p2 = playerpos + Vector3(0, 0, 0);
 									Vector3 p3 = playerpos + Vector3(0, 2, 0);
@@ -2103,6 +2247,10 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 									((B)(mem::game_assembly_base + 0x9AB6A0))(pendingline, p3);
 									((B)(mem::game_assembly_base + 0x9AB6A0))(pendingline, p4);
 									((B)(mem::game_assembly_base + 0x9AB6A0))(pendingline, p5);
+
+									//public void SetPosition(int index, Vector3 position) { }
+									typedef void(*Z)(uintptr_t, int, Vector3);
+									((Z)(mem::game_assembly_base + 0x1B69A00))(_line, 0, p5);
 								}
 								wireplaced = true;
 							}
@@ -2615,10 +2763,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 											baseprojectile->automatic() = true;
 									}
 
-									if (vars->combat.fast_bullet && !vars->combat.bestvelocity)
-										baseprojectile->projectileVelocityScale() = 1.48f;
-									else if (vars->combat.bestvelocity)
-										baseprojectile->projectileVelocityScale() = 1.f;
+									baseprojectile->projectileVelocityScale() = vars->combat.fast_bullet;
 									if (vars->combat.nospread)
 										baseprojectile->set_no_spread();
 									baseprojectile->set_recoil();
