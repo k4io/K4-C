@@ -86,10 +86,6 @@ namespace hooks {
 
 	static auto ServerRPC_int = reinterpret_cast<void (*)(BaseProjectile*, System::string funcName, unsigned int arg1, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uint_);
 	
-	static auto serverrpclist = reinterpret_cast<void (*)(BaseEntity*, System::string funcName, uintptr_t, UINT, int, UINT, int, int, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPCList_);
-	
-	static auto ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string funcName, unsigned int arg1, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
-	
 	//static auto get_resourcePath = reinterpret_cast<System::string (*)(uintptr_t)>(mem::game_assembly_base + offsets::Method$ResourceRef_method);
 
 	static auto PerformanceUI_Update = reinterpret_cast<void (*)(void*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PerformanceUI"), _("Update"), -1, _(""), _("Facepunch"))));
@@ -99,8 +95,6 @@ namespace hooks {
 		orig::requestuserinfo = reinterpret_cast<void (*)(Client*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("OnRequestUserInformation"), 1, _(""), _(""))));
 		orig::pifu = reinterpret_cast<void(*)(PlayerInput*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerInput"), _("FrameUpdate"), 0, _(""), _(""))));
 		orig::createeffect = reinterpret_cast<GameObject * (*)(System::string, Effect*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("EffectLibrary"), _("CreateEffect"), 2, _(""), _(""))));
-		ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string funcName, unsigned int arg1, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
-		serverrpclist = reinterpret_cast<void (*)(BaseEntity*, System::string funcName, uintptr_t, UINT, int, UINT, int, int, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPCList_);
 		orig::IsConnected = reinterpret_cast<bool (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("IsConnected"), 0, _(""), _("Network"))));
 		orig::OnNetworkMessage = reinterpret_cast<void (*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("OnNetworkMessage"), 1, _(""), _(""))));
 		orig::BaseProjectile_OnSignal = reinterpret_cast<void (*)(BaseProjectile*, int, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("OnSignal"), 2, _(""), _(""))));
@@ -616,32 +610,34 @@ namespace hooks {
 						p->initialVelocity(aimbot_velocity);
 						p->previousVelocity(aimbot_velocity);
 					}
-
+					
 					if (vars->combat.targetbehindwall)
 					{
 						//p->projectileID(p->projectileID() - 1);
-						reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(hooks::orig::serverrpc_projectileshoot)(rcx, rdx, r9, projectileShoot, arg5);
-
-
-						typedef void(*cclear)(uintptr_t);
-						((cclear)(mem::game_assembly_base + 15604800))((uintptr_t)baseprojectile + 0x398); //"System.Collections.Generic.List<Projectile>$$Clear",
-
-						misc::fixed_time_last_shot = get_fixedTime();
-						misc::just_shot = true;
-						misc::did_reload = false;
-						if (misc::autoshot)
-							misc::autoshot = false;
-						return;
 					}
+				}
+				if (vars->combat.targetbehindwall)
+				{
+					reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(hooks::orig::serverrpc_projectileshoot)(rcx, rdx, r9, projectileShoot, arg5);
+
+					for (int i = 0; i < projectile_list->get_size(); i++) {
+						auto projectile = *(BaseProjectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
+						p = *(Projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
+						((Projectile1*)p)->Launch1();
+					}
+
+					typedef void(*cclear)(uintptr_t);
+					((cclear)(mem::game_assembly_base + 15617184))((uintptr_t)baseprojectile + 0x398); //"System.Collections.Generic.List<Projectile>$$Clear",
+					return;
 				}
 			}
 
 			if (misc::autoshot)
 				misc::autoshot = false;
 		} while (0);
-		reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(hooks::orig::serverrpc_projectileshoot)(rcx, rdx, r9, projectileShoot, arg5);
 
 		vars->local_player->console_echo(string::wformat(_(L"[matrix]: ProjectileShoot (prediction) simulated %i times before hit!"), simulations));
+		reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(hooks::orig::serverrpc_projectileshoot)(rcx, rdx, r9, projectileShoot, arg5);
 		//pppid++;
 		//calls base.serverrpc<projectileshoot>("clproject", x) ^^
 		//loops through created projectiles and launches with

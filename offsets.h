@@ -21,41 +21,35 @@ namespace offsets {
     constexpr auto convar = 46502296; //"ConVar_Graphics_c*"
 }
 */
-#define oButtons_TypeInfo 56959632
-#define oLineOfSightRadius 9214032
-#define oChatOpen 0x653360 //public static void open() { } <- inside 'ConVar::Chat'
-#define oCanReload 0x912860 // public bool CanReload(BasePlayer owner) { }
-#define oSetGestureMenuOpen 0x5B4BD0 //private void SetGestureMenuOpen(bool wantsOpen) { }
-#define oSphereCast 0x253DD60
-#define oGetWorldVelocity 0xC9FAE0
-#define oSetRayleigh 0xC32460 //public static void set_atmosphere_rayleigh(float value) { }
-#define oConsoleSystem_GetAll 39100016 //"ConsoleSystem.Index$$get_All"
-#define oConvar 56967448
-#define oConvarClient 56959376
-#define oConvarAdmin 56954176
-#define oTerrainMeta_TypeInfo 56967824
-#define oPlayerEyes_TypeInfo 56849160
-#define oPlayerBelt_TypeInfo 56952008
+#define oButtons_TypeInfo 56972496
+#define oLineOfSightRadius 9338352
+#define oChatOpen 0x5FC810 //public static void open() { } <- inside 'ConVar::Chat'
+#define oCanReload 0x915BB0 // public bool CanReload(BasePlayer owner) { }
+#define oSetGestureMenuOpen 0x5B6A20 //private void SetGestureMenuOpen(bool wantsOpen) { }
+#define oSphereCast 0x2540F40
+#define oGetWorldVelocity 0xC774F0
+#define oSetRayleigh 0xC35370 //public static void set_atmosphere_rayleigh(float value) { }
+#define oConsoleSystem_GetAll 39112784 //"ConsoleSystem.Index$$get_All"
+#define oConvarGraphics 56980352
+#define oConvarClient 56972208
+#define oConvarAdmin 56966944
+#define oTerrainMeta_TypeInfo 56980720
+#define oPlayerEyes_TypeInfo 56862008
+#define oPlayerBelt_TypeInfo 56964776
 //REAL RUST
 namespace offsets {
-    constexpr auto Method$BaseEntity_ServerRPC_CreateBuilding___ = 57189856;// "Name": "Method$BaseEntity.ServerRPC<CreateBuilding>()"
-    constexpr auto Method$BaseEntity_ServerRPC_PlayerProjectileAttack___ = 57189624;// "Name": "Method$BaseEntity.ServerRPC<PlayerProjectileAttack>()"
-    constexpr auto Method$BaseEntity_ServerRPC_PlayerProjectileShoot___ = 57189376;// "Name": "Method$BaseEntity.ServerRPC<ProjectileShoot>()"
-    constexpr auto Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___ = 57189480;// "Name": "Method$BaseEntity.ServerRPC<PlayerProjectileUpdate>()"
-    constexpr auto Method$Facepunch_Pool_GetList_TraceInfo_Address = 57070968;// "Name": "Method$Facepunch.Pool.GetList<TraceInfo>()"
-    constexpr auto Method$Facepunch_Pool_GetList_TraceInfo_MethodAddress = 7250064;// method address
+    constexpr auto Method$BaseEntity_ServerRPC_CreateBuilding___ = 57202544;// "Name": "Method$BaseEntity.ServerRPC<CreateBuilding>()"
+    constexpr auto Method$BaseEntity_ServerRPC_PlayerProjectileAttack___ = 57202304;// "Name": "Method$BaseEntity.ServerRPC<PlayerProjectileAttack>()"
+    constexpr auto Method$BaseEntity_ServerRPC_PlayerProjectileShoot___ = 57202064;// "Name": "Method$BaseEntity.ServerRPC<ProjectileShoot>()"
+    constexpr auto Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___ = 57202168;// "Name": "Method$BaseEntity.ServerRPC<PlayerProjectileUpdate>()"
+    constexpr auto Method$Facepunch_Pool_GetList_TraceInfo_Address = 57083640;// "Name": "Method$Facepunch.Pool.GetList<TraceInfo>()"
+    constexpr auto Method$Facepunch_Pool_GetList_TraceInfo_MethodAddress = 7257872;// method address
 
-    constexpr auto Method_BaseEntity_ServerRPC_string_bool_address = 57187984;// address "Name": "Method$BaseEntity.ServerRPC<string, bool>()",
-    constexpr auto BaseEntity$$ServerRPC_string_bool_Address = 18424352;// method address
+    constexpr auto Method_BaseEntity_ServerRPC_string_bool_address = 57200672;// address "Name": "Method$BaseEntity.ServerRPC<string, bool>()",
+    constexpr auto BaseEntity$$ServerRPC_string_bool_Address = 18437024;// method address
 
-    constexpr auto Method$BaseEntity_ServerRPC_uint = 57186856;// "Address":,"Method$BaseEntity.ServerRPC<uint>()" //both addresses
-    constexpr auto BaseEntity$$ServerRPC_uint_ = 18422912;// method address
-
-    constexpr auto Method$BaseEntity_ServerRPC_uintstring = 57186976;// "Address":,"Method$BaseEntity.ServerRPC<uint, System::string(>()" //both addresses
-    constexpr auto BaseEntity$$ServerRPC_uintstring_ = 18421584;// method address
-
-    constexpr auto Method$BaseEntity_ServerRPCList = 57185896;//  Method$BaseEntity.ServerRPCList<Vector3, uint, int, uint, int, int>(
-    constexpr auto BaseEntity$$ServerRPCList_ = 18413520;// method address
+    constexpr auto Method$BaseEntity_ServerRPC_uint = 57199560;// "Address":,"Method$BaseEntity.ServerRPC<uint>()" //both addresses
+    constexpr auto BaseEntity$$ServerRPC_uint_ = 18435584;// method address
 }
 
 /*

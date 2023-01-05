@@ -1,6 +1,6 @@
 #include "misc.hpp"
 
-uintptr_t pools_offset = 0xBC7A90;
+uintptr_t pools_offset = 0xBCA990;
 uintptr_t poollist_offset = 0x6E9DF0;
 /*
  /* GenericInstMethod :
@@ -30,7 +30,7 @@ uintptr_t poollist_offset = 0x6E9DF0;
 	|-Pool.Get<PositionLerp>
 	|-Pool.Get<AIDesign>
 */
-uintptr_t Method$System_Collections_Generic_List_Projectile__Clear__ = 15604800; //Method$System.Collections.Generic.List<Projectile>.Clear() (METHOD ADDRESS)
+uintptr_t Method$System_Collections_Generic_List_Projectile__Clear__ = 15617184; //Method$System.Collections.Generic.List<Projectile>.Clear() (METHOD ADDRESS)
 
 static auto _DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
 
@@ -360,12 +360,12 @@ public:
 			//Sphere(point, 0.2f, { 1, 1, 1, 1 }, 10.f, 100.f);
 			//static auto DoHit = *reinterpret_cast<bool(**)(Projectile * _instance, HitTest * test, Vector3 point, Vector3 normal)>(Il2CppWrapper::GetClassFromName(_(""), _("Projectile"))->GetMethodFromName(_("DoHit")));
 			//__try {
-				if (_DoHit(_this, (HitTest*)ht, point, Vector3::Zero())) {
-					//if (Do_Hit(_this, (uintptr_t)ht, point, Vector3::Zero())) {
-					_this->currentVelocity(vel);
-					_this->traveledTime(real_travel_time);
-					return true;
-				}
+			if (_DoHit(_this, (HitTest*)ht, point, Vector3::Zero())) {
+				//if (Do_Hit(_this, (uintptr_t)ht, point, Vector3::Zero())) {
+				_this->currentVelocity(vel);
+				_this->traveledTime(real_travel_time);
+				return true;
+			}
 			//} __except(true) { }
 			return false;
 		}
@@ -381,9 +381,10 @@ public:
 
 		if (!hitTest) {
 			/*HitTest_TypeInfo*/
-			//DWORD64 htstatic = il2cpp::init_class(_("HitTest"), _(""));
+			DWORD64 htstatic = il2cpp::init_class(_("HitTest"), _(""));
 
-			DWORD64 HitTest = il2cpp::methods::object_new(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + 56956632));
+			//DWORD64 HitTest = il2cpp::methods::object_new(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + 56956632));
+			DWORD64 HitTest = il2cpp::methods::object_new(htstatic);
 			_this->hitTest((DWORD64)HitTest);
 			//*reinterpret_cast<uintptr_t*>((uintptr_t)_this + 0x198) = HitTest; //hittest
 
@@ -441,7 +442,7 @@ public:
 	{
 		vars->local_player->console_echo(_(L"[matrix]: CreatePlayerProjectileUpdate - Called"));
 		typedef uint64_t(__stdcall* PoolGet)(uint64_t);
-		uint64_t update = *reinterpret_cast<uint64_t*>(mem::game_assembly_base + 56715248); //"Method$Facepunch.Pool.Get<PlayerProjectileUpdate>()",
+		uint64_t update = *reinterpret_cast<uint64_t*>(mem::game_assembly_base + 56727856); //"Method$Facepunch.Pool.Get<PlayerProjectileUpdate>()",
 
 		if (!update)
 			return 0;
@@ -461,14 +462,14 @@ public:
 			return;
 
 		typedef uintptr_t(*AAA)(); // Client get_cl() { }
-		auto cl = ((AAA)(mem::game_assembly_base + 0x133D200))();
+		auto cl = ((AAA)(mem::game_assembly_base + 0x1340260))();
 		if (!cl)
 			return;
 		vars->local_player->console_echo(_(L"[matrix]: SendPlayerProjectileUpdate - Called"));
 		
 		//public NetWrite get_write() { }
 		typedef uintptr_t(*AA)(uintptr_t);
-		auto write = ((AA)(mem::game_assembly_base + 0x58C8A0))(cl);
+		auto write = ((AA)(mem::game_assembly_base + 0x58E6F0))(cl);
 		//uint64_t tod_sky = mem::read<uint64_t>(p1 + 0x28);
 
 		//auto write = cl->write();
@@ -479,10 +480,10 @@ public:
 
 		//public bool Start() { }
 		//if (write->Start()) {
-		if (((netwrite_start)(mem::game_assembly_base + 0x24B2200))(write)) {
+		if (((netwrite_start)(mem::game_assembly_base + 0x24B53E0))(write)) {
 
 			typedef void(*netwrite_packetid)(uintptr_t, UINT);
-			((netwrite_packetid)(mem::game_assembly_base + 0x24B1E30))(write, (UINT)MessageType::RPCMessage);
+			((netwrite_packetid)(mem::game_assembly_base + 0x24B5010))(write, (UINT)MessageType::RPCMessage);
 			//write->PacketID((UINT)MessageType::RPCMessage);
 
 			auto net = *reinterpret_cast<uintptr_t*>((uintptr_t)vars->local_player + 0x58);
@@ -496,14 +497,14 @@ public:
 
 			typedef void(*netwrite_uint32)(uintptr_t, UINT);
 
-			((netwrite_uint32)(mem::game_assembly_base + 0x24B2500))(write, id);
+			((netwrite_uint32)(mem::game_assembly_base + 0x24B4F20))(write, id);
 			//write->UInt32(id);
 
-			((netwrite_uint32)(mem::game_assembly_base + 0x24B2500))(write, 2324190493); //projectile update id 2324190493
+			((netwrite_uint32)(mem::game_assembly_base + 0x24B4F20))(write, 2324190493); //projectile update id 2324190493
 			//write->UInt32(2324190493); //projectile update
 
 			typedef void(*serialize)(uintptr_t, uint64_t);
-			((serialize)(mem::game_assembly_base + 0x20A8370))(write, update);
+			((serialize)(mem::game_assembly_base + 0x20AB3D0))(write, update);
 			//ProtoBuf::PlayerProjectileUpdate::Serialize(write, (ProtoBuf::PlayerProjectileUpdate*)update);
 
 			auto conn = *reinterpret_cast<uintptr_t*>(cl + 0x28);
@@ -534,7 +535,7 @@ public:
 
 			//public void Send(SendInfo info) { }
 			typedef void(*netwrite_send)(uintptr_t, uintptr_t);
-			((netwrite_send)(mem::game_assembly_base + 0x24B20E0))(write, si);
+			((netwrite_send)(mem::game_assembly_base + 0x24B52C0))(write, si);
 			vars->local_player->console_echo(_(L"[matrix]: SendPlayerProjectileUpdate - Finished"));
 			//write->Send(sendInfo);
 		}
@@ -704,7 +705,7 @@ public:
 		Vector3 hitPosition = Vector3(-1, -1, -1);
 		Vector3 position = _this->sentPosition();
 		Vector3 startLOSPosition = position;
-		Vector3 startPosition = _this->previousVelocity();
+		Vector3 startPosition = _this->tumbleAxis();
 		//Vector3 startPosition = _this->tumbleAxis();
 		float startVelocityLen = *reinterpret_cast<float*>((uintptr_t)_this + 0x90); //flybySoundDistance
 		//float startVelocityLen = _this->flybySoundDistance();
@@ -756,7 +757,9 @@ public:
 		else if (result.silentCat && result.hitEntity)
 		{
 			bool canHit = SilentCat(result, position);
-			Sphere(result.hitPosition, 1.f, { 1, 1, 1, 1 }, 10.f, true);
+			Line(result.hitPosition, position, { 0, 1, 0, 100 }, 10.f, 1, 1);
+			Line(result.hitPosition, startPosition, { 1, 1, 0, 100 }, 10.f, 1, 1);
+			DDraw::Text(_(L"SilentCat"), result.hitPosition, { r, g, b, 255 }, 10.f);
 			vars->local_player->console_echo(string::wformat(_(L"[matrix]: DoRealMovement - SilentCat: %d"), (int)canHit));
 			if (canHit && abs(result.hitTime - maxTime) <= projectile_desync) {
 				float maxTravelDst = _this->initialDistance() + startVelocityLen * min(result.hitTime, maxTime) * projectile_forgiviness;
@@ -771,12 +774,13 @@ public:
 		Vector3 vel = _this->previousVelocity();
 
 		Vector3 newPos = prev + vel * num;
+		//DDraw::Text(_(L"DoRealMovement"), newPos, { r, g, b, 255 }, 10.f);
 		vars->local_player->console_echo(string::wformat(_(L"[matrix]: DoRealMovement - Pos: (%d, %d, %d), newPos: (%d, %d, %d)"),
-			(int)position.x,
-			(int)position.y,
-			(int)position.z,
-			(int)newPos.z,
-			(int)newPos.z,
+			(int)prev.x,
+			(int)prev.y,
+			(int)prev.z,
+			(int)newPos.x,
+			(int)newPos.y,
 			(int)newPos.z
 		));
 
@@ -890,13 +894,8 @@ public:
 			return _this->Launch();
 		LocalPlayer->console_echo(_(L"[matrix]: Launch1 - Called"));
 		if (vars->combat.targetbehindwall) {
-			while (_this->IsAlive() && 
-				(_this->traveledDistance() < _this->initialDistance() || 
-					_this->traveledTime() < 0.1f))
-			{
-				//do we update here? what happens? fuck.
+			while (_this->IsAlive() && _this->traveledTime() < 0.09f)
 				this->UpdateVelocity();
-			}
 			LocalPlayer->console_echo(_(L"[matrix]: Launch1 - Finished launch"));
 		}
 		else {	

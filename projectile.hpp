@@ -101,6 +101,9 @@ public:
 	
 	Vector3 previousVelocity() { return safe_read(this + O::Projectile::previousVelocity, Vector3); }
 	void previousVelocity(Vector3 d) { safe_write(this + O::Projectile::previousVelocity, d, Vector3); }
+	
+	Vector3 tumbleAxis() { return safe_read(this + O::Projectile::tumbleAxis, Vector3); }
+	void tumbleAxis(Vector3 d) { safe_write(this + O::Projectile::tumbleAxis, d, Vector3); }
 
 	void hitTest(DWORD64 d) { safe_write(this + O::Projectile::hitTest, d, DWORD64); }
 	DWORD64 hitTest() { return safe_read(this + O::Projectile::hitTest, DWORD64); }

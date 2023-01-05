@@ -611,6 +611,7 @@ static auto set_ClearMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reint
 static auto set_CloudMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_CloudMaterial"), 0, _(""), _(""))));
 static auto getiteminslot = reinterpret_cast<uintptr_t(*)(PlayerBelt*, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerBelt"), _("GetItemInSlot"), 0, _(""), _(""))));
 static auto gettrans = reinterpret_cast<uintptr_t(*)(Component*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
+static auto _Text = reinterpret_cast<void (*)(System::string, Vector3, col, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Text"), 4, _(""), _("UnityEngine"))));
 #pragma endregion
 
 class col {
@@ -632,6 +633,7 @@ float current_time;
 void init_bp() {
 	//setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
 	//ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
+	_Text = reinterpret_cast<void (*)(System::string, Vector3, col, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Text"), 4, _(""), _("UnityEngine"))));
 	viewmodelplay = reinterpret_cast<void(*)(uintptr_t, System::string, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ViewModel"), _("Play"), 2, _(""), _(""))));
 	set_ambientintensity = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("RenderSettings"), _("set_ambientIntensity"), 1, _(""), _("UnityEngine"))));
 	set_ambientlight = reinterpret_cast<void(*)(uintptr_t, col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Sky"), _("set_AmbientColor"), 1, _(""), _(""))));
@@ -874,6 +876,13 @@ void init_bp() {
 	NP(type) \
 	static auto ret = ((Component*)this)->GetComponent<type*>(unity::GetType(_(space), _(#type))); \
 	return ret; }
+
+class DDraw {
+public:
+	static void Text(const wchar_t* w, Vector3 pos, col clr, float duration) {
+		//return _Text(w, pos, clr, duration);
+	}
+};
 
 class Object {
 public:
@@ -2740,14 +2749,14 @@ public:
 		if (zooming) {
 			pent//0x32182E0
 //auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52689952); //"ConVar_Graphics_c*" alkad rust
-auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + oConvar); //"	" real rust
+auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + oConvarGraphics); //"	" real rust
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = vars->visual.zoomfov;
 		}
 
 		if (!zooming) {
 			pent
-				auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + oConvar); //"ConVar_Graphics_c*" real rust
+				auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + oConvarGraphics); //"ConVar_Graphics_c*" real rust
 				//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*" alkad rust
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = vars->visual.playerfov;
@@ -3348,12 +3357,12 @@ auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base +
 			//auto s = string::wformat(_(L"trap [%d]: %s"), (int)get_fixedTime(), str);
 			if (vars->misc.logs)
 				console_msg((uintptr_t)this, str);
-		//else {
-		//	freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
-		//	freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
-		//	wcscat(const_cast<wchar_t*>(str), _(L"\n"));
-		//	wprintf(str);
-		//}
+		else {
+			freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
+			freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
+			wcscat(const_cast<wchar_t*>(str), _(L"\n"));
+			wprintf(str);
+		}
 	}
 };
 

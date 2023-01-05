@@ -1353,12 +1353,12 @@ namespace Gui
 			}
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(50, 15));
-			im::Checkbox(_("Manipulator2"), &vars->combat.manipulator2);
-			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
-			im::Hotkey(_("M2"), &vars->keybinds.manipulator2, ImVec2(50, 15));
+			//im::Checkbox(_("Manipulator2"), &vars->combat.manipulator2);
+			//im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			//im::Hotkey(_("M2"), &vars->keybinds.manipulator2, ImVec2(50, 15));
+			//im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
+			//im::Checkbox(_("STW (many invalids)"), &vars->combat.throughwall);
 			//im::Checkbox(_("Target behind wall"), &vars->combat.shoot_at_fatbullet);
-			im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
-			im::Checkbox(_("STW (many invalids)"), &vars->combat.throughwall);
 			im::Checkbox(_("Pierce"), &vars->combat.pierce);
 			im::Checkbox(_("Double-tap"), &vars->combat.doubletap);
 			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
@@ -1369,7 +1369,7 @@ namespace Gui
 			if (vars->misc.tooltips && im::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
 				im::SetTooltip(_("Multiplier for distance to teleport the bullet within desync time"));
 			}
-			im::Checkbox(_("Best velocity"), &vars->combat.bestvelocity);
+			//im::Checkbox(_("Best velocity"), &vars->combat.bestvelocity);
 			im::SliderFloat(_("Bullet velocity"), &vars->combat.fast_bullet, .5f, 1.5f, _("%.1f"));
 			im::Checkbox(_("Instant eoka"), &vars->combat.instaeoka);
 			//im::Checkbox(_("Fast bow"), &vars->combat.fastbow);
