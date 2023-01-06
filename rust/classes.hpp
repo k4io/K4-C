@@ -1218,9 +1218,11 @@ public:
 		return getparentvel(this);
 	}
 	void ServerRPC(wchar_t* func) {
-		pent
-			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
-		return serverrpc(this, func);
+		__try {
+			pent
+				if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
+			return serverrpc(this, func);
+		} __except (true) { return; }
 	}
 	void ServerRPCs(const char* func) {
 		pent

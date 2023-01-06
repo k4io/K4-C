@@ -134,16 +134,6 @@ public:
 			return heightmap;
 		};
 
-		//if (memory::IsAddressValid(TerrainMeta_TypeInfo))
-		//if (TerrainMeta_TypeInfo)
-		//{
-		//	uint64_t meta = *reinterpret_cast<uint64_t*>(TerrainMeta_TypeInfo + 0xB8);
-		//	if (memory::IsAddressValid(meta))
-		//	{
-		//		auto heightMap = TerrainMeta::_get_HeightMap();
-		//		if (memory::IsAddressValid(heightMap))
-		//		{
-
 		auto heightMap = getheightmap();
 		if (heightMap) {
 			//auto RealTarget = reinterpret_cast<BasePlayerSDK*>(CheatCore::m_cheat->AimbotTarget.entity);
@@ -381,10 +371,10 @@ public:
 
 		if (!hitTest) {
 			/*HitTest_TypeInfo*/
-			DWORD64 htstatic = il2cpp::init_class(_("HitTest"), _(""));
+			//DWORD64 htstatic = il2cpp::init_class(_("HitTest"), _(""));
 
-			//DWORD64 HitTest = il2cpp::methods::object_new(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + 56956632));
-			DWORD64 HitTest = il2cpp::methods::object_new(htstatic);
+			DWORD64 HitTest = il2cpp::methods::object_new(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + 56969464));
+			//DWORD64 HitTest = il2cpp::methods::object_new(htstatic);
 			_this->hitTest((DWORD64)HitTest);
 			//*reinterpret_cast<uintptr_t*>((uintptr_t)_this + 0x198) = HitTest; //hittest
 
@@ -705,8 +695,8 @@ public:
 		Vector3 hitPosition = Vector3(-1, -1, -1);
 		Vector3 position = _this->sentPosition();
 		Vector3 startLOSPosition = position;
+		//Vector3 startPosition = _this->pre();
 		Vector3 startPosition = _this->tumbleAxis();
-		//Vector3 startPosition = _this->tumbleAxis();
 		float startVelocityLen = *reinterpret_cast<float*>((uintptr_t)_this + 0x90); //flybySoundDistance
 		//float startVelocityLen = _this->flybySoundDistance();
 		Vector3 velocity = _this->initialVelocity();
@@ -716,7 +706,7 @@ public:
 
 		Vector3 CurrentProjectilePosition = _this->currentPosition();
 
-		Line(CurrentProjectilePosition, prevPosition, { 1, 1, 1, 1 }, 10.f, true, true);
+		//Line(CurrentProjectilePosition, prevPosition, { 1, 1, 1, 1 }, 10.f, true, true);
 
 		_this->traveledTime(_this->traveledTime() + num);
 
@@ -757,9 +747,9 @@ public:
 		else if (result.silentCat && result.hitEntity)
 		{
 			bool canHit = SilentCat(result, position);
-			Line(result.hitPosition, position, { 0, 1, 0, 100 }, 10.f, 1, 1);
-			Line(result.hitPosition, startPosition, { 1, 1, 0, 100 }, 10.f, 1, 1);
-			DDraw::Text(_(L"SilentCat"), result.hitPosition, { r, g, b, 255 }, 10.f);
+			//Line(result.hitPosition, position, { 0, 1, 0, 100 }, 10.f, 1, 1);
+			//Line(result.hitPosition, startPosition, { 1, 1, 0, 100 }, 10.f, 1, 1);
+			//DDraw::Text(_(L"SilentCat"), result.hitPosition, { r, g, b, 255 }, 10.f);
 			vars->local_player->console_echo(string::wformat(_(L"[matrix]: DoRealMovement - SilentCat: %d"), (int)canHit));
 			if (canHit && abs(result.hitTime - maxTime) <= projectile_desync) {
 				float maxTravelDst = _this->initialDistance() + startVelocityLen * min(result.hitTime, maxTime) * projectile_forgiviness;
@@ -784,6 +774,7 @@ public:
 			(int)newPos.z
 		));
 
+		Line(prev, newPos, { 1, 1, 1, 1 }, 10.f, 1, 1);
 
 		vel += gravity * num;
 		vel -= vel * drag * num;

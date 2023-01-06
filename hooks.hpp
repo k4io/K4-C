@@ -626,6 +626,9 @@ namespace hooks {
 						((Projectile1*)p)->Launch1();
 					}
 
+					misc::fixed_time_last_shot = get_fixedTime();
+					misc::just_shot = true;
+					misc::did_reload = false;
 					typedef void(*cclear)(uintptr_t);
 					((cclear)(mem::game_assembly_base + 15617184))((uintptr_t)baseprojectile + 0x398); //"System.Collections.Generic.List<Projectile>$$Clear",
 					return;
