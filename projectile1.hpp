@@ -274,6 +274,7 @@ public:
 						velocity -= velocity * drag * num;
 						travelTime += num;
 						maxHitDist = GetHitDist(min(travelTime, maxTime), (BasePlayer*)RealTarget.ent, true);
+						Sphere(position, maxHitDist, { 1, 1, 1, 1 }, 10.f, 100.f);
 						maxTravelDst = _this->initialDistance() + startVelocityLen * min(travelTime, maxTime) * projectile_forgiviness;
 					}
 				}
@@ -642,8 +643,8 @@ public:
 					movPos = closest + (c / len) * min(len, stepSize);
 			}
 
-			Sphere(movPos, reduceLen, { 1, 0, 1, 1 }, 10.f, 100.f);
-
+			Sphere(movPos, 0.5f, { 1, 0, 0, 1 }, 10.f, 1);
+			Line(movPos, prevPos, { 0, 1, 0, 1 }, 10.f, 1, 1);
 			prevPos = movPos;
 
 			((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->position = movPos;
@@ -808,7 +809,7 @@ public:
 			
 			Vector3 pos = Transform->position();
 			//Sphere(pos, .3f, { 1, 1, 0, 1 }, 10.f, false);
-			Line(pos, _this->currentPosition(), { r, g, b, 100 }, 10.f, 1, 1);
+			//Line(pos, _this->currentPosition(), { r, g, b, 100 }, 10.f, 1, 1);
 			_this->currentPosition(pos);
 			//Sphere(_this->currentPosition(), 1.f, { 1, 1, 0, 1 }, 10.f, false);
 

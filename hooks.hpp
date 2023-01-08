@@ -623,6 +623,7 @@ namespace hooks {
 					for (int i = 0; i < projectile_list->get_size(); i++) {
 						auto projectile = *(BaseProjectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
 						p = *(Projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
+						if (!p) continue;
 						((Projectile1*)p)->Launch1();
 					}
 
@@ -657,7 +658,7 @@ namespace hooks {
 	void hk_serverrpc_playerprojectileupdate(int64_t rcx, int64_t rdx, int64_t r9, int64_t _ppa, int64_t arg5) {
 		auto  projectile = reinterpret_cast<Projectile*>(get_rbx_value());
 		auto  ppu = reinterpret_cast<protobuf::PlayerProjectileUpdate*>(_ppa);
-		tppu = ppu;
+		//tppu = ppu;
 		const auto orig_fn =
 			reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(
 				hooks::orig::playerprojectileupdate);
@@ -707,6 +708,7 @@ namespace hooks {
 		//		return;
 		//	}
 		//}
+		Sphere(ppu->position, .5f, { 0, 0, 1, 1 }, 10.f, 1);
 
 		return orig_fn(rcx, rdx, r9, _ppa, arg5);
 	}
