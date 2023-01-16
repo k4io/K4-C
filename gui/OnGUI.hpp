@@ -1334,7 +1334,7 @@ namespace gui {
 				case 3: { b += 0.0015f; g -= 0.0015f; if (b >= 1) cases = 0; break; }
 				default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
 				}
-				unity::set_lockstate(CursorLockMode::None);
+				//unity::set_lockstate(CursorLockMode::None);
 		
 				if (LI_FIND(GetAsyncKeyState)(VK_LBUTTON)) {
 					auto z = Rect{ window_position.x, window_position.y, menu_size.x, 30 };

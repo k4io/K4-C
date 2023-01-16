@@ -176,7 +176,7 @@ namespace il2cpp {
 
 		auto klass = init_class(kl, name_space);
 
-			while (f = methods::class_get_methods(klass, &iter)) {
+		while (f = methods::class_get_methods(klass, &iter)) {
 
 			char* st = *reinterpret_cast<char**>(f + 0x10);
 

@@ -3359,12 +3359,12 @@ auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base +
 			//auto s = string::wformat(_(L"trap [%d]: %s"), (int)get_fixedTime(), str);
 			if (vars->misc.logs)
 				console_msg((uintptr_t)this, str);
-		else {
-			freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
-			freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
-			wcscat(const_cast<wchar_t*>(str), _(L"\n"));
-			wprintf(str);
-		}
+		//else {
+		//	freopen_s(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
+		//	freopen_s(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
+		//	wcscat(const_cast<wchar_t*>(str), _(L"\n"));
+		//	wprintf(str);
+		//}
 	}
 };
 
