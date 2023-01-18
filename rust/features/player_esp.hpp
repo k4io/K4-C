@@ -91,6 +91,8 @@ namespace esp {
 
 	void draw_item(Vector2 w2s_position, uintptr_t label, Vector4 color, wchar_t* name = _(L""));
 
+	void draw_player(BasePlayer* ent, bool is_npc);
+
 	void rock_chams(BaseEntity* ent);
 
 	void do_chams(BasePlayer* ent);
@@ -100,6 +102,8 @@ namespace esp {
 	void draw_name(Vector3 position, wchar_t* name);
 
 	void draw_middle(aim_target target);
+
+	void draw_weapon_icon(Item* item, Vector2 w2s_position);
 
 	void offscreen_indicator(Vector3 position);
 
@@ -1122,7 +1126,7 @@ namespace esp {
 
 					if (draw && vars->visual.playeresp && vars->local_player) {
 
-						//draw_player(((BasePlayer*)ent), is_npc);
+						draw_player(((BasePlayer*)ent), is_npc);
 
 						if (vars->visual.offscreen_indicator
 							&& !is_npc)
@@ -1243,8 +1247,8 @@ namespace esp {
 						esp_color = Vector4(196, 124, 0, 255);
 
 						Vector2 w2s_position = {};
-						//if (out_w2s(world_position, w2s_position))
-						//	draw_weapon_icon(item, w2s_position);
+						if (out_w2s(world_position, w2s_position))
+							draw_weapon_icon(item, w2s_position);
 						//esp::draw_item(w2s_position, 0, esp_color, item_name);
 
 						if (vars->visual.distance)

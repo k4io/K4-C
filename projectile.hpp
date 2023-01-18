@@ -25,27 +25,27 @@ static auto Trace_All = reinterpret_cast<void(*)(uintptr_t, uintptr_t, int)>(0);
 static auto get_magnitude = reinterpret_cast<float(*)(uintptr_t)>(0);
 static auto seteffect = reinterpret_cast<void(*)(uintptr_t, float)>(0);
 
-static auto getrandomvel = reinterpret_cast<float(*)(uintptr_t)>(0);
+static auto getrandomvel = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ItemModProjectile"), _("GetRandomVelocity"), 0, _(""), _(""))));
 
-static auto _launch = reinterpret_cast<void(*)(uintptr_t)>(0);
+static auto _launch = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Launch"), 0, _(""), _(""))));
 
 
 void init_projectile() {
-	_update = reinterpret_cast<void(*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oProjUpdate));
-	Sphere = reinterpret_cast<void (*)(Vector3 vPos, float fRadius, col color, float fDuration, bool distanceFade)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oDdrawSphere));
-	Capsule = reinterpret_cast<void (*)(Vector3, Vector4, float, float, col, float, bool)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oDdrawCapsule));
-	_retire = reinterpret_cast<void(*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oProjRetire));
-	Trace_All = reinterpret_cast<void(*)(uintptr_t, uintptr_t, int)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGamePhysTraceAll));
+	_update = reinterpret_cast<void(*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Update"), 0, _(""), _(""))));
+	Sphere = reinterpret_cast<void (*)(Vector3 vPos, float fRadius, col color, float fDuration, bool distanceFade)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Sphere"), 5, _(""), _("UnityEngine"))));
+	Capsule = reinterpret_cast<void (*)(Vector3, Vector4, float, float, col, float, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Capsule"), 7, _(""), _("UnityEngine"))));
+	_retire = reinterpret_cast<void(*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Retire"), 0, _(""), _(""))));
+	Trace_All = reinterpret_cast<void(*)(uintptr_t, uintptr_t, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameTrace"), _("TraceAll"), 3, _(""), _(""))));
 
-	HitPointWorld = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oHitPointWorld));
-	HitNormalWorld = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oHitNormalWorld));
+	HitPointWorld = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("HitTest"), _("HitPointWorld"), 0, _(""), _(""))));
+	HitNormalWorld = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("HitTest"), _("HitNormalWorld"), 0, _(""), _(""))));
 
-	GetName = reinterpret_cast<str(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oAssetNameCacheGetName));
-	Do_Hit = reinterpret_cast<bool(*)(Projectile*, uintptr_t, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oProjDoHit));
-	get_magnitude = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGetMagnitude));
-	getrandomvel = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGetRandomVel));
-	seteffect = reinterpret_cast<void(*)(uintptr_t, float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oProjSetEffectScale));
-	_launch = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oProjLaunch));
+	GetName = reinterpret_cast<str(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetNameCache"), _("GetName"), 1, _(""), _(""))));
+	Do_Hit = reinterpret_cast<bool(*)(Projectile*, uintptr_t, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), 0, _(""), _(""))));
+	get_magnitude = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Vector3"), _("get_magnitude"), 0, _(""), _("UnityEngine"))));
+	getrandomvel = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ItemModProjectile"), _("GetRandomVelocity"), 0, _(""), _(""))));
+	seteffect = reinterpret_cast<void(*)(uintptr_t, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("SetEffectScale"), 1, _(""), _(""))));
+	_launch = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Launch"), 0, _(""), _(""))));
 }
 
 class Projectile : public BaseMonoBehaviour {
@@ -466,11 +466,11 @@ public:
 		Line(this->currentPosition(), this->previousPosition(), col(0.6, 0.1, 0.7, 1), 10.f, false, true);
 		
 		auto Trans = pr->transform();
-		transsetpos(Trans, currentPosition()); //Transform | void transsetpos(Vector3 value); 
+		set_position(Trans, currentPosition()); //Transform | void set_position(Vector3 value); 
 
 		Vector4 rotation = LookRotation(currentVelocity(), Vector3(0, 1, 0));
 
-		transsetrot(Trans, rotation);
+		set_rotation(Trans, rotation);
 	}
 };
 

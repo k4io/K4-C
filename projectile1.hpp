@@ -32,7 +32,7 @@ uintptr_t poollist_offset = 0x6E9DF0;
 */
 uintptr_t Method$System_Collections_Generic_List_Projectile__Clear__ = 15617184; //Method$System.Collections.Generic.List<Projectile>.Clear() (METHOD ADDRESS)
 
-static auto _DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oProjDoHit));
+static auto _DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
 
 class Projectile1;
 class Projectile1 : public BaseMonoBehaviour
@@ -853,12 +853,12 @@ public:
 
 			UpdateBulletTracer(pos, curPos);
 
-			transsetpos(Transform, curPos);
+			set_position(Transform, curPos);
 			//Transform->_set_position(curPos);
 
 			Vector4 rotation = LookRotation(_this->currentVelocity(), Vector3(0, 1, 0));
 			//Quaternion rotation = UnityEngine::Quaternion::LookRotation(_this->currentVelocity());
-			transsetrot(Transform, rotation);
+			set_rotation(Transform, rotation);
 			//Transform->_set_rotation(rotation);
 
 			Vector3 SentPos = _this->sentPosition();

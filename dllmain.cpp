@@ -186,27 +186,16 @@ bool DllMain(HMODULE hmodule)
 		//		}
 		//	}
 		//}
+		mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);
+
 		has_initialized = true;
 	}
 
-	//mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);
-	//*reinterpret_cast<uintptr_t*>(i) = (uintptr_t)our_func;
-	//mem::HVF(mem::game_assembly_base + oBaseProjectileLaunchProjectile, &hooks::hk_projectile_launchprojectile, _("BaseProjectile"));
-	//*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBaseProjectileLaunchProjectile) = (uintptr_t)&hooks::hk_projectile_launchprojectile;
-	//
-	//il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
-	//*reinterpret_cast<void**>(il2cpp_method) = our_func;
-	
-	//*reinterpret_cast<void**>(mem::game_assembly_base + oPerformanceUIUpdate) = &hooks::hk_performance_update;
-	//il2cpp::hk(mem::game_assembly_base + oPerformanceUIUpdate, &hooks::hk_performance_update);
+	il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
+	il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
+	il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);
 
-	//il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
-	//*reinterpret_cast<void**>(mem::game_assembly_base + oDevControlsOnGui) = &hooks::hk_performance_update;
-	//il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);
-	//*reinterpret_cast<void**>(mem::game_assembly_base + oProjUpdate) = &hooks::hk_projectile_update;
-	//
-	//mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
-	//mem::HVF(mem::game_assembly_base + oBasePlayerClientInput, &hooks::hk_baseplayer_ClientInput, _("BasePlayer"));
+	mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
 
 	return true;
 }
