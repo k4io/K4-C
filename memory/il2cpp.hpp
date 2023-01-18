@@ -1,7 +1,6 @@
 #pragma once
 #include "../utils/no_crt.hpp"
 #include "../utils/xorstr.hpp"
-
 #include "memory.hpp"
 
 #include <map>
@@ -10,6 +9,7 @@ template<typename T1, typename T2>
 bool map_contains_key(T1 map, T2 key) {
 	return map.count(key) > 0;
 }
+
 std::map<std::string, uintptr_t> addrmap{};
 
 namespace il2cpp {
@@ -199,6 +199,7 @@ namespace il2cpp {
 				}
 
 				addrmap.insert(std::make_pair(s, f));
+				
 				return f;
 			}
 		}
@@ -212,6 +213,13 @@ namespace il2cpp {
 
 	uintptr_t hook( void* our_func, const char* function_to_hook,const char* class_to_hook, const char* name_space = _(""), int argument_number = -1, char* argument_name = _("")) {
 		auto il2cpp_method = method(class_to_hook, function_to_hook, argument_number, argument_name, name_space);
+
+		*reinterpret_cast<void**>(il2cpp_method) = our_func;
+		return il2cpp_method;
+	}
+
+	uintptr_t hk(uintptr_t mfunc, void* our_func) {
+		auto il2cpp_method = mfunc;
 
 		*reinterpret_cast<void**>(il2cpp_method) = our_func;
 		return il2cpp_method;
@@ -297,6 +305,22 @@ uintptr_t mem::hook_virtual_function(const char* classname, const char* function
 		if (addr == search) {
 			*reinterpret_cast<uintptr_t*>(i) = (uintptr_t)our_func;
 			addrmap.insert(std::make_pair(mstr, addr));
+			return addr;
+		}
+	}
+}
+
+uintptr_t mem::HVF(uintptr_t search, void* our_func, const char* classname) {
+	//uintptr_t search = *reinterpret_cast<uintptr_t*>(il2cpp::method(classname, function_to_hook, -1, _(""), name_space));
+	uintptr_t table = il2cpp::init_class(classname, _(""));
+
+	if (search == (uintptr_t)our_func)
+		return (uintptr_t)our_func;
+
+	for (uintptr_t i = table; i <= table + 0x1500; i += 0x1) {
+		uintptr_t addr = *reinterpret_cast<uintptr_t*>(i);
+		if (addr == search) {
+			*reinterpret_cast<uintptr_t*>(i) = (uintptr_t)our_func;
 			return addr;
 		}
 	}

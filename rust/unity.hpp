@@ -11,29 +11,14 @@ namespace unity {
 	static auto get_width = reinterpret_cast<int (*)()>(0);
 
 	static auto get_height = reinterpret_cast<int (*)()>(0);
-
-	static auto GetKeyDown = reinterpret_cast<bool(*)(KeyCode key)>(0);
-
-	static auto GetMouseButtonDown = reinterpret_cast<bool(*)(KeyCode button)>(0);
-
+	
 	static auto get_main_camera = reinterpret_cast<uintptr_t(*)()>(0);
 
 	static auto IgnoreLayerCollision = reinterpret_cast<void(*)(layer, layer, bool)>(0);
 
-	static auto get_keyCode = reinterpret_cast<KeyCode(*)(uintptr_t)>(0);
-
 	static auto LineOfSight = reinterpret_cast<bool(*)(Vector3, Vector3, int, float)>(0);
 
-	//static auto LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), -1, _(""), _(""))));
-
-	//static auto LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, Layers, float, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), 5, _(""), _(""))));
-	//static auto LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), -1, _(""), _(""))));
-
 	static auto LineOfSightInternal = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float, float, uintptr_t)>(0);
-
-	//static auto GetKey = reinterpret_cast<bool(*)(KeyCode)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("GetKeyInt"), 1, _(""), _("UnityEngine"))));
-
-	static auto set_visible = reinterpret_cast<void(*)(bool)>(0);
 
 	static auto get_shader = reinterpret_cast<uintptr_t(*)(uintptr_t material)>(0);
 
@@ -45,81 +30,44 @@ namespace unity {
 	
 	static auto CheckCapsule = reinterpret_cast<bool (*)(Vector3, Vector3, float, int, int)>(0);
 	
-	static auto LoadAllAssets = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, uintptr_t type)>(0);
-
 	static auto LoadFromFile = reinterpret_cast<uintptr_t(*)(System::string path)>(0);
 
 	static auto LoadAsset = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, System::string path, uintptr_t type)>(0);
 
-
 	static auto get_Scattering = reinterpret_cast<uintptr_t(*)(uintptr_t)>(0);
-	
-	static auto get_SpaceMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(0);
-	static auto get_StarMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)> (0);
-	static auto get_SunMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>  (0);
-	static auto get_MoonMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)> (0);
-	static auto get_AtmosphereMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(0);
-	static auto get_ClearMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(0);
-	static auto get_CloudMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(0);
-
-	//static auto Spherecast = reinterpret_cast<bool (*)(Vector3, float, Vector3, RaycastHit*, float, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Physics"), _("SphereCast"), 6, _("origin"), _("UnityEngine"), 1)));
-	//static auto Spherecast = reinterpret_cast<bool (*)(Ray, float, float, int)>(mem::game_assembly_base + 35705904);
 
 	void init_unity() {
-		get_shader = reinterpret_cast<uintptr_t(*)(uintptr_t material)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("get_shader"), 0, _(""), _("UnityEngine"))));
+		get_shader = reinterpret_cast<uintptr_t(*)(uintptr_t material)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oMaterialSetShader));
 
 		set_shader = reinterpret_cast<void(*)(uintptr_t, uintptr_t)>(il2cpp::methods::resolve_icall(_("UnityEngine.Material::set_shader()")));
 
-		//set_lockstate = reinterpret_cast<void(*)(CursorLockMode)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Cursor"), _("set_lockState"), 1, _("value"), _("UnityEngine"))));
+		get_width = reinterpret_cast<int (*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oScreenGetWidth));
 
-		set_visible = reinterpret_cast<void(*)(bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Cursor"), _("set_visible"), 1, _("value"), _("UnityEngine"))));
-
-		get_width = reinterpret_cast<int (*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Screen"), _("get_width"), 0, _(""), _("UnityEngine"))));
-
-		get_height = reinterpret_cast<int (*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Screen"), _("get_height"), 0, _(""), _("UnityEngine"))));
-
-		GetKeyDown = reinterpret_cast<bool(*)(KeyCode key)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("GetKeyDown"), 1, _("key"), _("UnityEngine"), 1)));
+		get_height = reinterpret_cast<int (*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oScreenGetHeight));
 
 		get_main_camera = reinterpret_cast<uintptr_t(*)()>(il2cpp::methods::resolve_icall(_("UnityEngine.Camera::get_main()")));
 
 		IgnoreLayerCollision = reinterpret_cast<void(*)(layer, layer, bool)>(il2cpp::methods::resolve_icall(_("UnityEngine.Physics::IgnoreLayerCollision()")));
 
-		get_keyCode = reinterpret_cast<KeyCode(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Event"), _("get_keyCode"), 0, _(""), _("UnityEngine"))));
-
-		LineOfSight = reinterpret_cast<bool(*)(Vector3, Vector3, int, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSight"), -1, _(""), _(""))));
+		LineOfSight = reinterpret_cast<bool(*)(Vector3, Vector3, int, float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oLineOfSight));
 
 		//LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, Layers, float, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), 5, _(""), _(""))));
 
 		//GetKey = reinterpret_cast<bool(*)(KeyCode)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("GetKeyInt"), 1, _(""), _("UnityEngine"))));
 
-		get_realtimesincestartup = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_realtimeSinceStartup"), 0, _(""), _("UnityEngine"))));
+		get_realtimesincestartup = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGetRealtimeSinceStartup));
 
-		Raycast = reinterpret_cast<bool (*)(Ray, float, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Physics"), _("Raycast"), 0, _(""), _("UnityEngine"))));
+		Raycast = reinterpret_cast<bool (*)(Ray, float, int)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oRaycast));
 
-		LineOfSightInternal = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float, float, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightInternal"), -1, _(""), _(""))));
+		LineOfSightInternal = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float, float, uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oLineOfSightInternal));
 
-		LoadAllAssets = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAllAssets"), 1, _("type"), _("UnityEngine"), 1)));
+		LoadFromFile = reinterpret_cast<uintptr_t(*)(System::string path)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oLoadFromFile));
 
-		LoadFromFile = reinterpret_cast<uintptr_t(*)(System::string path)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadFromFile"), 1, _("path"), _("UnityEngine"), 1)));
+		LoadAsset = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, System::string path, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oLoadAsset));
 
-		LoadAsset = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, System::string path, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAsset"), 2, _("name"), _("UnityEngine"), 1)));
-
-		GetMouseButtonDown = reinterpret_cast<bool(*)(KeyCode button)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("GetMouseButton"), 1, _("button"), _("UnityEngine"), 1)));
-
-		CheckCapsule = reinterpret_cast<bool (*)(Vector3, Vector3, float, int, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("CheckCapsule"), 0, _(""), _(""))));
+		CheckCapsule = reinterpret_cast<bool (*)(Vector3, Vector3, float, int, int)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCheckCapsule));
 		
-		get_Scattering = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("get_Scattering"), 0, _(""), _(""))));
-
-		get_SpaceMaterial = reinterpret_cast<uintptr_t (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("get_SpaceMaterial"), 0, _(""), _(""))));
-		get_StarMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("get_StarMaterial"), 0, _(""), _(""))));
-		get_SunMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("get_SunMaterial"), 0, _(""), _(""))));
-		get_MoonMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("get_MoonMaterial"), 0, _(""), _(""))));
-		get_AtmosphereMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("get_AtmosphereMaterial"), 0, _(""), _(""))));
-		get_ClearMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("get_ClearMaterial"), 0, _(""), _(""))));
-		get_CloudMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("get_CloudMaterial"), 0, _(""), _(""))));
-
-		//Spherecast = reinterpret_cast<bool (*)(Vector3, float, Vector3, RaycastHit*, float, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Physics"), _("SphereCast"), 6, _("origin"), _("UnityEngine"), 1)));
-		//Spherecast = reinterpret_cast<bool (*)(Ray, float, float, int)>(/*instead of il2cpp because seems to hate me use static offset*/ mem::game_assembly_base + 35705904);
+		get_Scattering = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGetScattering));
 	}
 
 	uintptr_t bundle;

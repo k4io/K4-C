@@ -241,4 +241,6 @@ namespace mem {
 		return true;
 	}
 	uintptr_t hook_virtual_function(const char* classname, const char* function_to_hook, void* target, const char* name_space);
+
+	uintptr_t HVF(uintptr_t search, void* our_func, const char* classname);
 }

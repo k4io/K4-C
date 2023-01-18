@@ -230,9 +230,9 @@ uintptr_t eyepos = il2cpp::value(_("PlayerEyes"), _("position"));
 
 uintptr_t swimming = il2cpp::value(_("PlayerWalkMovement"), _("swimming"));
 
-uintptr_t ducking = il2cpp::value(_("BaseMovement"), _("<Ducking>k__BackingField"));
+uintptr_t ducking = il2cpp::value(_("BaseMovement"), _("<Ducking>k__BackingFIELD"));
 
-uintptr_t TargetMovement = il2cpp::value(_("BaseMovement"), _("<TargetMovement>k__BackingField"));
+uintptr_t TargetMovement = il2cpp::value(_("BaseMovement"), _("<TargetMovement>k__BackingFIELD"));
 
 uintptr_t lastHitTime = il2cpp::value(_("Chainsaw"), _("lastHitTime"));
 uintptr_t lastHitMaterial = il2cpp::value(_("Chainsaw"), _("lastHitMaterial"));
@@ -315,303 +315,281 @@ typedef struct Str
 //static auto ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
 
 //static auto setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
-static auto viewmodelplay = reinterpret_cast<void(*)(uintptr_t, System::string, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ViewModel"), _("Play"), 2, _(""), _(""))));
+//static auto viewmodelplay = reinterpret_cast<void(*)(uintptr_t, System::string, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ViewModel"), _("Play"), 2, _(""), _(""))));
+static auto viewmodelplay = reinterpret_cast<void(*)(uintptr_t, System::string, int)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oViewmodelPlay));
 
-static auto set_ambientintensity = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("RenderSettings"), _("set_ambientIntensity"), 1, _(""), _("UnityEngine"))));
+static auto set_ambientintensity = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oset_ambientIntensity));
 
-static auto set_ambientlight = reinterpret_cast<void(*)(uintptr_t, col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Sky"), _("set_AmbientColor"), 1, _(""), _(""))));
+static auto set_ambientlight = reinterpret_cast<void(*)(uintptr_t, col)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + osetAmbientColor));
 
-static auto getmountedvehicle = reinterpret_cast<BaseVehicle * (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMountedVehicle"), 0, _(""), _(""))));
+static auto getmountedvehicle = reinterpret_cast<BaseVehicle * (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGetMountedVehicle));
 
-static auto getmounted = reinterpret_cast<BaseMountable * (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMounted"), 0, _(""), _(""))));
+static auto getmounted = reinterpret_cast<BaseMountable * (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGetMounted));
 
-static auto raycasthit_get_transform = reinterpret_cast<Transform * (*)(RaycastHit*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("RaycastHit"), _("get_transform"), 0, _(""), _("UnityEngine"))));
+static auto raycasthit_get_transform = reinterpret_cast<Transform * (*)(RaycastHit*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oRaycastGetTrans));
 
-static auto bmdoattack = reinterpret_cast<void(*)(BaseMelee*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("DoAttack"), 0, _(""), _(""))));
+static auto bmdoattack = reinterpret_cast<void(*)(BaseMelee*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oDoAttack));
 
-static auto dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
+static auto dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oDontDestroyOnLoad));
 
-static auto create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
+static auto create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oInternal_CreateGameObject));
 
-static auto add_component = reinterpret_cast<Component * (*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_AddComponentWithType"), 0, _(""), _("UnityEngine"))));
+static auto add_component = reinterpret_cast<Component * (*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oInternal_AddComponentWithType));
 
-static auto hasammo = reinterpret_cast<bool(*)(PlayerInventory*, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerInventory"), _("HasAmmo"), 0, _(""), _(""))));
+static auto hasammo = reinterpret_cast<bool(*)(PlayerInventory*, int)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oHasAmmo));
 
-static auto getrenderers = reinterpret_cast<System::list<Renderer*>*(*)(SkinnedMultiMesh*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
+static auto getrenderers = reinterpret_cast<System::list<Renderer*>*(*)(SkinnedMultiMesh*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGet_Renderers));
 
-static auto setmaterial = reinterpret_cast<void(*)(Renderer*, Material*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("set_material"), 0, _(""), _("UnityEngine"))));
+static auto setmaterial = reinterpret_cast<void(*)(Renderer*, Material*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oSet_material));
 
-static auto getmaterial = reinterpret_cast<Material * (*)(Renderer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("get_material"), 0, _(""), _("UnityEngine"))));
+static auto getmaterial = reinterpret_cast<Material * (*)(Renderer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGet_material));
 
-static auto setfloat = reinterpret_cast<void(*)(Material*, System::string, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetFloat"), 2, _("name"), _("UnityEngine"), 1)));
+static auto setfloat = reinterpret_cast<void(*)(Material*, System::string, float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oSet_float));
 
-static auto setcolor = reinterpret_cast<void(*)(Material*, System::string, col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetColor"), 2, _("name"), _("UnityEngine"), 1)));
+static auto setcolor = reinterpret_cast<void(*)(Material*, System::string, col)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oSet_color));
 
-static auto setshader = reinterpret_cast<void(*)(Material*, Shader*)>(il2cpp::methods::resolve_icall(_("UnityEngine.Material::set_shader()")));
+static auto setshader = reinterpret_cast<void(*)(Material*, Shader*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oSet_shader));
 
-static auto getshader = reinterpret_cast<Shader * (*)(Material*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("get_shader"), 0, _(""), _("UnityEngine"))));
+static auto getshader = reinterpret_cast<Shader * (*)(Material*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGet_shader));
 
-static auto canhit = reinterpret_cast<bool (*)(BaseMelee*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("CanHit"), 1, _(""), _(""))));
+static auto canhit = reinterpret_cast<bool (*)(BaseMelee*, HitTest*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBaseMeleeCanHit));
 
-static auto serverrpc = reinterpret_cast<void (*)(BaseEntity*, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
+static auto serverrpc = reinterpret_cast<void (*)(BaseEntity*, System::string)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oServRpc));
 
-static auto getparentvel = reinterpret_cast<Vector3(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetParentVelocity"), 0, _(""), _(""))));
+static auto getparentvel = reinterpret_cast<Vector3(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGetParentVelocity));
 
-static auto sendprojupdate = reinterpret_cast<void(*)(BasePlayer*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("SendProjectileUpdate"), 0, _(""), _(""))));
+static auto sendprojupdate = reinterpret_cast<void(*)(BasePlayer*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oSendProjUpdate));
 
-static auto gamephystrace = reinterpret_cast<bool(*)(Ray r, float f, RaycastHit * r2, float f2, int layer, int querytriggerinteraction)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("Trace"), 0, _(""), _(""))));
+static auto gamephystrace = reinterpret_cast<bool(*)(Ray r, float f, RaycastHit * r2, float f2, int layer, int querytriggerinteraction)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGamephysTrace));
 
-static auto get_localscale = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_localScale"), 0, _(""), _("UnityEngine"))));
+static auto get_localscale = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGet_localscale));
 
-static auto set_localscale = reinterpret_cast<void(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_localScale"), 1, _(""), _("UnityEngine"))));
+static auto set_localscale = reinterpret_cast<void(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oSet_localscale));
 
-static auto launchproj = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("LaunchProjectile"), 0, _(""), _(""))));
+static auto launchproj = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oLaunchProjectile));
 
-static auto capgetheight = reinterpret_cast<float(*)(CapsuleCollider*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("get_height"), 0, _(""), _("UnityEngine"))));
+static auto capgetheight = reinterpret_cast<float(*)(CapsuleCollider*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCapColliderGetHeight));
 
-static auto capsetheight = reinterpret_cast<void(*)(CapsuleCollider*, float f)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("set_height"), 1, _(""), _("UnityEngine"))));
+static auto capsetheight = reinterpret_cast<void(*)(CapsuleCollider*, float f)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCapColliderSetHeight));
 
-static auto capgetrad = reinterpret_cast<float(*)(CapsuleCollider*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("get_radius"), 0, _(""), _("UnityEngine"))));
+static auto capgetrad = reinterpret_cast<float(*)(CapsuleCollider*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCapColliderGetRadius));
 
-static auto capsetrad = reinterpret_cast<void(*)(CapsuleCollider*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("set_radius"), 1, _(""), _("UnityEngine"))));
+static auto capsetrad = reinterpret_cast<void(*)(CapsuleCollider*, float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCapColliderSetRadius));
 
-static auto basemeldothrow = reinterpret_cast<void(*)(BaseMelee*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("DoThrow"), 0, _(""), _(""))));
+static auto basemeldothrow = reinterpret_cast<void(*)(BaseMelee*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBaseMeleeDoThrow));
 
-static auto baseentgetitem = reinterpret_cast<Item * (*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetItem"), 0, _(""), _(""))));
+static auto baseentgetitem = reinterpret_cast<Item * (*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBaseEntGetItem));
 
-static auto item_cmd = reinterpret_cast<void(*)(unsigned int, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("LocalPlayer"), _("ItemCommand"), 2, _(""), _(""))));
+static auto item_cmd = reinterpret_cast<void(*)(unsigned int, System::string)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oLocalPlayerItemCmd));
 
-static auto get_activemodel = reinterpret_cast<uintptr_t(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseViewModel"), _("get_ActiveModel"), 0, _(""), _(""))));
+static auto get_activemodel = reinterpret_cast<uintptr_t(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGet_activemodel));
 
-static auto useaction = reinterpret_cast<void(*)(BasePlayer*, InputState*)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("UseAction"), 1, _(""), _(""))));
+static auto useaction = reinterpret_cast<void(*)(BasePlayer*, InputState*)> (*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerUseAction));
 
-static auto bmclientinput = reinterpret_cast<void(*)(BaseMovement*, InputState*, ModelState*)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("ClientInput"), 2, _(""), _(""))));
+static auto bmclientinput = reinterpret_cast<void(*)(BaseMovement*, InputState*, ModelState*)> (*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPwmClientInput));
 
-static auto timewarnnew = reinterpret_cast<TimeWarning * (*)(System::string, int)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TimeWarning"), _("New"), 2, _(""), _(""))));
+static auto timewarnnew = reinterpret_cast<TimeWarning * (*)(System::string, int)> (*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTimeWarningNew));
 
-static auto heldentinput = reinterpret_cast<void(*)(BasePlayer*)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HeldEntityInput"), 0, _(""), _(""))));
+//static auto heldentinput = reinterpret_cast<void(*)(BasePlayer*)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HeldEntityInput"), 0, _(""), _(""))));
 
-static auto mapinterfacesetopen = reinterpret_cast<void(*)(bool)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("MapInterface"), _("SetOpen"), 1, _(""), _(""))));
+//static auto mapinterfacesetopen = reinterpret_cast<void(*)(bool)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("MapInterface"), _("SetOpen"), 1, _(""), _(""))));
 
-static auto uiinvclose = reinterpret_cast<void(*)()> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("UIInventory"), _("Close"), -1, _(""), _(""))));
+//static auto uiinvclose = reinterpret_cast<void(*)()> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("UIInventory"), _("Close"), -1, _(""), _(""))));
 
-static auto pbclientinput = reinterpret_cast<void(*)(PlayerBelt*, InputState*)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerBelt"), _("ClientInput"), 1, _(""), _(""))));
+//static auto pbclientinput = reinterpret_cast<void(*)(PlayerBelt*, InputState*)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerBelt"), _("ClientInput"), 1, _(""), _(""))));
 
-static auto anyactive = reinterpret_cast<bool(*)(int, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("NeedsKeyboard"), _("AnyActive"), 2, _(""), _(""))));
+static auto anyactive = reinterpret_cast<bool(*)(int, int)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oNeedsKeyboardAnyActive));
 
-static auto haslocalcontrols = reinterpret_cast<bool(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HasLocalControls"), 0, _(""), _(""))));
+static auto haslocalcontrols = reinterpret_cast<bool(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerHasLocalControls));
 
-static auto voicerecclientinput = reinterpret_cast<void(*)(PlayerVoiceRecorder*, InputState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerVoiceRecorder"), _("ClientInput"), 0, _(""), _(""))));
+//static auto voicerecclientinput = reinterpret_cast<void(*)(PlayerVoiceRecorder*, InputState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerVoiceRecorder"), _("ClientInput"), 0, _(""), _(""))));
 
-static auto waterfactor = reinterpret_cast<float(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("WaterFactor"), 0, _(""), _(""))));
+static auto waterfactor = reinterpret_cast<float(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerWaterFactor));
 
-static auto objgetname = reinterpret_cast<System::string * (*)(Object*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("get_name"), 0, _(""), _("UnityEngine"))));
+static auto objgetname = reinterpret_cast<System::string * (*)(Object*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oObjGetName));
 
-static auto lpgetent = reinterpret_cast<BasePlayer * (*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("LocalPlayer"), _("get_Entity"), 0, _(""), _(""))));
+static auto lpgetent = reinterpret_cast<BasePlayer * (*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oLocalPlayerGetEnt));
 
-static auto closestpoint = reinterpret_cast<Vector3(*)(BaseEntity*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ClosestPoint"), 1, _(""), _(""))));
+static auto closestpoint = reinterpret_cast<Vector3(*)(BaseEntity*, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBaseEntClosestPoint));
 
-static auto thrownwpn_inheritedvel = reinterpret_cast<Vector3(*)(AttackEntity*, BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ThrownWeapon"), _("GetInheritedVelocity"), 2, _(""), _(""))));
+static auto thrownwpn_inheritedvel = reinterpret_cast<Vector3(*)(AttackEntity*, BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oThrownWpnGetInheritedVel));
 
-static auto forceposto = reinterpret_cast<void(*)(BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ForcePositionTo"), 1, _(""), _(""))));
+static auto forceposto = reinterpret_cast<void(*)(BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerForcePosTo));
 
-static auto getignore = reinterpret_cast<bool(*)(TerrainCollision*, Vector3, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainCollision"), _("GetIgnore"), 2, _(""), _(""))));
+static auto getignore = reinterpret_cast<bool(*)(TerrainCollision*, Vector3, float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTerrainCollisionGetIgnore));
 
-static auto sampleheight = reinterpret_cast<float(*)(Terrain*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Terrain"), _("SampleHeight"), 1, _(""), _("UnityEngine"))));
+static auto sampleheight = reinterpret_cast<float(*)(Terrain*, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTerrainSampleHeight));
 
-static auto thmgetheight = reinterpret_cast<float(*)(TerrainHeightMap*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetHeight"), 1, _(""), _(""))));
+static auto thmgetheight = reinterpret_cast<float(*)(TerrainHeightMap*, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTerrainHeightMapGetHeight));
 
-static auto transgetpos = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
+static auto transgetpos = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTransGetPos));
 
-static auto transgetrot = reinterpret_cast<Vector4(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
+static auto transgetrot = reinterpret_cast<Vector4(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTransGetRot));
 
-static auto transsetrot = reinterpret_cast<void(*)(Transform*, Vector4)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_rotation"), 0, _(""), _("UnityEngine"))));
+static auto transsetrot = reinterpret_cast<void(*)(Transform*, Vector4)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTransSetRot));
 
-static auto transsetpos = reinterpret_cast<void(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 0, _(""), _("UnityEngine"))));
+static auto transsetpos = reinterpret_cast<void(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTransSetPos));
 
 static auto Sphere = reinterpret_cast<void (*)(Vector3 vPos, float fRadius, col color, float fDuration, bool distanceFade)>(0);
 
 static auto Capsule = reinterpret_cast<void (*)(Vector3, Vector4, float, float, col, float, bool)>(0);
 
-static auto GetNormal = reinterpret_cast<Vector3(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetNormal"), 1, _(""), _(""))));
+static auto GetNormal = reinterpret_cast<Vector3(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTerrainHeightMapGetNormal));
 
-static auto get_visplayerlist = reinterpret_cast<System::Array<BasePlayer*>*(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("get_VisiblePlayerList"), -1, _(""), _(""))));
+static auto GetSpeed = reinterpret_cast<float (*)(BasePlayer * baseplayer, float running, float ducking, float crawling)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerGetSpeed));
 
-static auto GetSpeed = reinterpret_cast<float (*)(BasePlayer * baseplayer, float running, float ducking, float crawling)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetSpeed"), 3, _(""), _(""))));
+static auto IsSwimming = reinterpret_cast<bool (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerIsSwimming));
 
-static auto IsSwimming = reinterpret_cast<bool (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("IsSwimming"), 0, _(""), _(""))));
+static auto Line = reinterpret_cast<void (*)(Vector3, Vector3, col, float, bool, bool)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oDdrawLine));
 
-static auto Line = reinterpret_cast<void (*)(Vector3, Vector3, col, float, bool, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Line"), 6, _(""), _("UnityEngine"))));
+static auto GetIndex = reinterpret_cast<int(*)(uintptr_t SkinSetCollection, float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oSkinSetGetIndex));
 
-static auto GetIndex = reinterpret_cast<int(*)(uintptr_t SkinSetCollection, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinSetCollection"), _("GetIndex"), 1, _(""), _(""))));
+static auto set_onLadder = reinterpret_cast<void(*)(ModelState*, bool)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oModelStateSet_OnLadder));
 
-static auto set_onLadder = reinterpret_cast<void(*)(ModelState*, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_onLadder"), 1, _(""), _(""))));
+static auto HasPlayerFlag = reinterpret_cast<bool(*)(BasePlayer*, PlayerFlags)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerHasPlayerFlag));
 
-static auto HasPlayerFlag = reinterpret_cast<bool(*)(BasePlayer*, PlayerFlags)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HasPlayerFlag"), 1, _(""), _(""))));
+static auto StringPool_Get = reinterpret_cast<unsigned int(*)(System::string)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oStringPoolGet));
 
-static auto get_iconSprite = reinterpret_cast<uintptr_t(*)(Item * Item)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Item"), _("get_iconSprite"), 0, _(""), _(""))));
+static auto set_timeScale = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTimeSetTimescale));
 
-static auto get_texture = reinterpret_cast<uintptr_t(*)(uintptr_t sprite)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Sprite"), _("get_texture"), 0, _(""), _("UnityEngine"))));
+static auto get_frameCount = reinterpret_cast<int(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTimeGetFrameCount));
 
-static auto get_rect = reinterpret_cast<Rect(*)(uintptr_t sprite)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Sprite"), _("get_rect"), 0, _(""), _("UnityEngine"))));
+static auto get_timeScale = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTimeGetTimescale));
 
-static auto StringPool_Get = reinterpret_cast<unsigned int(*)(System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("StringPool"), _("Get"), 1, _("str"), _(""))));
+static auto FloorToInt = reinterpret_cast<int (*)(float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oFloorToInt));
 
-static auto set_timeScale = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("set_timeScale"), 1, _(""), _("UnityEngine"))));
+static auto get_gravity = reinterpret_cast<Vector3(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPhysicsGetGravity));
 
-static auto get_frameCount = reinterpret_cast<int(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_frameCount"), 0, _(""), _("UnityEngine"))));
+static auto get_isAlive = reinterpret_cast<bool (*)(BaseProjectile*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oProjGetIsAlive));
 
-static auto get_timeScale = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_timeScale"), 0, _(""), _("UnityEngine"))));
+static auto FindShader = reinterpret_cast<uintptr_t(*)(System::string)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oFindShader));
 
-static auto get_mousePosition = reinterpret_cast<Vector3(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("get_mousePosition"), 0, _(""), _("UnityEngine"))));
+static auto set_hideFlags = reinterpret_cast<void(*)(uintptr_t material, int value)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oObjSetHideFlags));
 
-static auto FloorToInt = reinterpret_cast<int (*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Mathf"), _("FloorToInt"), 1, _(""), _("UnityEngine"))));
+static auto set_name = reinterpret_cast<void(*)(uintptr_t, System::string)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oObjGetName));
 
-static auto get_gravity = reinterpret_cast<Vector3(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Physics"), _("get_gravity"), 1, _(""), _("UnityEngine"))));
+static auto SetInt = reinterpret_cast<void(*)(uintptr_t material, System::string name, int value)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oMaterialSetInt));
 
-static auto get_isAlive = reinterpret_cast<bool (*)(BaseProjectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("get_isAlive"), 0, _(""), _(""))));
+static auto get_deltaTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTimeGetDeltaTime));
 
-static auto get_rotation = reinterpret_cast<Vector4(*)(uintptr_t Transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
+static auto get_smoothdeltaTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTimeGetSmoothDeltaTime));
 
-static auto FindShader = reinterpret_cast<uintptr_t(*)(System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Shader"), _("Find"), 1, _(""), _("UnityEngine"))));
+static auto get_fixeddeltaTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTimeGetFixedDeltaTime));
 
-static auto set_hideFlags = reinterpret_cast<void(*)(uintptr_t material, int value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("set_hideFlags"), 1, _(""), _("UnityEngine"))));
+static auto get_fixedTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTimeGetFixedTime));
 
-static auto set_name = reinterpret_cast<void(*)(uintptr_t, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("set_name"), 1, _(""), _("UnityEngine"))));
+static auto get_IsNpc = reinterpret_cast<bool(*)(uintptr_t player_model)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerModelGetIsNpc));
 
-static auto SetInt = reinterpret_cast<void(*)(uintptr_t material, System::string name, int value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetInt"), 1, _(""), _("UnityEngine"))));
+static auto get_time = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTimeGetTime));
 
-static auto get_deltaTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_deltaTime"), 0, _(""), _("UnityEngine"))));
+static auto _InverseTransformPoint = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oInverseTransformPoint));
 
-static auto get_smoothdeltaTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_smoothDeltaTime"), 0, _(""), _("UnityEngine"))));
+static auto _InverseTransformDirection = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oInverseTransformDir));
 
-static auto get_fixeddeltaTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_fixedDeltaTime"), 0, _(""), _("UnityEngine"))));
+static auto get_localToWorldMatrix = reinterpret_cast<VMatrix(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGet_localworldtomatrix));
 
-static auto get_fixedTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_fixedTime"), 0, _(""), _("UnityEngine"))));
+static auto get_gameObject = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCompGetGameObject));
 
-static auto get_IsNpc = reinterpret_cast<bool(*)(uintptr_t player_model)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerModel"), _("get_IsNpc"), -1, _(""), _(""))));
+static auto get_component = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCompGetComponent));
 
-static auto get_time = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_time"), 0, _(""), _("UnityEngine"))));
+static auto get_components_in_children = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCompGetComponentsInChildren));
 
-static auto _InverseTransformPoint = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
+static auto get_up = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTransGetUp));
 
-static auto _InverseTransformDirection = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformDirection"), 1, _(""), _("UnityEngine"))));
+static auto LookRotation = reinterpret_cast<Vector4(*)(Vector3, Vector3 value)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oQuaternionLookRot));
 
-static auto get_localToWorldMatrix = reinterpret_cast<VMatrix(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_localToWorldMatrix"), 0, _(""), _("UnityEngine"))));
+static auto StartAttackCooldown = reinterpret_cast<void(*)(AttackEntity*, float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oStartAttackCooldown));
 
-static auto get_gameObject = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_gameObject"), 0, _(""), _("UnityEngine"))));
+static auto ProcessAttack = reinterpret_cast<void(*)(BaseMelee*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBaseMeleeProcessAttack));
 
-static auto get_component = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("GetComponent"), 0, _(""), _("UnityEngine"))));
-
-static auto get_components_in_children = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("GetComponentsInChildren"), 0, _(""), _("UnityEngine"))));
-
-static auto set_position = reinterpret_cast<void(*)(Transform*, Vector3 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 1, _(""), _("UnityEngine"))));
-
-static auto get_up = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_up"), 0, _(""), _("UnityEngine"))));
-
-static auto LookRotation = reinterpret_cast<Vector4(*)(Vector3, Vector3 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Quaternion"), _("LookRotation"), 2, _(""), _("UnityEngine"))));
-
-static auto set_rotation = reinterpret_cast<void(*)(Transform*, Vector4 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_rotation"), 1, _(""), _("UnityEngine"))));
-
-static auto StartAttackCooldown = reinterpret_cast<void(*)(AttackEntity*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AttackEntity"), _("StartAttackCooldown"), 1, _(""), _(""))));
-
-static auto ProcessAttack = reinterpret_cast<void(*)(BaseMelee*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("ProcessAttack"), 1, _(""), _(""))));
-
-static auto GetProjectileVelocityScale = reinterpret_cast<float(*)(BaseProjectile*, bool max)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("GetProjectileVelocityScale"), 1, _("getMax"), _(""), 1)));
+static auto GetProjectileVelocityScale = reinterpret_cast<float(*)(BaseProjectile*, bool max)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGetProjectileVelocityScale));
 
 //static auto get_Renderers = reinterpret_cast<System::list<uintptr_t>*(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
 
-static auto get_material = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("get_material"), 0, _(""), _("UnityEngine"))));
+static auto get_material = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oRendererGetMaterial));
 
-static auto set_material = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("set_material"), 0, _(""), _("UnityEngine"))));
+static auto set_material = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oRendererSetMaterial));
 
-static auto get_maxspeed = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMaxSpeed"), 0, _(""), _(""))));
+static auto get_maxspeed = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerGetMaxSpeed));
 
-static auto SendSignal = reinterpret_cast<void(*)(uintptr_t, Signal, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("SendSignalBroadcast"), 2, _(""), _(""))));
+static auto SendSignal = reinterpret_cast<void(*)(uintptr_t, Signal, System::string)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oSendSignalBroadcast));
 
-static auto _BoundsPadding = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("BoundsPadding"), 2, _(""), _(""))));
+static auto _BoundsPadding = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerBoundsPadding));
 
-static auto PEyes_get_position = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_position"), 0, _(""), _(""))));
+static auto PEyes_get_position = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyesGetPos));
 
-static auto get_center = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_center"), 0, _(""), _(""))));
+static auto get_center = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyesGetCenter));
 
-static auto PEyes_get_rotation = reinterpret_cast<Vector4(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_rotation"), 0, _(""), _(""))));
+static auto PEyes_get_rotation = reinterpret_cast<Vector4(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyesGetRot));
 
-static auto headforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("HeadForward"), 0, _(""), _(""))));
+static auto headforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyesHeadFwd));
 
-static auto bodyforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("BodyForward"), 0, _(""), _(""))));
+static auto bodyforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyesBodyFwd));
 
-static auto headright = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("HeadRight"), 0, _(""), _(""))));
+static auto headright = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyesHeadRight));
 
-static auto bodyright = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("BodyRight"), 0, _(""), _(""))));
+static auto bodyright = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyesBodyRight));
 
-static auto _SendClientTick = reinterpret_cast<void(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("SendClientTick"), 0, _(""), _(""))));
+static auto _SendClientTick = reinterpret_cast<void(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerSendClientTick));
 
-static auto _getjumpheight = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetJumpHeight"), 0, _(""), _(""))));
+static auto _getjumpheight = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerGetJumpHeight));
 
-static auto _GetRadius = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetRadius"), 0, _(""), _(""))));
+static auto _GetRadius = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerGetRadius));
 
-static auto GetHeight = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetHeight"), 0, _(""), _(""))));
+static auto GetHeight = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerGetHeight));
 
-static auto terrainheightmap_GetHeight = reinterpret_cast<int(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetHeight"), 0, _(""), _(""))));
+static auto terrainheightmap_GetHeight = reinterpret_cast<int(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTerrainHeightMapGetHeight));
 
-static auto updateammodisplay = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("UpdateAmmoDisplay"), 0, _(""), _(""))));
+static auto updateammodisplay = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oUpdateAmmoDisplay));
 
-static auto shot_fired = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("ShotFired"), 0, _(""), _(""))));
+static auto shot_fired = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oShotFired));
 
-static auto did_attack_client_side = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("DidAttackClientside"), 0, _(""), _(""))));
+static auto did_attack_client_side = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oDidAttackClientSide));
 
-static auto getmodifiedaimcone = reinterpret_cast<Vector3(*)(float, Vector3, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AimConeUtil"), _("GetModifiedAimConeDirection"), 0, _(""), _(""))));
+static auto getmodifiedaimcone = reinterpret_cast<Vector3(*)(float, Vector3, bool)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGetModifiedAimCone));
 
-static auto canaffordupgrade = reinterpret_cast<bool(*)(uintptr_t, BuildingGrade, BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BuildingBlock"), _("CanAffordUpgrade"), 0, _(""), _(""))));
+static auto canaffordupgrade = reinterpret_cast<bool(*)(uintptr_t, BuildingGrade, BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCanAffordUpgrade));
 
-static auto canchangetograde = reinterpret_cast<bool(*)(uintptr_t, BuildingGrade, BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BuildingBlock"), _("CanChangeToGrade"), 0, _(""), _(""))));
+static auto canchangetograde = reinterpret_cast<bool(*)(uintptr_t, BuildingGrade, BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCanChangeToGrade));
 
-static auto upgradetograde = reinterpret_cast<void(*)(uintptr_t, BuildingGrade, BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BuildingBlock"), _("UpgradeToGrade"), 0, _(""), _(""))));
+static auto upgradetograde = reinterpret_cast<void(*)(uintptr_t, BuildingGrade, BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oUpgradeToGrade));
 
-static auto set_jumped = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_jumped"), 0, _(""), _(""))));
-static auto set_sprinting = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_sprinting"), 0, _(""), _(""))));
-static auto set_aiming = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_aiming"), 0, _(""), _(""))));
-static auto set_ducked = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_ducked"), 0, _(""), _(""))));
+static auto set_jumped = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oModelStateSetJumped));
+static auto set_sprinting = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oModelStateSetSprint));
+static auto set_aiming = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oModelStateSetAiming));
+static auto set_ducked = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oModelStateSetDucked));
 
-static auto do_jump = reinterpret_cast<void(*)(uintptr_t, uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("Jump"), 0, _(""), _(""))));
+static auto do_jump = reinterpret_cast<void(*)(uintptr_t, uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPwmJump));
 
-static auto set_rigidbody_velocity = reinterpret_cast<void(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Rigidbody"), _("set_velocity"), 0, _(""), _("UnityEngine"))));
+static auto set_rigidbody_velocity = reinterpret_cast<void(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oRigidBodySetVel));
 
-static auto get_rigidbody_velocity = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Rigidbody"), _("get_velocity"), 0, _(""), _("UnityEngine"))));
+static auto get_rigidbody_velocity = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oRigidBodyGetVel));
 
-static auto console_msg = reinterpret_cast<void(*)(uintptr_t, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ConsoleMessage"), 0, _(""), _(""))));
+static auto console_msg = reinterpret_cast<void(*)(uintptr_t, System::string)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerConsoleMessage));
 
-static auto teleportto = reinterpret_cast<void(*)(uintptr_t, Vector3, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMovement"), _("TeleportTo"), 0, _(""), _(""))));
+static auto teleportto = reinterpret_cast<void(*)(uintptr_t, Vector3, uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBaseMovementTeleportTo));
 
-static auto GetAimCone = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("GetAimCone"), 0, _(""), _(""))));
+static auto GetAimCone = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBaseProjectileGetAimCone));
 
-static auto animcurve_evaluate = reinterpret_cast<float(*)(uintptr_t, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AnimationCurve"), _("Evaluate"), 0, _(""), _("UnityEngine"))));
+static auto animcurve_evaluate = reinterpret_cast<float(*)(uintptr_t, float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oAnimCurveEval));
 
-static auto guidtopath = reinterpret_cast<System::string(*)(System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameManifest"), _("GUIDToPath"), 0, _(""), _(""))));
+static auto guidtopath = reinterpret_cast<System::string(*)(System::string)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGuidToPath));
 
-static auto GetBounds = reinterpret_cast<Bounds(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetBounds"), 0, _(""), _(""))));
+static auto GetBounds = reinterpret_cast<Bounds(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerGetBounds));
 
-static auto get_mounted = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMounted"), 0, _(""), _(""))));
+static auto get_mounted = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerGetMounted));
 
-static auto get_parent_entity = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseNetworkable"), _("GetParentEntity"), 0, _(""), _(""))));
+static auto get_parent_entity = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGetParentEnt));
 
-static auto get_short_prefab_name = reinterpret_cast<System::string(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseNetworkable"), _("get_ShortPrefabName"), 0, _(""), _(""))));
+static auto get_short_prefab_name = reinterpret_cast<System::string(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBaseNetworkableGetShortPrefabName));
 
-static auto get_game_object_transform = reinterpret_cast<Transform * (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("get_transform"), 0, _(""), _("UnityEngine"))));
+static auto get_game_object_transform = reinterpret_cast<Transform * (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGameObjGetTrans));
 
-static auto get_max_fwd_speed = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModularCar"), _("GetMaxForwardSpeed"), 0, _(""), _(""))));
+static auto get_max_fwd_speed = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oModularCarGetMaxFwdSpeed));
 
-static auto set_SpaceMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_SpaceMaterial"), 0, _(""), _(""))));
-static auto set_StarMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_StarMaterial"), 0, _(""), _(""))));
-static auto set_SunMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_SunMaterial"), 0, _(""), _(""))));
-static auto set_MoonMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_MoonMaterial"), 0, _(""), _(""))));
-static auto set_AtmosphereMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_AtmosphereMaterial"), 0, _(""), _(""))));
-static auto set_ClearMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_ClearMaterial"), 0, _(""), _(""))));
-static auto set_CloudMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_CloudMaterial"), 0, _(""), _(""))));
-static auto getiteminslot = reinterpret_cast<uintptr_t(*)(PlayerBelt*, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerBelt"), _("GetItemInSlot"), 0, _(""), _(""))));
-static auto gettrans = reinterpret_cast<uintptr_t(*)(Component*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
-static auto _Text = reinterpret_cast<void (*)(System::string, Vector3, col, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Text"), 4, _(""), _("UnityEngine"))));
+static auto getiteminslot = reinterpret_cast<uintptr_t(*)(PlayerBelt*, int)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerBeltGetItemInSlot));
+static auto gettrans = reinterpret_cast<uintptr_t(*)(Component*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCompGetTrans));
+static auto _Text = reinterpret_cast<void (*)(System::string, Vector3, col, float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oDdrawText));
 #pragma endregion
 
 class col {
@@ -633,170 +611,280 @@ float current_time;
 void init_bp() {
 	//setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
 	//ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
-	_Text = reinterpret_cast<void (*)(System::string, Vector3, col, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Text"), 4, _(""), _("UnityEngine"))));
-	viewmodelplay = reinterpret_cast<void(*)(uintptr_t, System::string, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ViewModel"), _("Play"), 2, _(""), _(""))));
-	set_ambientintensity = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("RenderSettings"), _("set_ambientIntensity"), 1, _(""), _("UnityEngine"))));
-	set_ambientlight = reinterpret_cast<void(*)(uintptr_t, col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Sky"), _("set_AmbientColor"), 1, _(""), _(""))));
-	transsetrot = reinterpret_cast<void(*)(Transform*, Vector4)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_rotation"), 0, _(""), _("UnityEngine"))));
-	getmountedvehicle = reinterpret_cast<BaseVehicle * (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMountedVehicle"), 0, _(""), _(""))));
-	getmounted = reinterpret_cast<BaseMountable * (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMounted"), 0, _(""), _(""))));
-	raycasthit_get_transform = reinterpret_cast<Transform * (*)(RaycastHit*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("RaycastHit"), _("get_transform"), 0, _(""), _("UnityEngine"))));
-	bmdoattack = reinterpret_cast<void(*)(BaseMelee*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("DoAttack"), 0, _(""), _(""))));
-	dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
-	create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
-	add_component = reinterpret_cast<Component * (*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_AddComponentWithType"), 0, _(""), _("UnityEngine"))));
+	viewmodelplay = reinterpret_cast<void(*)(uintptr_t, System::string, int)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oViewmodelPlay));
 
-	hasammo = reinterpret_cast<bool(*)(PlayerInventory*, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerInventory"), _("HasAmmo"), 0, _(""), _(""))));
-	getrenderers = reinterpret_cast<System::list<Renderer*>*(*)(SkinnedMultiMesh*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
-	setmaterial = reinterpret_cast<void(*)(Renderer*, Material*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("set_material"), 0, _(""), _("UnityEngine"))));
-	getmaterial = reinterpret_cast<Material * (*)(Renderer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("get_material"), 0, _(""), _("UnityEngine"))));
-	setfloat = reinterpret_cast<void(*)(Material*, System::string, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetFloat"), 2, _("name"), _("UnityEngine"), 1)));
-	setcolor = reinterpret_cast<void(*)(Material*, System::string, col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetColor"), 2, _("name"), _("UnityEngine"), 1)));
-	setshader = reinterpret_cast<void(*)(Material*, Shader*)>(il2cpp::methods::resolve_icall(_("UnityEngine.Material::set_shader()")));
-	getshader = reinterpret_cast<Shader * (*)(Material*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("get_shader"), 0, _(""), _("UnityEngine"))));
-	canhit = reinterpret_cast<bool (*)(BaseMelee*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("CanHit"), 1, _(""), _(""))));
-	serverrpc = reinterpret_cast<void (*)(BaseEntity*, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
-	getparentvel = reinterpret_cast<Vector3(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetParentVelocity"), 0, _(""), _(""))));
-	transgetrot = reinterpret_cast<Vector4(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
-	gettrans = reinterpret_cast<uintptr_t(*)(Component*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
-	get_game_object_transform = reinterpret_cast<Transform * (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("get_transform"), 0, _(""), _("UnityEngine"))));
-	sendprojupdate = reinterpret_cast<void(*)(BasePlayer*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("SendProjectileUpdate"), 0, _(""), _(""))));
-	gamephystrace = reinterpret_cast<bool(*)(Ray r, float f, RaycastHit * r2, float f2, int layer, int querytriggerinteraction)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("Trace"), 0, _(""), _(""))));
-	headright = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("HeadRight"), 0, _(""), _(""))));
-	headforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("HeadForward"), 0, _(""), _(""))));
-	get_localscale = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_localScale"), 0, _(""), _("UnityEngine"))));
-	set_localscale = reinterpret_cast<void(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_localScale"), 1, _(""), _("UnityEngine"))));
-	launchproj = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("LaunchProjectile"), 0, _(""), _(""))));
-	capgetheight = reinterpret_cast<float(*)(CapsuleCollider*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("get_height"), 0, _(""), _("UnityEngine"))));
-	capsetheight = reinterpret_cast<void(*)(CapsuleCollider*, float f)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("set_height"), 1, _(""), _("UnityEngine"))));
-	capgetrad = reinterpret_cast<float(*)(CapsuleCollider*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("get_radius"), 0, _(""), _("UnityEngine"))));
-	capsetrad = reinterpret_cast<void(*)(CapsuleCollider*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("CapsuleCollider"), _("set_radius"), 0, _(""), _("UnityEngine"))));
-	basemeldothrow = reinterpret_cast<void(*)(BaseMelee*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("DoThrow"), 0, _(""), _(""))));
-	baseentgetitem = reinterpret_cast<Item * (*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetItem"), 0, _(""), _(""))));
-	item_cmd = reinterpret_cast<void(*)(unsigned int, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("LocalPlayer"), _("ItemCommand"), 2, _(""), _(""))));
-	get_activemodel = reinterpret_cast<uintptr_t(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseViewModel"), _("get_ActiveModel"), 0, _(""), _(""))));
-	useaction = reinterpret_cast<void(*)(BasePlayer*, InputState*)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("UseAction"), 1, _(""), _(""))));
-	bmclientinput = reinterpret_cast<void(*)(BaseMovement*, InputState*, ModelState*)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("ClientInput"), 2, _(""), _(""))));
-	timewarnnew = reinterpret_cast<TimeWarning * (*)(System::string, int)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TimeWarning"), _("New"), 2, _(""), _(""))));
-	heldentinput = reinterpret_cast<void(*)(BasePlayer*)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HeldEntityInput"), 0, _(""), _(""))));
-	mapinterfacesetopen = reinterpret_cast<void(*)(bool)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("MapInterface"), _("SetOpen"), 1, _(""), _(""))));
-	uiinvclose = reinterpret_cast<void(*)()> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("UIInventory"), _("Close"), -1, _(""), _(""))));
-	pbclientinput = reinterpret_cast<void(*)(PlayerBelt*, InputState*)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerBelt"), _("ClientInput"), 1, _(""), _(""))));
-	anyactive = reinterpret_cast<bool(*)(int, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("NeedsKeyboard"), _("AnyActive"), 2, _(""), _(""))));
-	haslocalcontrols = reinterpret_cast<bool(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HasLocalControls"), 0, _(""), _(""))));
-	voicerecclientinput = reinterpret_cast<void(*)(PlayerVoiceRecorder*, InputState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerVoiceRecorder"), _("ClientInput"), 0, _(""), _(""))));
-	waterfactor = reinterpret_cast<float(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("WaterFactor"), 0, _(""), _(""))));
-	set_sprinting = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_sprinting"), 0, _(""), _(""))));
-	set_aiming = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_aiming"), 0, _(""), _(""))));
-	set_ducked = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_ducked"), 0, _(""), _(""))));
-	objgetname = reinterpret_cast<System::string * (*)(Object*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("get_name"), 0, _(""), _("UnityEngine"))));
-	lpgetent = reinterpret_cast<BasePlayer * (*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("LocalPlayer"), _("get_Entity"), 0, _(""), _(""))));
-	closestpoint = reinterpret_cast<Vector3(*)(BaseEntity*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ClosestPoint"), 1, _(""), _(""))));
-	thrownwpn_inheritedvel = reinterpret_cast<Vector3(*)(AttackEntity*, BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ThrownWeapon"), _("GetInheritedVelocity"), 2, _(""), _(""))));
-	forceposto = reinterpret_cast<void(*)(BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ForcePositionTo"), 1, _(""), _(""))));
-	getignore = reinterpret_cast<bool(*)(TerrainCollision*, Vector3, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainCollision"), _("GetIgnore"), 2, _(""), _(""))));
-	sampleheight = reinterpret_cast<float(*)(Terrain*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Terrain"), _("SampleHeight"), 1, _(""), _("UnityEngine"))));
-	thmgetheight = reinterpret_cast<float(*)(TerrainHeightMap*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetHeight"), 1, _(""), _(""))));
-	transsetpos = reinterpret_cast<void(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 0, _(""), _("UnityEngine"))));
-	getiteminslot = reinterpret_cast<uintptr_t(*)(PlayerBelt*, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerBelt"), _("GetItemInSlot"), 0, _(""), _(""))));
-	transgetpos = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
-	get_visplayerlist = reinterpret_cast<System::Array<BasePlayer*>*(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("get_VisiblePlayerList"), -1, _(""), _(""))));
-	damageProperties = il2cpp::value(_("BaseMelee"), _("damageProperties"));
-	get_center = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_center"), 0, _(""), _(""))));
-	get_max_fwd_speed = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModularCar"), _("GetMaxForwardSpeed"), 0, _(""), _(""))));
-	get_short_prefab_name = reinterpret_cast<System::string(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseNetworkable"), _("get_ShortPrefabName"), 0, _(""), _(""))));
-	get_parent_entity = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseNetworkable"), _("GetParentEntity"), 0, _(""), _(""))));
-	get_mounted = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMounted"), 0, _(""), _(""))));
-	terrainheightmap_GetHeight = reinterpret_cast<int(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetHeight"), 0, _(""), _(""))));
-	GetNormal = reinterpret_cast<Vector3(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetNormal"), 1, _(""), _(""))));
-	Line = reinterpret_cast<void (*)(Vector3, Vector3, col, float, bool, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Line"), 6, _(""), _("UnityEngine"))));
-	set_onLadder = reinterpret_cast<void(*)(ModelState*, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_onLadder"), 1, _(""), _(""))));
-	HasPlayerFlag = reinterpret_cast<bool(*)(BasePlayer*, PlayerFlags)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HasPlayerFlag"), 1, _(""), _(""))));
-	get_rect = reinterpret_cast<Rect(*)(uintptr_t sprite)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Sprite"), _("get_rect"), 0, _(""), _("UnityEngine"))));
-	get_iconSprite = reinterpret_cast<uintptr_t(*)(Item * Item)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Item"), _("get_iconSprite"), 0, _(""), _(""))));
-	steamItem = il2cpp::value(_("ItemDefinition"), _("steamItem"));
-	iconSprite = il2cpp::value(_("ItemDefinition"), _("iconSprite"));
-	get_texture = reinterpret_cast<uintptr_t(*)(uintptr_t sprite)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Sprite"), _("get_texture"), 0, _(""), _("UnityEngine"))));
-	set_name = reinterpret_cast<void(*)(uintptr_t, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("set_name"), 1, _(""), _("UnityEngine"))));;
-	get_gameObject = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_gameObject"), 0, _(""), _("UnityEngine"))));
-	_InverseTransformDirection = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformDirection"), 1, _(""), _("UnityEngine"))));
-	LookRotation = reinterpret_cast<Vector4(*)(Vector3, Vector3 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Quaternion"), _("LookRotation"), 2, _(""), _("UnityEngine"))));
-	set_rotation = reinterpret_cast<void(*)(Transform*, Vector4 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_rotation"), 1, _(""), _("UnityEngine"))));
-	set_position = reinterpret_cast<void(*)(Transform*, Vector3 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 1, _(""), _("UnityEngine"))));
-	SetInt = reinterpret_cast<void(*)(uintptr_t material, System::string name, int value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetInt"), 1, _(""), _("UnityEngine"))));
-	set_hideFlags = reinterpret_cast<void(*)(uintptr_t material, int value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("set_hideFlags"), 1, _(""), _("UnityEngine"))));
-	FindShader = reinterpret_cast<uintptr_t(*)(System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Shader"), _("Find"), 1, _(""), _("UnityEngine"))));
-	//get_Renderers = reinterpret_cast<System::list<uintptr_t> *(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
-	//get_material = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("get_material"), 0, _(""), _("UnityEngine"))));
-	StringPool_Get = reinterpret_cast<unsigned int(*)(System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("StringPool"), _("Get"), 1, _("str"), _(""))));
-	set_timeScale = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("set_timeScale"), 1, _(""), _("UnityEngine"))));
-	get_timeScale = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_timeScale"), 0, _(""), _("UnityEngine"))));
-	GetIndex = reinterpret_cast<int(*)(uintptr_t SkinSetCollection, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinSetCollection"), _("GetIndex"), 1, _(""), _(""))));
-	FloorToInt = reinterpret_cast<int (*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Mathf"), _("FloorToInt"), 1, _(""), _("UnityEngine"))));
-	get_gravity = reinterpret_cast<Vector3(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Physics"), _("get_gravity"), 1, _(""), _("UnityEngine"))));
-	get_isAlive = reinterpret_cast<bool (*)(BaseProjectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("get_isAlive"), 0, _(""), _(""))));
-	get_mousePosition = reinterpret_cast<Vector3(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("get_mousePosition"), 0, _(""), _("UnityEngine"))));
-	GetSpeed = reinterpret_cast<float (*)(BasePlayer * baseplayer, float running, float ducking, float crawling)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetSpeed"), 3, _(""), _(""))));
-	get_frameCount = reinterpret_cast<int(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_frameCount"), 0, _(""), _("UnityEngine"))));
-	get_rotation = reinterpret_cast<Vector4(*)(uintptr_t Transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
-	GetBounds = reinterpret_cast<Bounds(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetBounds"), 0, _(""), _(""))));
-	bodyright = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("BodyRight"), 0, _(""), _(""))));
-	get_components_in_children = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("GetComponentsInChildren"), 0, _(""), _("UnityEngine"))));
-	get_component = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("GetComponent"), 0, _(""), _("UnityEngine"))));
+	set_ambientintensity = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oset_ambientIntensity));
 
-	PEyes_get_position = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_position"), 0, _(""), _(""))));
+	set_ambientlight = reinterpret_cast<void(*)(uintptr_t, col)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + osetAmbientColor));
 
-	_GetRadius = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetRadius"), 0, _(""), _(""))));
+	getmountedvehicle = reinterpret_cast<BaseVehicle * (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGetMountedVehicle));
 
-	_getjumpheight = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetJumpHeight"), 0, _(""), _(""))));
+	getmounted = reinterpret_cast<BaseMountable * (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGetMounted));
 
-	_BoundsPadding = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("BoundsPadding"), 2, _(""), _(""))));
+	raycasthit_get_transform = reinterpret_cast<Transform * (*)(RaycastHit*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oRaycastGetTrans));
 
-	_SendClientTick = reinterpret_cast<void(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("SendClientTick"), 0, _(""), _(""))));
+	bmdoattack = reinterpret_cast<void(*)(BaseMelee*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oDoAttack));
 
-	get_maxspeed = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMaxSpeed"), 0, _(""), _(""))));
+	dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oDontDestroyOnLoad));
 
-	get_up = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_up"), 0, _(""), _("UnityEngine"))));
+	create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oInternal_CreateGameObject));
 
-	get_fixedTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_fixedTime"), 0, _(""), _("UnityEngine"))));
+	add_component = reinterpret_cast<Component * (*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oInternal_AddComponentWithType));
 
-	SendSignal = reinterpret_cast<void(*)(uintptr_t, Signal, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("SendSignalBroadcast"), 2, _(""), _(""))));
+	hasammo = reinterpret_cast<bool(*)(PlayerInventory*, int)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oHasAmmo));
 
-	updateammodisplay = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("UpdateAmmoDisplay"), 0, _(""), _(""))));
+	getrenderers = reinterpret_cast<System::list<Renderer*>*(*)(SkinnedMultiMesh*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGet_Renderers));
 
-	shot_fired = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("ShotFired"), 0, _(""), _(""))));
+	setmaterial = reinterpret_cast<void(*)(Renderer*, Material*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oSet_material));
 
-	did_attack_client_side = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("DidAttackClientside"), 0, _(""), _(""))));
+	getmaterial = reinterpret_cast<Material * (*)(Renderer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGet_material));
 
-	bodyforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("BodyForward"), 0, _(""), _(""))));
+	setfloat = reinterpret_cast<void(*)(Material*, System::string, float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oSet_float));
 
-	get_localToWorldMatrix = reinterpret_cast<VMatrix(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_localToWorldMatrix"), 0, _(""), _("UnityEngine"))));
+	setcolor = reinterpret_cast<void(*)(Material*, System::string, col)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oSet_color));
 
-	getmodifiedaimcone = reinterpret_cast<Vector3(*)(float, Vector3, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AimConeUtil"), _("GetModifiedAimConeDirection"), 0, _(""), _(""))));
+	setshader = reinterpret_cast<void(*)(Material*, Shader*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oSet_shader));
 
-	PEyes_get_rotation = reinterpret_cast<Vector4(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_rotation"), 0, _(""), _(""))));
+	getshader = reinterpret_cast<Shader * (*)(Material*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGet_shader));
 
-	set_jumped = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_jumped"), 0, _(""), _(""))));
+	canhit = reinterpret_cast<bool (*)(BaseMelee*, HitTest*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBaseMeleeCanHit));
 
-	set_rigidbody_velocity = reinterpret_cast<void(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Rigidbody"), _("set_velocity"), 0, _(""), _("UnityEngine"))));
+	serverrpc = reinterpret_cast<void (*)(BaseEntity*, System::string)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oServRpc));
 
-	get_rigidbody_velocity = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Rigidbody"), _("get_velocity"), 0, _(""), _("UnityEngine"))));
+	getparentvel = reinterpret_cast<Vector3(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGetParentVelocity));
 
-	console_msg = reinterpret_cast<void(*)(uintptr_t, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ConsoleMessage"), 0, _(""), _(""))));
+	sendprojupdate = reinterpret_cast<void(*)(BasePlayer*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oSendProjUpdate));
 
-	teleportto = reinterpret_cast<void(*)(uintptr_t, Vector3, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMovement"), _("TeleportTo"), 0, _(""), _(""))));
+	gamephystrace = reinterpret_cast<bool(*)(Ray r, float f, RaycastHit * r2, float f2, int layer, int querytriggerinteraction)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGamephysTrace));
 
-	set_material = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("set_material"), 0, _(""), _("UnityEngine"))));
+	get_localscale = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGet_localscale));
 
-	do_jump = reinterpret_cast<void(*)(uintptr_t, uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("Jump"), 0, _(""), _(""))));
+	set_localscale = reinterpret_cast<void(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oSet_localscale));
 
-	GetAimCone = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("GetAimCone"), 0, _(""), _(""))));
+	launchproj = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oLaunchProjectile));
 
-	animcurve_evaluate = reinterpret_cast<float(*)(uintptr_t, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AnimationCurve"), _("Evaluate"), 0, _(""), _("UnityEngine"))));
+	capgetheight = reinterpret_cast<float(*)(CapsuleCollider*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCapColliderGetHeight));
 
-	guidtopath = reinterpret_cast<System::string(*)(System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameManifest"), _("GUIDToPath"), 0, _(""), _(""))));
+	capsetheight = reinterpret_cast<void(*)(CapsuleCollider*, float f)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCapColliderSetHeight));
 
-	IsSwimming = reinterpret_cast<bool (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("IsSwimming"), 0, _(""), _(""))));
+	capgetrad = reinterpret_cast<float(*)(CapsuleCollider*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCapColliderGetRadius));
+
+	capsetrad = reinterpret_cast<void(*)(CapsuleCollider*, float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCapColliderSetRadius));
+
+	basemeldothrow = reinterpret_cast<void(*)(BaseMelee*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBaseMeleeDoThrow));
+
+	baseentgetitem = reinterpret_cast<Item * (*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBaseEntGetItem));
+
+	item_cmd = reinterpret_cast<void(*)(unsigned int, System::string)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oLocalPlayerItemCmd));
+
+	get_activemodel = reinterpret_cast<uintptr_t(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGet_activemodel));
+
+	useaction = reinterpret_cast<void(*)(BasePlayer*, InputState*)> (*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerUseAction));
+
+	bmclientinput = reinterpret_cast<void(*)(BaseMovement*, InputState*, ModelState*)> (*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPwmClientInput));
+
+	timewarnnew = reinterpret_cast<TimeWarning * (*)(System::string, int)> (*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTimeWarningNew));
+
+	//heldentinput = reinterpret_cast<void(*)(BasePlayer*)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HeldEntityInput"), 0, _(""), _(""))));
+
+	//mapinterfacesetopen = reinterpret_cast<void(*)(bool)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("MapInterface"), _("SetOpen"), 1, _(""), _(""))));
+
+	//uiinvclose = reinterpret_cast<void(*)()> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("UIInventory"), _("Close"), -1, _(""), _(""))));
+
+	//pbclientinput = reinterpret_cast<void(*)(PlayerBelt*, InputState*)> (*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerBelt"), _("ClientInput"), 1, _(""), _(""))));
+
+	anyactive = reinterpret_cast<bool(*)(int, int)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oNeedsKeyboardAnyActive));
+
+	haslocalcontrols = reinterpret_cast<bool(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerHasLocalControls));
+
+	//voicerecclientinput = reinterpret_cast<void(*)(PlayerVoiceRecorder*, InputState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerVoiceRecorder"), _("ClientInput"), 0, _(""), _(""))));
+
+	waterfactor = reinterpret_cast<float(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerWaterFactor));
+
+	objgetname = reinterpret_cast<System::string * (*)(Object*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oObjGetName));
+
+	lpgetent = reinterpret_cast<BasePlayer * (*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oLocalPlayerGetEnt));
+
+	closestpoint = reinterpret_cast<Vector3(*)(BaseEntity*, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBaseEntClosestPoint));
+
+	thrownwpn_inheritedvel = reinterpret_cast<Vector3(*)(AttackEntity*, BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oThrownWpnGetInheritedVel));
+
+	forceposto = reinterpret_cast<void(*)(BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerForcePosTo));
+
+	getignore = reinterpret_cast<bool(*)(TerrainCollision*, Vector3, float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTerrainCollisionGetIgnore));
+
+	sampleheight = reinterpret_cast<float(*)(Terrain*, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTerrainSampleHeight));
+
+	thmgetheight = reinterpret_cast<float(*)(TerrainHeightMap*, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTerrainHeightMapGetHeight));
+
+	transgetpos = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTransGetPos));
+
+	transgetrot = reinterpret_cast<Vector4(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTransGetRot));
+
+	transsetrot = reinterpret_cast<void(*)(Transform*, Vector4)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTransSetRot));
+
+	transsetpos = reinterpret_cast<void(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTransSetPos));
+
+	Sphere = reinterpret_cast<void (*)(Vector3 vPos, float fRadius, col color, float fDuration, bool distanceFade)>(0);
+
+	Capsule = reinterpret_cast<void (*)(Vector3, Vector4, float, float, col, float, bool)>(0);
+
+	GetNormal = reinterpret_cast<Vector3(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTerrainHeightMapGetNormal));
+
+	GetSpeed = reinterpret_cast<float (*)(BasePlayer * baseplayer, float running, float ducking, float crawling)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerGetSpeed));
+
+	IsSwimming = reinterpret_cast<bool (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerIsSwimming));
+
+	Line = reinterpret_cast<void (*)(Vector3, Vector3, col, float, bool, bool)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oDdrawLine));
+
+	GetIndex = reinterpret_cast<int(*)(uintptr_t SkinSetCollection, float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oSkinSetGetIndex));
+
+	set_onLadder = reinterpret_cast<void(*)(ModelState*, bool)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oModelStateSet_OnLadder));
+
+	HasPlayerFlag = reinterpret_cast<bool(*)(BasePlayer*, PlayerFlags)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerHasPlayerFlag));
+
+	StringPool_Get = reinterpret_cast<unsigned int(*)(System::string)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oStringPoolGet));
+
+	set_timeScale = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTimeSetTimescale));
+
+	get_frameCount = reinterpret_cast<int(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTimeGetFrameCount));
+
+	get_timeScale = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTimeGetTimescale));
+
+	FloorToInt = reinterpret_cast<int (*)(float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oFloorToInt));
+
+	get_gravity = reinterpret_cast<Vector3(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPhysicsGetGravity));
+
+	get_isAlive = reinterpret_cast<bool (*)(BaseProjectile*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oProjGetIsAlive));
+
+	FindShader = reinterpret_cast<uintptr_t(*)(System::string)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oFindShader));
+
+	set_hideFlags = reinterpret_cast<void(*)(uintptr_t material, int value)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oObjSetHideFlags));
+
+	set_name = reinterpret_cast<void(*)(uintptr_t, System::string)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oObjGetName));
+
+	SetInt = reinterpret_cast<void(*)(uintptr_t material, System::string name, int value)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oMaterialSetInt));
+
+	get_deltaTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTimeGetDeltaTime));
+
+	get_smoothdeltaTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTimeGetSmoothDeltaTime));
+
+	get_fixeddeltaTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTimeGetFixedDeltaTime));
+
+	get_fixedTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTimeGetFixedTime));
+
+	get_IsNpc = reinterpret_cast<bool(*)(uintptr_t player_model)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerModelGetIsNpc));
+
+	get_time = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTimeGetTime));
+
+	_InverseTransformPoint = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oInverseTransformPoint));
+
+	_InverseTransformDirection = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oInverseTransformDir));
+
+	get_localToWorldMatrix = reinterpret_cast<VMatrix(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGet_localworldtomatrix));
+
+	get_gameObject = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCompGetGameObject));
+
+	get_component = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCompGetComponent));
+
+	get_components_in_children = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCompGetComponentsInChildren));
+
+	get_up = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTransGetUp));
+
+	LookRotation = reinterpret_cast<Vector4(*)(Vector3, Vector3 value)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oQuaternionLookRot));
+
+	StartAttackCooldown = reinterpret_cast<void(*)(AttackEntity*, float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oStartAttackCooldown));
+
+	ProcessAttack = reinterpret_cast<void(*)(BaseMelee*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBaseMeleeProcessAttack));
+
+	GetProjectileVelocityScale = reinterpret_cast<float(*)(BaseProjectile*, bool max)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGetProjectileVelocityScale));
+
+	//get_Renderers = reinterpret_cast<System::list<uintptr_t>*(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
+
+	get_material = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oRendererGetMaterial));
+
+	set_material = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oRendererSetMaterial));
+
+	get_maxspeed = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerGetMaxSpeed));
+
+	SendSignal = reinterpret_cast<void(*)(uintptr_t, Signal, System::string)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oSendSignalBroadcast));
+
+	_BoundsPadding = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerBoundsPadding));
+
+	PEyes_get_position = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyesGetPos));
+
+	get_center = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyesGetCenter));
+
+	PEyes_get_rotation = reinterpret_cast<Vector4(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyesGetRot));
+
+	headforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyesHeadFwd));
+
+	bodyforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyesBodyFwd));
+
+	headright = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyesHeadRight));
+
+	bodyright = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerEyesBodyRight));
+
+	_SendClientTick = reinterpret_cast<void(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerSendClientTick));
+
+	_getjumpheight = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerGetJumpHeight));
+
+	_GetRadius = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerGetRadius));
+
+	GetHeight = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerGetHeight));
+
+	terrainheightmap_GetHeight = reinterpret_cast<int(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oTerrainHeightMapGetHeight));
+
+	updateammodisplay = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oUpdateAmmoDisplay));
+
+	shot_fired = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oShotFired));
+
+	did_attack_client_side = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oDidAttackClientSide));
+
+	getmodifiedaimcone = reinterpret_cast<Vector3(*)(float, Vector3, bool)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGetModifiedAimCone));
+
+	canaffordupgrade = reinterpret_cast<bool(*)(uintptr_t, BuildingGrade, BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCanAffordUpgrade));
+
+	canchangetograde = reinterpret_cast<bool(*)(uintptr_t, BuildingGrade, BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCanChangeToGrade));
+
+	upgradetograde = reinterpret_cast<void(*)(uintptr_t, BuildingGrade, BasePlayer*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oUpgradeToGrade));
+
+	set_jumped = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oModelStateSetJumped));
+	set_sprinting = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oModelStateSetSprint));
+	set_aiming = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oModelStateSetAiming));
+	set_ducked = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oModelStateSetDucked));
+
+	do_jump = reinterpret_cast<void(*)(uintptr_t, uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPwmJump));
+
+	set_rigidbody_velocity = reinterpret_cast<void(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oRigidBodySetVel));
+
+	get_rigidbody_velocity = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oRigidBodyGetVel));
+
+	console_msg = reinterpret_cast<void(*)(uintptr_t, System::string)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerConsoleMessage));
+
+	teleportto = reinterpret_cast<void(*)(uintptr_t, Vector3, uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBaseMovementTeleportTo));
+
+	GetAimCone = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBaseProjectileGetAimCone));
+
+	animcurve_evaluate = reinterpret_cast<float(*)(uintptr_t, float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oAnimCurveEval));
+
+	guidtopath = reinterpret_cast<System::string(*)(System::string)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGuidToPath));
+
+	GetBounds = reinterpret_cast<Bounds(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerGetBounds));
+
+	get_mounted = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBasePlayerGetMounted));
+
+	get_parent_entity = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGetParentEnt));
+
+	get_short_prefab_name = reinterpret_cast<System::string(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBaseNetworkableGetShortPrefabName));
+
+	get_game_object_transform = reinterpret_cast<Transform * (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oGameObjGetTrans));
+
+	get_max_fwd_speed = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oModularCarGetMaxFwdSpeed));
+
+	getiteminslot = reinterpret_cast<uintptr_t(*)(PlayerBelt*, int)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oPlayerBeltGetItemInSlot));
+	gettrans = reinterpret_cast<uintptr_t(*)(Component*)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oCompGetTrans));
+	_Text = reinterpret_cast<void (*)(System::string, Vector3, col, float)>(*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oDdrawText));
 #pragma region il2
 
 	containerWear = il2cpp::value(_("PlayerInventory"), _("containerWear"));
@@ -850,24 +938,24 @@ void init_bp() {
 	viewOffset = il2cpp::value(_("PlayerEyes"), _("viewOffset"));
 
 	swimming = il2cpp::value(_("PlayerWalkMovement"), _("swimming"));
-	ducking = il2cpp::value(_("BaseMovement"), _("<Ducking>k__BackingField"));
-	TargetMovement = il2cpp::value(_("BaseMovement"), _("<TargetMovement>k__BackingField"));
+	ducking = il2cpp::value(_("BaseMovement"), _("<Ducking>k__BackingFIELD"));
+	TargetMovement = il2cpp::value(_("BaseMovement"), _("<TargetMovement>k__BackingFIELD"));
 	groundAngleNew = il2cpp::value(_("PlayerWalkMovement"), _("groundAngleNew"));
 	flying = il2cpp::value(_("PlayerWalkMovement"), _("flying"));
 
-	get_deltaTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_deltaTime"), 0, _(""), _("UnityEngine"))));
-
-	get_IsNpc = reinterpret_cast<bool(*)(uintptr_t player_model)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerModel"), _("get_IsNpc"), -1, _(""), _(""))));
-
-	get_time = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_time"), 0, _(""), _("UnityEngine"))));
-
-	GetProjectileVelocityScale = reinterpret_cast<float(*)(BaseProjectile*, bool max)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("GetProjectileVelocityScale"), 1, _("getMax"), _(""), 1)));
-
-	StartAttackCooldown = reinterpret_cast<void(*)(AttackEntity*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AttackEntity"), _("StartAttackCooldown"), 1, _(""), _(""))));
-
-	_InverseTransformPoint = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
-
-	ProcessAttack = reinterpret_cast<void(*)(BaseMelee*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("ProcessAttack"), 1, _(""), _(""))));
+	//get_deltaTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_deltaTime"), 0, _(""), _("UnityEngine"))));
+	//
+	//get_IsNpc = reinterpret_cast<bool(*)(uintptr_t player_model)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerModel"), _("get_IsNpc"), -1, _(""), _(""))));
+	//
+	//get_time = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_time"), 0, _(""), _("UnityEngine"))));
+	//
+	//GetProjectileVelocityScale = reinterpret_cast<float(*)(BaseProjectile*, bool max)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("GetProjectileVelocityScale"), 1, _("getMax"), _(""), 1)));
+	//
+	//StartAttackCooldown = reinterpret_cast<void(*)(AttackEntity*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AttackEntity"), _("StartAttackCooldown"), 1, _(""), _(""))));
+	//
+	//_InverseTransformPoint = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
+	//
+	//ProcessAttack = reinterpret_cast<void(*)(BaseMelee*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("ProcessAttack"), 1, _(""), _(""))));
 
 #pragma endregion
 }
@@ -1006,10 +1094,11 @@ public:
 	}
 
 	Vector3 position() {
-		pent
-			__try {
+		__try {
 			if (!(uintptr_t)this)
 				return {};
+			typedef Vector3(*A)(Transform*);
+			//return ((A)(mem::game_assembly_base + oTransGetPos))(this);
 			return transgetpos(this);
 		}
 		__except (true) { pent return Vector3::Zero(); }
@@ -1178,15 +1267,12 @@ class BaseEntity : public BaseNetworkable {
 public:
 	//FIELD(_("BaseEntity"), _("model"), model, Model*);
 	FIELD(O::BaseEntity::_name, name, System::string*);
+	FIELD(O::BaseEntity::model, model, Model*);
 
 	void SendSignalBroadcast(Signal signal, wchar_t* str = _(L""))
 	{
 		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
 		return SendSignal((uintptr_t)this, signal, System::string(str));
-	}
-	Model* model() {
-		pent
-			return *reinterpret_cast<Model**>((uintptr_t)this + 0x130);
 	}
 	Item* GetItem() {
 		pent
@@ -2268,8 +2354,8 @@ namespace Convar {
 		static void Set_admintime(float f) {
 			pent
 				auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oConvarAdmin);
-			auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-			mem::write<float>(fieldz + 0x0, f);
+			auto FIELDz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+			mem::write<float>(FIELDz + 0x0, f);
 		}
 	};
 }
@@ -2435,17 +2521,8 @@ class PlayerModel : public Component {
 public:
 	FIELD(O::PlayerModel::newVelocity, newVelocity, Vector3);
 	FIELD(O::PlayerModel::_multiMesh, _multiMesh, SkinnedMultiMesh*);
-
-	bool isnpc() {
-		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return false;
-		return get_IsNpc((uintptr_t)this);
-	}
-	bool isLocalPlayer() {
-		pent
-			if (!this || (uintptr_t)this < 0xFFFFFFFF) return false;
-		//if ((uintptr_t)this > 0xFFFFFFFFFFFF0000)
-		return *reinterpret_cast<bool*>((uintptr_t)this + 0x299);
-	}
+	FIELD(0x2C8, isnpc, bool); //private bool <IsNpc>k__BackingField; // 0x2C8
+	FIELD(O::PlayerModel::isLocalPlayer, isLocalPlayer, bool);
 };
 
 class ItemSlot {
@@ -2510,7 +2587,7 @@ public:
 	void ClientInput(InputState* state) {
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
-		return pbclientinput(this, state);
+		//return pbclientinput(this, state);
 	}
 };
 
@@ -2519,7 +2596,7 @@ public:
 	void ClientInput(InputState* state) {
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
-		voicerecclientinput(this, state);
+		//voicerecclientinput(this, state);
 	}
 };
 
@@ -2599,12 +2676,6 @@ public:
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return nullptr;
 		return getmountedvehicle(this);
-	}
-
-	void HeldEntityInput() {
-		pent
-			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return;
-		return heldentinput(this);
 	}
 
 	bool HasLocalControls() {
@@ -3328,7 +3399,7 @@ auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base +
 			if (!this || (uintptr_t)this < 0xFFFFFFFF)
 				return false;
 
-		return LocalPlayer::Entity()->userID() == this->userID();
+		//return LocalPlayer::Entity()->userID() == this->userID();
 
 		auto player_model = this->playerModel();
 		if (!player_model)
@@ -3372,12 +3443,8 @@ class Model : public MonoBehaviour {
 public:
 	//FIELD(_("Model"), _("boneTransforms"), boneTransforms, System::Array<Transform*>*);
 	FIELD(O::Model::boneNames, boneNames, System::Array<System::string*>*);
+	FIELD(O::Model::boneTransforms, boneTransforms, System::Array<Transform*>*);
 
-	System::Array<Transform*>* boneTransforms() {
-		pent
-			if (!this || (uintptr_t)this < 0xFFFFFFFF) return nullptr;
-		return *reinterpret_cast<System::Array<Transform*>**>(this + 0x48);
-	}
 	Bone* resolve(const wchar_t* bone_name, BasePlayer* lp) {
 		pent
 			__try {
@@ -3531,10 +3598,10 @@ namespace ConVar {
 	public:
 		static float& _fov() {
 			pent
-				static auto clazz = il2cpp::init_class(_("Graphics"), _("ConVar"));//CLASS("Assembly-CSharp::ConVar::Graphics");
+			static auto clazz = mem::read<uintptr_t>(mem::game_assembly_base + oConvarGraphics);//il2cpp::init_class(_("Graphics"), _("ConVar"));
 			return *reinterpret_cast<float*>(std::uint64_t(clazz + 0x00B8) + 0x18);
 		}
-	};
+	};	
 }
 
 class CheaterCache {
@@ -3949,8 +4016,6 @@ public:
 class MapInterface {
 public:
 	static void SetOpen(bool b) {
-		pent
-			return mapinterfacesetopen(b);
 	}
 };
 
@@ -3958,7 +4023,7 @@ class UIInventory {
 public:
 	static void Close() {
 		pent
-			return uiinvclose();
+			//return uiinvclose();
 	}
 };
 
@@ -3972,14 +4037,14 @@ public:
 	static ConButton* Chat() {
 		pent
 			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
-		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-		return mem::read<ConButton*>(fieldz + 0x50 + 0x10);
+		auto FIELDz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+		return mem::read<ConButton*>(FIELDz + 0x50 + 0x10);
 	}
 	static bool SetForward(bool b) {
 		pent
 			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
-		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-		auto p = mem::read<uintptr_t>(fieldz + 0x8);
+		auto FIELDz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+		auto p = mem::read<uintptr_t>(FIELDz + 0x8);
 		typedef void(*A)(uintptr_t, bool);
 		((A)(mem::game_assembly_base + 0x5BC4A0))(p, b);
 		return 1;
@@ -3987,8 +4052,8 @@ public:
 	static bool SetRight(bool b) {
 		pent
 			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
-		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-		auto p = mem::read<uintptr_t>(fieldz + 0x20);
+		auto FIELDz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+		auto p = mem::read<uintptr_t>(FIELDz + 0x20);
 		typedef void(*A)(uintptr_t, bool);
 		((A)(mem::game_assembly_base + 0x5BC4A0))(p, b);
 		return 1;
@@ -3996,8 +4061,8 @@ public:
 	static bool SetLeft(bool b) {
 		pent
 			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
-		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-		auto p = mem::read<uintptr_t>(fieldz + 0x18);
+		auto FIELDz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+		auto p = mem::read<uintptr_t>(FIELDz + 0x18);
 		typedef void(*A)(uintptr_t, bool);
 		((A)(mem::game_assembly_base + 0x5BC4A0))(p, b);
 		return 1;
@@ -4005,8 +4070,8 @@ public:
 	static bool SetBackwards(bool b) {
 		pent
 			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
-		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-		auto p = mem::read<uintptr_t>(fieldz + 0x10);
+		auto FIELDz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+		auto p = mem::read<uintptr_t>(FIELDz + 0x10);
 		typedef void(*A)(uintptr_t, bool);
 		((A)(mem::game_assembly_base + 0x5BC4A0))(p, b);
 		return 1;
@@ -4014,26 +4079,26 @@ public:
 	static ConButton* Gestures() {
 		pent
 			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
-		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-		return mem::read<ConButton*>(fieldz + 0x188 + 0x10);
+		auto FIELDz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+		return mem::read<ConButton*>(FIELDz + 0x188 + 0x10);
 	}
 	static ConButton* Map() {
 		pent
 			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
-		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-		return mem::read<ConButton*>(fieldz + 0xF0 + 0x10);
+		auto FIELDz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+		return mem::read<ConButton*>(FIELDz + 0xF0 + 0x10);
 	}
 	static ConButton* Hoverloot() {
 		pent
 			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
-		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-		return mem::read<ConButton*>(fieldz + 0x78 + 0x10);
+		auto FIELDz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+		return mem::read<ConButton*>(FIELDz + 0x78 + 0x10);
 	}
 	static ConButton* Inventory() {
 		pent
 			auto kl = mem::read<uintptr_t>(mem::game_assembly_base + oButtons_TypeInfo);
-		auto fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-		return mem::read<ConButton*>(fieldz + 0x48 + 0x10);
+		auto FIELDz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+		return mem::read<ConButton*>(FIELDz + 0x48 + 0x10);
 	}
 };
 
@@ -4121,13 +4186,12 @@ void attack_melee(aim_target target, BaseProjectile* melee, BasePlayer* lp, bool
 	if (melee->timeSinceDeploy() < melee->deployDelay())
 		return;
 
-	auto hit_test_class = il2cpp::init_class(_("HitTest"));
+	const auto hit_test_class = mem::read<uintptr_t>(mem::game_assembly_base + oHitTest_TypeInfo);
 	if (!hit_test_class)
 		return;
 
 	if (!is_player) {
-		pent
-			HitTest2* hit_test = (HitTest2*)il2cpp::methods::object_new(hit_test_class);
+		HitTest2* hit_test = (HitTest2*)il2cpp::methods::object_new(hit_test_class);
 
 		Ray ray = Ray(lp->eyes()->position(), (target.pos - lp->eyes()->position()).Normalized());
 

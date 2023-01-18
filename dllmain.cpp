@@ -165,37 +165,48 @@ bool DllMain(HMODULE hmodule)
 		init_bp();
 		init_projectile();
 
-		typedef System::list<uintptr_t>* (*AAA)();//real rust 36223520 ALKAD 36217232 "Name": ,"ConsoleSystem.Index$$get_All"
-		System::list<uintptr_t>* command_list = ((AAA)(mem::game_assembly_base + oConsoleSystem_GetAll))();
-		
-		if (command_list) {
-			auto sz = *reinterpret_cast<int*>(command_list + 0x18);
-			for (size_t i = 0; i < sz; i++)
-			{
-				auto cmd = *reinterpret_cast<uintptr_t*>(command_list + 0x20 + i * 0x8);
-				if (!cmd) continue;
-				auto name = (System::string*)*reinterpret_cast<uintptr_t*>((uintptr_t)cmd + 0x10);
-				if (!LI_FIND(wcscmp)(name->str, _(L"noclip")) ||
-					!LI_FIND(wcscmp)(name->str, _(L"debugcamera")) ||
-					!LI_FIND(wcscmp)(name->str, _(L"debug.debugcamera")) ||
-					!LI_FIND(wcscmp)(name->str, _(L"camspeed")) ||
-					!LI_FIND(wcscmp)(name->str, _(L"camlerp")))
-				{
-					bool r = false;
-					mem::write<bool>((uintptr_t)cmd + 0x58, r);
-				}
-			}
-		}
-		mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);
-
+		//typedef System::list<uintptr_t>* (*AAA)();//real rust 36223520 ALKAD 36217232 "Name": ,"ConsoleSystem.Index$$get_All"
+		//System::list<uintptr_t>* command_list = ((AAA)(mem::game_assembly_base + oConsoleSystem_GetAll))();
+		//
+		//if (command_list) {
+		//	auto sz = *reinterpret_cast<int*>(command_list + 0x18);
+		//	for (size_t i = 0; i < sz; i++)
+		//	{
+		//		auto cmd = *reinterpret_cast<uintptr_t*>(command_list + 0x20 + i * 0x8);
+		//		if (!cmd) continue;
+		//		auto name = (System::string*)*reinterpret_cast<uintptr_t*>((uintptr_t)cmd + 0x10);
+		//		if (!LI_FIND(wcscmp)(name->str, _(L"noclip")) ||
+		//			!LI_FIND(wcscmp)(name->str, _(L"debugcamera")) ||
+		//			!LI_FIND(wcscmp)(name->str, _(L"debug.debugcamera")) ||
+		//			!LI_FIND(wcscmp)(name->str, _(L"camspeed")) ||
+		//			!LI_FIND(wcscmp)(name->str, _(L"camlerp")))
+		//		{
+		//			bool r = false;
+		//			mem::write<bool>((uintptr_t)cmd + 0x58, r);
+		//		}
+		//	}
+		//}
 		has_initialized = true;
 	}
 
-	il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
-	il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
-	il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);
+	//mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);
+	//*reinterpret_cast<uintptr_t*>(i) = (uintptr_t)our_func;
+	//mem::HVF(mem::game_assembly_base + oBaseProjectileLaunchProjectile, &hooks::hk_projectile_launchprojectile, _("BaseProjectile"));
+	//*reinterpret_cast<uintptr_t*>(mem::game_assembly_base + oBaseProjectileLaunchProjectile) = (uintptr_t)&hooks::hk_projectile_launchprojectile;
+	//
+	//il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
+	//*reinterpret_cast<void**>(il2cpp_method) = our_func;
+	
+	//*reinterpret_cast<void**>(mem::game_assembly_base + oPerformanceUIUpdate) = &hooks::hk_performance_update;
+	//il2cpp::hk(mem::game_assembly_base + oPerformanceUIUpdate, &hooks::hk_performance_update);
 
-	mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
+	//il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
+	//*reinterpret_cast<void**>(mem::game_assembly_base + oDevControlsOnGui) = &hooks::hk_performance_update;
+	//il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);
+	//*reinterpret_cast<void**>(mem::game_assembly_base + oProjUpdate) = &hooks::hk_projectile_update;
+	//
+	//mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
+	//mem::HVF(mem::game_assembly_base + oBasePlayerClientInput, &hooks::hk_baseplayer_ClientInput, _("BasePlayer"));
 
 	return true;
 }

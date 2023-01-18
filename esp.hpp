@@ -1180,6 +1180,7 @@ void iterate_entities() {
 						target.pos = ent->model()->boneTransforms()->get((int)Bone_List::l_knee)->position();
 						break;
 					}
+
 					auto distance = vars->local_player->model()->boneTransforms()->get(48)->position().get_3d_dist(target.pos); //crashes bc non game thread
 					target.distance = distance;
 
