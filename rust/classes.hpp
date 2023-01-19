@@ -1955,7 +1955,7 @@ public:
 
 	int GetAmount()
 	{
-		return *reinterpret_cast<int*>(this + 0x30);
+		return *reinterpret_cast<int*>(this + O::Item::amount);
 	}
 
 	wchar_t* get_weapon_name() {

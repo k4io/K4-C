@@ -1845,8 +1845,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 #pragma region static_method_hooks
 		//static uintptr_t* serverrpc_createbuilding;
 		//if (!serverrpc_projecshoot) {
-		//	auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot);
-		//	//auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileShoot___);
+		//	//auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot); 
+		//	auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileShoot___);
 		//
 		//	if (method_serverrpc_projecshoot) {
 		//		serverrpc_projecshoot = **(uintptr_t***)(method_serverrpc_projecshoot + 0x30);
@@ -1882,7 +1882,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		//	auto method_serverrpc_createbuilding = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_CreateBuilding___);
 		//
 		//	if (method_serverrpc_createbuilding) {
-		//		serverrpc_createbuilding = **(uintptr_t***)(method_serverrpc_createbuilding + 0x30);
+		//		serverrpc_createbuilding = **(uintptr_t***)(method_serverrpc_createbuilding + 0x38);
 		//
 		//		hooks::orig::createbuilding = *serverrpc_createbuilding;
 		//

@@ -280,6 +280,7 @@
       <Filter>sol</Filter>
     </ClInclude>
     <ClInclude Include="dump.h" />
+    <ClInclude Include="rust\features\shared_esp.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

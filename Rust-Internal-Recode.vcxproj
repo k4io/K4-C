@@ -264,6 +264,7 @@
     <ClInclude Include="RenderClass.h" />
     <ClInclude Include="rust\classes.hpp" />
     <ClInclude Include="rust\features\player_esp.hpp" />
+    <ClInclude Include="rust\features\shared_esp.h" />
     <ClInclude Include="rust\rust.hpp" />
     <ClInclude Include="rust\unity.hpp" />
     <ClInclude Include="settings.hpp" />
