@@ -1186,7 +1186,7 @@ public:
 	}
 	Model* model() {
 		pent
-			return *reinterpret_cast<Model**>((uintptr_t)this + 0xB8);
+			return *reinterpret_cast<Model**>((uintptr_t)this + O::BaseEntity::model);
 	}
 	Item* GetItem() {
 		pent
@@ -3375,7 +3375,7 @@ public:
 	System::Array<Transform*>* boneTransforms() {
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF) return nullptr;
-		return *reinterpret_cast<System::Array<Transform*>**>(this + 0x48);
+		return *reinterpret_cast<System::Array<Transform*>**>(this + O::Model::boneTransforms);
 	}
 	Bone* resolve(const wchar_t* bone_name, BasePlayer* lp) {
 		pent

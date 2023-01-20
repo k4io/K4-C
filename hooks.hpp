@@ -1843,30 +1843,30 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		}
 
 #pragma region static_method_hooks
-		//static uintptr_t* serverrpc_createbuilding;
-		//if (!serverrpc_projecshoot) {
-		//	//auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot); 
-		//	auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileShoot___);
-		//
-		//	if (method_serverrpc_projecshoot) {
-		//		serverrpc_projecshoot = **(uintptr_t***)(method_serverrpc_projecshoot + 0x30);
-		//
-		//		hooks::orig::serverrpc_projectileshoot = *serverrpc_projecshoot;
-		//
-		//		*serverrpc_projecshoot = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_projectileshoot);
-		//	}
-		//}
-		//if (!serverrpc_playerprojectileattack) {
-		//	auto method_serverrpc_playerprojectileattack = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileAttack___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
-		//
-		//	if (method_serverrpc_playerprojectileattack) {
-		//		serverrpc_playerprojectileattack = **(uintptr_t***)(method_serverrpc_playerprojectileattack + 0x30);
-		//
-		//		hooks::orig::playerprojectileattack = *serverrpc_playerprojectileattack;
-		//
-		//		*serverrpc_playerprojectileattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
-		//	}
-		//}
+		static uintptr_t* serverrpc_createbuilding;
+		if (!serverrpc_projecshoot) {
+			//auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot); 
+			auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileShoot___);
+		
+			if (method_serverrpc_projecshoot) {
+				serverrpc_projecshoot = **(uintptr_t***)(method_serverrpc_projecshoot + 0x30);
+		
+				hooks::orig::serverrpc_projectileshoot = *serverrpc_projecshoot;
+		
+				*serverrpc_projecshoot = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_projectileshoot);
+			}
+		}
+		if (!serverrpc_playerprojectileattack) {
+			auto method_serverrpc_playerprojectileattack = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileAttack___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
+		
+			if (method_serverrpc_playerprojectileattack) {
+				serverrpc_playerprojectileattack = **(uintptr_t***)(method_serverrpc_playerprojectileattack + 0x30);
+		
+				hooks::orig::playerprojectileattack = *serverrpc_playerprojectileattack;
+		
+				*serverrpc_playerprojectileattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
+			}
+		}
 		////if (!serverrpc_playerprojectileupdate) {
 		//	auto method_serverrpc_playerprojectileupdate = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
 		//
@@ -1878,17 +1878,17 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		//		*serverrpc_playerprojectileupdate = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileupdate);
 		//	}
 		//}
-		//if (!serverrpc_createbuilding) {
-		//	auto method_serverrpc_createbuilding = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_CreateBuilding___);
-		//
-		//	if (method_serverrpc_createbuilding) {
-		//		serverrpc_createbuilding = **(uintptr_t***)(method_serverrpc_createbuilding + 0x38);
-		//
-		//		hooks::orig::createbuilding = *serverrpc_createbuilding;
-		//
-		//		*serverrpc_createbuilding = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_doplace);
-		//	}
-		//}
+		if (!serverrpc_createbuilding) {
+			auto method_serverrpc_createbuilding = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_CreateBuilding___);
+		
+			if (method_serverrpc_createbuilding) {
+				serverrpc_createbuilding = **(uintptr_t***)(method_serverrpc_createbuilding + 0x38);
+		
+				hooks::orig::createbuilding = *serverrpc_createbuilding;
+		
+				*serverrpc_createbuilding = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_doplace);
+			}
+		}
 #pragma endregion
 
 		orig::baseplayer_client_input(baseplayer, state);
