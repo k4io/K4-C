@@ -2231,8 +2231,28 @@ public:
 
 auto cliententities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
 
+class BaseNetwork {
+public:
+};
+
+class Client : public BaseNetwork {
+public:
+	FIELD(0x40, ConnectedAddress, System::string*);
+	FIELD(0x48, ConnectedPort, int);
+	FIELD(0x50, ServerName, System::string*);
+};
+
+class Server {
+public:
+	FIELD(0x28, ip, System::string*);
+	FIELD(0x30, port, int);
+};
+
 class Networkable {
 public:
+	FIELD(0x48, sv, Server*);
+	FIELD(0x50, cl, Client*);
+
 	unsigned int get_id() {
 
 		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return -1;
@@ -2253,14 +2273,6 @@ public:
 	}
 };
 
-class BaseNetwork {
-public:
-};
-
-class Client : public BaseNetwork {
-public:
-
-};
 
 namespace Convar {
 	class Admin {
@@ -4157,7 +4169,10 @@ void attack_melee(aim_target target, BaseProjectile* melee, BasePlayer* lp, bool
 		//hit_test->HitNormal() = Vector3(0, 0, 0);
 		//hit_test->damageProperties() = (DamageProperties*)*reinterpret_cast<uintptr_t*>((uintptr_t)melee + damageProperties); //basemelee + damageproperties
 
-		StartAttackCooldown(melee, melee->repeatDelay());
+		if (!strcmp(melee->get_class_name(), _("Jackhammer"))) {
+			StartAttackCooldown(melee, 0.05f);
+		}
+		else StartAttackCooldown(melee, melee->repeatDelay());
 
 		ProcessAttack((BaseMelee*)melee, (uintptr_t)hit_test);
 	}

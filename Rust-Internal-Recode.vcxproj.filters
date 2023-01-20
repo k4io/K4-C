@@ -281,6 +281,7 @@
     </ClInclude>
     <ClInclude Include="dump.h" />
     <ClInclude Include="rust\features\shared_esp.h" />
+    <ClInclude Include="rust\features\shplayerdata.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

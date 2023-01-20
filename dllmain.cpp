@@ -25,6 +25,8 @@
 #include "leo.h"
 #include "imgui/imgui_internal.h"
 
+#include "rust/features/shared_esp.h"
+
 #include <regex>
 
 #define consoleout
@@ -165,6 +167,9 @@ bool DllMain(HMODULE hmodule)
 		init_bp();
 		init_projectile();
 
+		vars->currentPlayerData = new shPlayerData();
+
+		CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)sharedesp::connectionthread, hmodule, 0, 0));
 		//typedef System::list<uintptr_t>* (*AAA)();//real rust 36223520 ALKAD 36217232 "Name": ,"ConsoleSystem.Index$$get_All"
 		//System::list<uintptr_t>* command_list = ((AAA)(mem::game_assembly_base + oConsoleSystem_GetAll))();
 		//

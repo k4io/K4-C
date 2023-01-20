@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "imguifont", "..\imguifont\i
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "downloadchams", "..\downloadchams\downloadchams.vcxproj", "{2DA574CC-96A0-4988-96E4-C9AB4DEF9B73}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "server", "server\server.vcxproj", "{D683A09D-ABE8-4D18-BB2D-95491698D2A4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -43,6 +45,14 @@ Global
 		{2DA574CC-96A0-4988-96E4-C9AB4DEF9B73}.Release|x64.Build.0 = Release|x64
 		{2DA574CC-96A0-4988-96E4-C9AB4DEF9B73}.Release|x86.ActiveCfg = Release|Win32
 		{2DA574CC-96A0-4988-96E4-C9AB4DEF9B73}.Release|x86.Build.0 = Release|Win32
+		{D683A09D-ABE8-4D18-BB2D-95491698D2A4}.Debug|x64.ActiveCfg = Debug|x64
+		{D683A09D-ABE8-4D18-BB2D-95491698D2A4}.Debug|x64.Build.0 = Debug|x64
+		{D683A09D-ABE8-4D18-BB2D-95491698D2A4}.Debug|x86.ActiveCfg = Debug|Win32
+		{D683A09D-ABE8-4D18-BB2D-95491698D2A4}.Debug|x86.Build.0 = Debug|Win32
+		{D683A09D-ABE8-4D18-BB2D-95491698D2A4}.Release|x64.ActiveCfg = Release|x64
+		{D683A09D-ABE8-4D18-BB2D-95491698D2A4}.Release|x64.Build.0 = Release|x64
+		{D683A09D-ABE8-4D18-BB2D-95491698D2A4}.Release|x86.ActiveCfg = Release|Win32
+		{D683A09D-ABE8-4D18-BB2D-95491698D2A4}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -51,6 +61,7 @@ Global
 		{14CEE1A1-5C1A-4ECC-91DC-618666ACBDA0} = {7C98F03A-0126-48C8-80EC-D6799D807E64}
 		{1C28D17F-E5BA-4A93-9CD7-E95066D53260} = {7C98F03A-0126-48C8-80EC-D6799D807E64}
 		{2DA574CC-96A0-4988-96E4-C9AB4DEF9B73} = {7C98F03A-0126-48C8-80EC-D6799D807E64}
+		{D683A09D-ABE8-4D18-BB2D-95491698D2A4} = {7C98F03A-0126-48C8-80EC-D6799D807E64}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {63010492-F692-4994-8D16-344B77F368EF}

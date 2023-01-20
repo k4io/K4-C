@@ -1,168 +1,111 @@
 #pragma once
-#include <string>
-#include <map>
+#define WIN32_LEAN_AND_MEAN
 
-struct shPlayerData {
-	std::string name;
-	long serverid, userid;
-	float cachedtime, x, y, z, vx, vy, vz;
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <stdlib.h>
+#include <stdio.h>
 
-	shPlayerData(unsigned long sid, unsigned long uid, float time,
-		float _x, float _y, float _z,
-		float _vx, float _vy, float _vz, std::string _name)
-		: serverid(sid), userid(uid), cachedtime(time), x(_x), y(_y), z(_z), vx(_vx), vy(_vy), vz(_vz), name(_name) { }
+#define DEFAULT_BUFLEN 512
+#define DEFAULT_PORT "42069"
+#define SERVNAME "192.168.1.1"
+// Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib
+#pragma comment (lib, "Ws2_32.lib")
+#pragma comment (lib, "Mswsock.lib")
+#pragma comment (lib, "AdvApi32.lib")
 
-	shPlayerData() { }
+#include "../../vars.hpp"
 
-	/// <summary>
-	/// will serialize instance leaving beginning 8 bytes as placeholder
-	/// </summary>
-	/// <returns>serialized instance as char array</returns>
-	char* serialize() {
-		char packet[256];
-		std::string sid = std::to_string(serverid);
-		std::string uid = std::to_string(userid);
-		std::string time = std::to_string(cachedtime);
-		std::string sx = std::to_string(x);
-		std::string sy = std::to_string(y);
-		std::string sz = std::to_string(z);
-		std::string svx = std::to_string(vx);
-		std::string svy = std::to_string(vy);
-		std::string svz = std::to_string(vz);
+namespace sharedesp {
+	bool connected = false;
+	int sockfd = INVALID_SOCKET;
 
-		for (size_t i = 0; i < 255; i++) {
-			packet[i] = '\xA6';
+	void connectionthread() {
+		struct addrinfo* result = NULL,
+			* ptr = NULL,
+			hints;
+
+		WSAData dat;
+		if (WSAStartup(MAKEWORD(2, 2), &dat) != 0)
+			return;
+
+		ZeroMemory(&hints, sizeof(hints));
+		hints.ai_family = AF_UNSPEC;
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_protocol = IPPROTO_TCP;
+
+		if (getaddrinfo(0, DEFAULT_PORT, &hints, &result) != 0)
+			return;	
+
+		int iresult;
+		connected = false;
+		for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
+
+			// Create a SOCKET for connecting to server
+			sockfd = socket(ptr->ai_family, ptr->ai_socktype,
+				ptr->ai_protocol);
+			if (sockfd == INVALID_SOCKET) {
+				printf("socket failed with error: %ld\n", WSAGetLastError());
+				WSACleanup();
+				return;
+			}
+
+			// Connect to server.
+			iresult = connect(sockfd, ptr->ai_addr, (int)ptr->ai_addrlen);
+			if (iresult == SOCKET_ERROR) {
+				closesocket(sockfd);
+				sockfd = INVALID_SOCKET;
+				continue;
+			}
+			connected = true;
+			break;
 		}
+		freeaddrinfo(result);
+		//sockfd = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
-		int ix = 7;
-		for (size_t i = 0; i < sid.size() - 1; i++) {
-			packet[ix++] = sid[i];
-		}
+		if (connected) {
+			//send hello
+			//send current client information
+			//receive client count
+			//if 0, start again
+			//if more than 0, iterate N times and deserialize data
 
-		ix = 31;
-		for (size_t i = 0; i < uid.size() - 1; i++) {
-			packet[ix++] = uid[i];
+			char hellobuffer[1]{ 'M' };
+			send(sockfd, hellobuffer, 1, 0);
+			char buffer[512];
+			while (1) {
+				try {
+					SleepEx(300, 0);
+					auto sb = vars->currentPlayerData->serialize();
+					send(sockfd, sb, 512, 0);
+					recv(sockfd, buffer, 512, 0);
+					std::string c = "";
+					for (size_t i = 0; i < 512; i++) {
+						if (buffer[i] == '\xA6') break;
+						c += buffer[i];
+					}
+					memset(&buffer, '\xA6', 512);
+					int count = stoi(c);
+					auto temp_map = std::map<ULONG, shPlayerData*>{};
+					for (size_t i = 0; i < count; i++) {
+						recv(sockfd, buffer, 512, 0);
+						auto dat = shPlayerData::deserialize(buffer);
+						temp_map.insert(std::make_pair(dat->userid, dat));
+						memset(&buffer, '\xA6', 512);
+					}
+				}
+				catch (...) {
+					closesocket(sockfd);
+					SleepEx(60000, 0);
+					connectionthread();
+				}
+			}
 		}
-
-		ix = 63;
-		for (size_t i = 0; i < time.size() - 1; i++) {
-			packet[ix++] = time[i];
+		else {
+			SleepEx(60000, 0);
+			connectionthread();
 		}
-
-		ix = 95;
-		for (size_t i = 0; i < sx.size() - 1; i++) {
-			packet[ix++] = sx[i];
-		}
-
-		ix = 111;
-		for (size_t i = 0; i < sy.size() - 1; i++) {
-			packet[ix++] = sy[i];
-		}
-
-		ix = 127;
-		for (size_t i = 0; i < sz.size() - 1; i++) {
-			packet[ix++] = sz[i];
-		}
-
-		ix = 143;
-		for (size_t i = 0; i < svx.size() - 1; i++) {
-			packet[ix++] = svx[i];
-		}
-
-		ix = 159;
-		for (size_t i = 0; i < svy.size() - 1; i++) {
-			packet[ix++] = svy[i];
-		}
-
-		ix = 175;
-		for (size_t i = 0; i < svz.size() - 1; i++) {
-			packet[ix++] = svz[i];
-		}
-
-		ix = 191;
-		for (size_t i = 0; i < name.size() - 1; i++) {
-			packet[ix++] = name[i];
-		}
+		//if()
 	}
-
-	/// <summary>
-	/// will deserialize a packet into a shPlayerData ptr
-	/// </summary>
-	/// <param name="packet">packet to be interpreted</param>
-	/// <returns>pointer to instance of shPlayerData</returns>
-	static shPlayerData* deserialize(char* packet) {
-		std::string sid = "";
-		for (size_t i = 7; i < 31; i++) {
-			if (packet[i] == '\xA6') break;
-			sid += packet[i];
-		}
-
-		std::string uid = "";
-		for (size_t i = 31; i < 63; i++) {
-			if (packet[i] == '\xA6') break;
-			uid += packet[i];
-		}
-
-		std::string time = "";
-		for (size_t i = 63; i < 95; i++) {
-			if (packet[i] == '\xA6') break;
-			time += packet[i];
-		}
-
-		std::string _x = "";
-		for (size_t i = 95; i < 111; i++) {
-			if (packet[i] == '\xA6') break;
-			_x += packet[i];
-		}
-
-		std::string _y = "";
-		for (size_t i = 111; i < 127; i++) {
-			if (packet[i] == '\xA6') break;
-			_y += packet[i];
-		}
-
-		std::string _z = "";
-		for (size_t i = 127; i < 143; i++) {
-			if (packet[i] == '\xA6') break;
-			_z += packet[i];
-		}
-
-		std::string _vx = "";
-		for (size_t i = 143; i < 159; i++) {
-			if (packet[i] == '\xA6') break;
-			_vx += packet[i];
-		}
-
-		std::string _vy = "";
-		for (size_t i = 159; i < 175; i++) {
-			if (packet[i] == '\xA6') break;
-			_vy += packet[i];
-		}
-
-		std::string _vz = "";
-		for (size_t i = 175; i < 191; i++) {
-			if (packet[i] == '\xA6') break;
-			_vz += packet[i];
-		}
-
-		std::string _name = "";
-		for (size_t i = 191; i < 223; i++) {
-			if (packet[i] == '\xA6') break;
-			_name += packet[i];
-		}
-
-		return new shPlayerData(std::stol(sid), 
-								std::stol(uid), 
-								std::stof(time), 
-								std::stof(_x), 
-								std::stof(_y), 
-								std::stof(_z),
-								std::stof(_vx), 
-								std::stof(_vy), 
-								std::stof(_vz),
-								_name);
-	}
-};
-
-std::map<long, shPlayerData*> shared_players;
-
+}

@@ -1531,6 +1531,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		return orig::baseprojectile_launchprojectile((uintptr_t)pr);
 	}
 
+	std::map<int, bool> phm{};
+
 	void hk_projectile_update(uintptr_t pr) {
 		//printf("projectile update called\n");
 		if (vars->combat.pierce) {
@@ -1549,7 +1551,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			launchedmelee = false;
 			return _update((Projectile*)pr);
 		}
-		if (vars->combat.thickness > 1.f) {
+		if (vars->combat.thickness > 1.f && false) {
 			for (;;) {
 				auto p = (Projectile*)pr;
 				if (!p->hitTest()) break;
@@ -1560,11 +1562,13 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				Vector3 dir = vel.normalize();
 				Vector3 traveledThisUpdate = vel * (get_deltaTime() * 2.f);
 				Vector3 newpos = pos + traveledThisUpdate;
-				Line(pos, newpos, { r, g, b, 1 }, 10.f, true, true);
+				//Line(pos, newpos, { r, g, b, 1 }, 10.f, true, true);
 				float offset = 0.f;
 				float thick = vars->combat.thickness;
 
-				if (misc::LineCircleIntersection(target, (thick > 1.f ? thick : 1.f), pos, newpos, offset)) {
+				if (misc::LineCircleIntersection(target, (thick > 1.f ? thick : 1.f), pos, newpos, offset)
+					&& unity::is_visible(target, pos, 0)
+					&& !map_contains_key(phm, p->projectileID())) {
 					for (float i = 0; i < 1.f; i += 0.01f) {
 						auto n = pos.Lerp(newpos, i);
 						auto dist = n.distance(target);
@@ -1581,16 +1585,16 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								vvel -= vvel * p->drag() * step;
 								if (vpos.distance(target) < thick) {
 									//p->transform()->setposition(vpos);
-									Sphere(vpos, .5f, { r, g, b, 1 }, 10.f, false);
-									Line(pos, vpos, { 0, 1, 1, 1 }, 10.f, true, true);
-									Line(vpos, target, { 0, 1, 0, 1 }, 10.f, true, true);
+									Sphere(target, vpos.distance(target), { r, g, b, 1 }, 10.f, false);
+									//Line(pos, vpos, { 0, 1, 1, 1 }, 10.f, true, true);
+									//Line(vpos, target, { 0, 1, 0, 1 }, 10.f, true, true);
 									
-									g_UpdateReusable = Projectile1::CreatePlayerProjectileUpdate();
-									((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->position = vpos;
-									((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->projectileID = p->projectileID();
-									((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->traveltime = p->traveledTime() + travel;
-									((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->velocity = vvel;
-									vars->local_player->SendProjectileUpdate((uintptr_t)g_UpdateReusable);
+									//g_UpdateReusable = Projectile1::CreatePlayerProjectileUpdate();
+									//((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->position = vpos;
+									//((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->projectileID = p->projectileID();
+									//((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->traveltime = p->traveledTime() + travel;
+									//((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->velocity = vvel;
+									//vars->local_player->SendProjectileUpdate((uintptr_t)g_UpdateReusable);
 
 									auto hitpos = vpos;
 									if (vpos.distance(target) > 1.f)
@@ -1606,6 +1610,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 									Ray r(p->transform()->position(), hitpos);
 									safe_write(ht + 0x14, r, Ray);
 									_DoHit(p, ht, vpos, HitNormalWorld((uintptr_t)ht));
+									phm.insert(std::make_pair(p->projectileID(), true));
 									break;
 								}
 							}
@@ -1897,6 +1902,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		if (baseplayer) {
 			baseplayer->modelState()->remove_flag(ModelState_Flag::Flying);
 
+			wprintf(L"%ls:%i (%ls)\n", baseplayer->net()->cl()->ConnectedAddress()->str, baseplayer->net()->cl()->ConnectedPort(), baseplayer->net()->cl()->ServerName()->str);
+
 			auto mountable = baseplayer->GetMounted();
 			auto tick_time = baseplayer->lastSentTickTime();
 			vars->desyncTime = (unity::get_realtimesincestartup() - tick_time) - 0.03125 * 3;
@@ -1921,7 +1928,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				|| ((vars->combat.manipulator2 || vars->combat.manipulator)
 					&& (unity::GetKey(vars->keybinds.manipulator)
 						|| misc::manipulate_vis)))
-				baseplayer->clientTickInterval() = .99f;
+				baseplayer->clientTickInterval() = 1.f;
 			else if (!is_lagging && !is_speeding)
 				baseplayer->clientTickInterval() = 0.05f;
 
@@ -1933,6 +1940,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				if (vars->combat.manipulator && ((unity::GetKey(vars->keybinds.manipulator))
 					|| misc::manipulate_vis))
 				{
+					printf("%.3f : %.3f\n", vars->desyncTime, mm_eye);
 					Vector3 target = vars->best_target.pos;
 					auto mag_ammo = held->ammo_left();
 					if (!strcmp(held->get_class_name(), _("BaseMelee"))

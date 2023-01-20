@@ -7,6 +7,8 @@
 #include <fstream>
 #include <filesystem>
 #include <Windows.h>
+#include "rust/features/shplayerdata.h"
+
 #define GUI_NAME "Matrix"
 #define CUSTOM_ICONS FALSE
 
@@ -198,10 +200,12 @@ struct Vars
 	std::map<ULONG, int> handchams_player_map{};
 	std::map<std::wstring, gskin> applied_skins_map{};
 	std::map<std::string, bool*> loaded_lua_list{};
+	std::map<ULONG, shPlayerData*> shared_player_map{};
 
 	std::vector<RenderObject*> RenderList{};
 	IDXGISwapChain* pSwapChain;
 	aim_target best_target;
+	shPlayerData* currentPlayerData;
 
 	int follow_player_id = -1;
 
