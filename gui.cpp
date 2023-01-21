@@ -1353,10 +1353,10 @@ namespace Gui
 			}
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(50, 15));
-			//im::Checkbox(_("Manipulator2"), &vars->combat.manipulator2);
-			//im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
-			//im::Hotkey(_("M2"), &vars->keybinds.manipulator2, ImVec2(50, 15));
-			//im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
+			im::Checkbox(_("Manipulator2"), &vars->combat.manipulator2);
+			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
+			im::Hotkey(_("M2"), &vars->keybinds.manipulator2, ImVec2(50, 15));
+			im::Checkbox(_("Target behind wall"), &vars->combat.targetbehindwall);
 			//im::Checkbox(_("STW (many invalids)"), &vars->combat.throughwall);
 			//im::Checkbox(_("Target behind wall"), &vars->combat.shoot_at_fatbullet);
 			im::Checkbox(_("Pierce"), &vars->combat.pierce);

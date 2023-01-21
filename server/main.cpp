@@ -81,15 +81,24 @@ int main() {
         {
             int count = 0;
             while (1) {
-                SleepEx(100, 0);
+                system("cls");
                 int lastcount = count;
-                if (count != sharedPlayersMap.size()) {
-                    count = sharedPlayersMap.size();
-                    for (auto v : sharedPlayersMap) {
-                        auto c = v.second;
-                        printf("[~:] %s\n", c->name);
-                    }
+                for (auto v : sharedPlayersMap) {
+                    auto c = v.second;
+                    printf(R"(
+[====== %s ======]
+[User id]: %i
+[In game]: %s
+[Server name]: %s
+[Server ip]: %s:%i
+[Position]: (%.2f, %.2f, %.2f)
+[Velocity]: (%.2f, %.2f, %.2f)
+)", c->name, c->userid, c->ingame ? "true" : "false",
+c->servername.c_str(), c->serverip, c->serverport,
+c->x, c->y, c->z,
+c->vx, c->vy, c->vz);
                 }
+                SleepEx(100, 0);
             }
         }
     ).detach();
@@ -110,29 +119,42 @@ int main() {
                 char hellobuffer[1];
                 auto result = recv(sockfd, hellobuffer, 1, 0);
                 if (result != 1 && hellobuffer[0] != 'M') return;
-                char buffer[512];
+                char buffer[512]{};
+                memset(&buffer, '\xA6', 512);
+                buffer[1] = 'H';
+                send(sockfd, buffer, 512, 0);
                 printf("[~+] Accepted client!\n");
                 shPlayerData* cl = nullptr;
                 while (1) {
                     try {
                         SleepEx(300, 0);
                         //receive information about client
-                        result = recv(sockfd, buffer, 512, 0);
-                        if (result != 512)
-                            break;
+                        //if (result != 512)
+                        //    break;
+
+                        std::string cs = "";
+                        for (size_t i = 0; i < 512; i += 8) {
+                            char n[8];
+                            result = recv(sockfd, n, 8, 0);
+                            for (size_t j = 0; j < 8; j++) {
+                                buffer[i + j] = n[j];
+                            }
+                            cs += n;
+                        }
+
                         cl = shPlayerData::deserialize(buffer);
+
                         if (sharedPlayersMap.count(cl->userid) < 1)
                             sharedPlayersMap.insert(std::make_pair(cl->userid, cl));
                         else sharedPlayersMap[cl->userid] = cl;
-                        printf("n: %s\n", cl->name.c_str());
                         //send count of current clients
                         memset(&buffer, '\xA6', 512);
                         auto c_sz = std::to_string(sharedPlayersMap.size() - 1);
-                        if (c_sz == "0") continue;
                         for (size_t i = 0; i < c_sz.size(); i++) {
                             buffer[i] = c_sz[i];
                         }
                         send(sockfd, buffer, 512, 0);
+                        if (c_sz == "0") continue;
 
                         //send current clients
                         for (auto pair : sharedPlayersMap) {

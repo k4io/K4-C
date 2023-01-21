@@ -311,7 +311,7 @@ public:
 			ht->set_hit_entity((BasePlayer*)at);
 
 			if (at) {
-				auto trans = at->transform();
+				auto trans = at->model()->boneTransforms()->get(48);
 				//if (!memory::IsAddressValid(ht))
 				if (!ht)
 					return false;
@@ -326,7 +326,7 @@ public:
 					ht->set_hit_point(v);
 				//ht->HitMaterial() = Il2CppString::create(_("flesh"));
 
-				ht->set_hit_material(System::string(_(L"flesh")));
+				ht->set_hit_material(il2cpp::methods::new_string(_("flesh")));
 				//ht->HitMaterial() = _(L"flesh");
 			}
 			else
@@ -334,7 +334,7 @@ public:
 			//ht->HitPoint() = point;
 
 			//ht->AttackRay() = Ray(point, Vector3(0, 0, 0));
-			ht->set_attack_ray(Ray(point, { 0, 0, 0 }));
+			ht->set_attack_ray(Ray(point, Vector3(0, 0, 0)));
 
 			float real_travel_time = _this->traveledTime();
 			//_this->traveledTime() = travelTime
@@ -351,6 +351,7 @@ public:
 			//Sphere(point, 0.2f, { 1, 1, 1, 1 }, 10.f, 100.f);
 			//static auto DoHit = *reinterpret_cast<bool(**)(Projectile * _instance, HitTest * test, Vector3 point, Vector3 normal)>(Il2CppWrapper::GetClassFromName(_(""), _("Projectile"))->GetMethodFromName(_("DoHit")));
 			//__try {
+
 			if (_DoHit(_this, (HitTest*)ht, point, Vector3::Zero())) {
 				//if (Do_Hit(_this, (uintptr_t)ht, point, Vector3::Zero())) {
 				_this->currentVelocity(vel);
@@ -488,10 +489,10 @@ public:
 
 			typedef void(*netwrite_uint32)(uintptr_t, UINT);
 
-			((netwrite_uint32)(mem::game_assembly_base + 0x24B4F20))(write, id);
+			((netwrite_uint32)(mem::game_assembly_base + 0x24B56E0))(write, id);
 			//write->UInt32(id);
 
-			((netwrite_uint32)(mem::game_assembly_base + 0x24B4F20))(write, 2324190493); //projectile update id 2324190493
+			((netwrite_uint32)(mem::game_assembly_base + 0x24B56E0))(write, 2324190493); //projectile update id 2324190493
 			//write->UInt32(2324190493); //projectile update
 
 			typedef void(*serialize)(uintptr_t, uint64_t);
@@ -882,8 +883,8 @@ public:
 		//if (!memory::IsAddressValid(_this))
 			return;
 
-		if (!_this->authoritative())
-			return _this->Launch();
+		//if (!_this->authoritative())
+		//	return _this->Launch();
 		LocalPlayer->console_echo(_(L"[matrix]: Launch1 - Called"));
 		if (vars->combat.targetbehindwall) {
 			while (_this->IsAlive() && _this->traveledTime() < 0.09f)

@@ -3883,9 +3883,9 @@ public:
 		*reinterpret_cast<Transform**>((uintptr_t)this + 0xB0) = hit_transform;
 	}
 
-	void set_hit_material(System::string material) {
+	void set_hit_material(uintptr_t material) {
 
-		*reinterpret_cast<System::string*>((uintptr_t)this + 0xC0) = material;
+		*reinterpret_cast<uintptr_t*>((uintptr_t)this + 0xC0) = material;
 	}
 
 	void set_hit_type(HitTestType hit_type) {

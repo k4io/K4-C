@@ -1551,7 +1551,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			launchedmelee = false;
 			return _update((Projectile*)pr);
 		}
-		if (vars->combat.thickness > 1.f && false) {
+		if (vars->combat.thickness > 1.f) {
 			for (;;) {
 				auto p = (Projectile*)pr;
 				if (!p->hitTest()) break;
@@ -1781,6 +1781,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 	bool wireplaced = false;
 
+	std::wstring lsn = L"";
+
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
 	{
 		//printf("clientinput start\n");
@@ -1922,6 +1924,34 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			float _timeSinceLastTick = unity::get_realtimesincestartup() - baseplayer->lastSentTickTime();
 			float timeSinceLastTickClamped = max(0.f, min(_timeSinceLastTick, 1.f));
 			float mm_eye = 0.1f + (timeSinceLastTickClamped + 2.f / 60.f) * 1.5f * maxVelocity;
+
+
+			{
+				auto ser_n = std::wstring(baseplayer->net()->cl()->ServerName()->str);
+				if (lsn != ser_n) {
+					vars->currentPlayerData->servername = std::string(ser_n.begin(), ser_n.end());
+					auto tip = std::wstring(baseplayer->net()->cl()->ConnectedAddress()->str);
+					vars->currentPlayerData->serverip = std::string(tip.begin(), tip.end());
+					vars->currentPlayerData->serverport = baseplayer->net()->cl()->ConnectedPort();
+					vars->currentPlayerData->ingame = 1;
+					auto n = std::wstring(baseplayer->get_player_name());
+					vars->currentPlayerData->name = std::string(n.begin(), n.end());
+					vars->currentPlayerData->userid = baseplayer->userID();
+					lsn = ser_n;
+				}
+
+				auto mpos = baseplayer->transform()->position();
+				vars->currentPlayerData->x = mpos.x;
+				vars->currentPlayerData->y = mpos.y;
+				vars->currentPlayerData->z = mpos.z;
+				auto mvel = baseplayer->GetWorldVelocity();
+				vars->currentPlayerData->vx = mvel.x;
+				vars->currentPlayerData->vy = mvel.y;
+				vars->currentPlayerData->vz = mvel.z;
+
+				vars->currentPlayerData->cachedtime = fixed_time;
+			}
+
 
 			//desync on key
 			if (unity::GetKey(vars->keybinds.desync_ok)

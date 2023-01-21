@@ -74,11 +74,19 @@ namespace sharedesp {
 			char hellobuffer[1]{ 'M' };
 			send(sockfd, hellobuffer, 1, 0);
 			char buffer[512];
+			recv(sockfd, buffer, 512, 0);
+			if (buffer[1] != 'H') return;
 			while (1) {
 				try {
 					SleepEx(300, 0);
 					auto sb = vars->currentPlayerData->serialize();
-					send(sockfd, sb, 512, 0);
+					for (size_t i = 0; i < 512; i += 8) {
+						char n[8];
+						for (size_t j = 0; j < 8; j++) {
+							n[j] = sb[i + j];
+						}
+						send(sockfd, n, 8, 0);
+					}
 					recv(sockfd, buffer, 512, 0);
 					std::string c = "";
 					for (size_t i = 0; i < 512; i++) {

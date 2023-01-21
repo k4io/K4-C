@@ -27,7 +27,7 @@ struct shPlayerData {
 	/// will serialize instance leaving beginning 8 bytes as placeholder
 	/// </summary>
 	/// <returns>serialized instance as char array</returns>
-	char* serialize() {
+	std::string serialize() {
 		char packet[512];
 		std::string sid = std::to_string(serverid);
 		std::string uid = std::to_string(userid);

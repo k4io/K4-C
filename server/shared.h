@@ -221,7 +221,7 @@ struct shPlayerData {
 			std::stof(_vz),
 			_name, servip,
 			servname,
-			stoi(servip),
+			stoi(servport),
 			in_game);
 	}
 };
