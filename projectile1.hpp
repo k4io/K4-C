@@ -725,6 +725,8 @@ public:
 		float time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
 		float maxTime = time - _this->launchTime();
 
+		printf("time: %.2f\nlaunchTime: %.2f\n", time, _this->launchTime());
+
 		if (maxTime >= 7.95f)
 		{
 			vars->local_player->console_echo(string::wformat(_(L"[matrix]: UpdateVelocity - MaxTime > 7.95f, Integrity: %d"), (int)(_this->integrity() * 100)));

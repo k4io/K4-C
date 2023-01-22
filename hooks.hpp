@@ -600,7 +600,7 @@ namespace hooks {
 					p->previousPosition(rpc_position);
 					p->sentPosition(rpc_position);
 					p->prevSentVelocity(rpc_position); //?
-					p->launchTime(unity::get_realtimesincestartup());
+					//p->launchTime(unity::get_realtimesincestartup());
 					p->traveledTime(0);
 					if (vars->combat.manipulator2
 						&& (unity::GetKey(vars->keybinds.manipulator)
@@ -1562,7 +1562,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				Vector3 dir = vel.normalize();
 				Vector3 traveledThisUpdate = vel * (get_deltaTime() * 2.f);
 				Vector3 newpos = pos + traveledThisUpdate;
-				//Line(pos, newpos, { r, g, b, 1 }, 10.f, true, true);
+				Line(pos, newpos, { r, g, b, 1 }, 10.f, true, true);
 				float offset = 0.f;
 				float thick = vars->combat.thickness;
 
@@ -1583,23 +1583,35 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								vpos += vvel * step;
 								vvel.y -= 9.81f * p->gravityModifier() * step;
 								vvel -= vvel * p->drag() * step;
+								Sphere(vpos, 0.03f, { 1, 0, 0, 1 }, 10.f, 0);
 								if (vpos.distance(target) < thick) {
 									//p->transform()->setposition(vpos);
-									Sphere(target, vpos.distance(target), { r, g, b, 1 }, 10.f, false);
+									Sphere(vpos, 0.1f, { 1, 1, 1, 1 }, 10.f, 0);
 									//Line(pos, vpos, { 0, 1, 1, 1 }, 10.f, true, true);
 									//Line(vpos, target, { 0, 1, 0, 1 }, 10.f, true, true);
 									
-									//g_UpdateReusable = Projectile1::CreatePlayerProjectileUpdate();
-									//((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->position = vpos;
-									//((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->projectileID = p->projectileID();
-									//((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->traveltime = p->traveledTime() + travel;
-									//((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->velocity = vvel;
-									//vars->local_player->SendProjectileUpdate((uintptr_t)g_UpdateReusable);
+									g_UpdateReusable = Projectile1::CreatePlayerProjectileUpdate();
+									((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->position = vpos;
+									((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->projectileID = p->projectileID();
+									((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->traveltime = p->traveledTime() + travel;
+									((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->velocity = vvel;
+									vars->local_player->SendProjectileUpdate((uintptr_t)g_UpdateReusable);
 
 									auto hitpos = vpos;
-									if (vpos.distance(target) > 1.f)
+									if (vpos.distance(target) > 1.f) {
 										hitpos.MoveTowards(target, hitpos, thick - 1.f);
+
+										Sphere(hitpos, 0.1f, { r, g, b, 1 }, 10.f, 0);
+										//g_UpdateReusable = Projectile1::CreatePlayerProjectileUpdate();
+										((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->position = hitpos;
+										((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->projectileID = p->projectileID();
+										//((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->traveltime = p->traveledTime() + travel;
+										((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->velocity = vvel;
+										vars->local_player->SendProjectileUpdate((uintptr_t)g_UpdateReusable);
+									}
+
 									p->transform()->setposition(hitpos);
+
 									auto bonetrans = ((BasePlayer*)vars->best_target.ent)->get_bone_Transform(48);
 									HitTest* ht = (HitTest*)p->hitTest();
 									ht->DidHit() = true;
