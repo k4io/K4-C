@@ -237,25 +237,32 @@ public:
 							canHit = true;
 
 					NOHIT:
+						printf("dst: %.2f, updateDist: %.2f\n", dst, updateDist);
 						if (dst < updateDist) {
 							if (projectileProtection1 >= 3) {
 								bool flag1 = false;
+								printf("hm: %s, velocity.y: %.2f\n", heightMap ? "true" : "false", velocity.y);
 								if (heightMap && velocity.y <= 0.f) {
 									//float height = heightMap->GetHeight(nearest);
 									float height = terrainheightmap_GetHeight(heightMap);
+									printf("height: %.2f, nearest.y + underground_forgiviness: %.2f, \n", height, nearest.y + underground_forgiviness);
 									if (nearest.y + underground_forgiviness <= height) {
 										if (!PLOS(startPos, nearest))
 										{
+											printf("no los\n");
 											break;
 										}
+										printf("los flag1 = true\n");
 										flag1 = true;
 									}
 								}
 
 								if (!PLOS(nearest, pos)) {
+									printf("no los nearest - pos\n");
 									goto CONTINUE;
 								}
 								if (!flag1 && !PLOS(startPos, nearest)) {
+									printf("!flag1 & no los startpos - nearest\n");
 									break;
 								}
 							}
@@ -711,7 +718,7 @@ public:
 		//Line(CurrentProjectilePosition, prevPosition, { 1, 1, 1, 1 }, 10.f, true, true);
 
 		_this->traveledTime(_this->traveledTime() + num);
-
+		 
 		float travelTime = _this->previoustraveledTime();
 
 		bool flag = false;
@@ -727,6 +734,15 @@ public:
 
 		//TraceResult1 result = this->Trace(startPosition, position, velocity, gravity, drag, maxTime, travelTime, startVelocityLen);
 		TraceResult1 result = this->Trace(prevPosition, position, velocity, gravity, drag, maxTime, travelTime, startVelocityLen);
+
+
+		printf("result\ndidHit: %s\nprevPosition: (%.2f, %.2f, %.2f)\nposition: (%.2f, %.2f, %.2f)\nvelocity: (%.2f, %.2f, %.2f)\ngravity: (%.2f, %.2f, %.2f)\ndrag: %.2f\nmaxTime: %.2f\ntravelTime: %.2f\nstartVelLen: %.3f\n",
+			result.didHit ? "true" : "false",
+			prevPosition.x, prevPosition.y, prevPosition.z,
+			position.x, position.y, position.z,
+			velocity.x, velocity.y, velocity.z,
+			gravity.x, gravity.y, gravity.z,
+			drag, maxTime, travelTime, startVelocityLen);
 
 		if (result.didHit)
 		{
@@ -757,6 +773,15 @@ public:
 				float maxTravelDst = _this->initialDistance() + startVelocityLen * min(result.hitTime, maxTime) * projectile_forgiviness;
 				if ((result.hitDist = startPosition.distance(result.hitPosition)) < maxTravelDst) {
 					result.didHit = true;
+
+					printf("result\nmaxTravelDst:%.2f\ndidHit: %s\nprevPosition: (%.2f, %.2f, %.2f)\nposition: (%.2f, %.2f, %.2f)\nvelocity: (%.2f, %.2f, %.2f)\ngravity: (%.2f, %.2f, %.2f)\ndrag: %.2f\nmaxTime: %.2f\ntravelTime: %.2f\nstartVelLen: %.3f\n",
+						maxTravelDst, result.didHit ? "true" : "false",
+						prevPosition.x, prevPosition.y, prevPosition.z,
+						position.x, position.y, position.z,
+						velocity.x, velocity.y, velocity.z,
+						gravity.x, gravity.y, gravity.z,
+						drag, maxTime, travelTime, startVelocityLen);
+
 					goto HIT;
 				}
 			}
@@ -842,7 +867,7 @@ public:
 				_this->needsLOS(false);
 				*reinterpret_cast<bool*>((uintptr_t)_this + 0xf8) = false;
 				//_this->clientsideEffect() = false;
-
+				printf("projectile has been reset to 0 from update velocity\n");
 				CreateHT();
 			}
 

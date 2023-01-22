@@ -1,6 +1,8 @@
 #pragma once
 #include "lua_wrapper.hpp"
 
+std::vector<shPlayerData*> vshd{};
+
 void DrawOnRadar(Vector3 worldpos, wchar_t* entityname, bool visible = false) {
 	if (!vars->local_player) return;
 	auto local = vars->local_player->transform()->position();
@@ -38,7 +40,12 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 	if (npc && !vars->visual.npc_esp) return;
 
 	auto player_id = ply->userID();
-
+	auto ppos = ply->transform()->position();
+	auto pvel = ply->GetWorldVelocity();
+	auto _wS = std::wstring(ply->get_player_name());
+	vshd.push_back(new shPlayerData(0, player_id, vars->tick_time_when_called, ppos.x, ppos.y, ppos.z, pvel.x, pvel.y, pvel.z,
+		std::string(_wS.begin(), _wS.end()), vars->currentPlayerData->serverip, vars->currentPlayerData->servername,
+		vars->currentPlayerData->serverport, 1));
 	//esp::do_chams(ply);
 
 	bounds_t bounds;
@@ -2033,7 +2040,13 @@ void new_frame() {
 
 	//iterate_entities();
 	//printf("iterate entities\n");
+	vshd.clear();
 	iterate_entities();
+	if (vshd.size() != vars->currentPlayerData->rendered_players.size()) {
+		vars->currentPlayerData->rendered_players.clear();
+		for (auto v : vshd)
+			vars->currentPlayerData->rendered_players.push_back(v);
+	}
 	return;
 	/*
 	__try {

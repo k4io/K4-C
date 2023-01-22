@@ -1,9 +1,13 @@
 #include <string>
+#include <vector>
+
 struct shPlayerData {
 	std::string name, serverip, servername;
 	int serverport, ingame;
 	long serverid, userid;
 	float cachedtime, x, y, z, vx, vy, vz;
+	std::vector<shPlayerData*> rendered_players{};
+
 
 	shPlayerData(unsigned long sid, unsigned long uid, float time,
 		float _x, float _y, float _z,
@@ -26,7 +30,7 @@ struct shPlayerData {
 	/// <summary>
 	/// will serialize instance leaving beginning 8 bytes as placeholder
 	/// </summary>
-	/// <returns>serialized instance as char array</returns>
+	/// <returns>serialized instance as string</returns>
 	std::string serialize() {
 		char packet[512];
 		std::string sid = std::to_string(serverid);
@@ -100,6 +104,100 @@ struct shPlayerData {
 		std::string servip = serverip;
 		std::string servname = servername;
 		*/
+
+		ix = 223;
+		for (size_t i = 0; i < servport.size(); i++) {
+			packet[ix++] = servport[i];
+		}
+
+		//max port len = 5
+		ix = 228;
+		for (size_t i = 0; i < serverip.size(); i++) {
+			packet[ix++] = serverip[i];
+		}
+
+		//max connect addr len = 64
+		ix = 292;
+		for (size_t i = 0; i < servername.size(); i++) {
+			packet[ix++] = servername[i];
+		}
+
+		return packet;
+	}
+
+	/// <summary>
+	/// will serialize specified instance of renderer player leaving beginning 8 bytes as placeholder
+	/// </summary>
+	/// <returns>serialized instance as string</returns>
+	std::string serialize_rendered_player(int idx) {
+		char packet[512];
+		auto m = rendered_players[idx];
+		std::string sid = std::to_string(m->serverid);
+		std::string uid = std::to_string(m->userid);
+		std::string time = std::to_string(m->cachedtime);
+		std::string sx = std::to_string(m->x);
+		std::string sy = std::to_string(m->y);
+		std::string sz = std::to_string(m->z);
+		std::string svx = std::to_string(m->vx);
+		std::string svy = std::to_string(m->vy);
+		std::string svz = std::to_string(m->vz);
+		std::string servport = std::to_string(m->serverport);
+
+		for (size_t i = 0; i < 512; i++) {
+			packet[i] = '\xA6';
+		}
+
+		packet[5] = ingame ? 't' : 'f';
+
+		int ix = 7;
+		for (size_t i = 0; i < sid.size(); i++) {
+			packet[ix++] = sid[i];
+		}
+
+		ix = 31;
+		for (size_t i = 0; i < uid.size(); i++) {
+			packet[ix++] = uid[i];
+		}
+
+		ix = 63;
+		for (size_t i = 0; i < time.size(); i++) {
+			packet[ix++] = time[i];
+		}
+
+		ix = 95;
+		for (size_t i = 0; i < sx.size(); i++) {
+			packet[ix++] = sx[i];
+		}
+
+		ix = 111;
+		for (size_t i = 0; i < sy.size(); i++) {
+			packet[ix++] = sy[i];
+		}
+
+		ix = 127;
+		for (size_t i = 0; i < sz.size(); i++) {
+			packet[ix++] = sz[i];
+		}
+
+		ix = 143;
+		for (size_t i = 0; i < svx.size(); i++) {
+			packet[ix++] = svx[i];
+		}
+
+		ix = 159;
+		for (size_t i = 0; i < svy.size(); i++) {
+			packet[ix++] = svy[i];
+		}
+
+		ix = 175;
+		for (size_t i = 0; i < svz.size(); i++) {
+			packet[ix++] = svz[i];
+		}
+
+		ix = 191;
+		for (size_t i = 0; i < name.size(); i++) {
+			packet[ix++] = name[i];
+		}
 
 		ix = 223;
 		for (size_t i = 0; i < servport.size(); i++) {

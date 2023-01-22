@@ -93,10 +93,12 @@ int main() {
 [Server ip]: %s:%i
 [Position]: (%.2f, %.2f, %.2f)
 [Velocity]: (%.2f, %.2f, %.2f)
+[Renderer players]: Size (%i)
 )", c->name, c->userid, c->ingame ? "true" : "false",
 c->servername.c_str(), c->serverip, c->serverport,
 c->x, c->y, c->z,
-c->vx, c->vy, c->vz);
+c->vx, c->vy, c->vz, 
+c->rendered_players.size());
                 }
                 SleepEx(100, 0);
             }
@@ -144,6 +146,25 @@ c->vx, c->vy, c->vz);
 
                         cl = shPlayerData::deserialize(buffer);
 
+                        memset(&buffer, '\xA6', 512);
+                        recv(sockfd, buffer, 512, 0);
+                        std::string sz_c = "";
+                        for (size_t i = 0; i < 512; i++) {
+                            if (buffer[i] == '\xA6') break;
+                            sz_c += buffer[i];
+                        }
+                        auto count = stoi(sz_c);
+
+                        if (count > 0) {
+                            for (size_t i = 0; i < count; i++) {
+                                memset(&buffer, '\xA6', 512);
+                                recv(sockfd, buffer, 512, 0);
+                                cl->rendered_players.push_back(shPlayerData::deserialize(buffer));
+                            }
+                        } 
+                        else 
+                            cl->rendered_players = {};
+
                         if (sharedPlayersMap.count(cl->userid) < 1)
                             sharedPlayersMap.insert(std::make_pair(cl->userid, cl));
                         else sharedPlayersMap[cl->userid] = cl;
@@ -158,8 +179,9 @@ c->vx, c->vy, c->vz);
 
                         //send current clients
                         for (auto pair : sharedPlayersMap) {
-                            if (pair.first != cl->userid) //make sure not to send current client
-                                send(sockfd, pair.second->serialize(), 512, 0);
+                            if (pair.first != cl->userid) { //make sure not to send current client
+                                send(sockfd, pair.second->serialize().c_str(), 512, 0);
+                            }
                         }
                     }
                     catch (...) {

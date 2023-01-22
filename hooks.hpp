@@ -1904,7 +1904,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		if (baseplayer) {
 			baseplayer->modelState()->remove_flag(ModelState_Flag::Flying);
 
-			wprintf(L"%ls:%i (%ls)\n", baseplayer->net()->cl()->ConnectedAddress()->str, baseplayer->net()->cl()->ConnectedPort(), baseplayer->net()->cl()->ServerName()->str);
+			//wprintf(L"%ls:%i (%ls)\n", baseplayer->net()->cl()->ConnectedAddress()->str, baseplayer->net()->cl()->ConnectedPort(), baseplayer->net()->cl()->ServerName()->str);
 
 			auto mountable = baseplayer->GetMounted();
 			auto tick_time = baseplayer->lastSentTickTime();

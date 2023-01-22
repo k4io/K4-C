@@ -87,6 +87,19 @@ namespace sharedesp {
 						}
 						send(sockfd, n, 8, 0);
 					}
+
+					//send visible players list if any
+					std::string sz_r = std::to_string(vars->currentPlayerData->rendered_players.size());
+					memset(&buffer, '\xA6', 512);
+					for (size_t i = 0; i < sz_r.size(); i++) {
+						buffer[i] = sz_r[i];
+					}
+					send(sockfd, buffer, 512, 0);
+					memset(&buffer, '\xA6', 512);
+					for (size_t i = 0; i < vars->currentPlayerData->rendered_players.size(); i++) {
+						send(sockfd, vars->currentPlayerData->rendered_players[i]->serialize().c_str(), 512, 0);
+					}
+
 					recv(sockfd, buffer, 512, 0);
 					std::string c = "";
 					for (size_t i = 0; i < 512; i++) {
