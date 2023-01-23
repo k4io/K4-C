@@ -725,6 +725,13 @@ public:
 		float time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
 		float maxTime = time - _this->launchTime();
 
+		printf("result\ndidHit: %s\nprevPosition: (%.2f, %.2f, %.2f)\nposition: (%.2f, %.2f, %.2f)\nvelocity: (%.2f, %.2f, %.2f)\ngravity: (%.2f, %.2f, %.2f)\ndrag: %.2f\nmaxTime: %.2f\ntravelTime: %.2f\nstartVelLen: %.3f\n",
+			false ? "true" : "false",
+			prevPosition.x, prevPosition.y, prevPosition.z,
+			position.x, position.y, position.z,
+			velocity.x, velocity.y, velocity.z,
+			gravity.x, gravity.y, gravity.z,
+			drag, maxTime, travelTime, startVelocityLen);
 		printf("time: %.2f\nlaunchTime: %.2f\n", time, _this->launchTime());
 
 		if (maxTime >= 7.95f)
@@ -736,15 +743,6 @@ public:
 
 		//TraceResult1 result = this->Trace(startPosition, position, velocity, gravity, drag, maxTime, travelTime, startVelocityLen);
 		TraceResult1 result = this->Trace(prevPosition, position, velocity, gravity, drag, maxTime, travelTime, startVelocityLen);
-
-
-		printf("result\ndidHit: %s\nprevPosition: (%.2f, %.2f, %.2f)\nposition: (%.2f, %.2f, %.2f)\nvelocity: (%.2f, %.2f, %.2f)\ngravity: (%.2f, %.2f, %.2f)\ndrag: %.2f\nmaxTime: %.2f\ntravelTime: %.2f\nstartVelLen: %.3f\n",
-			result.didHit ? "true" : "false",
-			prevPosition.x, prevPosition.y, prevPosition.z,
-			position.x, position.y, position.z,
-			velocity.x, velocity.y, velocity.z,
-			gravity.x, gravity.y, gravity.z,
-			drag, maxTime, travelTime, startVelocityLen);
 
 		if (result.didHit)
 		{
@@ -775,14 +773,6 @@ public:
 				float maxTravelDst = _this->initialDistance() + startVelocityLen * min(result.hitTime, maxTime) * projectile_forgiviness;
 				if ((result.hitDist = startPosition.distance(result.hitPosition)) < maxTravelDst) {
 					result.didHit = true;
-
-					printf("result\nmaxTravelDst:%.2f\ndidHit: %s\nprevPosition: (%.2f, %.2f, %.2f)\nposition: (%.2f, %.2f, %.2f)\nvelocity: (%.2f, %.2f, %.2f)\ngravity: (%.2f, %.2f, %.2f)\ndrag: %.2f\nmaxTime: %.2f\ntravelTime: %.2f\nstartVelLen: %.3f\n",
-						maxTravelDst, result.didHit ? "true" : "false",
-						prevPosition.x, prevPosition.y, prevPosition.z,
-						position.x, position.y, position.z,
-						velocity.x, velocity.y, velocity.z,
-						gravity.x, gravity.y, gravity.z,
-						drag, maxTime, travelTime, startVelocityLen);
 
 					goto HIT;
 				}
@@ -945,8 +935,8 @@ public:
 				break;
 			}
 
-			//float bulletUpdateRate = 0.01f;
-			float bulletUpdateRate = 1.01f;
+			float bulletUpdateRate = 0.01f;
+			//float bulletUpdateRate = 1.01f;
 			if (_this->authoritative() && vars->combat.targetbehindwall) {
 				while (this->IsAlive()) {
 					float time = unity::get_realtimesincestartup();//unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();

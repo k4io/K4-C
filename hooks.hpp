@@ -600,7 +600,7 @@ namespace hooks {
 					p->previousPosition(rpc_position);
 					p->sentPosition(rpc_position);
 					p->prevSentVelocity(rpc_position); //?
-					//p->launchTime(unity::get_realtimesincestartup());
+					p->launchTime(unity::get_realtimesincestartup());
 					p->traveledTime(0);
 					if (vars->combat.manipulator2
 						&& (unity::GetKey(vars->keybinds.manipulator)
