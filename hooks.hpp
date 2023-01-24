@@ -34,8 +34,8 @@ namespace hooks {
 		static auto blocksprint = reinterpret_cast<void (*)(BasePlayer*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("BlockSprint"), 1, _(""), _(""))));
 		static auto OnNetworkMessage = reinterpret_cast<void (*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("OnNetworkMessage"), 1, _(""), _(""))));
 		static auto IsConnected = reinterpret_cast<bool (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("IsConnected"), 0, _(""), _("Network"))));
-		static auto Run = reinterpret_cast<System::string*(*)(uintptr_t, System::string*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ConsoleSystem"), _("Run"), 0, _(""), _(""))));
-		
+		static auto Run = reinterpret_cast<System::string * (*)(uintptr_t, System::string*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ConsoleSystem"), _("Run"), 0, _(""), _(""))));
+
 		static auto pifu = reinterpret_cast<void(*)(PlayerInput*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerInput"), _("FrameUpdate"), 0, _(""), _(""))));
 
 
@@ -47,8 +47,8 @@ namespace hooks {
 		static auto attackent_addpunch = reinterpret_cast<void(*)(uintptr_t, Vector3, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("HeldEntity"), _("AddPunch"), 0, _(""), _(""))));
 		static auto baseprojectile_createprojectile = reinterpret_cast<uintptr_t(*)(BaseProjectile*, System::string, Vector3, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("CreateProjectile"), 0, _(""), _(""))));
 		static auto DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
-		
-		static auto createeffect = reinterpret_cast<GameObject* (*)(System::string, Effect*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("EffectLibrary"), _("CreateEffect"), 2, _(""), _(""))));
+
+		static auto createeffect = reinterpret_cast<GameObject * (*)(System::string, Effect*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("EffectLibrary"), _("CreateEffect"), 2, _(""), _(""))));
 
 		static auto _update = reinterpret_cast<void (*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Update"), 0, _(""), _(""))));
 
@@ -85,7 +85,7 @@ namespace hooks {
 	static auto change_code_rpc = reinterpret_cast<void (*)(BasePlayer*, System::string, uintptr_t, bool, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_string_bool_Address); //BaseEntity$$ServerRPC<string, bool> Address
 
 	static auto ServerRPC_int = reinterpret_cast<void (*)(BaseProjectile*, System::string funcName, unsigned int arg1, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uint_);
-	
+
 	//static auto get_resourcePath = reinterpret_cast<System::string (*)(uintptr_t)>(mem::game_assembly_base + offsets::Method$ResourceRef_method);
 
 	static auto PerformanceUI_Update = reinterpret_cast<void (*)(void*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PerformanceUI"), _("Update"), -1, _(""), _("Facepunch"))));
@@ -102,7 +102,7 @@ namespace hooks {
 		orig::playerwalkmovement_client_input = reinterpret_cast<void (*)(PlayerWalkMovement*, uintptr_t, ModelState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("ClientInput"), -1, _(""), _(""))));
 		orig::DoFixedUpdate = reinterpret_cast<void (*)(PlayerWalkMovement*, ModelState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("DoFixedUpdate"), -1, _(""), _(""))));
 		orig::blocksprint = reinterpret_cast<void (*)(BasePlayer*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("BlockSprint"), 1, _(""), _(""))));
-		orig::Run = reinterpret_cast<System::string*(*)(uintptr_t, System::string*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ConsoleSystem"), _("Run"), 0, _(""), _(""))));
+		orig::Run = reinterpret_cast<System::string * (*)(uintptr_t, System::string*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ConsoleSystem"), _("Run"), 0, _(""), _(""))));
 		orig::playermodel_updatelocalvelocity = reinterpret_cast<void (*)(PlayerModel*, Vector3, Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerModel"), _("UpdateLocalVelocity"), 2, _(""), _(""))));
 		orig::get_bodyleanoffset = reinterpret_cast<Vector3(*)(PlayerEyes*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_BodyLeanOffset"), 0, _(""), _(""))));
 
@@ -173,7 +173,7 @@ namespace hooks {
     if(val == 0)        \
     return
 	uintptr_t client_entities;
-	
+
 	bool flying = false, is_speeding = false, is_lagging = false, has_intialized_methods = false, wake = true, launchedmelee = false;
 	float nextActionTime = 0, period = 1.4721, last_gesture_rpc = 0.f, last_revive_rpc = 0.f, last_refill_rpc = 0.f, last_fwd_fly = 0.f;
 	Vector3 m_debugcam_toggle_pos, m_debugcam_pos, tempmelvel, tempmelpos, lastMovementLinePos;
@@ -324,12 +324,12 @@ namespace hooks {
 
 			uintptr_t shoot_list = *(uintptr_t*)(*(uintptr_t*)(projectileShoot + 0x18));// + 0x10);
 
-			if(!misc::emulated)
+			if (!misc::emulated)
 				shoot_list = *(uintptr_t*)(*(uintptr_t*)(projectileShoot + 0x18) + 0x10);
 
 			auto size = *(int*)(*(uintptr_t*)(projectileShoot + 0x18) + 0x18);
 
-			Vector3 aimbot_velocity = Vector3(0,0,0);
+			Vector3 aimbot_velocity = Vector3(0, 0, 0);
 
 			const auto stats = baseprojectile->get_stats(Item->get_item_definition_id());
 
@@ -343,7 +343,7 @@ namespace hooks {
 			//get position of player with velocity
 			//get direction to that
 			//calculate perfect Y velocity in loop to find where projectile lands
-			
+
 
 			//calc new target position with velocity
 			Vector3 target_velocity, target_pos;
@@ -404,7 +404,7 @@ namespace hooks {
 					manipulated = true;
 					target.visible = true;
 				}
-				
+
 				else if (vars->combat.manipulator
 					&& target.ent->is_alive()
 					&& (!(!GetAsyncKeyState(vars->keybinds.manipulator))
@@ -434,7 +434,7 @@ namespace hooks {
 			}
 			if (vars->combat.HitScan) {
 				auto n = ((BasePlayer*)target.ent)->GetVisibleBone(rpc_position);
-				if(!n.is_empty())
+				if (!n.is_empty())
 					target_pos = n;
 			}
 			target_pos.y += 0.2f;
@@ -513,9 +513,11 @@ namespace hooks {
 					}
 				}
 				if (target.ent && vars->combat.vischeck ? (target.visible || manipulated || misc::autoshot) : true && !target.teammate) {
-					*reinterpret_cast<Vector3*>(projectile + 0x24) = aimbot_velocity; //startvel
-					*reinterpret_cast<Vector3*>(projectile + 0x18) = rpc_position; //startpos
-					//Sphere(target_pos, 0.05f, { r, g, b, 1 }, 5.f, 100.f);
+					if (!aimbot_velocity.is_empty()) {
+						*reinterpret_cast<Vector3*>(projectile + 0x24) = aimbot_velocity; //startvel
+						*reinterpret_cast<Vector3*>(projectile + 0x18) = rpc_position; //startpos
+						//Sphere(target_pos, 0.05f, { r, g, b, 1 }, 5.f, 100.f);
+					}
 				}
 			}
 			if (!ismelee) {
@@ -554,12 +556,14 @@ namespace hooks {
 						if (target.ent && target.ent->health() > 0 && !target.teammate) {
 							if (vars->combat.vischeck ? (target.visible || vis_fat) : true)
 							{
-								projectile->set_current_velocity(aimbot_velocity);
-								original_vel = aimbot_velocity;
-								if (manipulated) {
-									auto g = get_gameObject((uintptr_t)projectile);
-									auto t = get_game_object_transform(g);
-									set_position(t, rpc_position);
+								if (!aimbot_velocity.is_empty()) {
+									projectile->set_current_velocity(aimbot_velocity);
+									original_vel = aimbot_velocity;
+									if (manipulated) {
+										auto g = get_gameObject((uintptr_t)projectile);
+										auto t = get_game_object_transform(g);
+										set_position(t, rpc_position);
+									}
 								}
 							}
 						}
@@ -610,11 +614,7 @@ namespace hooks {
 						p->initialVelocity(aimbot_velocity);
 						p->previousVelocity(aimbot_velocity);
 					}
-					
-					if (vars->combat.targetbehindwall)
-					{
-						//p->projectileID(p->projectileID() - 1);
-					}
+
 				}
 				if (vars->combat.targetbehindwall)
 				{
@@ -655,6 +655,7 @@ namespace hooks {
 	}
 
 	protobuf::PlayerProjectileUpdate* tppu;
+	Vector3 lup{};
 	void hk_serverrpc_playerprojectileupdate(int64_t rcx, int64_t rdx, int64_t r9, int64_t _ppa, int64_t arg5) {
 		auto  projectile = reinterpret_cast<Projectile*>(get_rbx_value());
 		auto  ppu = reinterpret_cast<protobuf::PlayerProjectileUpdate*>(_ppa);
@@ -708,7 +709,7 @@ namespace hooks {
 		//		return;
 		//	}
 		//}
-		Sphere(ppu->position, .5f, { 0, 0, 1, 1 }, 10.f, 1);
+
 
 		return orig_fn(rcx, rdx, r9, _ppa, arg5);
 	}
@@ -716,7 +717,7 @@ namespace hooks {
 	void hk_serverrpc_playerprojectilericochet(int64_t rcx, int64_t rdx, int64_t r9, int64_t _ppa, int64_t arg5) {
 		auto        projectile = reinterpret_cast<Projectile*>(get_rbx_value());
 		auto  ppa = reinterpret_cast<protobuf::PlayerProjectileRicochet*>(_ppa);
-		
+
 
 		const auto orig_fn =
 			reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(
@@ -750,7 +751,7 @@ namespace hooks {
 		auto        projectile = reinterpret_cast<BaseProjectile*>(get_rbx_value());
 		auto  ppa = reinterpret_cast<protobuf::PlayerProjectileAttack*>(_ppa);
 		auto& attack = ppa->playerAttack->attack;
-
+		lup = {};
 		const auto orig_fn =
 			reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(
 				hooks::orig::playerprojectileattack);
@@ -766,7 +767,7 @@ namespace hooks {
 			auto hit_test = projectile->get_hit_test();
 			if (!hit_test)
 				break;
-			 
+
 			if (!hit_test->gameObject())
 				break;
 
@@ -861,7 +862,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					int64_t partid;
 				};
 
-				hitt test[1] = { 
+				hitt test[1] = {
 					{ 0, 0 }
 				};
 				if (target.ent->model()) {
@@ -905,50 +906,50 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			else if (!target.is_heli && vars->combat.randomize) {
 				switch (my_rand() % 10) {
 				case 0: // Head
-					attack->hitBone   = 698017942;
+					attack->hitBone = 698017942;
 					attack->hitPartID = 2173623152;
 					break;
 				case 1: // Chest
-					attack->hitBone	  = 1031402764;
+					attack->hitBone = 1031402764;
 					attack->hitPartID = 1750816991;
 					break;
 				case 2: // LHand
-					attack->hitBone   = 182688154;
+					attack->hitBone = 182688154;
 					attack->hitPartID = 1750816991;
 					break;
 				case 3: // RHand
-					attack->hitBone   = 102231371;
+					attack->hitBone = 102231371;
 					attack->hitPartID = 1750816991;
 					break;
 				case 4: // pelvis
-					attack->hitBone   = 2811218643;
+					attack->hitBone = 2811218643;
 					attack->hitPartID = 1750816991;
 					break;
 				case 5: // r_hip
-					attack->hitBone   = 2331610670;
+					attack->hitBone = 2331610670;
 					attack->hitPartID = 1750816991;
 					break;
 				case 6: // r_foot
-					attack->hitBone   = 920055401;
+					attack->hitBone = 920055401;
 					attack->hitPartID = 1750816991;
 					break;
 				case 7: // spine1
-					attack->hitBone =   3771021956;
+					attack->hitBone = 3771021956;
 					attack->hitPartID = 1750816991;
 					break;
 				case 8: // l_upperarm
-					attack->hitBone   = 3901657145;
+					attack->hitBone = 3901657145;
 					attack->hitPartID = 1750816991;
 					break;
 				case 9: // l_knee
-					attack->hitBone   = 3892428003;
+					attack->hitBone = 3892428003;
 					attack->hitPartID = 1750816991;
 					break;
 				}
 				attack->hitPositionLocal = { -.1f, -.1f, 0 };
 				attack->hitNormalLocal = { 0, -1, 0 };
 			}
-			else if(target.is_heli && vars->combat.weakspots) {
+			else if (target.is_heli && vars->combat.weakspots) {
 				auto weakspots = ((BaseHelicopter*)target.ent)->weakspots();
 				if (!weakspots)
 					break;
@@ -1004,28 +1005,28 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 	void hk_serverrpc_doplace(int64_t rcx, int64_t rdx, int64_t r9, int64_t _ppa, int64_t arg5) {
 		//auto  planner = *reinterpret_cast<uintptr_t*>(get_rbx_value());
-		auto  ppa = (protobuf::CreateBuilding * )_ppa;
+		auto  ppa = (protobuf::CreateBuilding*)_ppa;
 		const auto orig_fn =
 			reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(
 				hooks::orig::createbuilding);
 
-		if(!vars->local_player)
+		if (!vars->local_player)
 			return orig_fn(rcx, rdx, r9, _ppa, arg5);
 
 		auto held = vars->local_player->GetActiveItem()->GetHeldEntity<Planner>();
 		if (!held)
 			return orig_fn(rcx, rdx, r9, _ppa, arg5);
-		
+
 		//uintptr_t guide = *reinterpret_cast<uintptr_t*>(held + 0x210);
 		auto guide = held->guide();
 
-		if(!guide)
+		if (!guide)
 			return orig_fn(rcx, rdx, r9, _ppa, arg5);
 
-		if (GetAsyncKeyState(0x38)) { 
+		if (GetAsyncKeyState(0x38)) {
 			auto position = *reinterpret_cast<Vector3*>(guide + 0x18 + 0x34);
 			auto normal = *reinterpret_cast<Vector3*>(guide + 0x18 + 0x40);
-			
+
 			auto ogid = *reinterpret_cast<unsigned int*>(_ppa + 0x14);
 
 			auto build_id = *reinterpret_cast<unsigned int*>(_ppa + 0x14);
@@ -1045,7 +1046,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				*reinterpret_cast<Vector3*>(_ppa + 0x20) = ((Transform*)tranny)->InverseTransformPoint(position);
 				*reinterpret_cast<Vector3*>(_ppa + 0x2C) = ((Transform*)tranny)->InverseTransformDirection(normal);
 
-				vars->local_player->console_echo(string::wformat(_(L"[matrix] DoPlace - Spoofed %d to %d with position (%d, %d, %d)"), 
+				vars->local_player->console_echo(string::wformat(_(L"[matrix] DoPlace - Spoofed %d to %d with position (%d, %d, %d)"),
 					(int)ogid,
 					(int)vars->selected_entity_id,
 					(int)position.x,
@@ -1056,7 +1057,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		}
 		return orig_fn(rcx, rdx, r9, _ppa, arg5);
 	}
-	 
+
 	void hk_playerwalkmovement_ClientInput(PlayerWalkMovement* player_walk_movement, uintptr_t inputstate, ModelState* model_state) {
 
 		auto baseplayer = vars->local_player;
@@ -1080,7 +1081,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 		}
 		//if (baseplayer) baseplayer->console_echo(_(L"baseplayer"));
-		if (!baseplayer || baseplayer->is_sleeping()) 
+		if (!baseplayer || baseplayer->is_sleeping())
 			return;
 		//if (baseplayer) baseplayer->console_echo(_(L"baseplayer after"));
 		auto time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
@@ -1133,7 +1134,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						ov = Vector3(ov.x, curr.y < old.y ? (curr.y - 0.3f) : old.y, ov.z);
 					if (settings::hor_flyhack >= 6.f)
 						ov = Vector3(old.x, ov.y, old.z);
-					
+
 					if (settings::vert_flyhack >= 2.8f) {
 						if (ov != curr) //disallow positive movement on Y
 						{
@@ -1479,7 +1480,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			&& held)
 		{
 			auto m = held->repeatDelay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
-		
+
 			int r = vars->desyncTime / m;
 			if (r > 1)
 			{
@@ -1551,7 +1552,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			launchedmelee = false;
 			return _update((Projectile*)pr);
 		}
-		if (vars->combat.thickness > 1.f) {
+		if (vars->combat.thickness > 1.f && false) {
 			for (;;) {
 				auto p = (Projectile*)pr;
 				if (!p->hitTest()) break;
@@ -1589,7 +1590,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 									Sphere(vpos, 0.1f, { 1, 1, 1, 1 }, 10.f, 0);
 									//Line(pos, vpos, { 0, 1, 1, 1 }, 10.f, true, true);
 									//Line(vpos, target, { 0, 1, 0, 1 }, 10.f, true, true);
-									
+
 									g_UpdateReusable = Projectile1::CreatePlayerProjectileUpdate();
 									((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->position = vpos;
 									((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->projectileID = p->projectileID();
@@ -1759,9 +1760,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		//TimeWarning::New(_(L"movement.ClientInput"), 0.1f);
 		self->movement()->ClientInput(state, self->modelState());
 		hk_playerwalkmovement_ClientInput(self->movement(), (uintptr_t)input, self->modelState());
-			//if ()
-				//self->movement()->ClientInput(state, self->modelState());
-		//TimeWarning::New(_(L"UseAction"), 0.1f);
+		//if ()
+			//self->movement()->ClientInput(state, self->modelState());
+	//TimeWarning::New(_(L"UseAction"), 0.1f);
 		self->UseAction(state);
 		if (Buttons::Chat()->IsDown)
 		{
@@ -1866,27 +1867,27 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		if (!serverrpc_projecshoot) {
 			//auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot); 
 			auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileShoot___);
-		
+
 			if (method_serverrpc_projecshoot) {
 				serverrpc_projecshoot = **(uintptr_t***)(method_serverrpc_projecshoot + 0x30);
-		
+
 				hooks::orig::serverrpc_projectileshoot = *serverrpc_projecshoot;
-		
+
 				*serverrpc_projecshoot = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_projectileshoot);
 			}
 		}
 		if (!serverrpc_playerprojectileattack) {
 			auto method_serverrpc_playerprojectileattack = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileAttack___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
-		
+
 			if (method_serverrpc_playerprojectileattack) {
 				serverrpc_playerprojectileattack = **(uintptr_t***)(method_serverrpc_playerprojectileattack + 0x30);
-		
+
 				hooks::orig::playerprojectileattack = *serverrpc_playerprojectileattack;
-		
+
 				*serverrpc_playerprojectileattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
 			}
 		}
-		////if (!serverrpc_playerprojectileupdate) {
+		//if (!serverrpc_playerprojectileupdate) {
 		//	auto method_serverrpc_playerprojectileupdate = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
 		//
 		//	if (method_serverrpc_playerprojectileupdate) {
@@ -1899,12 +1900,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		//}
 		if (!serverrpc_createbuilding) {
 			auto method_serverrpc_createbuilding = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_CreateBuilding___);
-		
+
 			if (method_serverrpc_createbuilding) {
 				serverrpc_createbuilding = **(uintptr_t***)(method_serverrpc_createbuilding + 0x38);
-		
+
 				hooks::orig::createbuilding = *serverrpc_createbuilding;
-		
+
 				*serverrpc_createbuilding = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_doplace);
 			}
 		}
@@ -2086,7 +2087,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 			if (vars->misc.automini) {
 				auto mountedvehicle = baseplayer->GetMountedVehicle();
-				if(mountedvehicle) {
+				if (mountedvehicle) {
 					auto maxspeed = vars->misc.minicfg.speed;
 					auto target = vars->misc.minicfg.target;
 					auto mode = vars->misc.minicfg.mode;
@@ -2122,7 +2123,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							state->current()->mouseDelta().x,
 							state->current()->mouseDelta().y,
 							state->current()->mouseDelta().z
-							);
+						);
 
 						auto cmd = state->current()->mouseDelta();
 
@@ -2134,7 +2135,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							if (current_yaw > 0) {
 								Buttons::SetLeft(false);
 								Buttons::SetRight(true);
-							} else if (current_yaw > 0) {
+							}
+							else if (current_yaw > 0) {
 								Buttons::SetLeft(true);
 								Buttons::SetRight(false);
 							}
@@ -2144,7 +2146,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							else if (current_pitch < 0) //tilt forwards
 								state->current()->mouseDelta() = Vector3(cmd.x, cmd.y + .3f, cmd.z);
 							else state->current()->mouseDelta() = Vector3(0, 0, 0);
-							
+
 							if (current_roll > 0) //tilt right
 								state->current()->mouseDelta() = Vector3(cmd.x - .3f, cmd.y, cmd.z);
 							else if (current_roll < 0) //tilt left
@@ -2342,8 +2344,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							wprintf(c->ItemName()->str);
 							wprintf(_(L"\nViewModelPrefabName: "));
 							wprintf(c->ViewmodelPrefabName()->str);
-							
-							
+
+
 							wprintf(_(L"\nMesh download paths:"));
 							auto as = mem::read< System::Array<System::string*>*>((uintptr_t)c + 0x50);
 							if (as) {
@@ -2353,7 +2355,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 										wprintf(L"\t[%d]: %ls\n", k, c2->str);
 								}
 							}
-							
+
 							wprintf(_(L"\nEntityPrefabName: "));
 							wprintf(c->EntityPrefabName()->str);
 							wprintf(L"\nGROUP SIZE: %d\n", gpsz);
@@ -2387,13 +2389,13 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					}
 					*/
 					//workshopskin cache loop //Rust_Workshop_WorkshopSkin_c*
-					
+
 					typedef Skin* (*A)(unsigned long);
 					auto sk = ((A)(mem::game_assembly_base + 0x10587B0))(2249370680);
 
 					typedef void* (*B)(Skin*, GameObject*);
 					((B)(mem::game_assembly_base + 0x10471A0))(sk, held->GetComponent<GameObject>(unity::GetType(_("UnityEngine"), _("GameObject"))));
-				
+
 					auto model = get_activemodel();
 					auto renderers = ((Networkable*)model)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
 					if (renderers)
