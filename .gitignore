@@ -6,3 +6,6 @@
 /packages/Costura.Fody.5.7.0
 /.vs
 /x64
+/server/x64/Debug
+/server/x64/Release/server.tlog
+/server/x64/Release

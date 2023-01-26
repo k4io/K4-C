@@ -129,6 +129,9 @@ namespace System {
 			}
 			str[size] = 0;
 		}
+		static string* a(const char* s) {
+			return (string*)il2cpp::methods::new_string(s);
+		}
 	};
 }
 

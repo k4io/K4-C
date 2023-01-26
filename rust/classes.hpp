@@ -611,7 +611,7 @@ static auto set_ClearMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reint
 static auto set_CloudMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_CloudMaterial"), 0, _(""), _(""))));
 static auto getiteminslot = reinterpret_cast<uintptr_t(*)(PlayerBelt*, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerBelt"), _("GetItemInSlot"), 0, _(""), _(""))));
 static auto gettrans = reinterpret_cast<uintptr_t(*)(Component*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
-static auto _Text = reinterpret_cast<void (*)(System::string, Vector3, col, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Text"), 4, _(""), _("UnityEngine"))));
+static auto _Text = reinterpret_cast<void (*)(System::string*, Vector3, col, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Text"), 4, _(""), _("UnityEngine"))));
 #pragma endregion
 
 class col {
@@ -633,7 +633,7 @@ float current_time;
 void init_bp() {
 	//setrayleigh = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Weather"), _("set_atmosphere_rayleigh"), 0, _(""), _(""))));
 	//ServerRPC_intstring = reinterpret_cast<void (*)(BaseEntity*, System::string, unsigned int, System::string, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uintstring_);
-	_Text = reinterpret_cast<void (*)(System::string, Vector3, col, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Text"), 4, _(""), _("UnityEngine"))));
+	_Text = reinterpret_cast<void (*)(System::string*, Vector3, col, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Text"), 4, _(""), _("UnityEngine"))));
 	viewmodelplay = reinterpret_cast<void(*)(uintptr_t, System::string, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ViewModel"), _("Play"), 2, _(""), _(""))));
 	set_ambientintensity = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("RenderSettings"), _("set_ambientIntensity"), 1, _(""), _("UnityEngine"))));
 	set_ambientlight = reinterpret_cast<void(*)(uintptr_t, col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Sky"), _("set_AmbientColor"), 1, _(""), _(""))));
@@ -879,8 +879,8 @@ void init_bp() {
 
 class DDraw {
 public:
-	static void Text(const wchar_t* w, Vector3 pos, col clr, float duration) {
-		//return _Text(w, pos, clr, duration);
+	static void Text(const char* c, Vector3 pos, col clr, float duration) {
+		return _Text(System::string::a(c), pos, clr, duration);
 	}
 };
 

@@ -722,10 +722,12 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			auto name_color = is_visible ? vars->colors.players.details.name.visible : vars->colors.players.details.name.invisible;
 			auto half = (bounds.right - bounds.left) / 2;
 
+			int y = 0;
+
 			if (vars->visual.weaponesp) {
 				auto player_weapon = ply->GetActiveItem();
 				if (player_weapon)
-					render.StringCenter({ bounds.center, bounds.bottom + 19 }, player_weapon->get_weapon_name(), vars->visual.rainbowflags ? rainbowcolor : FLOAT4TOD3DCOLOR(vars->colors.players.details.flags.visible));
+					render.StringCenter({ bounds.center, bounds.bottom + (y * 10) }, player_weapon->get_weapon_name(), vars->visual.rainbowflags ? rainbowcolor : FLOAT4TOD3DCOLOR(vars->colors.players.details.flags.visible));
 			}
 
 			if (vars->visual.targettedflag) {
@@ -758,7 +760,7 @@ void DrawPlayer(BasePlayer* ply, bool npc)
 			{
 				auto dist_color = is_visible ? vars->colors.players.details.distance.visible : vars->colors.players.details.distance.invisible;
 				auto nstr = string::wformat(_(L"[%dm]"), (int)distance);
-				render.StringCenter({ bounds.center, bounds.bottom + 9 + (vars->visual.hpbar == 3 ? 0 : 10) }, nstr, vars->visual.rainbowdist ? rainbowcolor : FLOAT4TOD3DCOLOR(dist_color));
+				render.StringCenter({ bounds.center, bounds.bottom + (y * 10) + (vars->visual.hpbar == 3 ? 0 : 10) }, nstr, vars->visual.rainbowdist ? rainbowcolor : FLOAT4TOD3DCOLOR(dist_color));
 			}
 
 			//name

@@ -237,32 +237,32 @@ public:
 							canHit = true;
 
 					NOHIT:
-						printf("dst: %.2f, updateDist: %.2f\n", dst, updateDist);
+						//printf("dst: %.2f, updateDist: %.2f\n", dst, updateDist);
 						if (dst < updateDist) {
 							if (projectileProtection1 >= 3) {
 								bool flag1 = false;
-								printf("hm: %s, velocity.y: %.2f\n", heightMap ? "true" : "false", velocity.y);
+								//printf("hm: %s, velocity.y: %.2f\n", heightMap ? "true" : "false", velocity.y);
 								if (heightMap && velocity.y <= 0.f) {
 									//float height = heightMap->GetHeight(nearest);
 									float height = terrainheightmap_GetHeight(heightMap);
-									printf("height: %.2f, nearest.y + underground_forgiviness: %.2f, \n", height, nearest.y + underground_forgiviness);
+									//printf("height: %.2f, nearest.y + underground_forgiviness: %.2f, \n", height, nearest.y + underground_forgiviness);
 									if (nearest.y + underground_forgiviness <= height) {
 										if (!PLOS(startPos, nearest))
 										{
-											printf("no los\n");
+											//printf("no los\n");
 											break;
 										}
-										printf("los flag1 = true\n");
+										//printf("los flag1 = true\n");
 										flag1 = true;
 									}
 								}
 
 								if (!PLOS(nearest, pos)) {
-									printf("no los nearest - pos\n");
+									//printf("no los nearest - pos\n");
 									goto CONTINUE;
 								}
 								if (!flag1 && !PLOS(startPos, nearest)) {
-									printf("!flag1 & no los startpos - nearest\n");
+									//printf("!flag1 & no los startpos - nearest\n");
 									break;
 								}
 							}
@@ -281,7 +281,7 @@ public:
 						velocity -= velocity * drag * num;
 						travelTime += num;
 						maxHitDist = GetHitDist(min(travelTime, maxTime), (BasePlayer*)RealTarget.ent, true);
-						Sphere(position, maxHitDist, { 1, 1, 1, 1 }, 10.f, 100.f);
+						//Sphere(position, maxHitDist, { 1, 1, 1, 1 }, 10.f, 100.f);
 						maxTravelDst = _this->initialDistance() + startVelocityLen * min(travelTime, maxTime) * projectile_forgiviness;
 					}
 				}
@@ -559,7 +559,7 @@ public:
 		Vector3 movPos = from;
 		Vector3 prevPos = movPos;
 
-		float time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
+		float time = get_fixedTime();//UnityEngine::Time::get_realtimeSinceStartup();
 		float maxTime = time - _this->launchTime();
 
 		if (maxTime >= 7.95f) {
@@ -651,8 +651,8 @@ public:
 					movPos = closest + (c / len) * min(len, stepSize);
 			}
 
-			Sphere(movPos, 0.5f, { 1, 0, 0, 1 }, 10.f, 1);
-			Line(movPos, prevPos, { 0, 1, 0, 1 }, 10.f, 1, 1);
+			//Sphere(movPos, 0.5f, { 1, 0, 0, 1 }, 10.f, 1);
+			//Line(movPos, prevPos, { 0, 1, 0, 1 }, 10.f, 1, 1);
 			prevPos = movPos;
 
 			((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->position = movPos;
@@ -722,18 +722,17 @@ public:
 		float travelTime = _this->previoustraveledTime();
 
 		bool flag = false;
-		float time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
+		float time = get_fixedTime();//UnityEngine::Time::get_realtimeSinceStartup();
 		float maxTime = time - _this->launchTime();
 
-		printf("result\ndidHit: %s\nprevPosition: (%.2f, %.2f, %.2f)\nposition: (%.2f, %.2f, %.2f)\nvelocity: (%.2f, %.2f, %.2f)\ngravity: (%.2f, %.2f, %.2f)\ndrag: %.2f\nmaxTime: %.2f\ntravelTime: %.2f\nstartVelLen: %.3f\n",
-			false ? "true" : "false",
-			prevPosition.x, prevPosition.y, prevPosition.z,
-			position.x, position.y, position.z,
-			velocity.x, velocity.y, velocity.z,
-			gravity.x, gravity.y, gravity.z,
-			drag, maxTime, travelTime, startVelocityLen);
-		printf("time: %.2f\nlaunchTime: %.2f\n", time, _this->launchTime());
-
+		//printf("result\ndidHit: %s\nprevPosition: (%.2f, %.2f, %.2f)\nposition: (%.2f, %.2f, %.2f)\nvelocity: (%.2f, %.2f, %.2f)\ngravity: (%.2f, %.2f, %.2f)\ndrag: %.2f\nmaxTime: %.2f\ntravelTime: %.2f\nstartVelLen: %.3f\n",
+		//	false ? "true" : "false",
+		//	prevPosition.x, prevPosition.y, prevPosition.z,
+		//	position.x, position.y, position.z,
+		//	velocity.x, velocity.y, velocity.z,
+		//	gravity.x, gravity.y, gravity.z,
+		//	drag, maxTime, travelTime, startVelocityLen);
+		//printf("realtime: %.2f\ntime: %.2f\nlaunchTime: %.2f\n", get_fixedTime(), time, _this->launchTime());
 		if (maxTime >= 7.95f)
 		{
 			vars->local_player->console_echo(string::wformat(_(L"[matrix]: UpdateVelocity - MaxTime > 7.95f, Integrity: %d"), (int)(_this->integrity() * 100)));
@@ -750,7 +749,8 @@ public:
 			vars->local_player->console_echo(_(L"[matrix]: DoRealMovement - didHit"));
 			_this->traveledDistance(result.hitDist);
 
-			result.hitPosition = result.hitEntity->model()->boneTransforms()->get(47)->position();
+			//result.hitPosition = result.hitEntity->model()->boneTransforms()->get(48)->position();
+			result.hitPosition = result.hitEntity->model()->boneTransforms()->get(48)->position();
 			//if (settings.AimbotCircle)
 			//	result.hitPosition = result.hitEntity->model()->boneTransforms()->get(47)->_get_position();
 
@@ -793,7 +793,7 @@ public:
 			(int)newPos.z
 		));
 
-		Line(prev, newPos, { 1, 1, 1, 1 }, 10.f, 1, 1);
+		//Line(prev, newPos, { 1, 1, 1, 1 }, 10.f, 1, 1);
 
 		vel += gravity * num;
 		vel -= vel * drag * num;
@@ -837,6 +837,7 @@ public:
 				//if (misc::best_lean != Vector3(0, 0, 0))
 				//	pos = misc::best_lean;
 					//pos = CheatCore::m_cheat->RealGangstaShit;
+
 				//that was a lie this manipulator is different fuck me sideways
 				if (settings::RealGangstaShit != Vector3(0, 0, 0))
 					pos = settings::RealGangstaShit;
@@ -844,7 +845,7 @@ public:
 				//_this->currentPosition() = pos;
 				_this->currentPosition(pos);
 
-				float time1 = unity::get_realtimesincestartup();//unity::get_realtimesincestartup();//UnityEngine::Time::get_realtime SinceStartup();
+				float time1 = get_fixedTime();//get_fixedTime();//UnityEngine::Time::get_realtime SinceStartup();
 				_this->launchTime(time1);
 				_this->sentTraveledTime(0.f);
 				_this->sentPosition(pos);
@@ -859,7 +860,7 @@ public:
 				_this->needsLOS(false);
 				*reinterpret_cast<bool*>((uintptr_t)_this + 0xf8) = false;
 				//_this->clientsideEffect() = false;
-				printf("projectile has been reset to 0 from update velocity\n");
+				//printf("projectile has been reset to 0 from update velocity\n");
 				CreateHT();
 			}
 
@@ -916,7 +917,7 @@ public:
 
 	void Update() {
 		do
-		{
+		{	
 			vars->local_player->console_echo(_(L"[matrix]: Update - Called"));
 			auto _this = (Projectile*)this;
 			if (!_this)
@@ -939,7 +940,7 @@ public:
 			//float bulletUpdateRate = 1.01f;
 			if (_this->authoritative() && vars->combat.targetbehindwall) {
 				while (this->IsAlive()) {
-					float time = unity::get_realtimesincestartup();//unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
+					float time = get_fixedTime();//get_fixedTime();//UnityEngine::Time::get_realtimeSinceStartup();
 					vars->local_player->console_echo(_(L"[matrix]: Update - updating"));
 					if (time - _this->launchTime() < _this->traveledTime() + bulletUpdateRate) {
 						//vars->local_player->console_echo(string::wformat(_(L"[matrix]: Update - breaking, time: %d, launchTime: %d, traveled: %d"), (int)(time * 100), (int)(_this->launchTime() * 100), (int)(_this->traveledTime() * 100)));
@@ -967,7 +968,7 @@ public:
 		if (!LocalPlayerBase)
 			return 0.f;
 
-		float time = unity::get_realtimesincestartup();//unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
+		float time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
 		float timeSinceLastTick = time - LocalPlayerBase->lastSentTickTime();
 		float timeSinceLastTickClamped = max(0.f, min(timeSinceLastTick, 1.f));
 

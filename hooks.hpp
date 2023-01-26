@@ -604,7 +604,8 @@ namespace hooks {
 					p->previousPosition(rpc_position);
 					p->sentPosition(rpc_position);
 					p->prevSentVelocity(rpc_position); //?
-					p->launchTime(unity::get_realtimesincestartup());
+					//p->launchTime(unity::get_realtimesincestartup());
+					p->launchTime(get_fixedTime());
 					p->traveledTime(0);
 					if (vars->combat.manipulator2
 						&& (unity::GetKey(vars->keybinds.manipulator)
@@ -1479,7 +1480,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			&& !vars->combat.rapidfire
 			&& held)
 		{
-			auto m = held->repeatDelay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
+			auto m = held->repeatDelay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD	
 
 			int r = vars->desyncTime / m;
 			if (r > 1)
@@ -1641,6 +1642,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				if (!p->hitTest()) break;
 				if (p->penetrationPower() <= .5f) break;
 
+				DDraw::Text(_("CurrentPos"), p->currentPosition(), { r, g, b, 1 }, 10.f);
+
 				auto headtrans = ((BasePlayer*)vars->best_target.ent)->get_bone_Transform(48);
 				if (!headtrans) break;
 				Vector3 vel = p->currentVelocity();
@@ -1662,6 +1665,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					8388608 | 2097152 | 65536, 0))
 					break;
 
+				DDraw::Text(_("Hitpoint"), hitInfo->point(), { r, g, b, 1 }, 10.f);
+				DDraw::Text(_("X"), vars->best_target.pos, { r, g, b, 1 }, 10.f);
+
 				Line(hitInfo->point(), p->currentPosition(), { 1, 0, 0, 1 }, 10.f, false, false);
 				Line(hitInfo->point(), vars->best_target.pos, { 1, 0, 0, 1 }, 10.f, false, false);
 
@@ -1678,10 +1684,10 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				ppu->position = newpos;
 				ppu->velocity = p->currentVelocity();
 				vars->local_player->SendProjectileUpdate((uintptr_t)ppu);
-				//orig_fn(rcx, rdx, r9, _ppa, arg5);
+				//orig_fn(rcx, rdx, r9, _ppa, arg5); 
 
-				auto trans = vars->best_target.ent->transform();//((BasePlayer*)vars->best_target.ent)->get_bone_Transform(48);
-				if (!trans) break;
+				//auto trans = vars->best_target.ent->transform();//((BasePlayer*)vars->best_target.ent)->get_bone_Transform(48);
+				//if (!trans) break;
 				float dist = p->currentPosition().distance(headtrans->position());
 
 				p->traveledDistance(p->traveledDistance() + dist);
@@ -1693,6 +1699,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				Sphere(hitInfo->point(), 0.02f, { 1, 1, 1, 1 }, 10.f, false);
 				Sphere(ppu->position, 0.02f, { 0, 1, 0, 1 }, 10.f, false);
 				Sphere(newpos, 0.02f, { 0, 0, 1, 1 }, 10.f, false);
+				DDraw::Text(_("ppu"), ppu->position, { r, g, b, 1 }, 10.f);
 
 				auto btrans = hitInfo->transform();
 
@@ -1700,7 +1707,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				ht->set_hit_entity((BasePlayer*)vars->best_target.ent);
 				ht->set_attack_ray(Ray(hitInfo->point(), dir.Normalized()));
 				auto v = btrans->InverseTransformPoint(headtrans->position());
-				Sphere(v, 0.1f, { 0, 1, 1, 1 }, 10.f, false);
+				DDraw::Text(_("V"), headtrans->position() - v, { r, g, b, 1 }, 10.f);
 				ht->set_hit_point(v);
 				ht->set_hit_normal(Vector3(0, 0, 0));
 				ht->set_did_hit(true);
@@ -2233,6 +2240,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 			if (vars->visual.customtime)
 				Convar::Admin::Set_admintime(vars->visual.time);
+			else Convar::Admin::Set_admintime(-1);
 
 			//RenderSettings::set_ambientIntensity(vars->visual.ambient);
 
