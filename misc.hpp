@@ -526,6 +526,7 @@ namespace misc
 		};
 
 		//HitScan returns pair { lineofsight, targetposition }
+		misc::best_target = Vector3::Zero();
 
 		auto do_check = [&](Vector3 a) {
 			Vector3 p = re_p + a;
@@ -543,7 +544,7 @@ namespace misc
 			//check between manip pos and player pos
 			if (!ply->is_visible(p, pos, .18f))
 			{
-				if (!vars->combat.thick_bullet || !vars->combat.shoot_at_fatbullet) return false;
+				if (!vars->combat.thick_bullet || !vars->combat.targetbehindwall) return false;
 				bool t = false;
 				Vector3 z = pos;
 				//pos.y -= -0.2f; //imagine aiming at chest?????????
@@ -584,7 +585,7 @@ namespace misc
 				Line(p, pos, { r * 100, g * 100, b * 100, 1 }, (vars->desyncTime * 5.f), true, true);
 
 			misc::best_lean = p;
-			misc::best_target = pos;
+			//misc::best_target = pos;
 			return true;
 		};
 

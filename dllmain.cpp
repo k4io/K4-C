@@ -91,15 +91,19 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 	if (GetAsyncKeyState(VK_INSERT) & 1)
 		vars->open = !vars->open;
+	__try {
+		im::NewFrame();
+		if (render.NewFrame(pSwapChain))
+			new_frame();
+		render.EndFrame();
+		Gui::Render();
+		im::End();
 
-	im::NewFrame();
-	if (render.NewFrame(pSwapChain))
-		new_frame();
-	render.EndFrame();
-	Gui::Render();
-	im::End();
-	
-	im::Render();
+		im::Render();
+	}
+	__except (true) {
+		printf("exception occurred: " __FUNCTION__ "\n");
+	}
 
 	pContext->OMSetRenderTargets(1, &mainRenderTargetView, NULL);
 	ImGui_ImplDX11_RenderDrawData(im::GetDrawData());

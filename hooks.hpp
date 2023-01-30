@@ -426,6 +426,9 @@ namespace hooks {
 							if (misc::best_target != Vector3(0, 0, 0))
 							{
 								target_pos = misc::best_target;
+
+								settings::RealGangstaShit = rpc_position;
+								settings::FatHitPosition = target_pos;
 								//vis_fat = true;
 							}
 						}
@@ -500,6 +503,10 @@ namespace hooks {
 										if (misc::best_target != Vector3(0, 0, 0))
 										{
 											target_pos = misc::best_target;
+
+											settings::RealGangstaShit = rpc_position;
+											settings::FatHitPosition = target_pos;
+
 											vis_fat = true;
 										}
 									}
@@ -605,6 +612,7 @@ namespace hooks {
 					p->sentPosition(rpc_position);
 					p->prevSentVelocity(rpc_position); //?
 					//p->launchTime(unity::get_realtimesincestartup());
+					//p->launchTime(get_fixedTime());
 					p->launchTime(get_fixedTime());
 					p->traveledTime(0);
 					if (vars->combat.manipulator2
@@ -615,7 +623,6 @@ namespace hooks {
 						p->initialVelocity(aimbot_velocity);
 						p->previousVelocity(aimbot_velocity);
 					}
-
 				}
 				if (vars->combat.targetbehindwall)
 				{
@@ -628,6 +635,8 @@ namespace hooks {
 						((Projectile1*)p)->Launch1();
 					}
 
+					settings::RealGangstaShit = Vector3::Zero();
+					settings::FatHitPosition = Vector3::Zero();
 					misc::fixed_time_last_shot = get_fixedTime();
 					misc::just_shot = true;
 					misc::did_reload = false;
@@ -635,6 +644,9 @@ namespace hooks {
 					((cclear)(mem::game_assembly_base + 15617184))((uintptr_t)baseprojectile + 0x398); //"System.Collections.Generic.List<Projectile>$$Clear",
 					return;
 				}
+
+				settings::RealGangstaShit = Vector3::Zero();
+				settings::FatHitPosition = Vector3::Zero();
 			}
 
 			if (misc::autoshot)
@@ -1990,7 +2002,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				if (vars->combat.manipulator && ((unity::GetKey(vars->keybinds.manipulator))
 					|| misc::manipulate_vis))
 				{
-					printf("%.3f : %.3f\n", vars->desyncTime, mm_eye);
+					//printf("%.3f : %.3f\n", vars->desyncTime, mm_eye);
 					Vector3 target = vars->best_target.pos;
 					auto mag_ammo = held->ammo_left();
 					if (!strcmp(held->get_class_name(), _("BaseMelee"))
@@ -2824,6 +2836,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 											baseprojectile->automatic() = true;
 									}
 
+									if(vars->combat.fast_bullets)
 									baseprojectile->projectileVelocityScale() = vars->combat.fast_bullet;
 									if (vars->combat.nospread)
 										baseprojectile->set_no_spread();

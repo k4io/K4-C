@@ -264,6 +264,7 @@ struct Vars
 		bool HitScan = false;
 		bool norecoil = false;
 		bool nospread = false;
+		bool fast_bullets = false;
 		float fast_bullet = 1.f;
 		bool bestvelocity = false;
 		bool instaeoka = false;

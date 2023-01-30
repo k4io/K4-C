@@ -2560,10 +2560,10 @@ public:
 
 class MiniCopter : public BaseHelicopterVehicle {
 public:
+	FIELD(0x5D0, rotorSpeed, float);
 	FIELD(0x5D4, cachedPitch, float);
 	FIELD(0x5D8, cachedYaw, float);
 	FIELD(0x5DC, cachedRoll, float);
-	FIELD(0x5D0, rotorSpeed, float);
 };
 
 class BasePlayer : public BaseCombatEntity {

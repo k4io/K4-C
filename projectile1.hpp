@@ -39,7 +39,7 @@ class Projectile1 : public BaseMonoBehaviour
 {
 public:
 	void UpdateBulletTracer(Vector3 OldPos, Vector3 NewPos, bool Update = true) {
-		//Line(OldPos, NewPos, { 1, 1, 1, 1 }, 10.f, false, false);
+		//Line(OldPos, NewPos, { r * 255, g * 255, b * 255, 100 }, 10.f, false, false);
 		//Sphere(((Projectile*)this)->currentPosition(), .5f, { 1, 1, 1, 1 }, 10.f, 10.f);
 		/*
 		if (!settings.BulletTracers)

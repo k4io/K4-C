@@ -1352,7 +1352,7 @@ namespace Gui
 				im::SetTooltip(_("Abuses desync (0s-1s) and eye forgiveness to spawn bullets up to 10m away"));
 			}
 			im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
-			//im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(50, 15));
+			im::Hotkey(_("M"), &vars->keybinds.manipulator, ImVec2(50, 15));
 			//im::Checkbox(_("Manipulator2"), &vars->combat.manipulator2);
 			//im::SameLine(); im::SetCursorPosY(im::GetCursorPosY() + 2);
 			//im::Hotkey(_("M2"), &vars->keybinds.manipulator2, ImVec2(50, 15));
@@ -1370,7 +1370,8 @@ namespace Gui
 			//	im::SetTooltip(_("Multiplier for distance to teleport the bullet within desync time"));
 			//}
 			//im::Checkbox(_("Best velocity"), &vars->combat.bestvelocity);
-			im::SliderFloat(_("Bullet velocity"), &vars->combat.fast_bullet, .5f, 1.5f, _("%.1f"));
+			im::Checkbox(_("Bullet velocity"), &vars->combat.fast_bullets);
+			im::SliderFloat(_("Velocity"), &vars->combat.fast_bullet, .5f, 1.5f, _("%.1f"));
 			im::Checkbox(_("Instant eoka"), &vars->combat.instaeoka);
 			//im::Checkbox(_("Fast bow"), &vars->combat.fastbow);
 			im::Checkbox(_("Heli-weakspot"), &vars->combat.weakspots);
