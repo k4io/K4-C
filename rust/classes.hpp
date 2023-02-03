@@ -1997,7 +1997,7 @@ public:
 		pent
 			if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return nullptr;
 		//return ((T*)this->heldEntity());
-		return *reinterpret_cast<T**>(this + 0xA0);
+		return *reinterpret_cast<T**>(this + O::Item::heldEntity);
 	}
 };
 
@@ -3274,7 +3274,7 @@ auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base +
 	{
 		if (!this || (uintptr_t)this < 0xFFFFFFFF || (uintptr_t)this > 0xF000000000000000) return nullptr;
 		//unsigned int ActUID = this->clActiveItem();
-		unsigned int ActUID = mem::read<unsigned int>((uintptr_t)this + 0x5D8); //private uint clActiveItem; //0x5D8
+		unsigned int ActUID = mem::read<unsigned int>((uintptr_t)this + 0x5D0); //private uint clActiveItem; //0x5D0
 		if (!ActUID)
 			return 0;
 		Item* ActWeapon;
@@ -3289,9 +3289,9 @@ auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base +
 
 		for (int i = 0; i < 6; i++) //For each slot	
 		{
-			Item* WeaponInfo = mem::read<Item*>(items + 0x20 + (i * 0x8));;
+			Item* WeaponInfo = mem::read<Item*>(items + 0x20 + (i * 0x8));
 
-			unsigned int WeaponUID = mem::read<unsigned int>((uintptr_t)WeaponInfo + 0x28);
+			unsigned int WeaponUID = WeaponInfo->uid();
 			if (!WeaponUID)
 				return 0;
 			if (ActUID == WeaponUID)
@@ -3305,7 +3305,7 @@ auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base +
 
 	Item* get_active_weapon()
 	{
-		unsigned int ActUID = mem::read<unsigned int>((uintptr_t)this + 0x5D8);
+		unsigned int ActUID = mem::read<unsigned int>((uintptr_t)this + 0x5D0);
 		if (!ActUID)
 			return 0;
 		Item* ActWeapon;
@@ -3320,9 +3320,8 @@ auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base +
 
 		for (int i = 0; i < 6; i++) //For each slot	
 		{
-			Item* WeaponInfo = mem::read<Item*>(items + 0x20 + (i * 0x8));;
-
-			unsigned int WeaponUID = mem::read<unsigned int>((uintptr_t)WeaponInfo + 0x28);
+			Item* WeaponInfo = mem::read<Item*>(items + 0x20 + (i * 0x8));
+			unsigned int WeaponUID = WeaponInfo->uid();
 			if (!WeaponUID)
 				return 0;
 			if (ActUID == WeaponUID)

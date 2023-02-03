@@ -261,9 +261,6 @@ namespace hooks {
 		}
 	}
 
-	static uintptr_t* serverrpc_projecshoot;
-	static uintptr_t* serverrpc_playerprojectileattack;
-	static uintptr_t* serverrpc_playerprojectileupdate;
 
 	int pppid = 0;
 
@@ -365,8 +362,8 @@ namespace hooks {
 				}
 				else projshoot = *(uintptr_t*)(shoot_list + 0x20 + i * 0x8);
 
-				original_vel = *reinterpret_cast<Vector3*>(projshoot + 0x24);
-				rpc_position = *reinterpret_cast<Vector3*>(projshoot + 0x18);
+				original_vel = *reinterpret_cast<Vector3*>(projshoot + 0x20);
+				rpc_position = *reinterpret_cast<Vector3*>(projshoot + 0x14);
 
 				target.visible = target.ent->is_visible(rpc_position, target.pos);
 
@@ -398,7 +395,7 @@ namespace hooks {
 						target_pos = settings::FatHitPosition;
 					}
 					rpc_position = settings::RealGangstaShit;
-					*reinterpret_cast<Vector3*>(projshoot + 0x18) = rpc_position;
+					*reinterpret_cast<Vector3*>(projshoot + 0x14) = rpc_position;
 					manipulated = true;
 					target.visible = true;
 				}
@@ -420,7 +417,7 @@ namespace hooks {
 						{
 							manipulated = true;
 							target.visible = true;
-							*reinterpret_cast<Vector3*>(projshoot + 0x18) = rpc_position;
+							*reinterpret_cast<Vector3*>(projshoot + 0x14) = rpc_position;
 							if (misc::best_target != Vector3(0, 0, 0))
 							{
 								target_pos = misc::best_target;
@@ -519,8 +516,8 @@ namespace hooks {
 				}
 				if (target.ent && vars->combat.vischeck ? (target.visible || manipulated || misc::autoshot) : true && !target.teammate) {
 					if (!aimbot_velocity.is_empty()) {
-						*reinterpret_cast<Vector3*>(projectile + 0x24) = aimbot_velocity; //startvel
-						*reinterpret_cast<Vector3*>(projectile + 0x18) = rpc_position; //startpos
+						*reinterpret_cast<Vector3*>(projectile + 0x20) = aimbot_velocity; //startvel
+						*reinterpret_cast<Vector3*>(projectile + 0x14) = rpc_position; //startpos
 						//Sphere(target_pos, 0.05f, { r, g, b, 1 }, 5.f, 100.f);
 					}
 				}
@@ -639,7 +636,7 @@ namespace hooks {
 					misc::just_shot = true;
 					misc::did_reload = false;
 					typedef void(*cclear)(uintptr_t);
-					((cclear)(mem::game_assembly_base + 15617184))((uintptr_t)baseprojectile + 0x398); //"System.Collections.Generic.List<Projectile>$$Clear",
+					((cclear)(mem::game_assembly_base + 49075832))((uintptr_t)baseprojectile + 0x398); //"System.Collections.Generic.List<Projectile>$$Clear",
 					return;
 				}
 
@@ -1038,24 +1035,24 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			auto position = *reinterpret_cast<Vector3*>(guide + 0x18 + 0x34);
 			auto normal = *reinterpret_cast<Vector3*>(guide + 0x18 + 0x40);
 
-			auto ogid = *reinterpret_cast<unsigned int*>(_ppa + 0x14);
+			auto ogid = *reinterpret_cast<unsigned int*>(_ppa + 0x10);
 
-			auto build_id = *reinterpret_cast<unsigned int*>(_ppa + 0x14);
+			auto build_id = *reinterpret_cast<unsigned int*>(_ppa + 0x10);
 			auto tranny = esp::find_transform_by_id(build_id);
 			if (GetAsyncKeyState(0x39))
 			{
-				*reinterpret_cast<unsigned int*>(_ppa + 0x14) = vars->local_player->net()->get_id();
+				*reinterpret_cast<unsigned int*>(_ppa + 0x10) = vars->local_player->net()->get_id();
 				tranny = vars->local_player->transform();
 			}
 			else
-				*reinterpret_cast<unsigned int*>(_ppa + 0x14) = vars->selected_entity_id;
+				*reinterpret_cast<unsigned int*>(_ppa + 0x10) = vars->selected_entity_id;
 
 
 			if (tranny) {
 				//transform* tr = get_transform((base_player*)FindEntity);
 				//transform* Traaa = get_transform//FindEntity->_get_transform();
-				*reinterpret_cast<Vector3*>(_ppa + 0x20) = ((Transform*)tranny)->InverseTransformPoint(position);
-				*reinterpret_cast<Vector3*>(_ppa + 0x2C) = ((Transform*)tranny)->InverseTransformDirection(normal);
+				*reinterpret_cast<Vector3*>(_ppa + 0x1C) = ((Transform*)tranny)->InverseTransformPoint(position);
+				*reinterpret_cast<Vector3*>(_ppa + 0x28) = ((Transform*)tranny)->InverseTransformDirection(normal);
 
 				vars->local_player->console_echo(string::wformat(_(L"[matrix] DoPlace - Spoofed %d to %d with position (%d, %d, %d)"),
 					(int)ogid,
@@ -1813,6 +1810,11 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 	std::wstring lsn = L"";
 
+	static uintptr_t* serverrpc_createbuilding;
+	static uintptr_t* serverrpc_projecshoot;
+	static uintptr_t* serverrpc_playerprojectileattack;
+	static uintptr_t* serverrpc_playerprojectileupdate;
+
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state)
 	{
 		//printf("clientinput start\n");
@@ -1880,24 +1882,63 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		}
 
 #pragma region static_method_hooks
-		static uintptr_t* serverrpc_createbuilding;
-		if (!serverrpc_projecshoot) {
-			//auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot); 
-			__try {
-				auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileShoot___);
 
-				if (method_serverrpc_projecshoot) {
-					serverrpc_projecshoot = **(uintptr_t***)(method_serverrpc_projecshoot + 0x38);
+		/*static bool rpc_hook = false;
+		if (!rpc_hook) {
+			auto& RPC_ProjectileShoot = *(__int64*)(**(__int64**)(*(__int64*)(assembly + S::MethodBaseEntityServerRPCProjectileShoot) + 0x38) + 8);
+			hooks::orig::RPC_ProjectileShoot_orig = RPC_ProjectileShoot;
+			RPC_ProjectileShoot = (uintptr_t)&hooks::ProjectileShootRPC_hk;
+			rpc_hook = true;
+		}*/
 
-					hooks::orig::serverrpc_projectileshoot = *serverrpc_projecshoot;
-
-					*serverrpc_projecshoot = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_projectileshoot);
-				}
+		__try {
+			static bool rpchk = 0, buildhk = 0, rpcppa = 0, rpcppu = 0;
+			if (!rpchk) {
+				auto& RPCshoot = *(__int64*)(**(__int64**)(*(__int64*)(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileShoot___) + 0x38) + 8);
+				hooks::orig::serverrpc_projectileshoot = RPCshoot;
+				RPCshoot = (uintptr_t)&hooks::hk_serverrpc_projectileshoot;
+				rpchk = 1;
 			}
-			__except (true) {
 
+			if (!buildhk) {
+				auto& createbuild = *(__int64*)(**(__int64**)(*(__int64*)(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_CreateBuilding___) + 0x38) + 8);
+				hooks::orig::createbuilding = createbuild;
+				createbuild = (uintptr_t)&hooks::serverrpc_createbuilding;
+				buildhk = 1;
 			}
-		}
+			
+			if (!rpcppu) {
+				auto& upd = *(__int64*)(**(__int64**)(*(__int64*)(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___) + 0x38) + 8);
+				hooks::orig::playerprojectileupdate = upd;
+				upd = (uintptr_t)&hooks::hk_serverrpc_playerprojectileupdate;
+				rpcppu = 1;
+			}
+			
+			if (!rpcppa) {
+				auto& atk = *(__int64*)(**(__int64**)(*(__int64*)(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileAttack___) + 0x38) + 8);
+				hooks::orig::playerprojectileattack = atk;
+				atk = (uintptr_t)&hooks::hk_serverrpc_playerprojectileattack;
+				rpcppa = 1;
+			}
+		} __except(true) { }
+
+		//if (!serverrpc_projecshoot) {
+		//	//auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot); 
+		//	__try {
+		//		auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileShoot___);
+		//
+		//		if (method_serverrpc_projecshoot) {
+		//			serverrpc_projecshoot = **(uintptr_t***)(method_serverrpc_projecshoot + 0x28);
+		//
+		//			hooks::orig::serverrpc_projectileshoot = *serverrpc_projecshoot;
+		//
+		//			*serverrpc_projecshoot = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_projectileshoot);
+		//		}
+		//	}
+		//	__except (true) {
+		//
+		//	}
+		//}
 		//if (!serverrpc_playerprojectileattack) {
 		//	auto method_serverrpc_playerprojectileattack = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileAttack___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
 		//

@@ -148,17 +148,17 @@ namespace protobuf {
 	class Attack {
 	public:
 		union {
-			member(Vector3, pointStart, 0x14);
-			member(Vector3, pointEnd, 0x18);
-			member(unsigned int, hitID, 0x2C);
-			member(unsigned int, hitBone, 0x30);
-			member(Vector3, hitNormalLocal, 0x34);
-			member(Vector3, hitPositionLocal, 0x40);
-			member(Vector3, hitNormalWorld, 0x4C);
-			member(Vector3, hitPositionWorld, 0x48);
-			member(unsigned int, hitPartID, 0x64);
-			member(unsigned int, hitMaterialID, 0x68);
-			member(unsigned int, hitItem, 0x6C);
+			member(Vector3, pointStart, 0x10);
+			member(Vector3, pointEnd, 0x1C);
+			member(unsigned int, hitID, 0x28);
+			member(unsigned int, hitBone, 0x2C);
+			member(Vector3, hitNormalLocal, 0x30);
+			member(Vector3, hitPositionLocal, 0x3C);
+			member(Vector3, hitNormalWorld, 0x48);
+			member(Vector3, hitPositionWorld, 0x54);
+			member(unsigned int, hitPartID, 0x60);
+			member(unsigned int, hitMaterialID, 0x64);
+			member(unsigned int, hitItem, 0x68);
 		};
 	};
 
@@ -188,7 +188,7 @@ namespace protobuf {
 	class PlayerAttack {
 	public:
 		union {
-			member(Attack*, attack, 0x18);
+			member(Attack*, attack, 0x10);
 		};
 	};
 
@@ -209,10 +209,10 @@ namespace protobuf {
 	class PlayerProjectileAttack {
 	public:
 		union {
-			member(PlayerAttack*, playerAttack, 0x18);
-			member(Vector3, hitVelocity, 0x20);
-			member(float, hitDistance, 0x2C);
-			member(float, travelTime, 0x30);
+			member(PlayerAttack*, playerAttack, 0x10);
+			member(Vector3, hitVelocity, 0x18);
+			member(float, hitDistance, 0x24);
+			member(float, travelTime, 0x28);
 		};
 	};
 
@@ -229,10 +229,10 @@ namespace protobuf {
 	class PlayerProjectileUpdate {
 	public:
 		union {
-			member(int, projectileID, 0x14);
-			member(Vector3, position, 0x18);
-			member(Vector3, velocity, 0x24);
-			member(float, traveltime, 0x30);
+			member(int, projectileID, 0x10);
+			member(Vector3, position, 0x14);
+			member(Vector3, velocity, 0x20);
+			member(float, traveltime, 0x2C);
 		};
 	};
 }

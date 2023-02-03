@@ -1535,7 +1535,6 @@ namespace misc
 		float offset = -.5f,
 		float offsetstep = .05f) 
 	{
-
 		Vector3 player_velocity = Vector3(0, 0, 0);
 		std::vector<Vector3> path = {};
 		int simulations = 0;
