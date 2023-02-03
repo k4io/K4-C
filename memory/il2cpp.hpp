@@ -179,7 +179,8 @@ namespace il2cpp {
 
 		while (f = methods::class_get_methods(klass, &iter)) {
 
-			char* st = *reinterpret_cast<char**>(f + 0x10);
+			//char* st = *reinterpret_cast<char**>(f + 0x10);
+			char* st = *reinterpret_cast<char**>(f + 0x18);
 
 
 			if (m_strcmp(st, (char*)name)) {

@@ -33,7 +33,6 @@ namespace hooks {
 		static auto UpdateVelocity = reinterpret_cast<void (*)(PlayerWalkMovement*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("UpdateVelocity"), -1, _(""), _(""))));
 		static auto blocksprint = reinterpret_cast<void (*)(BasePlayer*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("BlockSprint"), 1, _(""), _(""))));
 		static auto OnNetworkMessage = reinterpret_cast<void (*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("OnNetworkMessage"), 1, _(""), _(""))));
-		static auto IsConnected = reinterpret_cast<bool (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("IsConnected"), 0, _(""), _("Network"))));
 		static auto Run = reinterpret_cast<System::string * (*)(uintptr_t, System::string*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ConsoleSystem"), _("Run"), 0, _(""), _(""))));
 
 		static auto pifu = reinterpret_cast<void(*)(PlayerInput*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerInput"), _("FrameUpdate"), 0, _(""), _(""))));
@@ -95,7 +94,6 @@ namespace hooks {
 		orig::requestuserinfo = reinterpret_cast<void (*)(Client*, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("OnRequestUserInformation"), 1, _(""), _(""))));
 		orig::pifu = reinterpret_cast<void(*)(PlayerInput*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerInput"), _("FrameUpdate"), 0, _(""), _(""))));
 		orig::createeffect = reinterpret_cast<GameObject * (*)(System::string, Effect*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("EffectLibrary"), _("CreateEffect"), 2, _(""), _(""))));
-		orig::IsConnected = reinterpret_cast<bool (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("IsConnected"), 0, _(""), _("Network"))));
 		orig::OnNetworkMessage = reinterpret_cast<void (*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("OnNetworkMessage"), 1, _(""), _(""))));
 		orig::BaseProjectile_OnSignal = reinterpret_cast<void (*)(BaseProjectile*, int, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("OnSignal"), 2, _(""), _(""))));
 		orig::baseplayer_client_input = reinterpret_cast<void (*)(BasePlayer*, InputState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ClientInput"), -1, _(""), _(""))));
@@ -1885,27 +1883,32 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		static uintptr_t* serverrpc_createbuilding;
 		if (!serverrpc_projecshoot) {
 			//auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot); 
-			auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileShoot___);
+			__try {
+				auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileShoot___);
 
-			if (method_serverrpc_projecshoot) {
-				serverrpc_projecshoot = **(uintptr_t***)(method_serverrpc_projecshoot + 0x30);
+				if (method_serverrpc_projecshoot) {
+					serverrpc_projecshoot = **(uintptr_t***)(method_serverrpc_projecshoot + 0x38);
 
-				hooks::orig::serverrpc_projectileshoot = *serverrpc_projecshoot;
+					hooks::orig::serverrpc_projectileshoot = *serverrpc_projecshoot;
 
-				*serverrpc_projecshoot = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_projectileshoot);
+					*serverrpc_projecshoot = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_projectileshoot);
+				}
+			}
+			__except (true) {
+
 			}
 		}
-		if (!serverrpc_playerprojectileattack) {
-			auto method_serverrpc_playerprojectileattack = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileAttack___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
-
-			if (method_serverrpc_playerprojectileattack) {
-				serverrpc_playerprojectileattack = **(uintptr_t***)(method_serverrpc_playerprojectileattack + 0x30);
-
-				hooks::orig::playerprojectileattack = *serverrpc_playerprojectileattack;
-
-				*serverrpc_playerprojectileattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
-			}
-		}
+		//if (!serverrpc_playerprojectileattack) {
+		//	auto method_serverrpc_playerprojectileattack = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileAttack___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
+		//
+		//	if (method_serverrpc_playerprojectileattack) {
+		//		serverrpc_playerprojectileattack = **(uintptr_t***)(method_serverrpc_playerprojectileattack + 0x8);
+		//
+		//		hooks::orig::playerprojectileattack = *serverrpc_playerprojectileattack;
+		//
+		//		*serverrpc_playerprojectileattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
+		//	}
+		//}
 		//if (!serverrpc_playerprojectileupdate) {
 		//	auto method_serverrpc_playerprojectileupdate = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
 		//
@@ -1917,17 +1920,17 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		//		*serverrpc_playerprojectileupdate = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileupdate);
 		//	}
 		//}
-		if (!serverrpc_createbuilding) {
-			auto method_serverrpc_createbuilding = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_CreateBuilding___);
-
-			if (method_serverrpc_createbuilding) {
-				serverrpc_createbuilding = **(uintptr_t***)(method_serverrpc_createbuilding + 0x38);
-
-				hooks::orig::createbuilding = *serverrpc_createbuilding;
-
-				*serverrpc_createbuilding = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_doplace);
-			}
-		}
+		//if (!serverrpc_createbuilding) {
+		//	auto method_serverrpc_createbuilding = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_CreateBuilding___);
+		//
+		//	if (method_serverrpc_createbuilding) {
+		//		serverrpc_createbuilding = **(uintptr_t***)(method_serverrpc_createbuilding + 0x8);
+		//
+		//		hooks::orig::createbuilding = *serverrpc_createbuilding;
+		//
+		//		*serverrpc_createbuilding = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_doplace);
+		//	}
+		//}
 #pragma endregion
 
 		orig::baseplayer_client_input(baseplayer, state);
@@ -1958,31 +1961,31 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			float mm_eye = 0.1f + (timeSinceLastTickClamped + 2.f / 60.f) * 1.5f * maxVelocity;
 
 
-			{
-				auto ser_n = std::wstring(baseplayer->net()->cl()->ServerName()->str);
-				if (lsn != ser_n) {
-					vars->currentPlayerData->servername = std::string(ser_n.begin(), ser_n.end());
-					auto tip = std::wstring(baseplayer->net()->cl()->ConnectedAddress()->str);
-					vars->currentPlayerData->serverip = std::string(tip.begin(), tip.end());
-					vars->currentPlayerData->serverport = baseplayer->net()->cl()->ConnectedPort();
-					vars->currentPlayerData->ingame = 1;
-					auto n = std::wstring(baseplayer->get_player_name());
-					vars->currentPlayerData->name = std::string(n.begin(), n.end());
-					vars->currentPlayerData->userid = baseplayer->userID();
-					lsn = ser_n;
-				}
-
-				auto mpos = baseplayer->transform()->position();
-				vars->currentPlayerData->x = mpos.x;
-				vars->currentPlayerData->y = mpos.y;
-				vars->currentPlayerData->z = mpos.z;
-				auto mvel = baseplayer->GetWorldVelocity();
-				vars->currentPlayerData->vx = mvel.x;
-				vars->currentPlayerData->vy = mvel.y;
-				vars->currentPlayerData->vz = mvel.z;
-
-				vars->currentPlayerData->cachedtime = fixed_time;
-			}
+			//{
+			//	auto ser_n = std::wstring(baseplayer->net()->cl()->ServerName()->str);
+			//	if (lsn != ser_n) {
+			//		vars->currentPlayerData->servername = std::string(ser_n.begin(), ser_n.end());
+			//		auto tip = std::wstring(baseplayer->net()->cl()->ConnectedAddress()->str);
+			//		vars->currentPlayerData->serverip = std::string(tip.begin(), tip.end());
+			//		vars->currentPlayerData->serverport = baseplayer->net()->cl()->ConnectedPort();
+			//		vars->currentPlayerData->ingame = 1;
+			//		auto n = std::wstring(baseplayer->get_player_name());
+			//		vars->currentPlayerData->name = std::string(n.begin(), n.end());
+			//		vars->currentPlayerData->userid = baseplayer->userID();
+			//		lsn = ser_n;
+			//	}
+			//
+			//	auto mpos = baseplayer->transform()->position();
+			//	vars->currentPlayerData->x = mpos.x;
+			//	vars->currentPlayerData->y = mpos.y;
+			//	vars->currentPlayerData->z = mpos.z;
+			//	auto mvel = baseplayer->GetWorldVelocity();
+			//	vars->currentPlayerData->vx = mvel.x;
+			//	vars->currentPlayerData->vy = mvel.y;
+			//	vars->currentPlayerData->vz = mvel.z;
+			//
+			//	vars->currentPlayerData->cachedtime = fixed_time;
+			//}
 
 
 			//desync on key

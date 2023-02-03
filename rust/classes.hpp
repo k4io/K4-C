@@ -2041,22 +2041,22 @@ public:
 
 	void remove_flag(ModelState_Flag flag) {
 		pent
-			int flags = *reinterpret_cast<int*>((uintptr_t)this + 0x24);
+			int flags = *reinterpret_cast<int*>((uintptr_t)this + O::BasePlayer::playerFlags);
 		flags &= ~(int)flag;
 
-		*reinterpret_cast<int*>((uintptr_t)this + 0x24) = flags;
+		*reinterpret_cast<int*>((uintptr_t)this + O::BasePlayer::playerFlags) = flags;
 	}
 
 	void set_flag(ModelState_Flag flag) {
 		pent
-			int flags = *reinterpret_cast<int*>((uintptr_t)this + 0x24);
+			int flags = *reinterpret_cast<int*>((uintptr_t)this + O::BasePlayer::playerFlags);
 
-		*reinterpret_cast<int*>((uintptr_t)this + 0x24) = flags |= (int)flag;
+		*reinterpret_cast<int*>((uintptr_t)this + O::BasePlayer::playerFlags) = flags |= (int)flag;
 	}
 
 	bool has_flag(ModelState_Flag f)
 	{
-		int& flags = *reinterpret_cast<int*>((uintptr_t)this + 0x24);
+		int& flags = *reinterpret_cast<int*>((uintptr_t)this + O::BasePlayer::playerFlags);
 
 		return (flags & (int)f) == (int)f;
 	}
