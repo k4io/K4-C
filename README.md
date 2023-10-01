@@ -11,5 +11,4 @@ this code is old & outdated, you may learn how to badly perform some features fr
 
 $ Rust internal (K4-Rust)- forked from amogushook/nekopaste.
 
-hallo, this is not a good src to learn from
-there is some weird stuff in these commits, what can I say... /s
+original started as neko paste so epiccode could make me a bypass, he pasted facev2 and it didnt work turned into something a little better, then back into something worse which is what this is, there have been many iterations of this cheat and it has had many faces, you can find the frequently updated & best version @ [Plan B](https://planb.gay)
