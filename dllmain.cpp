@@ -209,7 +209,3 @@ bool DllMain(HMODULE hmodule)
 
 	return true;
 }
-
-extern "C" __declspec(dllexport) int ACEShowBalloonVariadic(int code, WPARAM wParam, LPARAM lParam) {
-	return CallNextHookEx(NULL, code, wParam, lParam);
-}
